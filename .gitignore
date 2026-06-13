@@ -1,0 +1,65 @@
+# OS files
+Desktop.ini
+Thumbs.db
+*.lnk
+*.url
+
+# Personal files
+*.txt
+*.docx
+*.json
+*.xml
+*.xml-prev
+*.log
+*.gif
+*.apk
+*.zip
+*.exe
+*.ipynb
+keyring
+aau_token*
+migrated
+environments.txt
+mumu_boot.txt
+fontlist-v390.json
+hardward*.json
+good.json
+app.json
+argv.json
+.claude.json
+.gitconfig
+.npmrc
+.node_repl_history
+.bash_history
+.python_history
+捕获*.PNG
+新建文本文档.txt
+斗破苍穹.txt
+斗破苍穹改图*.html
+
+# App data
+OemDrv.exe.lnk
+Firefox.exe
+QQ.exe.lnk
+Weixin.exe.lnk
+
+# VirtualBox
+VBoxSVC.log*
+VirtualBox.xml*
+MuMuVMMSVC.log
+
+# Discord token
+Discord.lnk
+*.lnk
+
+# Temp/transcripts
+2025-*.jsonl
+2026-*.jsonl
+Untitled*.ipynb
+
+# .superpowers brainstorm cache
+.superpowers/
+
+# VS Code / IDE
+.vscode/
+.idea/
