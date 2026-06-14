@@ -6905,7 +6905,16 @@ function renderTavernMessages() {
 
   var html = '';
   chat.messages.forEach(function(msg) {
-    if (msg.role === 'system') return;
+    if (msg.role === 'system') {
+      // Show character profile card
+      if (msg.content.indexOf('【角色档案】') >= 0) {
+        html += '<div class="msg-profile-card" style="background:var(--bg-card);border:1px solid var(--border-gold);border-radius:8px;padding:14px;margin:8px 0;font-size:12px;line-height:1.7;color:var(--text-body);max-width:480px;">' +
+          '<div style="font-family:var(--font-serif);color:var(--text-primary);font-size:14px;margin-bottom:8px;">📜 ' + (GameState.player.name||'修炼者') + ' · 角色档案</div>' +
+          escapeHtml(msg.content.replace('【角色档案】\n','')).replace(/\n/g,'<br>') +
+        '</div>';
+      }
+      return;
+    }
     if (msg.role === 'assistant') {
       var parsed = parseGameModeOutput(msg.content);
       // Thinking fold
