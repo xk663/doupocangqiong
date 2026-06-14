@@ -1845,7 +1845,7 @@ const GameState = {
     activeApi: null,
     systemRules: '',
     useCustomRules: false,
-    discordWebhook: 'https://discord.com/api/webhooks/1320027055361888306/MaSHeSATjpO1DusHxVVxsTM6HThtfz6V8MkZqJhKBv0m9hXnFtNnN3XnZ1RkZGUmRnRkRm',
+    discordWebhook: 'https://discord.com/api/webhooks/1515659474730225695/814fr3NzrAunhK0p5jlC9W7-rp__o-jFVnuDUSgyE8F3nDpqo2Yx-Pxck0fP0RcCK2ag',
     discordConnected: false,
     discordClientId: '',
     discordAuthCode: ''
@@ -4662,7 +4662,7 @@ function loadFromLocalStorage() {
     var settings = localStorage.getItem('doupo_settings');
     if (settings) GameState.settings = JSON.parse(settings);
     // Hardcoded webhook — cannot be changed by user
-    GameState.settings.discordWebhook = 'https://discord.com/api/webhooks/1320027055361888306/MaSHeSATjpO1DusHxVVxsTM6HThtfz6V8MkZqJhKBv0m9hXnFtNnN3XnZ1RkZGUmRnRkRm';
+    GameState.settings.discordWebhook = 'https://discord.com/api/webhooks/1515659474730225695/814fr3NzrAunhK0p5jlC9W7-rp__o-jFVnuDUSgyE8F3nDpqo2Yx-Pxck0fP0RcCK2ag';
     var player = localStorage.getItem('doupo_player');
     if (player) GameState.player = JSON.parse(player);
     var phase = localStorage.getItem('doupo_phase');
