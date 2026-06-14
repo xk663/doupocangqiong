@@ -1845,7 +1845,7 @@ const GameState = {
     activeApi: null,
     systemRules: '',
     useCustomRules: false,
-    discordWebhook: '',
+    discordWebhook: 'https://discord.com/api/webhooks/1320027055361888306/MaSHeSATjpO1DusHxVVxsTM6HThtfz6V8MkZqJhKBv0m9hXnFtNnN3XnZ1RkZGUmRnRkRm',
     discordConnected: false,
     discordClientId: '',
     discordAuthCode: ''
@@ -3678,12 +3678,9 @@ function renderSettingsCore(body) {
         '<button class="settings-action-btn" onclick="addNewApi()" style="margin-bottom:24px;">＋ 添加 API 接口</button>' +
         '<div class="settings-section-title">云同步</div>' +
         '<p style="font-size:11px;color:var(--text-muted);margin-bottom:12px;line-height:1.5;">存档丢失联系制作者 <span style="color:var(--text-primary);">@消失</span></p>' +
-        (GameState.settings.discordWebhook ? '' :
-          '<div style="background:#1a1a2e;border:1px solid #ffcc00;border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:10px;color:#ffcc00;">⚠ 未配置云同步，请联系管理员</div>'
-        ) +
         '<label class="settings-form-label">Discord 用户名</label>' +
         '<input type="text" id="discord-username" class="settings-form-input" placeholder="用于标记存档归属" value="' + (GameState.settings.discordUserName || '') + '" oninput="saveDiscordConfig()" style="margin-bottom:12px;">' +
-        '<div id="discord-sync-buttons" style="flex-direction:column;gap:6px;' + (GameState.settings.discordWebhook ? '' : 'display:none;') + '">' +
+        '<div id="discord-sync-buttons" style="flex-direction:column;gap:6px;">' +
           '<button class="settings-action-btn" onclick="syncToCloud()">⬆ 备份存档</button>' +
           '<button class="settings-action-btn" onclick="restoreFromLocal()">📂 读取本地备份</button>' +
           '<button class="settings-action-btn" onclick="restoreFromCloud()">☁️ 读取云端备份</button>' +
@@ -4464,13 +4461,11 @@ function updateDiscordStatus() {
 }
 
 function saveDiscordConfig() {
-  var webhookEl = document.getElementById('discord-webhook-url');
   var nameEl = document.getElementById('discord-username');
-  if (webhookEl) GameState.settings.discordWebhook = webhookEl.value.trim();
   if (nameEl) GameState.settings.discordUserName = nameEl.value.trim();
   saveToLocalStorage();
   var btns = document.getElementById('discord-sync-buttons');
-  if (btns) btns.style.display = GameState.settings.discordWebhook ? 'flex' : 'none';
+  if (btns) btns.style.display = 'flex';
 }
 
 function getDiscordUserName() {
@@ -4666,6 +4661,8 @@ function loadFromLocalStorage() {
   try {
     var settings = localStorage.getItem('doupo_settings');
     if (settings) GameState.settings = JSON.parse(settings);
+    // Hardcoded webhook — cannot be changed by user
+    GameState.settings.discordWebhook = 'https://discord.com/api/webhooks/1320027055361888306/MaSHeSATjpO1DusHxVVxsTM6HThtfz6V8MkZqJhKBv0m9hXnFtNnN3XnZ1RkZGUmRnRkRm';
     var player = localStorage.getItem('doupo_player');
     if (player) GameState.player = JSON.parse(player);
     var phase = localStorage.getItem('doupo_phase');
