@@ -1151,7 +1151,7 @@ input:checked + .toggle-slider::before { background:var(--text-primary);transfor
       <button id="btn-settings" class="title-btn" onclick="openSettings()">设 置</button>
       <button id="btn-about" class="title-btn" onclick="openAbout()">关 于</button>
     </div>
-    <p style="font-family:var(--font-serif);font-size:10px;color:var(--text-dim);margin-top:40px;letter-spacing:2px;">v0.1.0 · 三一六纪元 · 斗气大陆</p>
+    <p style="font-family:var(--font-serif);font-size:10px;color:var(--text-dim);margin-top:40px;letter-spacing:2px;">v2.0 · 三一六纪元 · 斗气大陆</p>
   </div>
 </div>
 
@@ -4681,8 +4681,20 @@ function loadFromLocalStorage() {
 function openChangelog() {
   showModal(
     '<h3 style="margin-bottom:12px;">更新日志</h3>' +
-    '<div style="font-size:12px;color:var(--text-body);line-height:1.8;">' +
-      '<div style="color:var(--text-primary);">v0.1.0 · 三一六纪元</div>' +
+    '<div style="font-size:12px;color:var(--text-body);line-height:1.8;max-height:50vh;overflow-y:auto;">' +
+      '<div style="color:var(--text-primary);font-size:14px;margin-top:8px;">v2.0 · 大型更新</div>' +
+      '<div>· 设置面板全面改造（竖排侧栏、核心配置、协议系统）</div>' +
+      '<div>· 五大协议上线（状态栏/语义渲染/结算卡/战斗触发/自动推演）</div>' +
+      '<div>· 世界书系统（蓝绿灯/插入位置/261条目/智能分类）</div>' +
+      '<div>· 云同步（Discord Webhook + 本地双备份）</div>' +
+      '<div>· 预设系统（酒馆兼容/提示词编辑/导入导出/模型选择）</div>' +
+      '<div>· 驻地交互化（闭关修炼/炼药/武技研习/房间升级）</div>' +
+      '<div>· 异火榜（23种异火完整排名与描述）</div>' +
+      '<div>· 美人榜（10位红颜含隐秘描述）</div>' +
+      '<div>· 时空回溯（回合快照/变量回滚/一键回溯）</div>' +
+      '<div>· 任务系统（进行中/已完成/已失败/奖惩机制）</div>' +
+      '<div>· 封面视频支持、动态封面随机切换</div>' +
+      '<div style="color:var(--text-primary);font-size:14px;margin-top:12px;">v0.1.0 · 初始版本</div>' +
       '<div>· 斗气大陆初现，大世界地图开放</div>' +
       '<div>· 乌坦城萧家后院修炼驻地落成</div>' +
       '<div>· 开放11族选择、50天赋词条</div>' +
