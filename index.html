@@ -2768,6 +2768,133 @@ function startGame() {
   initGameWorld();
   saveToLocalStorage();
   showToast('创角完成！踏入斗气大陆...', 'success');
+  // Generate AI opening scene and switch to game view
+  setTimeout(function() {
+    generateOpeningScene().then(function() {
+      var btn = document.querySelector('[data-view="tavern"]');
+      if (btn) switchGameView('tavern', btn);
+    });
+  }, 500);
+}
+
+function buildCharacterIntro() {
+  var p = GameState.player;
+  var race = (RACES.find(function(r){return r.id===p.race})||{}).name||'未知';
+  var identity = (IDENTITIES.find(function(i){return i.id===p.identity})||{}).name||'未知';
+  var diff = (DIFFICULTY.find(function(d){return d.id===p.difficulty})||{}).name||'普通';
+  var stats = p.baseStats;
+  var talents = p.talents.map(function(tid){
+    for(var tier=0;tier<TALENT_TIERS.length;tier++){
+      var found = TALENTS[TALENT_TIERS[tier].key].find(function(t){return t.id===tid});
+      if(found) return found.name;
+    }
+    return tid;
+  });
+  var attrs = p.douqiAttributes.map(function(aid){
+    var found = DOUQI_ATTRS.find(function(a){return a.id===aid});
+    return found?found.name:aid;
+  });
+
+  return '【角色档案】\n' +
+    '姓名：' + (p.name||'未知') + '\n' +
+    '性别：' + (p.gender==='male'?'男':p.gender==='female'?'女':'扶她') + '\n' +
+    '年龄：' + p.age + '岁\n' +
+    '难度：' + diff + '\n' +
+    '种族：' + race + '\n' +
+    '身份：' + identity + '\n' +
+    '力量：' + stats.strength + ' | 身法：' + stats.agility + ' | 耐力：' + stats.endurance + '\n' +
+    '斗气：' + stats.douqi + ' | 灵魂力：' + stats.soul + ' | 速度：' + stats.speed + '\n' +
+    '天赋词条：' + (talents.length>0?talents.join('、'):'无') + '\n' +
+    '斗气属性：' + (attrs.length>0?attrs.join('、'):'无') + '\n' +
+    '当前所在地：加玛帝国·乌坦城·萧家\n' +
+    '当前时间：三一六纪元 · 九月十五日\n' +
+    '修炼境界：斗者·三星\n' +
+    '持有物品：聚气散×3、低阶药材×5、回气丹×1、异火大礼包×1';
+}
+
+async function generateOpeningScene() {
+  var intro = buildCharacterIntro();
+
+  // Create or get active chat
+  var chat = tavernState.chats.find(function(c){return c.id===tavernState.activeChatId;});
+  if (!chat) {
+    // Create first chat
+    var preset = tavernState.presets[0];
+    chat = createChatSession({
+      name: (GameState.player.name||'修炼者') + ' - 新人生',
+      characterName: '斗破苍穹',
+      presetId: preset ? preset.id : '',
+      lorebookIds: tavernState.activeLorebookIds.slice()
+    });
+    tavernState.chats.unshift(chat);
+    tavernState.activeChatId = chat.id;
+    await db.chats.put(chat);
+  }
+
+  // Inject character intro as system context, then ask LLM to generate opening
+  var firstPrompt = intro + '\n\n【任务】\n请根据以上角色档案，以史诗玄幻风格撰写一段精彩的游戏开场白（200-300字）。描述角色在乌坦城萧家后院的清晨醒来，感受到体内斗气的涌动，望向魔兽山脉方向，开启修炼之路。以第二人称"你"来写。结尾给出3个行动选项。';
+
+  // Add to chat
+  chat.messages.push(createChatMessage('system', intro));
+  chat.messages.push(createChatMessage('user', firstPrompt));
+  chat.updatedAt = Date.now();
+
+  renderTavernSessionList();
+  renderTavernMessages();
+
+  // Call LLM
+  var api = getActiveApiConfig();
+  if (!api) {
+    // No API configured - show mock opening
+    var mockOpening = '晨曦透过窗棂洒在萧家后院的青石板上，你从闭关中醒来，感受到丹田中斗气如涓涓细流般涌动。三一六纪元的秋风带着魔兽山脉的苍凉气息拂过面庞。你是来自乌坦城的' + (GameState.player.name||'修炼者') + '，以' + ((RACES.find(function(r){return r.id===GameState.player.race})||{}).name||'未知') + '之躯踏上了这条以斗气逆天改命的不归路。\n\n远处的魔兽山脉如巨兽匍匐，那里是无数佣兵埋骨之地，也是强者崛起的试炼场。坊市的喧嚣隐隐传来，萧家后院的老槐树沙沙作响——新的一天，新的修炼。\n\n——你的斗气之路，从这里开始。';
+    chat.messages.push(createChatMessage('assistant', mockOpening));
+    renderTavernMessages();
+    await db.chats.put(chat);
+    showToast('开场已生成（离线模式）', 'info');
+    return;
+  }
+
+  showToast('正在生成开场...', 'info');
+  try {
+    var messages = [];
+    // Build system prompt
+    var preset = tavernState.presets.find(function(p){return p.id===chat.presetId;})||tavernState.presets[0];
+    var systemParts = [];
+    if (preset && preset.prompt_main) systemParts.push(preset.prompt_main);
+    systemParts.push(intro);
+    messages.push({role:'system',content:systemParts.join('\n\n')});
+    messages.push({role:'user',content:firstPrompt});
+
+    var body = {
+      model: api.model || 'gpt-4o-mini',
+      messages: messages,
+      temperature: preset?preset.settings.temp_openai:0.8,
+      max_tokens: preset?preset.settings.openai_max_tokens:1024,
+      stream: false
+    };
+
+    var response = await fetch(api.url + '/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+api.key},
+      body:JSON.stringify(body)
+    });
+    if (!response.ok) throw new Error('HTTP '+response.status);
+    var data = await response.json();
+    var reply = data.choices[0].message.content;
+
+    chat.messages.push(createChatMessage('assistant', reply));
+    chat.updatedAt = Date.now();
+    await db.chats.put(chat);
+    renderTavernMessages();
+    showToast('开场已生成 ✓', 'success');
+  } catch(e) {
+    var fallback = '晨曦微光中，你站在萧家后院的青石板上，感受到体内斗气的第一次真正觉醒。魔兽山脉的轮廓在天边若隐若现，坊市的叫卖声随风飘来。面前有无数条路——炼药、修武、闯荡、崛起。你深吸一口气，踏出了第一步。';
+    chat.messages.push(createChatMessage('assistant', fallback));
+    chat.updatedAt = Date.now();
+    await db.chats.put(chat);
+    renderTavernMessages();
+    showToast('API调用失败，使用离线开场', 'warning');
+  }
 }
 
 function getIdentityName() {
