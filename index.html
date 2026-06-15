@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -3124,26 +3124,32 @@ function buildWorldMap() {
   SUB_LOCATIONS = MAP_SUB_LOCATIONS;
 
   container.innerHTML =
-    '<div style="flex:1;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#b8956a 0%,#c4a47a 30%,#b8956a 60%,#a08060 100%);padding:20px 30px;overflow:hidden;min-height:0;">' +
-      '<div style="position:relative;width:100%;max-width:1100px;min-height:580px;background:linear-gradient(180deg,#f5ead0 0%,#efe0c0 15%,#f2e5c8 50%,#ead8b0 85%,#e8d4a8 100%);box-shadow:0 12px 40px rgba(0,0,0,0.35),inset 0 0 120px rgba(139,90,43,0.08);padding:36px 44px 44px;display:flex;flex-direction:column;border:3px solid #8b6914;border-radius:2px;">' +
-        '<div style="position:absolute;top:-20px;left:0;right:0;height:26px;background:linear-gradient(180deg,#b8956a,#9a7a50,#7a5a30,#9a7a50,#b8956a);border:2.5px solid #5a3a1a;border-radius:5px;box-shadow:0 6px 12px rgba(0,0,0,0.3);"></div>' +
-        '<div style="position:absolute;bottom:-20px;left:0;right:0;height:26px;background:linear-gradient(180deg,#b8956a,#9a7a50,#7a5a30,#9a7a50,#b8956a);border:2.5px solid #5a3a1a;border-radius:5px;box-shadow:0 6px 12px rgba(0,0,0,0.3);"></div>' +
-        '<div style="text-align:center;margin-bottom:8px;">' +
-          '<h3 style="font-family:\'ZCOOL KuaiLe\',\'Noto Serif SC\',cursive;color:#4a2a10;font-size:1.8em;margin:0;letter-spacing:8px;">斗 气 大 陆</h3>' +
-          '<div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-top:2px;">' +
+    '<div style="flex:1;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#5a3a1a 0%,#6b4a2a 25%,#4a2a10 50%,#6b4a2a 75%,#5a3a1a 100%);padding:28px 36px;overflow:hidden;min-height:0;">' +
+      '<div style="position:relative;width:100%;max-width:1100px;min-height:580px;background:linear-gradient(180deg,#3d2817 0%,#2a1a0e 30%,#1f1008 60%,#2a1a0e 100%);box-shadow:0 16px 48px rgba(0,0,0,0.5),0 0 0 6px #6b4a2a,0 0 0 10px #3d2817,0 0 0 14px #8b6914,0 0 60px rgba(139,105,20,0.2);padding:40px 52px 48px;display:flex;flex-direction:column;border-radius:1px;">' +
+        '<div style="position:absolute;top:-16px;left:50%;transform:translateX(-50%);width:200px;height:32px;background:linear-gradient(180deg,#8b6914,#6b4a2a,#5a3a1a,#6b4a2a,#8b6914);border:2px solid #4a2a10;border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:2;">' +
+          '<span style="font-family:var(--font-serif);color:#3d2817;font-size:11px;letter-spacing:3px;font-weight:700;">斗 气 大 陆</span>' +
+        '</div>' +
+        '<div style="position:absolute;top:8px;left:8px;width:18px;height:18px;border-top:2px solid #8b6914;border-left:2px solid #8b6914;"></div>' +
+        '<div style="position:absolute;top:8px;right:8px;width:18px;height:18px;border-top:2px solid #8b6914;border-right:2px solid #8b6914;"></div>' +
+        '<div style="position:absolute;bottom:8px;left:8px;width:18px;height:18px;border-bottom:2px solid #8b6914;border-left:2px solid #8b6914;"></div>' +
+        '<div style="position:absolute;bottom:8px;right:8px;width:18px;height:18px;border-bottom:2px solid #8b6914;border-right:2px solid #8b6914;"></div>' +
+        '<div style="text-align:center;margin-bottom:8px;position:relative;z-index:1;">' +
+          '<h3 style="font-family:\'ZCOOL KuaiLe\',\'Noto Serif SC\',cursive;color:#c4a47a;font-size:1.8em;margin:0;letter-spacing:8px;text-shadow:0 2px 4px rgba(0,0,0,0.5);">斗 气 大 陆</h3>' +
+          '<div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-top:4px;">' +
             '<span style="width:50px;height:1px;background:linear-gradient(90deg,transparent,#8b6914);"></span>' +
-            '<span id="time-display-map" style="font-size:0.7em;color:#6b4a2a;font-family:var(--font-serif);"></span>' +
-            '<span style="font-size:0.6em;color:#8b6914;">·</span>' +
-            '<span style="font-size:0.7em;color:#6b4a2a;">点击区域 | 滚轮缩放 | 拖拽平移</span>' +
+            '<span id="time-display-map" style="font-size:0.7em;color:#a08060;font-family:var(--font-serif);"></span>' +
+            '<span style="font-size:0.6em;color:#6b4a2a;">·</span>' +
+            '<span style="font-size:0.65em;color:#8b7355;">点击区域 | 滚轮缩放 | 拖拽平移</span>' +
             '<span style="width:50px;height:1px;background:linear-gradient(90deg,#8b6914,transparent);"></span>' +
           '</div>' +
         '</div>' +
-        '<div id="map-canvas-wrap" style="flex:1;position:relative;min-height:440px;border:2px solid #b8956a;border-radius:2px;overflow:hidden;box-shadow:inset 0 0 40px rgba(139,90,43,0.1);">' +
+        '<div id="map-canvas-wrap" style="flex:1;position:relative;min-height:440px;border:2px solid #5a3a1a;border-radius:1px;overflow:hidden;box-shadow:inset 0 0 60px rgba(0,0,0,0.35),inset 0 0 4px rgba(139,105,20,0.2);background:#3d2817;">' +
           '<canvas id="map-canvas" style="width:100%;height:100%;display:block;"></canvas>' +
         '</div>' +
-        '<div style="display:flex;justify-content:center;gap:16px;margin-top:8px;font-size:9px;color:#6b4a2a;flex-wrap:wrap;">' +
-          '<span>点击区域详情 | 悬停高亮 | 滚轮缩放拖拽 | 搜索定位 | ☁️ 灵气感知</span>' +
+        '<div style="display:flex;justify-content:center;gap:20px;margin-top:10px;font-size:9px;color:#6b4a2a;flex-wrap:wrap;">' +
+          '<span>🗺️ 点击区域查看详情</span><span>✨ 悬停高亮</span><span>🔍 滚轮缩放拖拽</span><span>☁️ 灵气感知</span>' +
         '</div>' +
+        '<div style="position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:120px;height:2px;background:linear-gradient(90deg,transparent,#8b6914,transparent);"></div>' +
       '</div>' +
     '</div>';
 
@@ -5209,7 +5215,6 @@ function buildPlayerSummary() {
   if (!container) return;
   container.innerHTML =
     '<div class="summary-container">' +
-      // Header
       '<div class="summary-header">' +
         '<span style="font-family:var(--font-serif);color:var(--text-primary);font-size:15px;">玩家概要</span>' +
         '<div style="display:flex;gap:12px;align-items:center;">' +
@@ -5334,7 +5339,6 @@ function renderSummarySecret(body) {
       '<div style="background:' + grad + ';border:1px solid ' + borderColor + ';border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;">' +
         // Decorative corner
         '<div style="position:absolute;top:-8px;right:-8px;font-size:40px;opacity:0.06;">' + part.icon + '</div>' +
-        // Header
         '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">' +
           '<span style="font-size:24px;">' + part.icon + '</span>' +
           '<div>' +
@@ -8198,3 +8202,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </body>
 </html>
+
+
