@@ -21,7 +21,7 @@ html, body { height: 100%; overflow: hidden; background: #0a0a0f; }
   width: 100%; height: 100%;
 }
 
-/* 顶部信息�?*/
+/* 顶部信息栏 */
 #top-bar {
   position: absolute; top: 10px; left: 10px; z-index: 10;
   display: flex; gap: 8px; align-items: center;
@@ -66,7 +66,7 @@ html, body { height: 100%; overflow: hidden; background: #0a0a0f; }
 #tooltip .tt-danger { font-size: 10px; margin-top: 2px; }
 #tooltip .tt-factions { font-size: 10px; color: #887744; margin-top: 2px; }
 
-/* 响应式缩放按�?*/
+/* 响应式缩放按钮 */
 #zoom-controls {
   position: absolute; bottom: 30px; right: 20px; z-index: 10;
   display: flex; flex-direction: column; gap: 4px;
@@ -143,7 +143,7 @@ html, body { height: 100%; overflow: hidden; background: #0a0a0f; }
   <canvas id="map-canvas"></canvas>
 
   <div id="top-bar">
-    <span class="top-tag">🗺�?斗气大陆</span>
+    <span class="top-tag">🗺️ 斗气大陆</span>
     <span id="hover-name" class="top-tag" style="display:none;"></span>
   </div>
 
@@ -156,8 +156,8 @@ html, body { height: 100%; overflow: hidden; background: #0a0a0f; }
 
   <div id="zoom-controls">
     <button class="zoom-btn" id="btn-zoom-in" title="放大">+</button>
-    <button class="zoom-btn" id="btn-zoom-out" title="缩小">�?/button>
-    <button class="zoom-btn" id="btn-reset" title="重置视图" style="font-size:14px;">�?/button>
+    <button class="zoom-btn" id="btn-zoom-out" title="缩小">−</button>
+    <button class="zoom-btn" id="btn-reset" title="重置视图" style="font-size:14px;">⟲</button>
   </div>
 
   <!-- 前往确认弹窗 -->
@@ -193,7 +193,7 @@ var pendingTravel = null; // { x, y, name }
 
 function showTravelDialog(name, x, y) {
   tdTitle.textContent = name;
-  tdSub.textContent = '是否前往此处�?;
+  tdSub.textContent = '是否前往此处？';
   travelDialog.classList.add('show');
   pendingTravel = { x: x, y: y, name: name };
 }
@@ -210,7 +210,8 @@ tdConfirm.addEventListener('click', function() {
   hideTravelDialog();
 });
 
-// 点击弹窗外关�?travelDialog.addEventListener('click', function(e) { e.stopPropagation(); });
+// 点击弹窗外关闭
+travelDialog.addEventListener('click', function(e) { e.stopPropagation(); });
 document.getElementById('app').addEventListener('click', function(e) {
   if (travelDialog.classList.contains('show') && !travelDialog.contains(e.target)) {
     hideTravelDialog();
@@ -236,7 +237,8 @@ var engine = new MapEngine(canvas, {
     cx /= region.polygon.length;
     cy /= region.polygon.length;
 
-    // 小人走过�?    engine.walkTo(cx, cy, function() {
+    // 小人走过去
+    engine.walkTo(cx, cy, function() {
       showTravelDialog(region.name, cx, cy);
     });
   },
@@ -255,7 +257,8 @@ engine.setRegions(MAP_REGIONS);
 engine.setSubLocations(MAP_SUB_LOCATIONS);
 engine.setTerrain(MAP_TERRAIN);
 
-// 初始化视�?engine.fitToScreen();
+// 初始化视图
+engine.fitToScreen();
 
 // 缩放按钮
 document.getElementById('btn-zoom-in').addEventListener('click', function() {
@@ -268,7 +271,8 @@ document.getElementById('btn-reset').addEventListener('click', function() {
   engine.fitToScreen();
 });
 
-// 键盘快捷�?window.addEventListener('keydown', function(e) {
+// 键盘快捷键
+window.addEventListener('keydown', function(e) {
   if (e.key === '+' || e.key === '=') {
     engine.zoomAt(1.15, canvas.width / 2, canvas.height / 2);
   } else if (e.key === '-') {
@@ -320,7 +324,7 @@ canvas.addEventListener('mousemove', function(e) {
   tooltip.style.top = (my - 10) + 'px';
 });
 
-console.log('[Map] 斗破苍穹·斗气大陆地图已就绪。拖拽平�?· 滚轮缩放 · 双击聚焦 · 点击区域�?);
+console.log('[Map] 斗破苍穹·斗气大陆地图已就绪。拖拽平移 · 滚轮缩放 · 双击聚焦 · 点击区域探索');
 })();
 </script>
 </body>
