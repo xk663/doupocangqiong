@@ -4221,8 +4221,23 @@ function importPresetFromFile() {
 
 function renderSettingsTavern(body) {
   var s = tavernState.tavernSettings || createDefaultTavernSettings();
+  var activeApi = getTavernApi('primary');
+  var apiInfo = '';
+  if (activeApi) {
+    apiInfo = '<div class="settings-card" style="margin-bottom:16px;border-left:3px solid var(--accent-green);">' +
+      '<div style="font-size:10px;color:var(--accent-green);margin-bottom:6px;">🟢 活跃 API（来自核心配置 — 自动同步）</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+        '<div><span style="color:var(--text-primary);font-size:13px;">' + (activeApi.name || '未命名') + '</span><span style="color:var(--text-muted);font-size:10px;margin-left:8px;">' + (activeApi.model || '') + '</span></div>' +
+        '<button class="text-btn" onclick="switchSettingsTab(\'core\')" style="font-size:10px;">→ 修改 API 配置</button>' +
+      '</div></div>';
+  } else {
+    apiInfo = '<div class="settings-card" style="margin-bottom:16px;border-left:3px solid var(--accent-fire);">' +
+      '<div style="font-size:10px;color:var(--accent-fire);margin-bottom:4px;">⚠️ 未配置 API</div>' +
+      '<button class="text-btn" onclick="switchSettingsTab(\'core\')" style="font-size:10px;">→ 前往核心配置添加 API</button></div>';
+  }
   body.innerHTML =
     '<div class="settings-section-title">酒馆设置</div>' +
+    apiInfo +
     '<div class="form-group"><label class="settings-form-label">用户名称（你在对话中的称呼）</label><input type="text" id="ts-username" class="settings-form-input" value="' + (s.userName||'玩家') + '" oninput="saveTavernUserName()"></div>' +
     '<p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">角色形象与设定由当前角色卡决定</p>' +
     '<button class="settings-action-btn" onclick="saveTavernSettings()">保存酒馆设置</button>';
@@ -8058,10 +8073,25 @@ async function setActiveTavernPreset(id) {
 
 function openTavernSettingsModal() {
   var s = tavernState.tavernSettings || createDefaultTavernSettings();
+  // Show active API info synced from main settings
+  var activeApi = getTavernApi('primary');
+  var apiStatusHtml = '';
+  if (activeApi) {
+    apiStatusHtml = '<div style="background:rgba(136,204,136,0.06);border:1px solid var(--accent-green);border-radius:6px;padding:10px 12px;margin-bottom:12px;">' +
+      '<div style="font-size:10px;color:var(--accent-green);margin-bottom:4px;">🟢 当前活跃 API（与主页设置同步）</div>' +
+      '<div style="font-size:12px;color:var(--text-primary);">' + (activeApi.name || '未命名') + '</div>' +
+      '<div style="font-size:10px;color:var(--text-muted);">' + (activeApi.model || activeApi.apiKey || activeApi.key || '') + '</div>' +
+    '</div>';
+  } else {
+    apiStatusHtml = '<div style="background:rgba(255,107,53,0.06);border:1px solid var(--accent-fire);border-radius:6px;padding:10px 12px;margin-bottom:12px;">' +
+      '<div style="font-size:10px;color:var(--accent-fire);">⚠️ 未配置 API — 前往设置 → 核心 → API 配置</div>' +
+    '</div>';
+  }
   var html = '<h3 style="margin-bottom:16px;">酒馆设置</h3>' +
+    apiStatusHtml +
     '<div class="form-group"><label class="form-label">用户名称</label><input type="text" id="ts-username" class="form-input" value="' + (s.userName||'玩家') + '"></div>' +
     '<div class="form-group"><label class="form-label">角色名称</label><input type="text" id="ts-charname" class="form-input" value="' + (s.characterName||'') + '"></div>' +
-    '<p style="font-size:10px;color:var(--text-muted);margin-bottom:12px;">多 API 支持请前往设置 → 核心配置 → API 配置添加</p>' +
+    '<p style="font-size:10px;color:var(--text-muted);margin-bottom:12px;">API 配置修改请前往设置 → 核心 → API 配置</p>' +
     '<div style="display:flex;gap:10px;justify-content:flex-end;">' +
       '<button class="text-btn" onclick="closeAllModals()">取消</button>' +
       '<button class="summary-action-btn" onclick="saveTavernSettings()">保存</button>' +
