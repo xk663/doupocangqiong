@@ -4759,11 +4759,21 @@ function closeAllModals() {
 }
 
 // ==============================
-// LOCALSTORAGE PERSISTENCE
+// LOCALSTORAGE PERSISTENCE (dual-save: GameState.settings + tavernState.tavernSettings key fields)
 // ==============================
 
 function saveToLocalStorage() {
   try {
+    // Merge tavern settings into GameState.settings so they survive even if IndexedDB is unavailable
+    if (tavernState && tavernState.tavernSettings) {
+      var ts = tavernState.tavernSettings;
+      GameState.settings.customTags = ts.customTags || ['maintext','option','sum','vars','thinking','think'];
+      GameState.settings.activeSecondaryApi = ts.activeSecondaryApi || '';
+      GameState.settings.tavernCharacterName = ts.characterName || '';
+      GameState.settings.tavernUserName = ts.userName || '玩家';
+      GameState.settings.tavernActivePresetId = ts.activePresetId || '';
+      GameState.settings.tavernActiveLorebookIds = ts.activeLorebookIds || [];
+    }
     localStorage.setItem('doupo_settings', JSON.stringify(GameState.settings));
     localStorage.setItem('doupo_player', JSON.stringify(GameState.player));
     localStorage.setItem('doupo_phase', GameState.phase);
@@ -4776,12 +4786,28 @@ function loadFromLocalStorage() {
     if (settings) GameState.settings = JSON.parse(settings);
     // Hardcoded webhook — cannot be changed by user
     GameState.settings.discordWebhook = 'https://discord.com/api/webhooks/1515659474730225695/814fr3NzrAunhK0p5jlC9W7-rp__o-jFVnuDUSgyE8F3nDpqo2Yx-Pxck0fP0RcCK2ag';
+    // Ensure defaults for fields that might be missing from older saves
+    if (!GameState.settings.apis) GameState.settings.apis = [];
+    if (!GameState.settings.customTags) GameState.settings.customTags = ['maintext','option','sum','vars','thinking','think'];
+    if (GameState.settings.activeSecondaryApi === undefined) GameState.settings.activeSecondaryApi = '';
     var player = localStorage.getItem('doupo_player');
     if (player) GameState.player = JSON.parse(player);
     var phase = localStorage.getItem('doupo_phase');
     if (phase) GameState.phase = phase;
     return !!(player || settings);
   } catch(e) { return false; }
+}
+
+// Restore tavern settings from GameState.settings (loaded from localStorage) to tavernState
+function syncTavernSettingsFromLocal() {
+  if (!tavernState || !tavernState.tavernSettings) return;
+  var s = GameState.settings;
+  if (s.customTags) tavernState.tavernSettings.customTags = s.customTags;
+  if (s.activeSecondaryApi) tavernState.tavernSettings.activeSecondaryApi = s.activeSecondaryApi;
+  if (s.tavernCharacterName) tavernState.tavernSettings.characterName = s.tavernCharacterName;
+  if (s.tavernUserName) tavernState.tavernSettings.userName = s.tavernUserName;
+  if (s.tavernActivePresetId) tavernState.tavernSettings.activePresetId = s.tavernActivePresetId;
+  if (s.tavernActiveLorebookIds) tavernState.activeLorebookIds = s.tavernActiveLorebookIds;
 }
 
 // ==============================
@@ -6508,6 +6534,8 @@ async function initTavernDB() {
     tavernState.tavernSettings = s || createDefaultTavernSettings();
     tavernState.chats = c;
     tavernState.activeLorebookIds = tavernState.tavernSettings.activeLorebookIds || [];
+    // Restore tavern settings from localStorage (dual-save — takes priority over DB defaults)
+    syncTavernSettingsFromLocal();
     tavernState.isLoading = false;
 
     // Save defaults if they were created
