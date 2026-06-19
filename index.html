@@ -2938,7 +2938,13 @@ function continueGame() {
     var latest = saves.sort(function(a, b) { return b.timestamp - a.timestamp; })[0];
     if (latest.player && latest.player.name && latest.player.race) {
       GameState.player = JSON.parse(JSON.stringify(latest.player));
-      if (latest.settings) GameState.settings = JSON.parse(JSON.stringify(latest.settings));
+      if (latest.settings) {
+        GameState.settings = JSON.parse(JSON.stringify(latest.settings));
+        // Migrate old key field
+        if (GameState.settings.apis) GameState.settings.apis.forEach(function(api) {
+          if (api.key && !api.apiKey) api.apiKey = api.key;
+        });
+      }
       saveToLocalStorage(); // 同步到自动存档
     }
   }
@@ -4306,7 +4312,7 @@ function renderApiCards() {
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">' +
         '<input type="text" class="settings-form-input" placeholder="接口地址 (https://...)" value="' + (api.url || '') + '" oninput="updateApiSetting(\'' + api.id + '\',\'url\',this.value);clearModelList(\'' + api.id + '\');saveToLocalStorage()">' +
         '<div style="display:flex;gap:4px;">' +
-          '<input type="password" id="api-key-' + api.id + '" class="settings-form-input" placeholder="API Key" value="' + (api.key || '') + '" oninput="updateApiSetting(\'' + api.id + '\',\'key\',this.value);saveToLocalStorage()">' +
+          '<input type="password" id="api-key-' + api.id + '" class="settings-form-input" placeholder="API Key" value="' + (api.apiKey || api.key || '') + '" oninput="updateApiSetting(\'' + api.id + '\',\'apiKey\',this.value);updateApiSetting(\'' + api.id + '\',\'key\',this.value);saveToLocalStorage()">' +
           '<button class="dice-btn" onclick="toggleApiKeyVisibility(\'' + api.id + '\')" title="显示/隐藏" style="padding:6px 8px;">' +
             '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' +
           '</button>' +
@@ -4338,6 +4344,7 @@ function addNewApi() {
     id: 'api-' + Date.now(),
     name: '新接口',
     url: '',
+    apiKey: '',
     key: '',
     model: '',
     models: [],
@@ -4788,6 +4795,11 @@ function loadFromLocalStorage() {
     GameState.settings.discordWebhook = 'https://discord.com/api/webhooks/1515659474730225695/814fr3NzrAunhK0p5jlC9W7-rp__o-jFVnuDUSgyE8F3nDpqo2Yx-Pxck0fP0RcCK2ag';
     // Ensure defaults for fields that might be missing from older saves
     if (!GameState.settings.apis) GameState.settings.apis = [];
+    // Migrate old 'key' field to 'apiKey' for backward compatibility
+    GameState.settings.apis.forEach(function(api) {
+      if (api.key && !api.apiKey) api.apiKey = api.key;
+      if (!api.key && api.apiKey) api.key = api.apiKey;
+    });
     if (!GameState.settings.customTags) GameState.settings.customTags = ['maintext','option','sum','vars','thinking','think'];
     if (GameState.settings.activeSecondaryApi === undefined) GameState.settings.activeSecondaryApi = '';
     var player = localStorage.getItem('doupo_player');
@@ -6351,7 +6363,7 @@ function resolveModel(api, opts) {
   if (opts.model) return opts.model;
   if (api.model) return api.model;
   // Detect DeepSeek by key format (sk- + 32 hex) or URL
-  var key = api.apiKey || '';
+  var key = api.apiKey || api.key || '';
   var url = api.url || '';
   if (key.match(/^sk-[a-f0-9]{32}$/i) || url.indexOf('deepseek') >= 0) return 'deepseek-chat';
   // Detect other providers
@@ -6383,7 +6395,7 @@ async function callLLM(messages, opts) {
 
   var response = await fetch(url + '/chat/completions', {
     method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + api.apiKey, 'Content-Type': 'application/json' },
+    headers: { 'Authorization': 'Bearer ' + (api.apiKey || api.key || ''), 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
 
@@ -6415,7 +6427,7 @@ async function callLLMStream(messages, opts, onChunk) {
     try {
       response = await fetch(url + '/chat/completions', {
         method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + api.apiKey, 'Content-Type': 'application/json' },
+        headers: { 'Authorization': 'Bearer ' + (api.apiKey || api.key || ''), 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
       if (response.ok) break;
