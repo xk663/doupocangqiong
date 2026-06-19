@@ -2932,6 +2932,16 @@ function getIdentityStartingSkills(identityId) {
 }
 
 function continueGame() {
+  // 优先从存档管理器加载最新存档，确保刷新后能继续
+  var saves = getSaves();
+  if (saves.length > 0) {
+    var latest = saves.sort(function(a, b) { return b.timestamp - a.timestamp; })[0];
+    if (latest.player && latest.player.name && latest.player.race) {
+      GameState.player = JSON.parse(JSON.stringify(latest.player));
+      if (latest.settings) GameState.settings = JSON.parse(JSON.stringify(latest.settings));
+      saveToLocalStorage(); // 同步到自动存档
+    }
+  }
   if (!GameState.player.name || !GameState.player.race) {
     showToast('暂无有效存档，请开启新人生', 'warning');
     return;
@@ -5816,15 +5826,22 @@ function confirmReturnToTitle() {
 // TAVERN / SILLYTAVERN INTEGRATION (Vanilla JS)
 // ==============================
 
-// -- Database --
-var db = new Dexie('DoupocangqiongTavern');
-db.version(1).stores({
-  lorebooks: 'id,name,createdAt',
-  presets: 'id,name,createdAt',
-  characterCard: 'id',
-  tavernSettings: 'id',
-  chats: 'id,name,characterName,createdAt,updatedAt'
-});
+// -- Database (guarded: Dexie loads via defer, may not be ready at script parse time) --
+var db;
+try {
+  db = new Dexie('DoupocangqiongTavern');
+  db.version(1).stores({
+    lorebooks: 'id,name,createdAt',
+    presets: 'id,name,createdAt',
+    characterCard: 'id',
+    tavernSettings: 'id',
+    chats: 'id,name,characterName,createdAt,updatedAt'
+  });
+} catch(e) {
+  // Dexie not available yet — db operations will retry on DOMContentLoaded
+  db = null;
+  console.warn('Dexie not ready, will initialize later:', e.message);
+}
 
 // -- Types (as factory functions) --
 function createLorebookEntry(overrides) {
@@ -6032,14 +6049,28 @@ function mergeVariables(current, updates) {
   return merged;
 }
 
-// -- Parse Game Mode Output --
+// -- Parse Game Mode Output (configurable custom tags) --
+function getOutputTags() {
+  // Allow user-configured custom tags via settings, default to 6 standard tags
+  var s = (tavernState && tavernState.tavernSettings && tavernState.tavernSettings.customTags) ? tavernState.tavernSettings.customTags : null;
+  if (!s || !s.length) return ['maintext','option','sum','vars','thinking','think'];
+  // Ensure maintext and option are always present for UI compatibility
+  var tags = s.slice();
+  if (tags.indexOf('maintext') < 0) tags.unshift('maintext');
+  if (tags.indexOf('option') < 0) tags.splice(1, 0, 'option');
+  return tags;
+}
+
 function parseGameModeOutput(rawText) {
   var result = { maintext:'', option:[], sum:'', vars:{}, thinking:'', think:'' };
+  var validTags = getOutputTags();
   var re = /##\s*(\w+)\s*\n([\s\S]*?)(?=\n##\s|\n*$)/g;
   var match;
   while ((match = re.exec(rawText)) !== null) {
     var tag = match[1].toLowerCase();
     var content = match[2].trim();
+    // Only process recognized tags (from configurable set)
+    if (validTags.indexOf(tag) < 0) continue;
     switch(tag) {
       case 'maintext': result.maintext = content; break;
       case 'option':
@@ -6053,6 +6084,10 @@ function parseGameModeOutput(rawText) {
       case 'vars': result.vars = content; break;
       case 'thinking': result.thinking = content; break;
       case 'think': result.think = content; break;
+      default:
+        // Custom tags: store by name in result for downstream use
+        if (content) result[tag] = content;
+        break;
     }
   }
   if (!result.maintext && rawText.trim()) {
@@ -6065,7 +6100,7 @@ function parseGameModeOutput(rawText) {
 function assembleTavernPrompt(opts) {
   opts = opts || {};
   var preset = opts.preset;
-  var charCard = opts.characterCard || tavernState.characterCard;
+  var charCard = opts.characterCard || (tavernState && tavernState.characterCard) || null;
   var userName = opts.userName || '玩家';
   var charName = charCard ? charCard.name : '角色';
   var userInput = opts.userInput || '';
@@ -6083,105 +6118,86 @@ function assembleTavernPrompt(opts) {
 
   var systemParts = [];
 
-  // === Use new prompts array if available (SillyTavern-style) ===
+  // === Unified Prompt Assembly (SillyTavern-style) ===
+  // Build a virtual prompts list from either the new prompts array or legacy promptOrder
+  var promptsToInject = [];
   if (preset && preset.prompts && preset.prompts.length > 0) {
-    var enabledPrompts = preset.prompts.filter(function(pr) { return pr.enabled && pr.content; });
-    // Sort by injection_order then injection_position
-    enabledPrompts.sort(function(a, b) { return (a.injection_order || 100) - (b.injection_order || 100); });
-    enabledPrompts.forEach(function(pr) {
-      var content = pr.content
-        .replace(/\{\{user\}\}/g, userName)
-        .replace(/\{\{char\}\}/g, charName)
-        .replace(/\{\{scenario\}\}/g, charCard && charCard.scenario || '')
-        .replace(/\{\{personality\}\}/g, charCard && charCard.personality || '')
-        .replace(/\{\{description\}\}/g, charCard && charCard.description || '')
-        .replace(/\{\{location\}\}/g, location);
-      systemParts.push(content);
-    });
-  } else if (preset && preset.promptOrder) {
-    // === Legacy promptOrder system ===
+    promptsToInject = preset.prompts.filter(function(pr) { return pr.enabled && pr.content; });
+    promptsToInject.sort(function(a, b) { return (a.injection_order || 100) - (b.injection_order || 100); });
+  }
+  // Fallback to legacy promptOrder if prompts array doesn't exist or all have empty content
+  if (promptsToInject.length === 0 && preset && preset.promptOrder) {
+    // Legacy: convert promptOrder items to virtual prompt entries
     preset.promptOrder.forEach(function(item) {
       if (!item.enabled) return;
-      switch(item.id) {
-        case 'system_main':
-          if (preset.prompt_main) systemParts.push(preset.prompt_main);
+      var content = '';
+      var itemId = item.id || '';
+      switch(itemId) {
+        case 'system_main': case 'main': content = preset.prompt_main || ''; break;
+        case 'system_nsfw': case 'nsfw': content = preset.prompt_nsfw || ''; break;
+        case 'jailbreak': content = preset.jailbreak || ''; break;
+        case 'world_info_before': case 'worldInfoBefore':
+          if (lbGroups.before.length > 0) { content = '【世界信息·前置】\n' + lbGroups.before.map(function(m) { return '[' + m.bookName + '] ' + m.entry.content; }).join('\n'); }
           break;
-        case 'system_nsfw':
-          if (preset.prompt_nsfw) systemParts.push(preset.prompt_nsfw);
+        case 'char_description': case 'charDescription':
+          content = charCard && charCard.description ? '【' + charName + '描述】\n' + charCard.description : ''; break;
+        case 'char_personality': case 'charPersonality':
+          content = charCard && charCard.personality ? '【' + charName + '性格】\n' + charCard.personality : ''; break;
+        case 'scenario': content = charCard && charCard.scenario ? '【当前场景】\n' + charCard.scenario + '\n当前时间地点：' + location : ''; break;
+        case 'world_info_after': case 'worldInfoAfter':
+          if (lbGroups.after.length > 0) { content = '【世界信息·后置】\n' + lbGroups.after.map(function(m) { return '[' + m.bookName + '] ' + m.entry.content; }).join('\n'); }
           break;
-        case 'jailbreak':
-          if (preset.jailbreak) systemParts.push(preset.jailbreak);
+        case 'world_info': case 'worldInfo':
+          if (lbGroups.before.length > 0 || lbGroups.after.length > 0) { content = '【世界信息】\n' + lbGroups.before.concat(lbGroups.after).map(function(m) { return '[' + m.bookName + '] ' + m.entry.content; }).join('\n'); }
           break;
-        // World Info BEFORE char: position 0 entries
-        case 'world_info_before':
-          if (lbGroups.before.length > 0) {
-            var wbText = '【世界信息·前置】\n';
-            lbGroups.before.forEach(function(m) {
-              wbText += '[' + m.bookName + '] ' + m.entry.content + '\n';
-            });
-            systemParts.push(wbText);
-          }
-          break;
-        case 'char_description':
-          if (charCard && charCard.description) systemParts.push('【' + charName + '描述】\n' + charCard.description);
-          break;
-        case 'char_personality':
-          if (charCard && charCard.personality) systemParts.push('【' + charName + '性格】\n' + charCard.personality);
-          break;
-        case 'scenario':
-          if (charCard && charCard.scenario) systemParts.push('【当前场景】\n' + charCard.scenario + '\n当前时间地点：' + location);
-          break;
-        // World Info AFTER char: position 1 entries
-        case 'world_info_after':
-          if (lbGroups.after.length > 0) {
-            var waText = '【世界信息·后置】\n';
-            lbGroups.after.forEach(function(m) {
-              waText += '[' + m.bookName + '] ' + m.entry.content + '\n';
-            });
-            systemParts.push(waText);
-          }
-          break;
-        // Legacy: single world_info block (backward compat)
-        case 'world_info':
-          if (lbGroups.before.length > 0 || lbGroups.after.length > 0) {
-            var wiText = '【世界信息】\n';
-            lbGroups.before.forEach(function(m) {
-              wiText += '[' + m.bookName + '] ' + m.entry.content + '\n';
-            });
-            lbGroups.after.forEach(function(m) {
-              wiText += '[' + m.bookName + '] ' + m.entry.content + '\n';
-            });
-            systemParts.push(wiText);
-          }
-          break;
+      }
+      if (content) {
+        promptsToInject.push({
+          enabled: true, role: 'system', content: content,
+          injection_order: 100, injection_position: 0, injection_depth: 4
+        });
       }
     });
   }
 
+  // Inject all prompts with template substitution
+  promptsToInject.forEach(function(pr) {
+    var content = pr.content
+      .replace(/\{\{user\}\}/g, userName)
+      .replace(/\{\{char\}\}/g, charName)
+      .replace(/\{\{scenario\}\}/g, charCard && charCard.scenario || '')
+      .replace(/\{\{personality\}\}/g, charCard && charCard.personality || '')
+      .replace(/\{\{description\}\}/g, charCard && charCard.description || '')
+      .replace(/\{\{location\}\}/g, location);
+    systemParts.push(content);
+  });
+
   // Depth prompt (based on relationship affinity)
-  var mainAffinity = 50; // default middle
-  if (GameState.player.relationships && GameState.player.relationships.length > 0) {
-    mainAffinity = GameState.player.relationships[0].affinity || 50;
-  }
-  var depthPrompt = getDepthPrompt(mainAffinity);
-  if (depthPrompt) systemParts.push(depthPrompt);
+  try {
+    var mainAffinity = 50;
+    if (GameState && GameState.player && GameState.player.relationships && GameState.player.relationships.length > 0) {
+      mainAffinity = GameState.player.relationships[0].affinity || 50;
+    }
+    var depthPrompt = typeof getDepthPrompt === 'function' ? getDepthPrompt(mainAffinity) : null;
+    if (depthPrompt) systemParts.push(depthPrompt);
+  } catch(e) { /* depth prompts unavailable — skip */ }
 
-  // Style guide
-  systemParts.push('【文体指导】\n' + getStyleGuide());
-
-  // Dice pool
-  generateDicePool();
-  systemParts.push('[协议：公平骰池]\n检定规则：本次判定可用骰池(可根据情景选择一个骰子进行调用，只能使用以下的骰子，禁止随机)：\n' + getDicePoolText() + '\n[/协议：公平骰池]');
-
-  // NPC dynamic rules
-  systemParts.push('【NPC生成规则】\n' + NPC_DYNAMIC_RULES.join('\n'));
-
-  // Title/honorific rules
+  // Style guide, dice pool, NPC rules, title rules, protocol — guarded
+  try {
+    if (typeof getStyleGuide === 'function') systemParts.push('【文体指导】\n' + getStyleGuide());
+  } catch(e) {}
+  try {
+    if (typeof generateDicePool === 'function' && typeof getDicePoolText === 'function') {
+      generateDicePool();
+      systemParts.push('[协议：公平骰池]\n检定规则：本次判定可用骰池(可根据情景选择一个骰子进行调用，只能使用以下的骰子，禁止随机)：\n' + getDicePoolText() + '\n[/协议：公平骰池]');
+    }
+  } catch(e) {}
+  systemParts.push('【NPC生成规则】\n' + (typeof NPC_DYNAMIC_RULES !== 'undefined' ? NPC_DYNAMIC_RULES.join('\n') : ''));
   systemParts.push('【称谓规则】\n严格按境界差距使用称谓——道友(同辈或接近)、前辈(高于己者)、晚辈(低于己者)。称谓错误可能招致杀身之祸。');
-
-  // Protocol system rules
-  var protocolText = buildProtocolSystemPrompt();
-  if (protocolText) systemParts.push(protocolText);
+  try {
+    var protocolText = typeof buildProtocolSystemPrompt === 'function' ? buildProtocolSystemPrompt() : '';
+    if (protocolText) systemParts.push(protocolText);
+  } catch(e) {}
 
   // Variables injection
   var varKeys = Object.keys(variables);
@@ -6241,17 +6257,22 @@ function assembleTavernPrompt(opts) {
   return { messages: messages, systemMsg: systemMsg };
 }
 
-// -- Stream Parser --
+// -- Stream Parser (robust with buffer cap & partial-chunk recovery) --
 function StreamParser() {
   var buffer = '';
-  var currentTag = '';
-  var tagContent = {};
+  var MAX_BUFFER = 65536; // 64KB cap to prevent unbounded growth
   var listeners = [];
 
   function feed(chunk) {
     buffer += chunk;
-    // Try to extract complete tagged sections
-    var re = /##\s*(\w+)\s*\n([\s\S]*?)(?=\n##\s|$)/g;
+    // Prevent unbounded buffer growth (trim oldest partial content if exceeded)
+    if (buffer.length > MAX_BUFFER) {
+      var cutPoint = buffer.indexOf('\n## ', buffer.length - MAX_BUFFER / 2);
+      if (cutPoint < 0) cutPoint = buffer.length - MAX_BUFFER;
+      buffer = buffer.substring(cutPoint);
+    }
+    // Extract complete tagged sections: ## tagname \n content ... (until next ## tag or EOF)
+    var re = /##\s*(\w+)\s*\n([\s\S]*?)(?=\n##\s|\n*$)/g;
     var lastIndex = 0;
     var match;
     var newContent = {};
@@ -6270,24 +6291,38 @@ function StreamParser() {
   }
 
   function onTag(fn) { listeners.push(fn); }
-  function reset() { buffer = ''; currentTag = ''; tagContent = {}; }
+  function reset() { buffer = ''; }
+  function flushBuffer() {
+    // Force-parse remaining buffer as plain text (no complete tags)
+    var remaining = buffer.trim();
+    buffer = '';
+    if (remaining) listeners.forEach(function(fn) { fn('maintext', remaining); });
+    return remaining;
+  }
 
-  return { feed: feed, onTag: onTag, reset: reset };
+  return { feed: feed, onTag: onTag, reset: reset, flushBuffer: flushBuffer };
 }
 
-// -- API Router --
-function getTavernApi() {
+// -- API Router (SillyTavern-style routing) --
+function getTavernApi(purpose) {
   var settings = GameState.settings;
-  if (settings.apis && settings.apis.length > 0 && settings.activeApi) {
+  if (!settings.apis || settings.apis.length === 0) return null;
+  // Secondary API: route variable extraction / summarization to cheaper model
+  if (purpose === 'secondary' && settings.activeSecondaryApi) {
+    var sec = settings.apis.find(function(a) { return a.id === settings.activeSecondaryApi; });
+    if (sec) return sec;
+  }
+  // Primary API: main text generation
+  if (settings.activeApi) {
     return settings.apis.find(function(a) { return a.id === settings.activeApi; }) || settings.apis[0];
   }
-  return null;
+  return settings.apis[0];
 }
 
 
 async function callLLM(messages, opts) {
   opts = opts || {};
-  var api = getTavernApi();
+  var api = getTavernApi(opts.purpose || 'primary');
   if (!api) throw new Error('未配置API接口，请在设置中添加');
 
   var body = {
@@ -6301,7 +6336,10 @@ async function callLLM(messages, opts) {
   if (opts.presence_penalty !== undefined) body.presence_penalty = opts.presence_penalty;
   if (opts.stream !== undefined) body.stream = opts.stream;
 
-  var response = await fetch(api.url + '/chat/completions', {
+  var url = api.url;
+  if (url.slice(-1) === '/') url = url.slice(0, -1);
+
+  var response = await fetch(url + '/chat/completions', {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + api.apiKey, 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
@@ -6314,38 +6352,72 @@ async function callLLM(messages, opts) {
 async function callLLMStream(messages, opts, onChunk) {
   opts = opts || {};
   opts.stream = true;
-  var api = getTavernApi();
+  var api = getTavernApi(opts.purpose || 'primary');
   if (!api) throw new Error('未配置API接口');
 
   var body = {
     model: opts.model || api.model || 'gpt-4o-mini',
     messages: messages,
-    stream: true
+    stream: true,
+    temperature: opts.temperature
   };
-  if (opts.temperature !== undefined) body.temperature = opts.temperature;
+  if (opts.max_tokens !== undefined) body.max_tokens = opts.max_tokens;
+  if (opts.top_p !== undefined) body.top_p = opts.top_p;
 
-  var response = await fetch(api.url + '/chat/completions', {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + api.apiKey, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
+  var url = api.url;
+  if (url.slice(-1) === '/') url = url.slice(0, -1);
 
-  if (!response.ok) throw new Error('API error: ' + response.status);
+  var response;
+  var lastError;
+  for (var attempt = 0; attempt < 2; attempt++) {
+    try {
+      response = await fetch(url + '/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + api.apiKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (response.ok) break;
+      if (response.status >= 500 && attempt === 0) {
+        // Server error → retry once with non-streaming fallback hint
+        body.stream = false;
+        continue;
+      }
+    } catch(e) { lastError = e; }
+  }
+
+  if (!response || !response.ok) {
+    throw new Error('API error: ' + (response ? response.status : lastError ? lastError.message : 'unknown'));
+  }
+
+  // Non-streaming response (fallback from retry)
+  if (!body.stream) {
+    var data = await response.json();
+    var content = data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message.content : '';
+    if (onChunk) onChunk(content, content);
+    return content;
+  }
 
   var reader = response.body.getReader();
   var decoder = new TextDecoder();
   var fullContent = '';
+  var leftover = '';
 
-  while (true) {
-    var result = await reader.read();
-    if (result.done) break;
-    var text = decoder.decode(result.value, { stream: true });
-    var lines = text.split('\n');
-    for (var i = 0; i < lines.length; i++) {
-      var line = lines[i].trim();
-      if (line.startsWith('data: ')) {
+  try {
+    while (true) {
+      var result = await reader.read();
+      if (result.done) break;
+      var text = leftover + decoder.decode(result.value, { stream: true });
+      leftover = '';
+      var lines = text.split('\n');
+      // If last line is incomplete, save it for next read
+      if (text.charAt(text.length - 1) !== '\n') {
+        leftover = lines.pop();
+      }
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i].trim();
+        if (!line.startsWith('data: ')) continue;
         var data = line.substring(6);
-        if (data === '[DONE]') break;
+        if (data === '[DONE]') { reader.cancel(); break; }
         try {
           var json = JSON.parse(data);
           var delta = json.choices && json.choices[0] && json.choices[0].delta;
@@ -6353,16 +6425,36 @@ async function callLLMStream(messages, opts, onChunk) {
             fullContent += delta.content;
             if (onChunk) onChunk(delta.content, fullContent);
           }
-        } catch(e) {}
+        } catch(e) { /* skip malformed SSE chunks */ }
       }
     }
+  } finally {
+    try { reader.cancel(); } catch(e) {}
   }
+
   return fullContent;
 }
 
 // -- Tavern Database Operations --
 async function initTavernDB() {
   try {
+    // If Dexie wasn't ready at parse time, retry now (defer script should have loaded by DOMContentLoaded)
+    if (!db) {
+      try {
+        db = new Dexie('DoupocangqiongTavern');
+        db.version(1).stores({
+          lorebooks: 'id,name,createdAt',
+          presets: 'id,name,createdAt',
+          characterCard: 'id',
+          tavernSettings: 'id',
+          chats: 'id,name,characterName,createdAt,updatedAt'
+        });
+      } catch(e) {
+        console.error('Dexie still unavailable:', e);
+        tavernState.isLoading = false;
+        return;
+      }
+    }
     var l = await db.lorebooks.toArray();
     var p = await db.presets.toArray();
     var card = await db.characterCard.get('active');
@@ -6822,6 +6914,8 @@ function createDefaultTavernSettings() {
     userName: '玩家',
     activePresetId: '',
     activeLorebookIds: [],
+    customTags: ['maintext','option','sum','vars','thinking','think'],
+    activeSecondaryApi: '',
     createdAt: Date.now()
   };
 }
@@ -6879,60 +6973,134 @@ function renderTavernMessages() {
     return;
   }
 
-  var html = '';
-  chat.messages.forEach(function(msg) {
-    if (msg.role === 'system') {
-      // Show character profile card
-      if (msg.content.indexOf('【角色档案】') >= 0) {
-        html += '<div class="msg-profile-card" style="background:var(--bg-card);border:1px solid var(--border-gold);border-radius:8px;padding:14px;margin:8px 0;font-size:12px;line-height:1.7;color:var(--text-body);max-width:480px;">' +
-          '<div style="font-family:var(--font-serif);color:var(--text-primary);font-size:14px;margin-bottom:8px;">📜 ' + (GameState.player.name||'修炼者') + ' · 角色档案</div>' +
-          escapeHtml(msg.content.replace('【角色档案】\n','')).replace(/\n/g,'<br>') +
-        '</div>';
+  // Incremental render: only build HTML for the last few messages if already rendered
+  var lastRendered = msgs._lastRenderedCount || 0;
+  var newlyAdded = chat.messages.slice(lastRendered);
+  var isIncremental = lastRendered > 0 && newlyAdded.length <= 3 && msgs.children.length > 0;
+
+  if (isIncremental && newlyAdded.length > 0) {
+    // Append only new messages to existing DOM
+    newlyAdded.forEach(function(msg) {
+      if (msg.role === 'user') {
+        var div = document.createElement('div');
+        div.className = 'msg user';
+        div.textContent = msg.content;
+        msgs.appendChild(div);
+      } else if (msg.role === 'assistant') {
+        var frag = buildAssistantMessageDOM(msg);
+        msgs.appendChild(frag);
       }
-      return;
-    }
-    if (msg.role === 'assistant') {
-      var parsed = parseGameModeOutput(msg.content);
-      // Thinking fold
-      if (parsed.thinking) {
-        html += '<details class="msg-thinking-fold"><summary>💭 内心独白</summary><div class="think-content">' + escapeHtml(parsed.thinking) + '</div></details>';
+    });
+  } else {
+    // Full rebuild
+    var frag = document.createDocumentFragment();
+    chat.messages.forEach(function(msg) {
+      if (msg.role === 'system') {
+        if (msg.content.indexOf('【角色档案】') >= 0) {
+          var card = document.createElement('div');
+          card.className = 'msg-profile-card';
+          card.style.cssText = 'background:var(--bg-card);border:1px solid var(--border-gold);border-radius:8px;padding:14px;margin:8px 0;font-size:12px;line-height:1.7;color:var(--text-body);max-width:480px;';
+          var title = document.createElement('div');
+          title.style.cssText = 'font-family:var(--font-serif);color:var(--text-primary);font-size:14px;margin-bottom:8px;';
+          title.textContent = '📜 ' + (GameState.player.name || '修炼者') + ' · 角色档案';
+          card.appendChild(title);
+          var bodyText = document.createElement('div');
+          bodyText.innerHTML = escapeHtml(msg.content.replace('【角色档案】\n', '')).replace(/\n/g, '<br>');
+          bodyText.textContent = msg.content.replace('【角色档案】\n', '');
+          card.appendChild(title);
+          var lines = msg.content.replace('【角色档案】\n', '').split('\n');
+          lines.forEach(function(line) { var p = document.createElement('div'); p.textContent = line; card.appendChild(p); });
+          frag.appendChild(card);
+        }
+        return;
       }
-      if (parsed.think) {
-        html += '<details class="msg-thinking-fold"><summary>💭 思考</summary><div class="think-content">' + escapeHtml(parsed.think) + '</div></details>';
+      if (msg.role === 'user') {
+        var d = document.createElement('div');
+        d.className = 'msg user';
+        d.textContent = msg.content;
+        frag.appendChild(d);
+      } else if (msg.role === 'assistant') {
+        frag.appendChild(buildAssistantMessageDOM(msg));
       }
-      // Vars
-      if (parsed.vars) {
-        html += '<div class="msg-vars">📊 ' + escapeHtml(parsed.vars) + '</div>';
-      }
-      // Summary
-      if (parsed.sum) {
-        html += '<div class="msg-summary">📝 ' + escapeHtml(parsed.sum) + '</div>';
-      }
-      // Main text
-      html += '<div class="msg-maintext">' + escapeHtml(parsed.maintext) + '</div>';
-      // Options
-      if (parsed.option.length > 0) {
-        html += '<div class="msg-options">';
-        parsed.option.forEach(function(opt) {
-          html += '<button class="msg-option-btn" onclick="selectTavernOption(\'' + escapeHtmlAttr(opt) + '\')">' + escapeHtml(opt) + '</button>';
-        });
-        html += '</div>';
-      }
-      // Also parse <branches> tags
-      var branches = parseBranchOptions(msg.content);
-      if (branches.length > 0) {
-        html += '<div style="font-size:9px;color:var(--text-dim);margin:4px 0 8px;">——分支选项——</div><div class="msg-options">';
-        branches.forEach(function(opt) {
-          html += '<button class="msg-option-btn" onclick="selectTavernOption(\'' + escapeHtmlAttr(opt) + '\')">' + escapeHtml(opt) + '</button>';
-        });
-        html += '</div>';
-      }
-    } else if (msg.role === 'user') {
-      html += '<div class="msg user">' + escapeHtml(msg.content) + '</div>';
-    }
-  });
-  msgs.innerHTML = html;
-  msgs.scrollTop = msgs.scrollHeight;
+    });
+    msgs.textContent = '';
+    msgs.appendChild(frag);
+  }
+
+  msgs._lastRenderedCount = chat.messages.length;
+  // Deferred scroll using requestAnimationFrame
+  requestAnimationFrame(function() { msgs.scrollTop = msgs.scrollHeight; });
+}
+
+// Helper: build a single assistant message as a DOM fragment
+function buildAssistantMessageDOM(msg) {
+  var frag = document.createDocumentFragment();
+  var parsed = parseGameModeOutput(msg.content);
+
+  if (parsed.thinking) {
+    var det = document.createElement('details');
+    det.className = 'msg-thinking-fold';
+    det.innerHTML = '<summary>💭 内心独白</summary><div class="think-content">' + escapeHtml(parsed.thinking) + '</div>';
+    frag.appendChild(det);
+  }
+  if (parsed.think) {
+    var det2 = document.createElement('details');
+    det2.className = 'msg-thinking-fold';
+    det2.innerHTML = '<summary>💭 思考</summary><div class="think-content">' + escapeHtml(parsed.think) + '</div>';
+    frag.appendChild(det2);
+  }
+  if (parsed.vars) {
+    var v = document.createElement('div');
+    v.className = 'msg-vars';
+    v.textContent = '📊 ' + parsed.vars;
+    frag.appendChild(v);
+  }
+  if (parsed.sum) {
+    var s = document.createElement('div');
+    s.className = 'msg-summary';
+    s.textContent = '📝 ' + parsed.sum;
+    frag.appendChild(s);
+  }
+  // Main text
+  var mt = document.createElement('div');
+  mt.className = 'msg-maintext';
+  mt.textContent = parsed.maintext;
+  frag.appendChild(mt);
+
+  // ## option tag buttons
+  if (parsed.option.length > 0) {
+    var optDiv = document.createElement('div');
+    optDiv.className = 'msg-options';
+    parsed.option.forEach(function(opt) {
+      var btn = document.createElement('button');
+      btn.className = 'msg-option-btn';
+      btn.textContent = opt;
+      btn.onclick = function() { selectTavernOption(opt); };
+      optDiv.appendChild(btn);
+    });
+    frag.appendChild(optDiv);
+  }
+
+  // <branches> tag buttons (legacy)
+  var branches = parseBranchOptions(msg.content);
+  if (branches.length > 0) {
+    var sep = document.createElement('div');
+    sep.style.cssText = 'font-size:9px;color:var(--text-dim);margin:4px 0 8px;';
+    sep.textContent = '——分支选项——';
+    frag.appendChild(sep);
+    var brDiv = document.createElement('div');
+    brDiv.className = 'msg-options';
+    branches.forEach(function(opt) {
+      var btn = document.createElement('button');
+      btn.className = 'msg-option-btn';
+      btn.textContent = opt;
+      btn.onclick = function() { selectTavernOption(opt); };
+      brDiv.appendChild(btn);
+    });
+    frag.appendChild(brDiv);
+  }
+
+  return frag;
 }
 
 function escapeHtml(text) {
@@ -7082,16 +7250,23 @@ async function sendTavernMessage() {
       fullResponse = await callLLMStream(result.messages, {
         model: preset.settings.openai_model || undefined,
         temperature: preset.settings.temp_openai,
-        max_tokens: preset.settings.openai_max_tokens
+        max_tokens: preset.settings.openai_max_tokens,
+        purpose: 'primary'
       }, function(chunk, accumulated) {
         streamParser.feed(chunk);
       });
+      // Flush any remaining buffer content at stream end
+      var flushed = streamParser.flushBuffer();
+      if (flushed && flushed !== fullResponse) {
+        fullResponse = fullResponse || flushed;
+      }
     } catch(e) {
       // Fallback to non-streaming
       var data = await callLLM(result.messages, {
         model: preset.settings.openai_model || undefined,
         temperature: preset.settings.temp_openai,
-        max_tokens: preset.settings.openai_max_tokens
+        max_tokens: preset.settings.openai_max_tokens,
+        purpose: 'primary'
       });
       fullResponse = data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message.content : '';
     }
@@ -8163,7 +8338,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initTitleCover();
   // Initialize Tavern database (async, non-blocking)
   initTavernDB().catch(function(e) { console.warn('Tavern DB init:', e); });
-  var hasData = loadFromLocalStorage();
+  var hasData = loadFromLocalStorage() || (localStorage.getItem('doupo_saves') && JSON.parse(localStorage.getItem('doupo_saves')).length > 0);
   var continueBtn = document.getElementById('btn-continue');
   if (continueBtn && hasData) {
     continueBtn.classList.add('primary');
