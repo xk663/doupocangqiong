@@ -3794,7 +3794,10 @@ function renderSettingsCore(body) {
       '<div>' +
         '<div class="settings-section-title">API 配置</div>' +
         '<div class="settings-card-grid" id="api-cards-container" style="margin-bottom:10px;"></div>' +
-        '<button class="settings-action-btn" onclick="addNewApi()" style="margin-bottom:24px;">＋ 添加 API 接口</button>' +
+        '<div style="display:flex;gap:6px;margin-bottom:24px;">' +
+          '<button class="settings-action-btn" onclick="addNewApi()" style="flex:1;">＋ 添加 API</button>' +
+          '<button class="settings-action-btn" onclick="forceSaveAllSettings()" style="flex:1;background:rgba(136,204,136,0.1);border-color:var(--accent-green);color:var(--accent-green);">💾 强制保存配置</button>' +
+        '</div>' +
         '<div class="settings-section-title">云同步</div>' +
         '<p style="font-size:11px;color:var(--text-muted);margin-bottom:12px;line-height:1.5;">存档丢失联系制作者 <span style="color:var(--text-primary);">@消失</span></p>' +
         '<label class="settings-form-label">Discord 用户名</label>' +
@@ -3825,8 +3828,30 @@ function renderSettingsApi(body) {
   body.innerHTML =
     '<div class="settings-section-title">API 配置</div>' +
     '<div class="settings-card-grid" id="api-cards-container" style="margin-bottom:12px;"></div>' +
-    '<button class="settings-action-btn" onclick="addNewApi()">＋ 添加 API 接口</button>';
+    '<div style="display:flex;gap:8px;">' +
+      '<button class="settings-action-btn" onclick="addNewApi()" style="flex:1;">＋ 添加 API 接口</button>' +
+      '<button class="settings-action-btn primary" onclick="forceSaveAllSettings()" style="flex:1;background:rgba(136,204,136,0.12);border-color:var(--accent-green);color:var(--accent-green);">💾 强制保存配置</button>' +
+    '</div>';
   setTimeout(function() { renderApiCards(); }, 50);
+}
+
+function forceSaveAllSettings() {
+  // Force-save GameState settings to localStorage
+  saveToLocalStorage();
+  // Also persist tavern settings to IndexedDB if available
+  if (db && tavernState && tavernState.tavernSettings) {
+    try {
+      db.tavernSettings.put(tavernState.tavernSettings).then(function() {
+        showToast('✅ 配置已强制保存（localStorage + IndexedDB 双写）', 'success');
+      }).catch(function() {
+        showToast('✅ 配置已保存到本地', 'success');
+      });
+    } catch(e) {
+      showToast('✅ 配置已保存到本地', 'success');
+    }
+  } else {
+    showToast('✅ 配置已保存到本地', 'success');
+  }
 }
 
 function renderSettingsRules(body) {
