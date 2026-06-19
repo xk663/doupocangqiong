@@ -6319,6 +6319,22 @@ function getTavernApi(purpose) {
   return settings.apis[0];
 }
 
+// Resolve model with provider-aware fallback (DeepSeek keys → deepseek-chat, etc.)
+function resolveModel(api, opts) {
+  opts = opts || {};
+  if (opts.model) return opts.model;
+  if (api.model) return api.model;
+  // Detect DeepSeek by key format (sk- + 32 hex) or URL
+  var key = api.apiKey || '';
+  var url = api.url || '';
+  if (key.match(/^sk-[a-f0-9]{32}$/i) || url.indexOf('deepseek') >= 0) return 'deepseek-chat';
+  // Detect other providers
+  if (url.indexOf('openai') >= 0) return 'gpt-4o-mini';
+  if (url.indexOf('anthropic') >= 0 || url.indexOf('claude') >= 0) return 'claude-sonnet-4-6';
+  // Generic fallback
+  return 'gpt-4o-mini';
+}
+
 
 async function callLLM(messages, opts) {
   opts = opts || {};
@@ -6326,7 +6342,7 @@ async function callLLM(messages, opts) {
   if (!api) throw new Error('未配置API接口，请在设置中添加');
 
   var body = {
-    model: opts.model || api.model || 'gpt-4o-mini',
+    model: resolveModel(api, opts),
     messages: messages
   };
   if (opts.temperature !== undefined) body.temperature = opts.temperature;
@@ -6356,7 +6372,7 @@ async function callLLMStream(messages, opts, onChunk) {
   if (!api) throw new Error('未配置API接口');
 
   var body = {
-    model: opts.model || api.model || 'gpt-4o-mini',
+    model: resolveModel(api, opts),
     messages: messages,
     stream: true,
     temperature: opts.temperature
