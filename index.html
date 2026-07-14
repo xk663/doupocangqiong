@@ -980,6 +980,18 @@ input:checked + .toggle-slider::before { background:var(--text-primary);transfor
   color:var(--text-body);font-size:13px;line-height:1.8;white-space:pre-wrap;
 }
 .msg-maintext.typing::after { content:'▍';animation:blink 0.6s infinite;color:var(--text-primary); }
+.msg-maintext.typing { position:relative; }
+.msg-maintext.typing::before {
+  content:'天机推演中';
+  display:block;font-size:10px;color:var(--text-muted);margin-bottom:6px;
+  font-family:var(--font-serif);letter-spacing:2px;
+}
+/* 推演指示器动画点 */
+@keyframes blink { 0%,50%{opacity:1;} 51%,100%{opacity:0.3;} }
+@keyframes pulse-dot {
+  0%,60%,100%{transform:translateY(0);opacity:0.4;}
+  30%{transform:translateY(-6px);opacity:1;}
+}
 .msg-summary {
   background:rgba(150,130,100,0.05);border:1px solid var(--border-subtle);
   border-radius:6px;padding:8px 14px;margin-bottom:8px;
@@ -4239,6 +4251,13 @@ function renderSettingsTavern(body) {
     '<div class="settings-section-title">酒馆设置</div>' +
     apiInfo +
     '<div class="form-group"><label class="settings-form-label">用户名称（你在对话中的称呼）</label><input type="text" id="ts-username" class="settings-form-input" value="' + (s.userName||'玩家') + '" oninput="saveTavernUserName()"></div>' +
+    '<div class="settings-card" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">' +
+      '<div><div style="color:var(--text-primary);font-size:13px;font-family:var(--font-serif);">📝 纯文本模式</div><div style="font-size:10px;color:var(--text-muted);">开启后禁止 AI 输出任何 XML/HTML 标签，强制纯文本叙事</div></div>' +
+      '<label class="toggle-switch">' +
+        '<input type="checkbox" id="ts-puretext" ' + (s.pureTextMode ? 'checked' : '') + ' onchange="togglePureTextMode(this.checked)">' +
+        '<span class="toggle-slider"></span>' +
+      '</label>' +
+    '</div>' +
     '<p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">角色形象与设定由当前角色卡决定</p>' +
     '<button class="settings-action-btn" onclick="saveTavernSettings()">保存酒馆设置</button>';
 }
@@ -4248,6 +4267,14 @@ function saveTavernUserName() {
   s.userName = document.getElementById('ts-username').value || '玩家';
   tavernState.tavernSettings = s;
   db.tavernSettings.put(s);
+}
+
+function togglePureTextMode(checked) {
+  var s = tavernState.tavernSettings || createDefaultTavernSettings();
+  s.pureTextMode = checked;
+  tavernState.tavernSettings = s;
+  db.tavernSettings.put(s);
+  showToast(checked ? '纯文本模式已开启 — 禁止 XML 标签输出' : '语义渲染模式已开启', 'success');
 }
 
 function renderSettingsDiscord(body) {
@@ -4366,6 +4393,13 @@ function renderApiCards() {
         '</select>' +
         '<button class="dice-btn" onclick="syncModels(\'' + api.id + '\')" style="font-size:10px;white-space:nowrap;padding:6px 10px;">同步</button>' +
       '</div>' +
+      '<div style="display:flex;gap:6px;margin-bottom:6px;">' +
+        '<select class="settings-form-input" style="flex:1;" onchange="updateApiSetting(\'' + api.id + '\',\'backend\',this.value);onApiBackendChange(\'' + api.id + '\',this.value);saveToLocalStorage()">' +
+          '<option value="openai"' + ((api.backend||'openai')==='openai'?' selected':'') + '>天机通灵（OpenAI）</option>' +
+          '<option value="ollama"' + ((api.backend||'openai')==='ollama'?' selected':'') + '>本地灵枢（Ollama）</option>' +
+          '<option value="kobold"' + ((api.backend||'openai')==='kobold'?' selected':'') + '>炉火演算（KoboldCPP）</option>' +
+        '</select>' +
+      '</div>' +
       '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' +
         '<span style="font-size:10px;color:var(--text-muted);white-space:nowrap;font-family:var(--font-serif);">路由权重</span>' +
         '<input type="range" class="form-slider" min="0" max="100" value="' + (api.weight || 50) + '" style="flex:1;" oninput="updateApiSetting(\'' + api.id + '\',\'weight\',parseInt(this.value));this.nextElementSibling.textContent=this.value">' +
@@ -4390,7 +4424,8 @@ function addNewApi() {
     models: [],
     enabled: true,
     weight: 50,
-    lastSync: null
+    lastSync: null,
+    backend: 'openai'  // 'openai' | 'kobold' | 'ollama'
   };
   GameState.settings.apis.push(newApi);
   if (!GameState.settings.activeApi) GameState.settings.activeApi = newApi.id;
@@ -4417,6 +4452,25 @@ function toggleApiKeyVisibility(apiId) {
   var input = document.getElementById('api-key-' + apiId);
   if (!input) return;
   input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+// 天机之源切换 — 自动预填端点与模型
+function onApiBackendChange(apiId, backend) {
+  var api = (GameState.settings.apis || []).find(function(a) { return a.id === apiId; });
+  if (!api) return;
+  if (backend === 'ollama') {
+    if (!api.url || api.url.indexOf('api.openai.com') >= 0 || api.url.indexOf('localhost:5001') >= 0) api.url = 'http://localhost:11434/api/chat';
+    if (!api.model || api.model === 'gpt-3.5-turbo' || api.model === 'gpt-4o-mini' || api.model === 'deepseek-chat') api.model = 'llama3';
+  } else if (backend === 'kobold') {
+    if (!api.url || api.url.indexOf('api.openai.com') >= 0 || api.url.indexOf('localhost:11434') >= 0) api.url = 'http://localhost:5001/api/v1/generate';
+    if (!api.model || api.model === 'gpt-3.5-turbo' || api.model === 'gpt-4o-mini' || api.model === 'llama3') api.model = '';
+  } else {
+    if (!api.url || api.url.indexOf('localhost:11434') >= 0 || api.url.indexOf('localhost:5001') >= 0) api.url = 'https://api.openai.com/v1';
+    if (!api.model || api.model === 'llama3') api.model = 'gpt-4o-mini';
+  }
+  api.backend = backend;
+  saveToLocalStorage();
+  renderApiCards();
 }
 
 function clearModelList(apiId) {
@@ -6286,7 +6340,24 @@ function assembleTavernPrompt(opts) {
   }
 
   // Branch options + upstore format instruction
-  systemParts.push('【输出格式要求】\n请严格按以下XML标签分段输出：\n## maintext\n(正文叙述)\n\n## option\n- [ ] 选项1\n...\n\n在正文后必须生成<branches></branches>包裹的选项分支:\n<branches>\n[快速推进的行动]\n[最合理的行动]\n[最中立的行动]\n[最善良的行动]\n[NSFW的行动]\n</branches>\n\n同时必须紧跟<upstore></upstore>变量更新块:\n<upstore>\naddSmallSum:变量名:增量\nset:变量名:值\n</upstore>\n\n## sum\n(一句话总结)\n\n如有内心独白请放入 ## thinking 标签中。');
+  var ts = tavernState.tavernSettings || {};
+  if (ts.pureTextMode) {
+    // 纯文本模式 — 严禁任何 XML/HTML 标签
+    systemParts.push(
+      '【纯文本模式 · 最高优先级】\n' +
+      '你正在以纯文本格式输出。以下规则具有最高优先级，覆盖任何其他格式指令：\n' +
+      '1. 严禁输出以 < 开头的任何标签。禁止输出 <blockquote>、<aside>、<branches>、<div>、<span>、<section>、<p>、<ui_sys>、<content>、<card>、<store>、<upstore>、<cultivation_card>、<scene_checkpoint> 或任何 <> 包裹的结构。\n' +
+      '2. 禁止输出任何 HTML 标签、XML 标签、或 Markdown 代码块中包裹的标签。\n' +
+      '3. 请以纯文本自然段落格式输出正文。段落之间用空行分隔。\n' +
+      '4. NPC 台词使用中文引号直接书写，如：薰儿轻声道："萧炎哥哥在想什么呢？"\n' +
+      '5. 内心独白使用括号直接嵌入正文，如：（她心中暗想，萧炎哥哥今日似乎格外沉默。）\n' +
+      '6. 如果需要在正文末尾提供选项分支，请用纯文本格式列出，格式为：【选项】\\n- 选项1\\n- 选项2\\n...\n' +
+      '7. 禁止输出任何 data- 属性、class 属性、style 属性或任何 HTML 属性。\n' +
+      '违反以上任何一条规则都会导致输出被拒绝。请严格遵守纯文本格式。'
+    );
+  } else {
+    systemParts.push('【输出格式要求】\n请严格按以下XML标签分段输出：\n## maintext\n(正文叙述)\n\n## option\n- [ ] 选项1\n...\n\n在正文后必须生成<branches></branches>包裹的选项分支:\n<branches>\n[快速推进的行动]\n[最合理的行动]\n[最中立的行动]\n[最善良的行动]\n[NSFW的行动]\n</branches>\n\n同时必须紧跟<upstore></upstore>变量更新块:\n<upstore>\naddSmallSum:变量名:增量\nset:变量名:值\n</upstore>\n\n## sum\n(一句话总结)\n\n如有内心独白请放入 ## thinking 标签中。');
+  }
 
   var systemMsg = systemParts.join('\n\n');
 
@@ -6418,7 +6489,47 @@ async function callLLM(messages, opts) {
   opts = opts || {};
   var api = getTavernApi(opts.purpose || 'primary');
   if (!api) throw new Error('未配置API接口，请在设置中添加');
+  var backend = api.backend || 'openai';
 
+  if (backend === 'kobold') {
+    // KoboldCPP: non-streaming fallback — return full response as choices[0].message.content
+    var prompt = messagesToKoboldPrompt(messages);
+    var koboldBody = {
+      prompt: prompt,
+      temperature: opts.temperature,
+      max_length: opts.max_tokens || 512,
+      top_p: opts.top_p
+    };
+    var kUrl = api.url; if (kUrl.slice(-1) === '/') kUrl = kUrl.slice(0, -1);
+    var kResp = await fetch(kUrl + '/api/v1/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(koboldBody)
+    });
+    if (!kResp.ok) throw new Error('炉火演算错误: ' + kResp.status);
+    var kData = await kResp.json();
+    return { choices: [{ message: { content: kData.results && kData.results[0] ? kData.results[0].text : '' } }] };
+  }
+
+  if (backend === 'ollama') {
+    var ollamaBody = {
+      model: resolveModel(api, opts),
+      messages: messages,
+      stream: false,
+      options: { temperature: opts.temperature, num_predict: opts.max_tokens || 512, top_p: opts.top_p }
+    };
+    var oUrl = api.url; if (oUrl.slice(-1) === '/') oUrl = oUrl.slice(0, -1);
+    var oResp = await fetch(oUrl + '/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(ollamaBody)
+    });
+    if (!oResp.ok) throw new Error('本地灵枢错误: ' + oResp.status);
+    var oData = await oResp.json();
+    return { choices: [{ message: { content: oData.message ? oData.message.content : '' } }] };
+  }
+
+  // OpenAI 兼容
   var body = {
     model: resolveModel(api, opts),
     messages: messages
@@ -6426,21 +6537,34 @@ async function callLLM(messages, opts) {
   if (opts.temperature !== undefined) body.temperature = opts.temperature;
   if (opts.max_tokens !== undefined) body.max_tokens = opts.max_tokens;
   if (opts.top_p !== undefined) body.top_p = opts.top_p;
-  if (opts.frequency_penalty !== undefined) body.frequency_penalty = opts.frequency_penalty;
-  if (opts.presence_penalty !== undefined) body.presence_penalty = opts.presence_penalty;
   if (opts.stream !== undefined) body.stream = opts.stream;
 
   var url = api.url;
   if (url.slice(-1) === '/') url = url.slice(0, -1);
+  // Auto-append /chat/completions if not present
+  if (url.indexOf('/chat/completions') === -1) url += '/chat/completions';
 
-  var response = await fetch(url + '/chat/completions', {
+  var response = await fetch(url, {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + (api.apiKey || api.key || ''), 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
+    signal: tavernState.streamAbortController ? tavernState.streamAbortController.signal : undefined
   });
 
   if (!response.ok) throw new Error('API error: ' + response.status);
   return response.json();
+}
+
+// 将 messages 数组转为 KoboldCPP prompt 格式
+function messagesToKoboldPrompt(messages) {
+  var prompt = '';
+  messages.forEach(function(m) {
+    if (m.role === 'system') prompt += '[设定: ' + m.content + ']\n';
+    else if (m.role === 'user') prompt += '\n修士: ' + m.content + '\n';
+    else if (m.role === 'assistant') prompt += '\n天道: ' + m.content + '\n';
+  });
+  prompt += '\n天道:';
+  return prompt;
 }
 
 async function callLLMStream(messages, opts, onChunk) {
@@ -6448,7 +6572,79 @@ async function callLLMStream(messages, opts, onChunk) {
   opts.stream = true;
   var api = getTavernApi(opts.purpose || 'primary');
   if (!api) throw new Error('未配置API接口');
+  var backend = api.backend || 'openai';
 
+  // === 炉火演算（KoboldCPP）流式 ===
+  if (backend === 'kobold') {
+    var kPrompt = messagesToKoboldPrompt(messages);
+    var kBody = {
+      prompt: kPrompt,
+      temperature: opts.temperature || 0.7,
+      max_length: opts.max_tokens || 512,
+      top_p: opts.top_p || 0.9,
+      stream: true
+    };
+    var kUrl = api.url; if (kUrl.slice(-1) === '/') kUrl = kUrl.slice(0, -1);
+    var kResponse = await fetch(kUrl + '/api/v1/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(kBody),
+      signal: tavernState.streamAbortController ? tavernState.streamAbortController.signal : undefined
+    });
+    if (!kResponse.ok) throw new Error('炉火演算错误: ' + kResponse.status);
+    var kReader = kResponse.body.getReader();
+    var kDecoder = new TextDecoder();
+    var kFull = '';
+    try {
+      while (true) {
+        var kr = await kReader.read(); if (kr.done) break;
+        var kChunk = kDecoder.decode(kr.value, { stream: true });
+        kFull += kChunk;
+        if (onChunk) onChunk(kChunk, kFull);
+      }
+    } finally { try { kReader.cancel(); } catch(e) {} }
+    return kFull;
+  }
+
+  // === 本地灵枢（Ollama）流式 ===
+  if (backend === 'ollama') {
+    var oBody = {
+      model: resolveModel(api, opts),
+      messages: messages,
+      stream: true,
+      options: { temperature: opts.temperature || 0.7, num_predict: opts.max_tokens || 512, top_p: opts.top_p || 0.9 }
+    };
+    var oUrl = api.url; if (oUrl.slice(-1) === '/') oUrl = oUrl.slice(0, -1);
+    var oResp = await fetch(oUrl + '/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(oBody),
+      signal: tavernState.streamAbortController ? tavernState.streamAbortController.signal : undefined
+    });
+    if (!oResp.ok) { var oErr = await oResp.text().catch(function(){return '';}); throw new Error('本地灵枢错误 ' + oResp.status + ': ' + oErr.slice(0,200)); }
+    var oReader = oResp.body.getReader();
+    var oDecoder = new TextDecoder();
+    var oFull = '';
+    var oBuf = '';
+    try {
+      while (true) {
+        var or = await oReader.read(); if (or.done) break;
+        oBuf += oDecoder.decode(or.value, { stream: true });
+        var oLines = oBuf.split('\n'); oBuf = oLines.pop() || '';
+        for (var oi = 0; oi < oLines.length; oi++) {
+          if (!oLines[oi].trim()) continue;
+          try {
+            var oJson = JSON.parse(oLines[oi]);
+            var oContent = oJson && oJson.message && oJson.message.content;
+            if (oContent) { oFull += oContent; if (onChunk) onChunk(oContent, oFull); }
+          } catch(e) {}
+        }
+      }
+    } finally { try { oReader.cancel(); } catch(e) {} }
+    return oFull;
+  }
+
+  // === 天机通灵（OpenAI 兼容）流式 ===
   var body = {
     model: resolveModel(api, opts),
     messages: messages,
@@ -6460,19 +6656,20 @@ async function callLLMStream(messages, opts, onChunk) {
 
   var url = api.url;
   if (url.slice(-1) === '/') url = url.slice(0, -1);
+  if (url.indexOf('/chat/completions') === -1) url += '/chat/completions';
 
   var response;
   var lastError;
   for (var attempt = 0; attempt < 2; attempt++) {
     try {
-      response = await fetch(url + '/chat/completions', {
+      response = await fetch(url, {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + (api.apiKey || api.key || ''), 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
+        signal: tavernState.streamAbortController ? tavernState.streamAbortController.signal : undefined
       });
       if (response.ok) break;
       if (response.status >= 500 && attempt === 0) {
-        // Server error → retry once with non-streaming fallback hint
         body.stream = false;
         continue;
       }
@@ -6483,7 +6680,7 @@ async function callLLMStream(messages, opts, onChunk) {
     throw new Error('API error: ' + (response ? response.status : lastError ? lastError.message : 'unknown'));
   }
 
-  // Non-streaming response (fallback from retry)
+  // 非流式回退
   if (!body.stream) {
     var data = await response.json();
     var content = data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message.content : '';
@@ -6503,17 +6700,16 @@ async function callLLMStream(messages, opts, onChunk) {
       var text = leftover + decoder.decode(result.value, { stream: true });
       leftover = '';
       var lines = text.split('\n');
-      // If last line is incomplete, save it for next read
       if (text.charAt(text.length - 1) !== '\n') {
         leftover = lines.pop();
       }
       for (var i = 0; i < lines.length; i++) {
         var line = lines[i].trim();
         if (!line.startsWith('data: ')) continue;
-        var data = line.substring(6);
-        if (data === '[DONE]') { reader.cancel(); break; }
+        var sseData = line.substring(6);
+        if (sseData === '[DONE]') { reader.cancel(); break; }
         try {
-          var json = JSON.parse(data);
+          var json = JSON.parse(sseData);
           var delta = json.choices && json.choices[0] && json.choices[0].delta;
           if (delta && delta.content) {
             fullContent += delta.content;
@@ -6584,6 +6780,8 @@ async function initTavernDB() {
     tavernState.presets = p.length > 0 ? p : [createPreset()];
     tavernState.characterCard = card || createDefaultCharacterCard();
     tavernState.tavernSettings = s || createDefaultTavernSettings();
+    // 迁移旧配置——补充缺少的字段
+    if (tavernState.tavernSettings.pureTextMode === undefined) tavernState.tavernSettings.pureTextMode = false;
     tavernState.chats = c;
     tavernState.activeLorebookIds = tavernState.tavernSettings.activeLorebookIds || [];
     // Restore tavern settings from localStorage (dual-save — takes priority over DB defaults)
@@ -7012,6 +7210,7 @@ function createDefaultTavernSettings() {
     activeLorebookIds: [],
     customTags: ['maintext','option','sum','vars','thinking','think'],
     activeSecondaryApi: '',
+    pureTextMode: false,  // 纯文本模式：开启后禁止模型输出 XML/HTML 标签
     createdAt: Date.now()
   };
 }
@@ -7024,13 +7223,18 @@ function buildTavern() {
     '<div class="tavern-container">' +
       '<div class="tavern-body">' +
         '<div class="tavern-main" style="flex:1;">' +
-          '<div style="display:flex;justify-content:flex-end;padding:6px 12px;gap:6px;">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 12px;gap:6px;">' +
+            '<div style="display:flex;gap:4px;">' +
+              '<button class="text-btn" onclick="regenerateLastTavern()" title="重演天机——重新生成最后一条回复" style="font-size:10px;">🔄 重演天机</button>' +
+              '<button class="text-btn" onclick="continueTavernStream()" title="续断推演——继续生成被截断的回复" style="font-size:10px;">➕ 续断推演</button>' +
+              '<button class="text-btn" onclick="resetTavernContext()" title="重置因缘——清空当前会话" style="font-size:10px;">🔮 重置因缘</button>' +
+            '</div>' +
             '<button class="text-btn" onclick="openTimeRewind()" title="时空回溯" style="font-size:10px;">⏪ 时空回溯 (' + (TimeRewind.snapshots?TimeRewind.snapshots.length:0) + ')</button>' +
           '</div>' +
           '<div class="tavern-messages" id="tavern-messages"></div>' +
           '<div class="tavern-input-bar">' +
-            '<textarea class="tavern-input" id="tavern-input" rows="2" placeholder="输入消息...（Enter发送，Shift+Enter换行）" onkeydown="handleTavernKeydown(event)"></textarea>' +
-            '<button class="tavern-send-btn" id="tavern-send-btn" onclick="sendTavernMessage()">发送</button>' +
+            '<textarea class="tavern-input" id="tavern-input" rows="2" placeholder="书写命数...（Enter发送，Shift+Enter换行）" onkeydown="handleTavernKeydown(event)"></textarea>' +
+            '<button class="tavern-send-btn" id="tavern-send-btn" onclick="sendTavernMessage()">推演</button>' +
           '</div>' +
         '</div>' +
       '</div>' +
@@ -7266,7 +7470,11 @@ function handleTavernKeydown(e) {
 }
 
 async function sendTavernMessage() {
-  if (tavernState.isSending) return;
+  // 阻断推演：如果正在推演中，点击按钮中止
+  if (tavernState.isSending) {
+    stopTavernStream();
+    return;
+  }
   var input = document.getElementById('tavern-input');
   if (!input) return;
   var content = input.value.trim();
@@ -7280,9 +7488,11 @@ async function sendTavernMessage() {
   }
 
   tavernState.isSending = true;
+  // 创建中断控制器
+  tavernState.streamAbortController = new AbortController();
   var btn = document.getElementById('tavern-send-btn');
   var inputEl = document.getElementById('tavern-input');
-  if (btn) btn.disabled = true;
+  if (btn) { btn.textContent = '阻断'; btn.style.background = 'rgba(255,107,53,0.15)'; btn.style.color = 'var(--accent-fire)'; }
   if (inputEl) inputEl.disabled = true;
   input.value = '';
 
@@ -7443,14 +7653,77 @@ async function sendTavernMessage() {
   } catch(e) {
     var typing2 = document.getElementById('tavern-typing');
     if (typing2) typing2.remove();
-    showToast('AI调用失败: ' + e.message, 'error');
-    console.error('Tavern send error:', e);
+    if (e.name === 'AbortError') {
+      showToast('推演已阻断', 'info');
+    } else {
+      showToast('天机推演失败: ' + e.message, 'error');
+      console.error('Tavern send error:', e);
+    }
   }
 
   tavernState.isSending = false;
-  if (btn) btn.disabled = false;
+  tavernState.streamAbortController = null;
+  if (btn) { btn.textContent = '推演'; btn.style.background = ''; btn.style.color = ''; btn.disabled = false; }
   if (inputEl) inputEl.disabled = false;
-  inputEl.focus();
+  if (inputEl) inputEl.focus();
+}
+
+// 阻断推演（中止当前流式请求）
+function stopTavernStream() {
+  if (tavernState.streamAbortController) {
+    tavernState.streamAbortController.abort();
+    tavernState.streamAbortController = null;
+  }
+}
+
+// 重演天机 — 删除最后一条AI回复后重新生成
+async function regenerateLastTavern() {
+  if (tavernState.isSending) return;
+  var chat = getActiveChat();
+  if (!chat) return;
+  // 找到最后一条assistant消息并删除
+  var lastIdx = -1;
+  for (var i = chat.messages.length - 1; i >= 0; i--) {
+    if (chat.messages[i].role === 'assistant') { lastIdx = i; break; }
+  }
+  if (lastIdx === -1) { showToast('无可重演的回复', 'info'); return; }
+  chat.messages.splice(lastIdx, 1);
+  chat.updatedAt = Date.now();
+  await db.chats.put(chat);
+  renderTavernMessages();
+  // 找到触发消息并重新发送
+  var triggerContent = '';
+  for (var j = lastIdx - 1; j >= 0; j--) {
+    if (chat.messages[j].role === 'user') { triggerContent = chat.messages[j].content; break; }
+  }
+  if (triggerContent) {
+    var input = document.getElementById('tavern-input');
+    if (input) { input.value = triggerContent; }
+    sendTavernMessage();
+  }
+}
+
+// 续断推演 — 在当前会话最后追加"请继续"
+async function continueTavernStream() {
+  if (tavernState.isSending) return;
+  var chat = getActiveChat();
+  if (!chat) return;
+  var input = document.getElementById('tavern-input');
+  if (input) { input.value = '（请继续）'; }
+  sendTavernMessage();
+}
+
+// 重置因缘 — 清空当前会话消息
+async function resetTavernContext() {
+  var chat = getActiveChat();
+  if (!chat) return;
+  if (!confirm('确定要重置因缘，清空当前会话的全部对话？')) return;
+  chat.messages = [];
+  chat.variables = {};
+  chat.updatedAt = Date.now();
+  await db.chats.put(chat);
+  renderTavernMessages();
+  showToast('因缘已重置，因果重新开始', 'success');
 }
 
 function updateTavernInfo() {
@@ -8091,6 +8364,13 @@ function openTavernSettingsModal() {
     apiStatusHtml +
     '<div class="form-group"><label class="form-label">用户名称</label><input type="text" id="ts-username" class="form-input" value="' + (s.userName||'玩家') + '"></div>' +
     '<div class="form-group"><label class="form-label">角色名称</label><input type="text" id="ts-charname" class="form-input" value="' + (s.characterName||'') + '"></div>' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;background:rgba(200,180,140,0.04);border:1px solid var(--border-subtle);border-radius:6px;padding:10px 12px;">' +
+      '<div><div style="font-size:12px;color:var(--text-primary);font-family:var(--font-serif);">📝 纯文本模式</div><div style="font-size:9px;color:var(--text-muted);">禁止 AI 输出 XML/HTML 标签，纯文本叙事</div></div>' +
+      '<label class="toggle-switch">' +
+        '<input type="checkbox" id="ts-puretext"' + (s.pureTextMode ? ' checked' : '') + ' onchange="togglePureTextMode(this.checked)">' +
+        '<span class="toggle-slider"></span>' +
+      '</label>' +
+    '</div>' +
     '<p style="font-size:10px;color:var(--text-muted);margin-bottom:12px;">API 配置修改请前往设置 → 核心 → API 配置</p>' +
     '<div style="display:flex;gap:10px;justify-content:flex-end;">' +
       '<button class="text-btn" onclick="closeAllModals()">取消</button>' +

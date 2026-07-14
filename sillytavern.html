@@ -1,0 +1,3105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>酒馆 · AI 角色扮演</title>
+<style>
+/* ============================================================
+   CSS 变量 & 全局重置
+   ============================================================ */
+:root {
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --bg-tertiary: #0f3460;
+  --bg-card: #1e2746;
+  --bg-input: #252a3e;
+  --bg-hover: #2a3152;
+  --text-primary: #e0d6c2;
+  --text-secondary: #a89b8c;
+  --text-muted: #6b5e4e;
+  --accent: #c9a96e;
+  --accent-hover: #d4b87e;
+  --accent-dim: #8b7355;
+  --border: #2a2540;
+  --border-light: #3a3550;
+  --danger: #c0392b;
+  --danger-hover: #e74c3c;
+  --success: #27ae60;
+  --user-bubble: #1b3a5c;
+  --ai-bubble: #2a2040;
+  --scrollbar-thumb: #3a3050;
+  --scrollbar-track: #1a1a2e;
+  --shadow: 0 2px 8px rgba(0,0,0,0.4);
+  --radius: 8px;
+  --radius-lg: 12px;
+  --transition: 0.2s ease;
+  --font-size-sm: 0.85rem;
+  --font-size-base: 0.95rem;
+  --font-size-lg: 1.1rem;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  line-height: 1.6;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+
+/* ============================================================
+   布局结构 — CSS Grid
+   ============================================================ */
+.app-container {
+  display: grid;
+  grid-template-columns: 260px 1fr 320px;
+  grid-template-rows: 1fr;
+  height: 100vh;
+  transition: grid-template-columns var(--transition);
+}
+
+.app-container.right-collapsed { grid-template-columns: 260px 1fr 0px; }
+.app-container.left-collapsed { grid-template-columns: 0px 1fr 320px; }
+
+/* ============================================================
+   左侧边栏
+   ============================================================ */
+.sidebar {
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-header h2 {
+  font-size: var(--font-size-lg);
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.sidebar-header .logo { font-size: 1.5rem; }
+
+.sidebar-nav {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-nav button {
+  flex: 1;
+  padding: 10px 8px;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  border-bottom: 2px solid transparent;
+  transition: var(--transition);
+}
+
+.sidebar-nav button.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.sidebar-nav button:hover { color: var(--text-primary); }
+
+.sidebar-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.sidebar-footer {
+  padding: 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 6px;
+}
+
+.sidebar-footer button {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: var(--transition);
+}
+
+.sidebar-footer button:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* 角色列表项 */
+.char-item, .group-item {
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+  border: 1px solid transparent;
+}
+
+.char-item:hover, .group-item:hover { background: var(--bg-hover); }
+
+.char-item.active {
+  background: var(--bg-tertiary);
+  border-color: var(--accent);
+}
+
+.char-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: var(--accent);
+  border: 2px solid var(--border-light);
+}
+
+.char-info { flex: 1; min-width: 0; }
+
+.char-info .char-name {
+  font-weight: 600;
+  font-size: var(--font-size-base);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.char-info .char-desc {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.char-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.char-item:hover .char-actions { opacity: 1; }
+
+.icon-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-btn:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
+.icon-btn.danger:hover { color: var(--danger); }
+
+/* ============================================================
+   中间聊天区域
+   ============================================================ */
+.chat-area {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  overflow: hidden;
+}
+
+.chat-header {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-secondary);
+  min-height: 60px;
+}
+
+.chat-header .char-avatar { width: 36px; height: 36px; }
+
+.chat-header .char-name { font-weight: 600; font-size: var(--font-size-lg); }
+
+.chat-header .char-detail { font-size: var(--font-size-sm); color: var(--text-muted); }
+
+.chat-header-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+}
+
+.chat-header-actions button {
+  padding: 6px 12px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.chat-header-actions button:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.chat-header .toggle-right {
+  margin-left: 8px;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 消息气泡 */
+.message {
+  display: flex;
+  gap: 10px;
+  max-width: 85%;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.message.user { align-self: flex-end; flex-direction: row-reverse; }
+.message.assistant { align-self: flex-start; }
+
+.message .msg-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: cover;
+  background: var(--bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: var(--accent);
+}
+
+.message .msg-content {
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  line-height: 1.7;
+  position: relative;
+  word-break: break-word;
+}
+
+.message.user .msg-content {
+  background: var(--user-bubble);
+  border-bottom-right-radius: 4px;
+}
+
+.message.assistant .msg-content {
+  background: var(--ai-bubble);
+  border-bottom-left-radius: 4px;
+}
+
+/* 消息内 Markdown */
+.msg-content p { margin: 0 0 8px; }
+.msg-content p:last-child { margin-bottom: 0; }
+.msg-content code {
+  background: rgba(0,0,0,0.3);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.85em;
+}
+.msg-content pre {
+  background: rgba(0,0,0,0.4);
+  padding: 12px;
+  border-radius: var(--radius);
+  overflow-x: auto;
+  margin: 8px 0;
+}
+.msg-content pre code { background: none; padding: 0; }
+.msg-content blockquote {
+  border-left: 3px solid var(--accent-dim);
+  padding-left: 12px;
+  color: var(--text-secondary);
+  margin: 8px 0;
+}
+.msg-content em { font-style: italic; color: #d4c8a8; }
+
+/* 消息操作按钮 */
+.msg-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.message:hover .msg-actions { opacity: 1; }
+
+.msg-actions button {
+  padding: 3px 8px;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  background: rgba(0,0,0,0.3);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: var(--transition);
+}
+
+.msg-actions button:hover { color: var(--text-primary); background: var(--bg-hover); }
+
+.msg-actions .msg-time {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  padding: 3px 4px;
+  display: flex;
+  align-items: center;
+}
+
+/* 正在输入动画 */
+.typing-indicator {
+  align-self: flex-start;
+  padding: 12px 16px;
+  background: var(--ai-bubble);
+  border-radius: var(--radius-lg);
+  border-bottom-left-radius: 4px;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.typing-indicator span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-8px); }
+}
+
+/* 输入区域 */
+.chat-input-area {
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+
+.chat-input-area .input-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.chat-input-area textarea {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  resize: none;
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  min-height: 44px;
+  max-height: 150px;
+  transition: border-color var(--transition);
+}
+
+.chat-input-area textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.chat-input-area textarea::placeholder { color: var(--text-muted); }
+
+.btn-send {
+  padding: 10px 24px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: #1a1a2e;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: var(--font-size-base);
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.btn-send:hover { background: var(--accent-hover); }
+.btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.chat-input-area .input-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+/* 空状态 */
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  gap: 12px;
+}
+
+.empty-state .empty-icon { font-size: 3rem; }
+.empty-state .empty-title { font-size: var(--font-size-lg); }
+.empty-state .empty-subtitle { font-size: var(--font-size-sm); }
+
+/* ============================================================
+   右侧面板
+   ============================================================ */
+.right-panel {
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width var(--transition);
+}
+
+.right-panel-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.right-panel-header h3 { font-size: var(--font-size-base); color: var(--accent); }
+
+.right-panel-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.right-panel-tabs button {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  border-bottom: 2px solid transparent;
+  transition: var(--transition);
+}
+
+.right-panel-tabs button.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.right-panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+/* 世界书 */
+.lorebook-entry {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 10px;
+  margin-bottom: 8px;
+}
+
+.lorebook-entry .entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.lorebook-entry .entry-keywords {
+  color: var(--accent);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.lorebook-entry .entry-priority {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.lorebook-entry .entry-content {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.lorebook-entry .entry-meta {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 10px;
+}
+
+.lorebook-entry .entry-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+/* 角色编辑 */
+.char-edit-section {
+  margin-bottom: 16px;
+}
+
+.char-edit-section label {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.char-edit-section input,
+.char-edit-section textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+}
+
+.char-edit-section textarea { resize: vertical; min-height: 60px; }
+.char-edit-section input:focus,
+.char-edit-section textarea:focus { outline: none; border-color: var(--accent); }
+
+.char-edit-avatar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.char-edit-avatar img {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-light);
+}
+
+/* ============================================================
+   通用组件
+   ============================================================ */
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+.btn-primary { background: var(--accent); color: #1a1a2e; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-light); }
+.btn-secondary:hover { background: var(--bg-hover); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { background: var(--danger-hover); }
+.btn-sm { padding: 4px 10px; font-size: 0.8rem; }
+.btn-block { display: block; width: 100%; }
+
+/* 模态框 */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  max-width: 560px;
+  width: 90%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow);
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header h3 { color: var(--accent); font-size: var(--font-size-lg); }
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-body .form-group {
+  margin-bottom: 14px;
+}
+
+.modal-body .form-group label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.modal-body .form-group input,
+.modal-body .form-group textarea,
+.modal-body .form-group select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+}
+
+.modal-body .form-group textarea { resize: vertical; min-height: 70px; }
+.modal-body .form-group input:focus,
+.modal-body .form-group textarea:focus,
+.modal-body .form-group select:focus { outline: none; border-color: var(--accent); }
+
+.modal-body .form-group select { cursor: pointer; }
+.modal-body .form-group select option { background: var(--bg-secondary); }
+
+.modal-body .form-row {
+  display: flex;
+  gap: 10px;
+}
+
+.modal-body .form-row .form-group { flex: 1; }
+
+.modal-body .form-group input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.modal-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* 群聊成员勾选 */
+.checkbox-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.checkbox-list label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.checkbox-list label:hover { background: var(--bg-hover); }
+
+.checkbox-list input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+}
+
+/* 群聊手动指定发言 */
+.group-speak-btn {
+  padding: 2px 8px;
+  border: 1px solid var(--accent-dim);
+  border-radius: 4px;
+  background: rgba(201,169,110,0.1);
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 0.7rem;
+  transition: var(--transition);
+}
+
+.group-speak-btn:hover { background: rgba(201,169,110,0.2); }
+
+/* 通知 Toast */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  color: #fff;
+  font-size: var(--font-size-sm);
+  z-index: 2000;
+  animation: slideInRight 0.3s ease;
+  max-width: 360px;
+}
+
+.toast.success { background: var(--success); }
+.toast.error { background: var(--danger); }
+.toast.info { background: var(--bg-tertiary); border: 1px solid var(--border-light); }
+
+@keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* 确认对话框 */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-box {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+.confirm-box p { margin-bottom: 16px; }
+
+.confirm-box .confirm-actions { display: flex; gap: 8px; justify-content: center; }
+
+/* 隐藏 */
+.hidden { display: none !important; }
+
+/* ============================================================
+   响应式设计
+   ============================================================ */
+@media (max-width: 768px) {
+  .app-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    bottom: 0;
+    width: 280px;
+    z-index: 100;
+    transition: left var(--transition);
+  }
+
+  .sidebar.mobile-open { left: 0; }
+
+  .right-panel {
+    position: fixed;
+    right: -340px;
+    top: 0;
+    bottom: 0;
+    width: 340px;
+    z-index: 100;
+    transition: right var(--transition);
+  }
+
+  .right-panel.mobile-open { right: 0; }
+
+  .message { max-width: 95%; }
+
+  .chat-header-actions button { padding: 4px 8px; font-size: 0.75rem; }
+
+  .mobile-menu-btn {
+    display: flex !important;
+  }
+}
+
+.mobile-menu-btn {
+  display: none;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 1.2rem;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (min-width: 769px) {
+  .mobile-backdrop { display: none !important; }
+}
+
+.mobile-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 99;
+}
+
+/* ============================================================
+   设置面板内联样式增强
+   ============================================================ */
+.settings-section {
+  margin-bottom: 20px;
+}
+
+.settings-section h4 {
+  color: var(--accent);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* 当前值显示 */
+.range-value {
+  font-size: 0.8rem;
+  color: var(--accent);
+  margin-left: 8px;
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     HTML 结构
+     ============================================================ -->
+<div class="app-container right-collapsed" id="appContainer">
+
+  <!-- 左侧边栏 -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="logo">🍺</span>
+      <h2>酒馆</h2>
+      <button class="mobile-menu-btn" onclick="closeSidebar()" style="margin-left:auto;">✕</button>
+    </div>
+
+    <div class="sidebar-nav">
+      <button class="active" data-tab="characters" onclick="switchSidebarTab('characters')">角色</button>
+      <button data-tab="groups" onclick="switchSidebarTab('groups')">群聊</button>
+    </div>
+
+    <!-- 角色列表 -->
+    <div class="sidebar-list" id="charList"></div>
+
+    <!-- 群聊列表 -->
+    <div class="sidebar-list hidden" id="groupList"></div>
+
+    <div class="sidebar-footer">
+      <button onclick="openCreateCharModal()" title="创建新角色">＋ 角色</button>
+      <button onclick="openCreateGroupModal()" title="创建群聊房间">＋ 群聊</button>
+      <button onclick="openSettingsModal()" title="设置">⚙ 设置</button>
+    </div>
+  </aside>
+
+  <!-- 中间聊天区域 -->
+  <main class="chat-area" id="chatArea">
+    <!-- 空状态 -->
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">🍺</div>
+      <div class="empty-title">欢迎来到酒馆</div>
+      <div class="empty-subtitle">选择左侧角色开始对话，或创建新角色</div>
+    </div>
+
+    <!-- 聊天头部 -->
+    <div class="chat-header hidden" id="chatHeader">
+      <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
+      <img class="char-avatar" id="chatAvatar" src="" alt="" onerror="this.style.display='none'">
+      <div>
+        <div class="char-name" id="chatName"></div>
+        <div class="char-detail" id="chatDetail"></div>
+      </div>
+      <div class="chat-header-actions">
+        <button onclick="resetContext()" title="清空当前会话">重置上下文</button>
+        <button onclick="regenerateLast()" title="重新生成最后一条回复">重新生成</button>
+        <button class="toggle-right" onclick="toggleRightPanel()" title="右侧面板">☰</button>
+      </div>
+    </div>
+
+    <!-- 消息区域 -->
+    <div class="chat-messages" id="chatMessages"></div>
+
+    <!-- 输入区域 -->
+    <div class="chat-input-area hidden" id="chatInputArea">
+      <div class="input-row">
+        <textarea id="msgInput" rows="1" placeholder="输入消息... (Shift+Enter 换行, Enter 发送)"
+          onkeydown="handleInputKeydown(event)"></textarea>
+        <button class="btn-send" id="btnSend" onclick="sendMessage()">发送</button>
+      </div>
+      <div class="input-hint" id="inputHint"></div>
+    </div>
+  </main>
+
+  <!-- 右侧面板 -->
+  <aside class="right-panel" id="rightPanel">
+    <div class="right-panel-header">
+      <h3 id="rightPanelTitle">世界书</h3>
+      <button class="icon-btn" onclick="toggleRightPanel()">✕</button>
+    </div>
+    <div class="right-panel-tabs">
+      <button class="active" data-tab="lorebook" onclick="switchRightTab('lorebook')">世界书</button>
+      <button data-tab="character" onclick="switchRightTab('character')">角色编辑</button>
+    </div>
+    <div class="right-panel-content" id="rightPanelContent">
+      <!-- 世界书内容 -->
+      <div id="lorebookTab">
+        <button class="btn btn-primary btn-block btn-sm" onclick="openLorebookEntryModal()" style="margin-bottom:10px;">＋ 添加条目</button>
+        <div id="lorebookEntries"></div>
+      </div>
+      <!-- 角色编辑内容 -->
+      <div class="hidden" id="characterTab">
+        <div class="char-edit-section">
+          <label>头像</label>
+          <div class="char-edit-avatar">
+            <img id="editCharAvatar" src="" alt="" onerror="this.style.display='none'">
+            <div>
+              <input type="file" accept="image/*" id="avatarFileInput" onchange="handleAvatarUpload(event)" style="display:none;">
+              <button class="btn btn-secondary btn-sm" onclick="document.getElementById('avatarFileInput').click()">上传图片</button>
+              <input type="text" id="editCharAvatarUrl" placeholder="或粘贴头像URL" style="margin-top:4px; width:100%;" onchange="updateEditAvatarPreview()">
+            </div>
+          </div>
+        </div>
+        <div class="char-edit-section">
+          <label>名称</label>
+          <input type="text" id="editCharName" placeholder="角色名称">
+        </div>
+        <div class="char-edit-section">
+          <label>描述</label>
+          <textarea id="editCharDesc" placeholder="角色外貌、背景等" rows="3"></textarea>
+        </div>
+        <div class="char-edit-section">
+          <label>个性</label>
+          <textarea id="editCharPersonality" placeholder="角色性格、说话风格等" rows="3"></textarea>
+        </div>
+        <div class="char-edit-section">
+          <label>开场白</label>
+          <textarea id="editCharGreeting" placeholder="首次对话时的开场白" rows="3"></textarea>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="saveCharacterEdit()">保存修改</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- 移动端遮罩 -->
+<div class="mobile-backdrop hidden" id="mobileBackdrop" onclick="closeAllMobile()"></div>
+
+<!-- 通知容器 -->
+<div id="toastContainer"></div>
+
+<!-- ============================================================
+     JavaScript — 完整应用逻辑
+     ============================================================ -->
+<script>
+/* ============================================================
+   模块 1: 工具函数
+   ============================================================ */
+
+/** 生成简易 UUID */
+function uuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
+/** Toast 通知 */
+function showToast(msg, type = 'info', duration = 3000) {
+  const container = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.transition = 'opacity 0.3s';
+    setTimeout(() => el.remove(), 300);
+  }, duration);
+}
+
+/** 确认对话框 */
+function confirmDialog(msg) {
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-overlay';
+    overlay.innerHTML = `
+      <div class="confirm-box">
+        <p>${msg}</p>
+        <div class="confirm-actions">
+          <button class="btn btn-secondary" id="confirmCancel">取消</button>
+          <button class="btn btn-danger" id="confirmOk">确认</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#confirmCancel').onclick = () => { overlay.remove(); resolve(false); };
+    overlay.querySelector('#confirmOk').onclick = () => { overlay.remove(); resolve(true); };
+  });
+}
+
+/** 简单的 Markdown 渲染 */
+function renderMarkdown(text) {
+  if (!text) return '';
+  let html = text;
+  // 先处理代码块 ```...```
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+  // 行内代码 `...`
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // 粗体 **text**
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // 斜体 *text*
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  // 引用 > text
+  html = html.replace(/^&gt;\s?(.*)$/gm, '<blockquote>$1</blockquote>');
+  // 换行
+  html = html.replace(/\n\n/g, '</p><p>');
+  html = html.replace(/\n/g, '<br>');
+  return '<p>' + html + '</p>';
+}
+
+/** 转义 HTML */
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+/** 获取头像 URL 或默认 */
+function getAvatar(char, fallback = '') {
+  if (char && char.avatar && char.avatar.trim()) return char.avatar;
+  return fallback;
+}
+
+/** 生成头像 fallback 显示 */
+function avatarHtml(char, size = 40) {
+  if (char && char.avatar && char.avatar.trim()) {
+    return `<img class="char-avatar" src="${escapeHtml(char.avatar)}" alt="${escapeHtml(char.name)}" style="width:${size}px;height:${size}px;" onerror="this.outerHTML='<span class=\\'char-avatar\\' style=\\'width:${size}px;height:${size}px;\\'>${escapeHtml(char.name.charAt(0))}</span>'">`;
+  }
+  return `<span class="char-avatar" style="width:${size}px;height:${size}px;font-size:${size*0.4}px;">${escapeHtml((char&&char.name) ? char.name.charAt(0) : '?')}</span>`;
+}
+
+/* ============================================================
+   模块 2: 状态管理
+   ============================================================ */
+
+const STORAGE_KEY = 'sillytavern_data';
+
+/** 全局应用状态 */
+const AppState = {
+  characters: [],
+  chats: {},           // { charId: [messages] }
+  groups: [],
+  groupChats: {},      // { groupId: [messages] }
+  lorebook: {},        // { charId | 'global': [entries] }
+  settings: {
+    backend: 'openai',           // 'openai' | 'kobold' | 'ollama'
+    endpoint: 'https://api.openai.com/v1/chat/completions',
+    apiKey: '',
+    model: 'gpt-3.5-turbo',
+    temperature: 0.7,
+    maxTokens: 512,
+    topP: 0.9,
+    // 各后端默认端点
+    defaults: {
+      openai: 'https://api.openai.com/v1/chat/completions',
+      kobold: 'http://localhost:5001/api/v1/generate',
+      ollama: 'http://localhost:11434/api/chat'
+    }
+  },
+  ui: {
+    activeChatId: null,       // 当前聊天 ID（角色ID 或 群聊ID）
+    activeChatType: null,     // 'character' | 'group'
+    isStreaming: false,
+    abortController: null,
+    sidebarTab: 'characters',
+    rightTab: 'lorebook'
+  }
+};
+
+/** 从 localStorage 加载 */
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const saved = JSON.parse(raw);
+      // 合并设置默认值
+      AppState.characters = saved.characters || [];
+      AppState.chats = saved.chats || {};
+      AppState.groups = saved.groups || [];
+      AppState.groupChats = saved.groupChats || {};
+      AppState.lorebook = saved.lorebook || {};
+      if (saved.settings) {
+        AppState.settings = { ...AppState.settings, ...saved.settings };
+        // 确保 defaults 不丢失
+        if (!AppState.settings.defaults) {
+          AppState.settings.defaults = {
+            openai: 'https://api.openai.com/v1/chat/completions',
+            kobold: 'http://localhost:5001/api/v1/generate',
+            ollama: 'http://localhost:11434/api/chat'
+          };
+        }
+      }
+    }
+  } catch (e) {
+    console.error('加载数据失败:', e);
+  }
+}
+
+/** 保存到 localStorage */
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      characters: AppState.characters,
+      chats: AppState.chats,
+      groups: AppState.groups,
+      groupChats: AppState.groupChats,
+      lorebook: AppState.lorebook,
+      settings: AppState.settings
+    }));
+  } catch (e) {
+    console.error('保存数据失败:', e);
+    showToast('保存失败，存储空间可能已满', 'error');
+  }
+}
+
+/* ============================================================
+   模块 3: 角色 CRUD
+   ============================================================ */
+
+function createCharacter(data) {
+  const char = {
+    id: uuid(),
+    name: data.name || '未命名角色',
+    description: data.description || '',
+    personality: data.personality || '',
+    greeting: data.greeting || '',
+    avatar: data.avatar || '',
+    createdAt: Date.now()
+  };
+  AppState.characters.push(char);
+  saveState();
+  return char;
+}
+
+function updateCharacter(id, data) {
+  const idx = AppState.characters.findIndex(c => c.id === id);
+  if (idx === -1) return null;
+  const char = AppState.characters[idx];
+  if (data.name !== undefined) char.name = data.name;
+  if (data.description !== undefined) char.description = data.description;
+  if (data.personality !== undefined) char.personality = data.personality;
+  if (data.greeting !== undefined) char.greeting = data.greeting;
+  if (data.avatar !== undefined) char.avatar = data.avatar;
+  saveState();
+  return char;
+}
+
+function deleteCharacter(id) {
+  AppState.characters = AppState.characters.filter(c => c.id !== id);
+  delete AppState.chats[id];
+  delete AppState.lorebook[id];
+  // 从群聊中移除
+  AppState.groups.forEach(g => {
+    g.memberIds = g.memberIds.filter(mid => mid !== id);
+  });
+  saveState();
+}
+
+function getCharacter(id) {
+  return AppState.characters.find(c => c.id === id);
+}
+
+/* ============================================================
+   模块 4: 聊天管理
+   ============================================================ */
+
+function getChatMessages(chatId, chatType) {
+  if (chatType === 'group') {
+    if (!AppState.groupChats[chatId]) AppState.groupChats[chatId] = [];
+    return AppState.groupChats[chatId];
+  }
+  if (!AppState.chats[chatId]) AppState.chats[chatId] = [];
+  return AppState.chats[chatId];
+}
+
+function addMessage(chatId, chatType, msg) {
+  const messages = getChatMessages(chatId, chatType);
+  messages.push(msg);
+  // 限制消息数量防止存储溢出
+  if (messages.length > 500) {
+    messages.splice(0, messages.length - 500);
+  }
+  saveState();
+}
+
+function updateMessage(chatId, chatType, msgId, content) {
+  const messages = getChatMessages(chatId, chatType);
+  const msg = messages.find(m => m.id === msgId);
+  if (msg) {
+    msg.content = content;
+    saveState();
+  }
+}
+
+function deleteMessage(chatId, chatType, msgId) {
+  if (chatType === 'group') {
+    AppState.groupChats[chatId] = getChatMessages(chatId, chatType).filter(m => m.id !== msgId);
+  } else {
+    AppState.chats[chatId] = getChatMessages(chatId, chatType).filter(m => m.id !== msgId);
+  }
+  saveState();
+}
+
+function getLastAssistantMsg(chatId, chatType) {
+  const messages = getChatMessages(chatId, chatType);
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].role === 'assistant') return messages[i];
+  }
+  return null;
+}
+
+/* ============================================================
+   模块 5: 群聊管理
+   ============================================================ */
+
+function createGroup(data) {
+  const group = {
+    id: uuid(),
+    name: data.name || '群聊房间',
+    memberIds: data.memberIds || [],
+    createdAt: Date.now()
+  };
+  AppState.groups.push(group);
+  saveState();
+  return group;
+}
+
+function updateGroup(id, data) {
+  const group = AppState.groups.find(g => g.id === id);
+  if (!group) return null;
+  if (data.name !== undefined) group.name = data.name;
+  if (data.memberIds !== undefined) group.memberIds = data.memberIds;
+  saveState();
+  return group;
+}
+
+function deleteGroup(id) {
+  AppState.groups = AppState.groups.filter(g => g.id !== id);
+  delete AppState.groupChats[id];
+  // 清理该群聊的世界书
+  if (AppState.lorebook[id]) delete AppState.lorebook[id];
+  saveState();
+}
+
+function getGroup(id) {
+  return AppState.groups.find(g => g.id === id);
+}
+
+/* ============================================================
+   模块 6: 世界书 (Lorebook)
+   ============================================================ */
+
+function getLoreScopeId() {
+  // 返回当前活跃上下文的世界书 scope：角色ID、群聊ID 或 'global'
+  if (AppState.ui.activeChatType === 'group') {
+    return AppState.ui.activeChatId || 'global';
+  }
+  return AppState.ui.activeChatId || 'global';
+}
+
+function getLorebookEntries(scopeId) {
+  const key = scopeId || 'global';
+  if (!AppState.lorebook[key]) AppState.lorebook[key] = [];
+  return AppState.lorebook[key];
+}
+
+function addLorebookEntry(scopeId, entry) {
+  const entries = getLorebookEntries(scopeId);
+  entries.push({
+    id: uuid(),
+    keywords: entry.keywords || '',
+    content: entry.content || '',
+    position: entry.position || 'before',
+    priority: parseInt(entry.priority) || 0,
+    createdAt: Date.now()
+  });
+  saveState();
+}
+
+function updateLorebookEntry(scopeId, entryId, data) {
+  const entries = getLorebookEntries(scopeId);
+  const entry = entries.find(e => e.id === entryId);
+  if (!entry) return;
+  if (data.keywords !== undefined) entry.keywords = data.keywords;
+  if (data.content !== undefined) entry.content = data.content;
+  if (data.position !== undefined) entry.position = data.position;
+  if (data.priority !== undefined) entry.priority = parseInt(data.priority) || 0;
+  saveState();
+}
+
+function deleteLorebookEntry(scopeId, entryId) {
+  const key = scopeId || 'global';
+  AppState.lorebook[key] = getLorebookEntries(scopeId).filter(e => e.id !== entryId);
+  saveState();
+}
+
+/**
+ * 根据用户消息匹配世界书，构建要插入的上下文
+ * 返回 { before: [contents], after: [contents] }，按优先级排序
+ */
+function getLorebookContext(scopeId, userMessage) {
+  const result = { before: [], after: [] };
+  // 收集 global + 当前 scope 的条目
+  const allEntries = [
+    ...getLorebookEntries('global'),
+    ...(scopeId && scopeId !== 'global' ? getLorebookEntries(scopeId) : [])
+  ];
+  if (!allEntries.length || !userMessage) return result;
+
+  const msgLower = userMessage.toLowerCase();
+  const matched = allEntries.filter(entry => {
+    if (!entry.keywords) return false;
+    const keywords = entry.keywords.split(/[,，]/).map(k => k.trim().toLowerCase()).filter(Boolean);
+    return keywords.some(kw => msgLower.includes(kw));
+  });
+
+  // 按优先级降序排列
+  matched.sort((a, b) => b.priority - a.priority);
+
+  matched.forEach(entry => {
+    if (entry.position === 'after') {
+      result.after.push(entry.content);
+    } else {
+      result.before.push(entry.content);
+    }
+  });
+
+  return result;
+}
+
+/* ============================================================
+   模块 7: 消息数组构造 (用于发送给 AI)
+   ============================================================ */
+
+/**
+ * 为单聊构建 messages 数组
+ * @param {string} charId 角色ID
+ * @param {string} userMessage 用户最新消息
+ * @returns {Array} OpenAI 格式的 messages
+ */
+function buildSingleChatMessages(charId, userMessage) {
+  const char = getCharacter(charId);
+  if (!char) return [];
+
+  const messages = [];
+  const history = getChatMessages(charId, 'character');
+
+  // 获取世界书上下文
+  const lorebook = getLorebookContext(charId, userMessage);
+
+  // 系统提示词 = 角色定义
+  let systemPrompt = '';
+  if (char.description) systemPrompt += `[角色描述]\n${char.description}\n\n`;
+  if (char.personality) systemPrompt += `[性格特点]\n${char.personality}\n\n`;
+  systemPrompt += `[对话规则]\n你正在扮演"${char.name}"。请始终保持角色，用符合角色设定的语气和风格说话。不要打破第四面墙，不要提及你是一个AI。`;
+
+  // before: 在系统提示词之前插入
+  if (lorebook.before.length) {
+    systemPrompt = '[世界设定]\n' + lorebook.before.join('\n\n') + '\n\n' + systemPrompt;
+  }
+
+  messages.push({ role: 'system', content: systemPrompt });
+
+  // after: 在历史消息之前插入
+  if (lorebook.after.length) {
+    messages.push({ role: 'system', content: '[情景信息]\n' + lorebook.after.join('\n\n') });
+  }
+
+  // 添加历史消息（最近 N 条，控制上下文长度）
+  const recentHistory = history.slice(-40);
+  recentHistory.forEach(m => {
+    messages.push({ role: m.role, content: m.content });
+  });
+
+  // 添加用户消息
+  messages.push({ role: 'user', content: userMessage });
+
+  return messages;
+}
+
+/**
+ * 为群聊中指定角色构建 messages 数组
+ */
+function buildGroupChatMessages(groupId, charId, triggerMessage) {
+  const char = getCharacter(charId);
+  if (!char) return [];
+
+  const messages = [];
+  const history = getChatMessages(groupId, 'group');
+  const lorebook = getLorebookContext(groupId, triggerMessage);
+
+  let systemPrompt = `[角色描述]\n${char.description || char.name}\n`;
+  if (char.personality) systemPrompt += `[性格特点]\n${char.personality}\n`;
+  systemPrompt += `\n[场景]\n你正在一个群聊中与其他角色一起对话。`;
+  systemPrompt += `\n[对话规则]\n你正在扮演"${char.name}"。请始终保持角色，用符合角色设定的语气和风格说话。`;
+
+  if (lorebook.before.length) {
+    systemPrompt = '[世界设定]\n' + lorebook.before.join('\n\n') + '\n\n' + systemPrompt;
+  }
+
+  messages.push({ role: 'system', content: systemPrompt });
+
+  if (lorebook.after.length) {
+    messages.push({ role: 'system', content: '[情景信息]\n' + lorebook.after.join('\n\n') });
+  }
+
+  // 添加最近的群聊历史
+  const recentHistory = history.slice(-30);
+  recentHistory.forEach(m => {
+    // 在群聊中，标注每条消息是谁说的
+    let content = m.content;
+    if (m.characterId && m.characterId !== charId) {
+      const speaker = getCharacter(m.characterId);
+      const speakerName = speaker ? speaker.name : '未知';
+      if (m.role === 'assistant') {
+        content = `[${speakerName}]: ${m.content}`;
+      }
+    }
+    const role = (m.role === 'assistant' && m.characterId === charId) ? 'assistant' : 'user';
+    messages.push({ role, content });
+  });
+
+  // 触发消息
+  messages.push({ role: 'user', content: triggerMessage });
+
+  return messages;
+}
+
+/* ============================================================
+   模块 8: API 适配器 — 统一的流式接口
+   ============================================================ */
+
+/**
+ * 统一的流式发送接口
+ * @param {Array} messages - 消息数组
+ * @param {Object} config - 配置 { backend, endpoint, apiKey, model, temperature, maxTokens, topP }
+ * @param {Function} onChunk - 收到增量文本时的回调 (text: string)
+ * @param {Function} onDone - 完成时的回调 (fullText: string)
+ * @param {Function} onError - 出错时的回调 (error: Error)
+ * @returns {AbortController} 可用于中止请求
+ */
+function sendStream(messages, config, onChunk, onDone, onError) {
+  switch (config.backend) {
+    case 'kobold': return koboldStream(messages, config, onChunk, onDone, onError);
+    case 'ollama': return ollamaStream(messages, config, onChunk, onDone, onError);
+    default:       return openaiStream(messages, config, onChunk, onDone, onError);
+  }
+}
+
+/**
+ * OpenAI 兼容适配器
+ * 请求格式: { model, messages, temperature, max_tokens, stream: true }
+ * SSE 解析: data: {"choices":[{"delta":{"content":"?"}}]}
+ */
+function openaiStream(messages, config, onChunk, onDone, onError) {
+  const controller = new AbortController();
+  const body = JSON.stringify({
+    model: config.model || 'gpt-3.5-turbo',
+    messages: messages,
+    temperature: parseFloat(config.temperature) || 0.7,
+    max_tokens: parseInt(config.maxTokens) || 512,
+    top_p: parseFloat(config.topP) || 0.9,
+    stream: true
+  });
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'text/event-stream'
+  };
+  if (config.apiKey && config.apiKey.trim()) {
+    headers['Authorization'] = `Bearer ${config.apiKey.trim()}`;
+  }
+
+  fetch(config.endpoint || 'https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: headers,
+    body: body,
+    signal: controller.signal
+  }).then(async response => {
+    if (!response.ok) {
+      const errText = await response.text().catch(() => '');
+      throw new Error(`API 错误 ${response.status}: ${errText.slice(0, 200)}`);
+    }
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      // 解析 SSE 行
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || ''; // 保留不完整的行
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6).trim();
+        if (data === '[DONE]') continue;
+        try {
+          const parsed = JSON.parse(data);
+          const content = parsed?.choices?.[0]?.delta?.content;
+          if (content) {
+            fullText += content;
+            onChunk(content);
+          }
+        } catch (e) {
+          // 跳过无法解析的行
+        }
+      }
+    }
+    onDone(fullText);
+  }).catch(err => {
+    if (err.name === 'AbortError') return;
+    onError(err);
+  });
+
+  return controller;
+}
+
+/**
+ * KoboldCPP 适配器
+ * 将 messages 数组转换为 Kobold prompt 格式
+ * 流式响应为逐行 token 文本
+ */
+function koboldStream(messages, config, onChunk, onDone, onError) {
+  const controller = new AbortController();
+
+  // 构建 Kobold 风格的 prompt
+  let prompt = '';
+  messages.forEach(m => {
+    if (m.role === 'system') {
+      prompt += `[System: ${m.content}]\n`;
+    } else if (m.role === 'user') {
+      prompt += `\nYou: ${m.content}\n`;
+    } else if (m.role === 'assistant') {
+      prompt += `\nAssistant: ${m.content}\n`;
+    }
+  });
+  prompt += '\nAssistant:';
+
+  const body = JSON.stringify({
+    prompt: prompt,
+    temperature: parseFloat(config.temperature) || 0.7,
+    max_length: parseInt(config.maxTokens) || 512,
+    top_p: parseFloat(config.topP) || 0.9,
+    stream: true
+  });
+
+  fetch(config.endpoint || 'http://localhost:5001/api/v1/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: body,
+    signal: controller.signal
+  }).then(async response => {
+    if (!response.ok) {
+      const errText = await response.text().catch(() => '');
+      throw new Error(`Kobold API 错误 ${response.status}: ${errText.slice(0, 200)}`);
+    }
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      // Kobold 流式通常直接是 token 文本
+      fullText += chunk;
+      onChunk(chunk);
+    }
+    onDone(fullText);
+  }).catch(err => {
+    if (err.name === 'AbortError') return;
+    onError(err);
+  });
+
+  return controller;
+}
+
+/**
+ * Ollama 适配器
+ * 请求格式: { model, messages, stream: true, options: { temperature, ... } }
+ * 响应: {"message":{"content":"..."}}
+ */
+function ollamaStream(messages, config, onChunk, onDone, onError) {
+  const controller = new AbortController();
+
+  const body = JSON.stringify({
+    model: config.model || 'llama3',
+    messages: messages,
+    stream: true,
+    options: {
+      temperature: parseFloat(config.temperature) || 0.7,
+      num_predict: parseInt(config.maxTokens) || 512,
+      top_p: parseFloat(config.topP) || 0.9
+    }
+  });
+
+  fetch(config.endpoint || 'http://localhost:11434/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: body,
+    signal: controller.signal
+  }).then(async response => {
+    if (!response.ok) {
+      const errText = await response.text().catch(() => '');
+      throw new Error(`Ollama API 错误 ${response.status}: ${errText.slice(0, 200)}`);
+    }
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      // Ollama 返回的是换行分隔的 JSON 对象
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        try {
+          const parsed = JSON.parse(line);
+          const content = parsed?.message?.content;
+          if (content) {
+            fullText += content;
+            onChunk(content);
+          }
+        } catch (e) {
+          // 跳过无法解析的行
+        }
+      }
+    }
+    onDone(fullText);
+  }).catch(err => {
+    if (err.name === 'AbortError') return;
+    onError(err);
+  });
+
+  return controller;
+}
+
+/*
+ * ============================================================
+ * CORS 与安全说明
+ * ============================================================
+ * 浏览器的同源策略会阻止直接向远程 API 发送跨域请求。
+ *
+ * 本地模型 (Ollama, KoboldCPP):
+ *   - Ollama: 启动时设置环境变量 OLLAMA_ORIGINS="*" 以允许跨域访问
+ *   - KoboldCPP: 启动时添加 --host 参数允许外部连接
+ *
+ * OpenAI 兼容 API:
+ *   - 某些提供商 (如 DeepSeek, OpenRouter) 支持 CORS 头
+ *   - 对于不支持 CORS 的提供商，可以使用 CORS 代理服务
+ *   - 或通过浏览器扩展禁用 CORS（仅开发环境）
+ *
+ * 安全提醒:
+ *   - API Key 明文存储在浏览器 localStorage 中
+ *   - 请勿在公共设备上使用含密钥的配置
+ *   - 建议使用临时令牌和限制权限的 API Key
+ * ============================================================
+ */
+
+/* ============================================================
+   模块 9: 流式聊天执行
+   ============================================================ */
+
+/**
+ * 执行流式 AI 聊天
+ * @param {Array} messages - 构建好的消息数组
+ * @param {string} chatId - 聊天ID
+ * @param {string} chatType - 'character' | 'group'
+ * @param {string} characterId - 角色ID（群聊时用于标记发言人）
+ */
+async function executeStreamChat(messages, chatId, chatType, characterId) {
+  if (AppState.ui.isStreaming) return;
+  AppState.ui.isStreaming = true;
+
+  // 显示"正在输入..."指示器
+  const typingEl = showTypingIndicator();
+  scrollToBottom();
+
+  // 创建占位消息
+  const assistantMsg = {
+    id: uuid(),
+    role: 'assistant',
+    content: '',
+    timestamp: Date.now(),
+    characterId: characterId || null
+  };
+  addMessage(chatId, chatType, assistantMsg);
+
+  // 渲染占位消息气泡
+  renderAllMessages(chatId, chatType);
+  scrollToBottom();
+
+  const config = {
+    backend: AppState.settings.backend,
+    endpoint: AppState.settings.endpoint || AppState.settings.defaults[AppState.settings.backend] || '',
+    apiKey: AppState.settings.apiKey,
+    model: AppState.settings.model,
+    temperature: AppState.settings.temperature,
+    maxTokens: AppState.settings.maxTokens,
+    topP: AppState.settings.topP
+  };
+
+  AppState.ui.abortController = sendStream(
+    messages, config,
+    // onChunk
+    (chunk) => {
+      assistantMsg.content += chunk;
+      updateMessageContent(assistantMsg.id, assistantMsg.content);
+      scrollToBottom();
+    },
+    // onDone
+    (fullText) => {
+      removeTypingIndicator(typingEl);
+      assistantMsg.content = fullText;
+      updateMessageContent(assistantMsg.id, fullText);
+      AppState.ui.isStreaming = false;
+      AppState.ui.abortController = null;
+      saveState();
+      renderAllMessages(chatId, chatType);
+      scrollToBottom();
+      updateInputState();
+    },
+    // onError
+    (error) => {
+      removeTypingIndicator(typingEl);
+      console.error('Stream error:', error);
+      if (assistantMsg.content) {
+        assistantMsg.content += `\n\n*[错误: ${error.message}]*`;
+      } else {
+        assistantMsg.content = `*[请求失败: ${error.message}]*`;
+      }
+      updateMessageContent(assistantMsg.id, assistantMsg.content);
+      AppState.ui.isStreaming = false;
+      AppState.ui.abortController = null;
+      saveState();
+      renderAllMessages(chatId, chatType);
+      showToast(error.message, 'error');
+      updateInputState();
+    }
+  );
+
+  updateInputState();
+}
+
+/**
+ * 停止流式生成
+ */
+function stopStream() {
+  if (AppState.ui.abortController) {
+    AppState.ui.abortController.abort();
+    AppState.ui.abortController = null;
+  }
+  AppState.ui.isStreaming = false;
+  removeTypingIndicator();
+  updateInputState();
+}
+
+/** 更新输入区域状态 */
+function updateInputState() {
+  const btnSend = document.getElementById('btnSend');
+  const hint = document.getElementById('inputHint');
+
+  if (AppState.ui.isStreaming) {
+    btnSend.textContent = '停止';
+    btnSend.onclick = stopStream;
+    hint.textContent = '正在生成回复...';
+  } else {
+    btnSend.textContent = '发送';
+    btnSend.onclick = sendMessage;
+    hint.textContent = '';
+  }
+}
+
+/* ============================================================
+   模块 10: 消息发送入口
+   ============================================================ */
+
+function sendMessage() {
+  if (AppState.ui.isStreaming) {
+    stopStream();
+    return;
+  }
+
+  const input = document.getElementById('msgInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const chatId = AppState.ui.activeChatId;
+  const chatType = AppState.ui.activeChatType;
+  if (!chatId) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+
+  // 添加用户消息
+  const userMsg = {
+    id: uuid(),
+    role: 'user',
+    content: text,
+    timestamp: Date.now()
+  };
+  addMessage(chatId, chatType, userMsg);
+
+  if (chatType === 'group') {
+    // 群聊模式：所有角色按顺序逐一自动回复
+    sendGroupReplies(chatId, text);
+  } else {
+    // 单聊模式
+    const messages = buildSingleChatMessages(chatId, text);
+    executeStreamChat(messages, chatId, chatType, chatId);
+  }
+
+  renderAllMessages(chatId, chatType);
+  scrollToBottom();
+}
+
+/**
+ * 群聊顺序自动回复
+ */
+async function sendGroupReplies(groupId, userMessage) {
+  const group = getGroup(groupId);
+  if (!group || !group.memberIds.length) {
+    showToast('群聊没有成员', 'error');
+    return;
+  }
+
+  // 过滤出有效的角色成员
+  const members = group.memberIds.map(id => getCharacter(id)).filter(Boolean);
+  if (!members.length) {
+    showToast('群聊成员无效', 'error');
+    return;
+  }
+
+  // 逐个角色回复
+  for (const member of members) {
+    if (!AppState.ui.activeChatId) break; // 用户切换了聊天
+
+    const messages = buildGroupChatMessages(groupId, member.id, userMessage);
+
+    // 使用 Promise 包装流式调用以等待完成
+    await new Promise(resolve => {
+      const config = {
+        backend: AppState.settings.backend,
+        endpoint: AppState.settings.endpoint || AppState.settings.defaults[AppState.settings.backend] || '',
+        apiKey: AppState.settings.apiKey,
+        model: AppState.settings.model,
+        temperature: AppState.settings.temperature,
+        maxTokens: AppState.settings.maxTokens,
+        topP: AppState.settings.topP
+      };
+
+      const assistantMsg = {
+        id: uuid(),
+        role: 'assistant',
+        content: '',
+        timestamp: Date.now(),
+        characterId: member.id
+      };
+      addMessage(groupId, 'group', assistantMsg);
+
+      const typingEl = showTypingIndicator(member.name);
+      renderAllMessages(groupId, 'group');
+      scrollToBottom();
+
+      AppState.ui.abortController = sendStream(
+        messages, config,
+        (chunk) => {
+          assistantMsg.content += chunk;
+          updateMessageContent(assistantMsg.id, assistantMsg.content);
+          scrollToBottom();
+        },
+        (fullText) => {
+          removeTypingIndicator(typingEl);
+          assistantMsg.content = fullText;
+          updateMessageContent(assistantMsg.id, fullText);
+          AppState.ui.abortController = null;
+          saveState();
+          renderAllMessages(groupId, 'group');
+          scrollToBottom();
+          resolve();
+        },
+        (error) => {
+          removeTypingIndicator(typingEl);
+          assistantMsg.content = `*[${member.name} 回复失败: ${error.message}]*`;
+          updateMessageContent(assistantMsg.id, assistantMsg.content);
+          AppState.ui.abortController = null;
+          saveState();
+          renderAllMessages(groupId, 'group');
+          showToast(`${member.name}: ${error.message}`, 'error');
+          resolve();
+        }
+      );
+    });
+  }
+
+  AppState.ui.isStreaming = false;
+  updateInputState();
+}
+
+/**
+ * 手动指定某个角色发言（群聊）
+ */
+function triggerGroupMemberSpeak(groupId, charId) {
+  if (AppState.ui.isStreaming) {
+    showToast('请等待当前回复完成', 'info');
+    return;
+  }
+
+  const char = getCharacter(charId);
+  if (!char) return;
+
+  const input = document.getElementById('msgInput');
+  const text = input.value.trim() || `（${char.name} 被手动触发发言）`;
+
+  AppState.ui.isStreaming = true;
+  updateInputState();
+
+  const messages = buildGroupChatMessages(groupId, charId, text);
+
+  const assistantMsg = {
+    id: uuid(),
+    role: 'assistant',
+    content: '',
+    timestamp: Date.now(),
+    characterId: charId
+  };
+  addMessage(groupId, 'group', assistantMsg);
+
+  const typingEl = showTypingIndicator(char.name);
+  renderAllMessages(groupId, 'group');
+  scrollToBottom();
+
+  const config = {
+    backend: AppState.settings.backend,
+    endpoint: AppState.settings.endpoint || AppState.settings.defaults[AppState.settings.backend] || '',
+    apiKey: AppState.settings.apiKey,
+    model: AppState.settings.model,
+    temperature: AppState.settings.temperature,
+    maxTokens: AppState.settings.maxTokens,
+    topP: AppState.settings.topP
+  };
+
+  AppState.ui.abortController = sendStream(
+    messages, config,
+    (chunk) => {
+      assistantMsg.content += chunk;
+      updateMessageContent(assistantMsg.id, assistantMsg.content);
+      scrollToBottom();
+    },
+    (fullText) => {
+      removeTypingIndicator(typingEl);
+      assistantMsg.content = fullText;
+      updateMessageContent(assistantMsg.id, fullText);
+      AppState.ui.isStreaming = false;
+      AppState.ui.abortController = null;
+      saveState();
+      renderAllMessages(groupId, 'group');
+      scrollToBottom();
+      updateInputState();
+    },
+    (error) => {
+      removeTypingIndicator(typingEl);
+      assistantMsg.content = `*[${char.name} 回复失败: ${error.message}]*`;
+      updateMessageContent(assistantMsg.id, assistantMsg.content);
+      AppState.ui.isStreaming = false;
+      AppState.ui.abortController = null;
+      saveState();
+      renderAllMessages(groupId, 'group');
+      showToast(error.message, 'error');
+      updateInputState();
+    }
+  );
+}
+
+/* ============================================================
+   模块 11: 消息交互操作
+   ============================================================ */
+
+/** 重新生成最后一条 AI 回复 */
+async function regenerateLast() {
+  if (AppState.ui.isStreaming) return;
+  const chatId = AppState.ui.activeChatId;
+  const chatType = AppState.ui.activeChatType;
+  if (!chatId) return;
+
+  const messages = getChatMessages(chatId, chatType);
+  // 移除最后一条 assistant 消息
+  let lastIdx = -1;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].role === 'assistant') { lastIdx = i; break; }
+  }
+  if (lastIdx === -1) {
+    showToast('没有可重新生成的回复', 'info');
+    return;
+  }
+
+  const removedMsg = messages[lastIdx];
+  messages.splice(lastIdx, 1);
+  saveState();
+
+  // 找到触发该回复的用户消息
+  let triggerMsg = '';
+  for (let i = lastIdx - 1; i >= 0; i--) {
+    if (messages[i].role === 'user') { triggerMsg = messages[i].content; break; }
+  }
+
+  if (chatType === 'group' && removedMsg.characterId) {
+    const msgs = buildGroupChatMessages(chatId, removedMsg.characterId, triggerMsg);
+    await executeStreamChat(msgs, chatId, chatType, removedMsg.characterId);
+  } else {
+    const msgs = buildSingleChatMessages(chatId, triggerMsg);
+    await executeStreamChat(msgs, chatId, chatType, chatId);
+  }
+}
+
+/** 继续生成 */
+async function continueGeneration() {
+  if (AppState.ui.isStreaming) return;
+  const chatId = AppState.ui.activeChatId;
+  const chatType = AppState.ui.activeChatType;
+  if (!chatId) return;
+
+  const messages = getChatMessages(chatId, chatType);
+  if (!messages.length) return;
+
+  // 获取最后一条消息
+  const lastMsg = messages[messages.length - 1];
+  const charId = lastMsg.characterId || chatId;
+
+  const msgs = buildSingleChatMessages(chatId, '（请继续）');
+  await executeStreamChat(msgs, chatId, chatType, charId);
+}
+
+/** 编辑消息 */
+async function editMessage(msgId) {
+  const chatId = AppState.ui.activeChatId;
+  const chatType = AppState.ui.activeChatType;
+  if (!chatId) return;
+
+  const messages = getChatMessages(chatId, chatType);
+  const msg = messages.find(m => m.id === msgId);
+  if (!msg) return;
+
+  const newContent = prompt('编辑消息:', msg.content);
+  if (newContent === null || newContent === msg.content) return;
+
+  updateMessage(chatId, chatType, msgId, newContent);
+  renderAllMessages(chatId, chatType);
+}
+
+/** 删除消息 */
+async function deleteMessageAction(msgId) {
+  const chatId = AppState.ui.activeChatId;
+  const chatType = AppState.ui.activeChatType;
+  if (!chatId) return;
+
+  const confirmed = await confirmDialog('确认删除这条消息？');
+  if (!confirmed) return;
+
+  deleteMessage(chatId, chatType, msgId);
+  renderAllMessages(chatId, chatType);
+  showToast('消息已删除', 'success');
+}
+
+/** 重置上下文 */
+async function resetContext() {
+  const chatId = AppState.ui.activeChatId;
+  const chatType = AppState.ui.activeChatType;
+  if (!chatId) return;
+
+  const confirmed = await confirmDialog('确认清空当前会话？此操作不可撤销。');
+  if (!confirmed) return;
+
+  if (chatType === 'group') {
+    AppState.groupChats[chatId] = [];
+  } else {
+    AppState.chats[chatId] = [];
+  }
+  saveState();
+  renderAllMessages(chatId, chatType);
+  showToast('上下文已重置', 'success');
+}
+
+/* ============================================================
+   模块 12: UI 渲染
+   ============================================================ */
+
+/** 渲染侧边栏 */
+function renderSidebar() {
+  renderCharList();
+  renderGroupList();
+}
+
+/** 渲染角色列表 */
+function renderCharList() {
+  const container = document.getElementById('charList');
+  if (AppState.characters.length === 0) {
+    container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);">还没有角色<br>点击下方按钮创建</div>';
+    return;
+  }
+
+  container.innerHTML = AppState.characters.map(char => {
+    const isActive = AppState.ui.activeChatId === char.id && AppState.ui.activeChatType === 'character';
+    const avatarEl = getAvatar(char)
+      ? `<img class="char-avatar" src="${escapeHtml(char.avatar)}" alt="${escapeHtml(char.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">`
+      : '';
+    const fallbackEl = getAvatar(char)
+      ? `<span class="char-avatar" style="display:none;">${escapeHtml(char.name.charAt(0))}</span>`
+      : `<span class="char-avatar">${escapeHtml(char.name.charAt(0))}</span>`;
+
+    return `
+      <div class="char-item ${isActive ? 'active' : ''}" onclick="selectCharacter('${char.id}')">
+        ${avatarEl}${fallbackEl}
+        <div class="char-info">
+          <div class="char-name">${escapeHtml(char.name)}</div>
+          <div class="char-desc">${escapeHtml((char.description || '').slice(0, 30))}</div>
+        </div>
+        <div class="char-actions" onclick="event.stopPropagation()">
+          <button class="icon-btn" onclick="openEditCharModal('${char.id}')" title="编辑">✎</button>
+          <button class="icon-btn danger" onclick="deleteCharConfirm('${char.id}')" title="删除">✕</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/** 渲染群聊列表 */
+function renderGroupList() {
+  const container = document.getElementById('groupList');
+  if (AppState.groups.length === 0) {
+    container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);">还没有群聊</div>';
+    return;
+  }
+
+  container.innerHTML = AppState.groups.map(group => {
+    const isActive = AppState.ui.activeChatId === group.id && AppState.ui.activeChatType === 'group';
+    const memberCount = group.memberIds ? group.memberIds.length : 0;
+    const memberNames = (group.memberIds || [])
+      .map(id => getCharacter(id))
+      .filter(Boolean)
+      .map(c => c.name)
+      .join('、');
+
+    return `
+      <div class="group-item ${isActive ? 'active' : ''}" onclick="selectGroup('${group.id}')" style="flex-direction:column;align-items:flex-start;">
+        <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
+          <span style="font-weight:600;">👥 ${escapeHtml(group.name)}</span>
+          <span style="font-size:0.75rem;color:var(--text-muted);">${memberCount}人</span>
+        </div>
+        <div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">
+          ${escapeHtml(memberNames || '无成员')}
+        </div>
+        <div class="char-actions" onclick="event.stopPropagation()" style="margin-top:4px;">
+          <button class="icon-btn" onclick="openEditGroupModal('${group.id}')" title="编辑">✎</button>
+          <button class="icon-btn danger" onclick="deleteGroupConfirm('${group.id}')" title="删除">✕</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/** 选择角色进入聊天 */
+function selectCharacter(charId) {
+  AppState.ui.activeChatId = charId;
+  AppState.ui.activeChatType = 'character';
+  const char = getCharacter(charId);
+  if (!char) return;
+
+  document.getElementById('emptyState').classList.add('hidden');
+  document.getElementById('chatHeader').classList.remove('hidden');
+  document.getElementById('chatInputArea').classList.remove('hidden');
+
+  const avatarImg = document.getElementById('chatAvatar');
+  if (char.avatar && char.avatar.trim()) {
+    avatarImg.src = char.avatar;
+    avatarImg.style.display = '';
+  } else {
+    avatarImg.style.display = 'none';
+  }
+  document.getElementById('chatName').textContent = char.name;
+  document.getElementById('chatDetail').textContent = (char.description || '').slice(0, 50);
+
+  renderAllMessages(charId, 'character');
+  renderRightPanel();
+  renderSidebar();
+  scrollToBottom();
+  updateInputState();
+
+  // 如果没有消息记录且角色有开场白，自动显示开场白
+  const messages = getChatMessages(charId, 'character');
+  if (!messages.length && char.greeting) {
+    const greetingMsg = {
+      id: uuid(),
+      role: 'assistant',
+      content: char.greeting,
+      timestamp: Date.now()
+    };
+    addMessage(charId, 'character', greetingMsg);
+    renderAllMessages(charId, 'character');
+  }
+}
+
+/** 选择群聊 */
+function selectGroup(groupId) {
+  AppState.ui.activeChatId = groupId;
+  AppState.ui.activeChatType = 'group';
+  const group = getGroup(groupId);
+  if (!group) return;
+
+  document.getElementById('emptyState').classList.add('hidden');
+  document.getElementById('chatHeader').classList.remove('hidden');
+  document.getElementById('chatInputArea').classList.remove('hidden');
+
+  document.getElementById('chatAvatar').style.display = 'none';
+  document.getElementById('chatName').textContent = '👥 ' + group.name;
+  const memberNames = (group.memberIds || [])
+    .map(id => getCharacter(id))
+    .filter(Boolean)
+    .map(c => c.name)
+    .join('、');
+  document.getElementById('chatDetail').textContent = '成员: ' + (memberNames || '无');
+
+  renderAllMessages(groupId, 'group');
+  renderRightPanel();
+  renderSidebar();
+  scrollToBottom();
+  updateInputState();
+}
+
+/** 渲染所有消息 */
+function renderAllMessages(chatId, chatType) {
+  const container = document.getElementById('chatMessages');
+  const messages = getChatMessages(chatId, chatType);
+
+  if (!messages.length) {
+    container.innerHTML = '';
+    return;
+  }
+
+  // 找到当前活跃的聊天参与者（用于头像）
+  const getSpeakerInfo = (msg) => {
+    if (msg.role === 'user') return { name: '你', avatar: '', isUser: true };
+    if (msg.characterId) {
+      const char = getCharacter(msg.characterId);
+      return {
+        name: char ? char.name : '未知',
+        avatar: char ? (char.avatar || '') : '',
+        isUser: false
+      };
+    }
+    // 单聊的 assistant
+    if (chatType === 'character') {
+      const char = getCharacter(chatId);
+      return {
+        name: char ? char.name : 'AI',
+        avatar: char ? (char.avatar || '') : '',
+        isUser: false
+      };
+    }
+    return { name: 'AI', avatar: '', isUser: false };
+  };
+
+  container.innerHTML = messages.map(msg => {
+    const speaker = getSpeakerInfo(msg);
+    const avatarHtml = speaker.avatar
+      ? `<img class="msg-avatar" src="${escapeHtml(speaker.avatar)}" alt="${escapeHtml(speaker.name)}" onerror="this.outerHTML='<span class=\\'msg-avatar\\'>${escapeHtml(speaker.name.charAt(0))}</span>'">`
+      : `<span class="msg-avatar">${escapeHtml(speaker.name.charAt(0))}</span>`;
+
+    const timeStr = new Date(msg.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+    const renderedContent = renderMarkdown(msg.content);
+
+    return `
+      <div class="message ${msg.role}" id="msg-${msg.id}">
+        ${avatarHtml}
+        <div>
+          <div class="msg-content">${renderedContent}</div>
+          <div class="msg-actions">
+            <span class="msg-time">${timeStr}</span>
+            ${!speaker.isUser ? `<button onclick="regenerateLast()" title="重新生成">↻</button>` : ''}
+            <button onclick="editMessage('${msg.id}')" title="编辑">✎</button>
+            <button onclick="deleteMessageAction('${msg.id}')" title="删除">🗑</button>
+            ${chatType === 'group' ? `<button onclick="triggerGroupMemberSpeak('${chatId}','${msg.characterId||''}')" title="让该角色发言">💬</button>` : ''}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/** 更新单条消息内容（流式更新，不重建整个列表） */
+function updateMessageContent(msgId, content) {
+  const el = document.getElementById('msg-' + msgId);
+  if (!el) {
+    // 如果 DOM 元素还没渲染，重建整个列表
+    renderAllMessages(AppState.ui.activeChatId, AppState.ui.activeChatType);
+    return;
+  }
+  const contentEl = el.querySelector('.msg-content');
+  if (contentEl) {
+    contentEl.innerHTML = renderMarkdown(content);
+  }
+}
+
+/** 显示"正在输入..."指示器 */
+function showTypingIndicator(name) {
+  const container = document.getElementById('chatMessages');
+  const existing = container.querySelector('.typing-indicator');
+  if (existing) existing.remove();
+
+  const el = document.createElement('div');
+  el.className = 'typing-indicator';
+  el.innerHTML = `
+    <span style="font-size:0.8rem;color:var(--text-muted);margin-right:8px;">${name || '对方'}正在输入</span>
+    <span></span><span></span><span></span>`;
+  container.appendChild(el);
+  return el;
+}
+
+/** 移除正在输入指示器 */
+function removeTypingIndicator(el) {
+  if (el && el.parentNode) {
+    el.remove();
+  } else {
+    const all = document.querySelectorAll('.typing-indicator');
+    all.forEach(e => e.remove());
+  }
+}
+
+/** 滚动到底部 */
+function scrollToBottom() {
+  const container = document.getElementById('chatMessages');
+  setTimeout(() => {
+    container.scrollTop = container.scrollHeight;
+  }, 50);
+}
+
+/** 渲染右侧面板 */
+function renderRightPanel() {
+  renderLorebookPanel();
+  renderCharacterEditPanel();
+}
+
+/** 渲染世界书面板 */
+function renderLorebookPanel() {
+  const scopeId = getLoreScopeId();
+  const entries = getLorebookEntries(scopeId);
+  const container = document.getElementById('lorebookEntries');
+  const scopeLabel = scopeId === 'global' ? '全局' : (getCharacter(scopeId)?.name || getGroup(scopeId)?.name || '当前');
+
+  if (!entries.length) {
+    container.innerHTML = `<div style="text-align:center;color:var(--text-muted);padding:20px;">${scopeLabel} · 暂无世界书条目</div>`;
+    return;
+  }
+
+  container.innerHTML = entries.sort((a, b) => b.priority - a.priority).map(entry => {
+    const positionLabel = entry.position === 'before' ? '角色定义前' : '聊天记录前';
+    return `
+      <div class="lorebook-entry">
+        <div class="entry-header">
+          <span class="entry-keywords">${escapeHtml(entry.keywords)}</span>
+          <span class="entry-priority">优先级: ${entry.priority}</span>
+        </div>
+        <div class="entry-content">${escapeHtml(entry.content).replace(/\n/g, '<br>')}</div>
+        <div class="entry-meta">
+          <span>${positionLabel}</span>
+          <span>${new Date(entry.createdAt).toLocaleDateString('zh-CN')}</span>
+        </div>
+        <div class="entry-actions">
+          <button class="btn btn-secondary btn-sm" onclick="openEditLorebookEntryModal('${entry.id}')">编辑</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteLoreConfirm('${entry.id}')">删除</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/** 渲染角色编辑面板 */
+function renderCharacterEditPanel() {
+  if (AppState.ui.activeChatType !== 'character' || !AppState.ui.activeChatId) {
+    document.getElementById('characterTab').classList.add('hidden');
+    return;
+  }
+  const char = getCharacter(AppState.ui.activeChatId);
+  if (!char) {
+    document.getElementById('characterTab').classList.add('hidden');
+    return;
+  }
+  document.getElementById('characterTab').classList.remove('hidden');
+  document.getElementById('editCharName').value = char.name || '';
+  document.getElementById('editCharDesc').value = char.description || '';
+  document.getElementById('editCharPersonality').value = char.personality || '';
+  document.getElementById('editCharGreeting').value = char.greeting || '';
+  document.getElementById('editCharAvatarUrl').value = char.avatar || '';
+  updateEditAvatarPreview();
+}
+
+function updateEditAvatarPreview() {
+  const url = document.getElementById('editCharAvatarUrl').value.trim();
+  const img = document.getElementById('editCharAvatar');
+  if (url) {
+    img.src = url;
+    img.style.display = '';
+  } else {
+    img.style.display = 'none';
+  }
+}
+
+function saveCharacterEdit() {
+  const charId = AppState.ui.activeChatId;
+  if (!charId || AppState.ui.activeChatType !== 'character') return;
+
+  updateCharacter(charId, {
+    name: document.getElementById('editCharName').value.trim(),
+    description: document.getElementById('editCharDesc').value.trim(),
+    personality: document.getElementById('editCharPersonality').value.trim(),
+    greeting: document.getElementById('editCharGreeting').value.trim(),
+    avatar: document.getElementById('editCharAvatarUrl').value.trim()
+  });
+  showToast('角色已更新', 'success');
+  renderSidebar();
+  // 更新聊天头部
+  const char = getCharacter(charId);
+  document.getElementById('chatName').textContent = char.name;
+  document.getElementById('chatDetail').textContent = (char.description || '').slice(0, 50);
+  const avatarImg = document.getElementById('chatAvatar');
+  if (char.avatar) {
+    avatarImg.src = char.avatar;
+    avatarImg.style.display = '';
+  } else {
+    avatarImg.style.display = 'none';
+  }
+}
+
+/** 头像上传处理 */
+function handleAvatarUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('editCharAvatarUrl').value = e.target.result;
+    updateEditAvatarPreview();
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+/* ============================================================
+   模块 13: 模态框
+   ============================================================ */
+
+function openModal(title, bodyHtml, footerHtml) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'activeModal';
+  overlay.innerHTML = `
+    <div class="modal">
+      <div class="modal-header">
+        <h3>${title}</h3>
+        <button class="icon-btn" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">${bodyHtml}</div>
+      ${footerHtml ? `<div class="modal-footer">${footerHtml}</div>` : ''}
+    </div>`;
+  // 点击遮罩关闭
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) closeModal();
+  });
+  document.body.appendChild(overlay);
+}
+
+function closeModal() {
+  const modal = document.getElementById('activeModal');
+  if (modal) modal.remove();
+}
+
+/** 创建/编辑角色模态框 */
+function openCreateCharModal(charId) {
+  const isEdit = !!charId;
+  const char = isEdit ? getCharacter(charId) : null;
+
+  const bodyHtml = `
+    <div class="form-group">
+      <label>名称 *</label>
+      <input type="text" id="modalCharName" value="${isEdit ? escapeHtml(char.name) : ''}" placeholder="角色名称">
+    </div>
+    <div class="form-group">
+      <label>头像URL</label>
+      <input type="text" id="modalCharAvatar" value="${isEdit ? escapeHtml(char.avatar || '') : ''}" placeholder="头像图片URL 或下方上传">
+    </div>
+    <div class="form-group">
+      <label>上传头像</label>
+      <input type="file" accept="image/*" id="modalAvatarFile" onchange="handleModalAvatarUpload(event)">
+      <div id="modalAvatarPreview" style="margin-top:6px;"></div>
+    </div>
+    <div class="form-group">
+      <label>描述</label>
+      <textarea id="modalCharDesc" rows="3" placeholder="角色外观、背景等">${isEdit ? escapeHtml(char.description || '') : ''}</textarea>
+    </div>
+    <div class="form-group">
+      <label>个性</label>
+      <textarea id="modalCharPersonality" rows="3" placeholder="角色性格、说话风格等">${isEdit ? escapeHtml(char.personality || '') : ''}</textarea>
+    </div>
+    <div class="form-group">
+      <label>开场白 <span style="font-weight:400;color:var(--text-muted);">（首次对话自动发送）</span></label>
+      <textarea id="modalCharGreeting" rows="3" placeholder="角色首次对话时的开场白">${isEdit ? escapeHtml(char.greeting || '') : ''}</textarea>
+    </div>`;
+
+  const footerHtml = `
+    ${isEdit ? '<button class="btn btn-danger" onclick="deleteCharFromModal(\'' + charId + '\')">删除角色</button>' : ''}
+    <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary" onclick="saveCharFromModal('${isEdit ? charId : ''}')">${isEdit ? '保存' : '创建'}</button>`;
+
+  openModal(isEdit ? '编辑角色' : '创建新角色', bodyHtml, footerHtml);
+
+  // 如果有头像URL，预览
+  if (char && char.avatar) {
+    document.getElementById('modalAvatarPreview').innerHTML = `<img src="${escapeHtml(char.avatar)}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;">`;
+  }
+}
+
+function handleModalAvatarUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('modalCharAvatar').value = e.target.result;
+    document.getElementById('modalAvatarPreview').innerHTML = `<img src="${e.target.result}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveCharFromModal(charId) {
+  const name = document.getElementById('modalCharName').value.trim();
+  const avatar = document.getElementById('modalCharAvatar').value.trim();
+  const description = document.getElementById('modalCharDesc').value.trim();
+  const personality = document.getElementById('modalCharPersonality').value.trim();
+  const greeting = document.getElementById('modalCharGreeting').value.trim();
+
+  if (!name) { showToast('请输入角色名称', 'error'); return; }
+
+  const data = { name, avatar, description, personality, greeting };
+
+  if (charId) {
+    updateCharacter(charId, data);
+    showToast('角色已更新', 'success');
+  } else {
+    createCharacter(data);
+    showToast('角色已创建', 'success');
+  }
+  closeModal();
+  renderSidebar();
+  // 如果当前聊天是被编辑的角色，刷新聊天头部
+  if (AppState.ui.activeChatId === charId) selectCharacter(charId);
+}
+
+function openEditCharModal(charId) { openCreateCharModal(charId); }
+
+async function deleteCharFromModal(charId) {
+  const confirmed = await confirmDialog('确认删除该角色？相关聊天记录也将被清除。');
+  if (!confirmed) return;
+  closeModal();
+  deleteCharacter(charId);
+  if (AppState.ui.activeChatId === charId) {
+    AppState.ui.activeChatId = null;
+    AppState.ui.activeChatType = null;
+    document.getElementById('emptyState').classList.remove('hidden');
+    document.getElementById('chatHeader').classList.add('hidden');
+    document.getElementById('chatInputArea').classList.add('hidden');
+  }
+  renderSidebar();
+  showToast('角色已删除', 'success');
+}
+
+async function deleteCharConfirm(charId) {
+  const confirmed = await confirmDialog('确认删除该角色？相关聊天记录也将被清除。');
+  if (!confirmed) return;
+  deleteCharacter(charId);
+  if (AppState.ui.activeChatId === charId) {
+    AppState.ui.activeChatId = null;
+    AppState.ui.activeChatType = null;
+    document.getElementById('emptyState').classList.remove('hidden');
+    document.getElementById('chatHeader').classList.add('hidden');
+    document.getElementById('chatInputArea').classList.add('hidden');
+  }
+  renderSidebar();
+  showToast('角色已删除', 'success');
+}
+
+/** 创建/编辑群聊模态框 */
+function openCreateGroupModal(groupId) {
+  const isEdit = !!groupId;
+  const group = isEdit ? getGroup(groupId) : null;
+
+  const memberCheckboxes = AppState.characters.map(c => {
+    const checked = isEdit && group.memberIds ? group.memberIds.includes(c.id) : false;
+    return `<label>
+      <input type="checkbox" value="${c.id}" ${checked ? 'checked' : ''}>
+      <span>${escapeHtml(c.name)}</span>
+      <span style="font-size:0.8rem;color:var(--text-muted);">${escapeHtml((c.description||'').slice(0,20))}</span>
+    </label>`;
+  }).join('');
+
+  const bodyHtml = `
+    <div class="form-group">
+      <label>群聊名称</label>
+      <input type="text" id="modalGroupName" value="${isEdit ? escapeHtml(group.name) : ''}" placeholder="群聊房间名称">
+    </div>
+    <div class="form-group">
+      <label>选择成员</label>
+      ${AppState.characters.length ? `<div class="checkbox-list">${memberCheckboxes}</div>` : '<div style="color:var(--text-muted);padding:10px;">暂无角色，请先创建角色</div>'}
+    </div>`;
+
+  const footerHtml = `
+    ${isEdit ? '<button class="btn btn-danger" onclick="deleteGroupFromModal(\'' + groupId + '\')">删除群聊</button>' : ''}
+    <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary" onclick="saveGroupFromModal('${isEdit ? groupId : ''}')">${isEdit ? '保存' : '创建'}</button>`;
+
+  openModal(isEdit ? '编辑群聊' : '创建群聊房间', bodyHtml, footerHtml);
+}
+
+function openEditGroupModal(groupId) { openCreateGroupModal(groupId); }
+
+function saveGroupFromModal(groupId) {
+  const name = document.getElementById('modalGroupName').value.trim();
+  if (!name) { showToast('请输入群聊名称', 'error'); return; }
+
+  const checkboxes = document.querySelectorAll('#activeModal input[type="checkbox"]:checked');
+  const memberIds = Array.from(checkboxes).map(cb => cb.value);
+
+  if (!memberIds.length) { showToast('请至少选择一个角色', 'error'); return; }
+
+  if (groupId) {
+    updateGroup(groupId, { name, memberIds });
+    showToast('群聊已更新', 'success');
+  } else {
+    createGroup({ name, memberIds });
+    showToast('群聊已创建', 'success');
+  }
+  closeModal();
+  renderSidebar();
+  if (AppState.ui.activeChatId === groupId) selectGroup(groupId);
+}
+
+async function deleteGroupFromModal(groupId) {
+  const confirmed = await confirmDialog('确认删除该群聊？');
+  if (!confirmed) return;
+  closeModal();
+  deleteGroup(groupId);
+  if (AppState.ui.activeChatId === groupId) {
+    AppState.ui.activeChatId = null;
+    AppState.ui.activeChatType = null;
+    document.getElementById('emptyState').classList.remove('hidden');
+    document.getElementById('chatHeader').classList.add('hidden');
+    document.getElementById('chatInputArea').classList.add('hidden');
+  }
+  renderSidebar();
+  showToast('群聊已删除', 'success');
+}
+
+async function deleteGroupConfirm(groupId) {
+  const confirmed = await confirmDialog('确认删除该群聊？');
+  if (!confirmed) return;
+  deleteGroup(groupId);
+  if (AppState.ui.activeChatId === groupId) {
+    AppState.ui.activeChatId = null;
+    AppState.ui.activeChatType = null;
+    document.getElementById('emptyState').classList.remove('hidden');
+    document.getElementById('chatHeader').classList.add('hidden');
+    document.getElementById('chatInputArea').classList.add('hidden');
+  }
+  renderSidebar();
+  showToast('群聊已删除', 'success');
+}
+
+/** 设置模态框 */
+function openSettingsModal() {
+  const s = AppState.settings;
+  const bodyHtml = `
+    <div class="settings-section">
+      <h4>API 后端</h4>
+      <div class="form-group">
+        <label>后端类型</label>
+        <select id="modalBackend" onchange="onBackendChange()">
+          <option value="openai" ${s.backend === 'openai' ? 'selected' : ''}>OpenAI 兼容</option>
+          <option value="kobold" ${s.backend === 'kobold' ? 'selected' : ''}>KoboldCPP</option>
+          <option value="ollama" ${s.backend === 'ollama' ? 'selected' : ''}>Ollama</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>API 端点 URL</label>
+        <input type="text" id="modalEndpoint" value="${escapeHtml(s.endpoint || '')}" placeholder="${escapeHtml(s.defaults[s.backend] || '')}">
+      </div>
+      <div class="form-group" id="apiKeyGroup" ${s.backend === 'kobold' || s.backend === 'ollama' ? 'style="display:none;"' : ''}>
+        <label>API 密钥</label>
+        <input type="password" id="modalApiKey" value="${escapeHtml(s.apiKey || '')}" placeholder="sk-...">
+      </div>
+      <div class="form-group">
+        <label>模型名称</label>
+        <input type="text" id="modalModel" value="${escapeHtml(s.model || '')}" placeholder="${s.backend === 'ollama' ? 'llama3' : 'gpt-3.5-turbo'}">
+      </div>
+    </div>
+    <div class="settings-section">
+      <h4>生成参数</h4>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Temperature <span class="range-value" id="tempVal">${s.temperature}</span></label>
+          <input type="range" id="modalTemperature" min="0" max="2" step="0.05" value="${s.temperature}" oninput="document.getElementById('tempVal').textContent=this.value">
+        </div>
+        <div class="form-group">
+          <label>Top P <span class="range-value" id="topPVal">${s.topP}</span></label>
+          <input type="range" id="modalTopP" min="0" max="1" step="0.05" value="${s.topP}" oninput="document.getElementById('topPVal').textContent=this.value">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Max Tokens</label>
+        <input type="number" id="modalMaxTokens" value="${s.maxTokens}" min="1" max="4096" style="width:100%;">
+      </div>
+    </div>
+    <div style="background:rgba(201,169,110,0.1);border:1px solid var(--accent-dim);border-radius:8px;padding:12px;font-size:0.85rem;color:var(--text-secondary);margin-top:12px;">
+      <strong>💡 CORS 提示：</strong><br>
+      本地模型(Ollama)请设置 <code>OLLAMA_ORIGINS="*"</code><br>
+      KoboldCPP 请添加 <code>--host</code> 启动参数<br>
+      OpenAI API 可能需要 CORS 代理或浏览器扩展
+    </div>`;
+
+  const footerHtml = `
+    <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary" onclick="saveSettings()">保存设置</button>`;
+
+  openModal('设置', bodyHtml, footerHtml);
+}
+
+function onBackendChange() {
+  const backend = document.getElementById('modalBackend').value;
+  const apiKeyGroup = document.getElementById('apiKeyGroup');
+  const endpointInput = document.getElementById('modalEndpoint');
+  const modelInput = document.getElementById('modalModel');
+
+  // 显示/隐藏 API Key 字段（Kobold 和 Ollama 通常不需要）
+  if (backend === 'kobold' || backend === 'ollama') {
+    apiKeyGroup.style.display = 'none';
+  } else {
+    apiKeyGroup.style.display = '';
+  }
+
+  // 自动填充默认端点
+  const defaults = AppState.settings.defaults || {
+    openai: 'https://api.openai.com/v1/chat/completions',
+    kobold: 'http://localhost:5001/api/v1/generate',
+    ollama: 'http://localhost:11434/api/chat'
+  };
+  if (!endpointInput.value || endpointInput.value === defaults[AppState.settings.backend]) {
+    endpointInput.placeholder = defaults[backend] || '';
+  }
+
+  // 自动填充默认模型
+  if (!modelInput.value || modelInput.value === 'gpt-3.5-turbo' || modelInput.value === 'llama3') {
+    modelInput.placeholder = backend === 'ollama' ? 'llama3' : (backend === 'kobold' ? 'kobold' : 'gpt-3.5-turbo');
+  }
+}
+
+function saveSettings() {
+  AppState.settings.backend = document.getElementById('modalBackend').value;
+  AppState.settings.endpoint = document.getElementById('modalEndpoint').value.trim();
+  AppState.settings.apiKey = document.getElementById('modalApiKey').value.trim();
+  AppState.settings.model = document.getElementById('modalModel').value.trim();
+  AppState.settings.temperature = parseFloat(document.getElementById('modalTemperature').value);
+  AppState.settings.maxTokens = parseInt(document.getElementById('modalMaxTokens').value) || 512;
+  AppState.settings.topP = parseFloat(document.getElementById('modalTopP').value);
+  saveState();
+  closeModal();
+  showToast('设置已保存', 'success');
+}
+
+/** 世界书条目模态框 */
+function openLorebookEntryModal(entryId) {
+  const scopeId = getLoreScopeId();
+  const scopeLabel = scopeId === 'global' ? '全局' : (getCharacter(scopeId)?.name || getGroup(scopeId)?.name || '当前');
+  const isEdit = !!entryId;
+  let entry = null;
+  if (isEdit) {
+    const entries = getLorebookEntries(scopeId);
+    entry = entries.find(e => e.id === entryId);
+  }
+
+  const bodyHtml = `
+    <p style="color:var(--text-muted);margin-bottom:12px;">范围: ${scopeLabel}</p>
+    <div class="form-group">
+      <label>关键词 <span style="font-weight:400;color:var(--text-muted);">（逗号分隔，匹配用户消息）</span></label>
+      <input type="text" id="modalLoreKeywords" value="${isEdit && entry ? escapeHtml(entry.keywords) : ''}" placeholder="关键词1, 关键词2">
+    </div>
+    <div class="form-group">
+      <label>内容</label>
+      <textarea id="modalLoreContent" rows="5" placeholder="世界书条目内容...">${isEdit && entry ? escapeHtml(entry.content) : ''}</textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>触发位置</label>
+        <select id="modalLorePosition">
+          <option value="before" ${isEdit && entry && entry.position === 'before' ? 'selected' : ''}>角色定义前 (before)</option>
+          <option value="after" ${isEdit && entry && entry.position === 'after' ? 'selected' : ''}>聊天记录前 (after)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>优先级</label>
+        <input type="number" id="modalLorePriority" value="${isEdit && entry ? entry.priority : 0}" min="0" max="100">
+      </div>
+    </div>`;
+
+  const footerHtml = `
+    ${isEdit ? '<button class="btn btn-danger" onclick="deleteLoreFromModal(\'' + entryId + '\')">删除</button>' : ''}
+    <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary" onclick="saveLoreFromModal('${isEdit ? entryId : ''}')">${isEdit ? '保存' : '添加'}</button>`;
+
+  openModal(isEdit ? '编辑世界书条目' : '添加世界书条目', bodyHtml, footerHtml);
+}
+
+function openEditLorebookEntryModal(entryId) { openLorebookEntryModal(entryId); }
+
+function saveLoreFromModal(entryId) {
+  const scopeId = getLoreScopeId();
+  const data = {
+    keywords: document.getElementById('modalLoreKeywords').value.trim(),
+    content: document.getElementById('modalLoreContent').value.trim(),
+    position: document.getElementById('modalLorePosition').value,
+    priority: parseInt(document.getElementById('modalLorePriority').value) || 0
+  };
+
+  if (!data.keywords || !data.content) {
+    showToast('请填写关键词和内容', 'error');
+    return;
+  }
+
+  if (entryId) {
+    updateLorebookEntry(scopeId, entryId, data);
+    showToast('条目已更新', 'success');
+  } else {
+    addLorebookEntry(scopeId, data);
+    showToast('条目已添加', 'success');
+  }
+  closeModal();
+  renderLorebookPanel();
+}
+
+async function deleteLoreFromModal(entryId) {
+  const confirmed = await confirmDialog('确认删除该世界书条目？');
+  if (!confirmed) return;
+  closeModal();
+  deleteLorebookEntry(getLoreScopeId(), entryId);
+  renderLorebookPanel();
+  showToast('条目已删除', 'success');
+}
+
+async function deleteLoreConfirm(entryId) {
+  const confirmed = await confirmDialog('确认删除该世界书条目？');
+  if (!confirmed) return;
+  deleteLorebookEntry(getLoreScopeId(), entryId);
+  renderLorebookPanel();
+  showToast('条目已删除', 'success');
+}
+
+/* ============================================================
+   模块 14: 右侧面板 & 侧边栏切换
+   ============================================================ */
+
+function toggleRightPanel() {
+  const app = document.getElementById('appContainer');
+  const icon = document.querySelector('.toggle-right');
+  app.classList.toggle('right-collapsed');
+  if (icon) icon.textContent = app.classList.contains('right-collapsed') ? '☰' : '☰';
+}
+
+function switchRightTab(tab) {
+  AppState.ui.rightTab = tab;
+  document.querySelectorAll('.right-panel-tabs button').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+  document.getElementById('lorebookTab').classList.toggle('hidden', tab !== 'lorebook');
+  document.getElementById('characterTab').classList.toggle('hidden', tab !== 'character');
+  document.getElementById('rightPanelTitle').textContent = tab === 'lorebook' ? '世界书' : '角色编辑';
+
+  if (tab === 'lorebook') renderLorebookPanel();
+  if (tab === 'character') renderCharacterEditPanel();
+}
+
+function switchSidebarTab(tab) {
+  AppState.ui.sidebarTab = tab;
+  document.querySelectorAll('.sidebar-nav button').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+  document.getElementById('charList').classList.toggle('hidden', tab !== 'characters');
+  document.getElementById('groupList').classList.toggle('hidden', tab !== 'groups');
+}
+
+/** 移动端操作 */
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('mobile-open');
+  document.getElementById('mobileBackdrop').classList.remove('hidden');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('mobileBackdrop').classList.add('hidden');
+}
+
+function closeAllMobile() {
+  closeSidebar();
+  document.getElementById('rightPanel').classList.remove('mobile-open');
+  document.getElementById('mobileBackdrop').classList.add('hidden');
+}
+
+/* ============================================================
+   模块 15: 事件绑定
+   ============================================================ */
+
+function handleInputKeydown(event) {
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault();
+    if (AppState.ui.isStreaming) {
+      stopStream();
+    } else {
+      sendMessage();
+    }
+  }
+  // 自动调整高度
+  setTimeout(() => {
+    const ta = event.target;
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 150) + 'px';
+  }, 0);
+}
+
+// 全局键盘快捷键
+document.addEventListener('keydown', function(e) {
+  // Ctrl+S 保存角色编辑
+  if (e.ctrlKey && e.key === 's') {
+    // 如果在角色编辑标签且有活跃角色，保存
+    if (AppState.ui.rightTab === 'character' && AppState.ui.activeChatType === 'character' && AppState.ui.activeChatId) {
+      e.preventDefault();
+      saveCharacterEdit();
+    }
+  }
+  // Escape 关闭模态框
+  if (e.key === 'Escape') {
+    if (document.getElementById('activeModal')) {
+      closeModal();
+    }
+  }
+});
+
+/* ============================================================
+   模块 16: 初始化
+   ============================================================ */
+
+function init() {
+  console.log('🍺 酒馆 · AI 角色扮演 初始化中...');
+  loadState();
+
+  // 恢复上次设置
+  if (AppState.settings.backend && AppState.settings.defaults) {
+    if (!AppState.settings.endpoint) {
+      AppState.settings.endpoint = AppState.settings.defaults[AppState.settings.backend] || '';
+    }
+  }
+
+  renderSidebar();
+  updateInputState();
+
+  // 默认打开右侧面板（桌面端）
+  if (window.innerWidth >= 769) {
+    document.getElementById('appContainer').classList.remove('right-collapsed');
+    document.querySelector('.toggle-right').textContent = '☰';
+  }
+
+  console.log('✅ 初始化完成');
+  console.log(`   角色数: ${AppState.characters.length}`);
+  console.log(`   群聊数: ${AppState.groups.length}`);
+  console.log(`   后端: ${AppState.settings.backend}`);
+  console.log('   CORS 提醒: 本地模型请配置跨域，详见设置面板');
+}
+
+// 启动应用
+init();
+</script>
+</body>
+</html>
