@@ -117,10 +117,63 @@ test('JSON and PNG tEXt character cards preserve Unicode; invalid cards fail cle
   await assert.rejects(core.importCard({name:'bad.json',size:2,text:async()=>'{}'}),/名称和描述/);
 });
 const turnFunctions=['runTavernTurn','setTavernSendingUI','stopTavernStream','regenerateLastTavern','parseUpstore','extractVariables','mergeVariables'];
+
+function installWorldBridge(state){
+  state.WorldCore=require('../assets/js/world-core.js');state.DoupoWorldData=require('../assets/js/world-data.js');
+  state.Economy={gold:40};state.GameTime={era:'斗气历',year:1,month:1,day:1,hour:8,minute:0,totalHours:0};state.WorldState={location:'乌坦城'};
+  state.QuestSystem={quests:[],completed:[],failed:[]};state.StudioState={};
+  Object.assign(state.GameState.player,{realm:'斗之气·三段',inventory:[{name:'干粮',qty:4},{name:'水囊',qty:4}]});
+  state.getTimeString=()=>state.GameTime.hour+':'+state.GameTime.minute;state.renderTimeDisplay=()=>{};
+  vm.runInContext(fs.readFileSync(path.join(__dirname,'../assets/js/world-bridge.js'),'utf8'),state);
+  state.WorldMapBridge.ensure();state.GameState.player.exploration.pose={sceneId:'wutan',x:48,y:50,direction:0};return state.WorldMapBridge;
+}
+
+test('actual map commit persists one runtime envelope and rewind restores location, time and goods',async()=>{
+ const {state,storage}=context(['saveToLocalStorage','takeSnapshot','rewindToSnapshot','stopTavernStream']);
+ const bridge=installWorldBridge(state);const before=core.clone(state.GameState.player.exploration);
+ assert.ok(bridge.execute({type:'travel',targetId:'qingshan'}));assert.equal(state.GameState.player.exploration.locationId,'qingshan');assert.equal(state.GameTime.hour,14);
+ const saved=JSON.parse(storage.get('doupo_runtime'));assert.equal(saved.player.exploration.locationId,'qingshan');assert.equal(saved.gameTime.hour,14);assert.equal(saved.worldState.specificSpot,'青山镇');
+ const snap=state.TimeRewind.snapshots[0];assert.ok(snap);await state.rewindToSnapshot(snap.id);assert.equal(state.GameState.player.exploration.locationId,'wutan');assert.equal(state.GameTime.hour,8);assert.equal(state.GameState.player.exploration.vigor,before.vigor);
+});
+
+test('actual map quota failure rolls back player, economy, time and added snapshot',()=>{
+ const {state}=context(['saveToLocalStorage','takeSnapshot']);const bridge=installWorldBridge(state);const before=JSON.stringify({player:state.GameState.player,economy:state.Economy,time:state.GameTime,world:state.WorldState,settings:state.GameState.settings});state.localStorage.setItem=()=>{throw Error('quota');};
+ assert.equal(bridge.execute({type:'buy',npcId:'su-merchant',itemId:'food',qty:1}),null);
+ assert.equal(JSON.stringify({player:state.GameState.player,economy:state.Economy,time:state.GameTime,world:state.WorldState,settings:state.GameState.settings}),before);assert.equal(state.TimeRewind.snapshots.length,0);
+});
+
+test('actual assembler injects map facts once and respects pure-text mode',()=>{
+ const {state}=context(['assembleTavernPrompt','createPreset']);installWorldBridge(state);const opts={preset:state.createPreset(),userInput:'查看附近'};
+ let text=state.assembleTavernPrompt(opts).messages.map(m=>m.content).join('\n');assert.equal((text.match(/【地图已确认事实】/g)||[]).length,1);assert.match(text,/苏掌柜/);assert.match(text,/world_action/);
+ state.tavernState.tavernSettings.pureTextMode=true;text=state.assembleTavernPrompt(opts).messages.map(m=>m.content).join('\n');assert.ok(!text.includes('地图行动可选协议'));
+});
+
+test('LLM response offers a validated map action without executing or displaying the control tag',async()=>{
+ const {state}=context(turnFunctions,{callLLMStream:async()=>'<maintext>可以先到青山镇看看。</maintext><world_action>{"type":"travel","targetId":"qingshan","mode":"walk"}</world_action>'});const bridge=installWorldBridge(state);
+ await state.runTavernTurn('问路',false);assert.equal(state.GameState.player.exploration.locationId,'wutan');assert.equal(state.GameTime.hour,8);assert.equal(bridge.getProposal().targetId,'qingshan');assert.ok(!state.getActiveChat().messages.at(-1).content.includes('world_action'));
+});
+
+test('regenerating narrative after map travel preserves map-owned inventory and position',async()=>{
+ const {state}=context(turnFunctions,{callLLMStream:async()=>'<maintext>新的叙述。</maintext>'});const bridge=installWorldBridge(state);
+ await state.runTavernTurn('问路',false);assert.ok(bridge.execute({type:'travel',targetId:'qingshan'}));const before=core.clone(state.GameState.player);
+ await state.runTavernTurn('',true);assert.equal(state.GameState.player.exploration.locationId,'qingshan');assert.deepEqual(state.GameState.player.inventory,before.inventory);assert.equal(state.GameTime.hour,14);
+});
+
+test('a walking character cannot start an overlapping LLM turn',async()=>{
+ let calls=0;const {state,notices}=context(turnFunctions,{callLLMStream:async()=>{calls++;return 'reply';}});const bridge=installWorldBridge(state);const token=bridge.beginMovement();await state.runTavernTurn('交谈',false);assert.equal(calls,0);assert.equal(state.getActiveChat().messages.length,0);assert.ok(notices.some(n=>n.msg.includes('停步')));bridge.finishMovement(token,null);
+});
 test('successful replay replaces one assistant and applies state updates exactly once',async()=>{
   const {state}=context(turnFunctions,{callLLMStream:async()=> '正文<upstore>addSmallSum:gold:3 toggle:active</upstore>'});
   await state.runTavernTurn('前往坊市',false);assert.equal(state.getActiveChat().variables.gold,13);assert.equal(state.getActiveChat().variables.active,true);
   await state.regenerateLastTavern();assert.equal(state.getActiveChat().messages.length,2);assert.equal(state.getActiveChat().variables.gold,13);assert.equal(state.getActiveChat().variables.active,true);
+});
+test('a new-life request uses its session narrator and selected location without overwriting imported cards',async()=>{
+ let assembled;
+ const {state}=context(turnFunctions,{WorldState:{location:'魔兽山脉外围',specificSpot:'青山镇药铺外'},assembleTavernPrompt(opts){assembled=opts;return {messages:[],estimatedTokens:0,removedMessages:0};},callLLMStream:async()=> '新的故事'});
+ state.tavernState.characterCard={name:'用户导入角色',description:'保留'};
+ state.getActiveChat().characterCard={name:'斗气大陆',description:'独立叙事'};
+ await state.runTavernTurn('打听采药队',false);
+ assert.equal(assembled.characterCard.name,'斗气大陆');assert.equal(assembled.location,'魔兽山脉外围 · 青山镇药铺外');assert.equal(state.tavernState.characterCard.name,'用户导入角色');
 });
 test('stop never falls back and restores usable UI; pending input can be replayed',async()=>{
   let calls=0,start;const started=new Promise(r=>start=r);

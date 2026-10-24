@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-24",
+  "automatedTests": { "total": 47, "passed": 47, "failed": 0 },
+  "command": "node --test tests/creation.test.cjs tests/tavern-core.test.cjs",
+  "browser": {
+    "isolatedOrigin": "http://127.0.0.1:8090/",
+    "checks": [
+      "All six creation steps rendered",
+      "Alchemy identity and fire-with-wood-trace selection",
+      "Live statistics and budget",
+      "Refresh resumes draft at saved step and recomputes budget",
+      "Qingshan opening matches selected herbalist inventory",
+      "Shimo opening exposes three clickable actions",
+      "Personnel list starts with player only",
+      "390x844 viewport has no document or content horizontal overflow"
+    ],
+    "consoleErrorsObserved": 0,
+    "paidModelCalls": 0,
+    "viewportOverrideReset": true
+  },
+  "limitations": [
+    "Live external LLM generation was not exercised",
+    "The world map and legacy entry HTML pages were not redesigned in this round",
+    "Only the listed 16 worldbook corrections were applied; this is not a claim of exhaustive canon validation",
+    "Existing game-wide economy and residence systems retain legacy behavior beyond the corrected opening"
+  ]
+}

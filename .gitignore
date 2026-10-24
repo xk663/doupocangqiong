@@ -63,3 +63,10 @@ Untitled*.ipynb
 # VS Code / IDE
 .vscode/
 .idea/
+
+# Versioned map catalogue, art provenance and regression reports
+!assets/data/world.json
+!assets/vendor/PIXI-LICENSE.txt
+!docs/world-map-art.json
+!docs/world-map-verification.json
+!docs/creation-verification.json

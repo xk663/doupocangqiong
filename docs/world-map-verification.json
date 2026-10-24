@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-24",
+  "automated": {
+    "command": "node --test tests/*.test.cjs",
+    "passed": 80,
+    "failed": 0,
+    "livePaidModelCalls": 0
+  },
+  "tiled": {
+    "tool": "Tiled 1.12.2",
+    "actualExport": "wutan.tmj -> external verification JSON",
+    "validatedAnchorCounts": {
+      "world": 61,
+      "wutan": 8,
+      "qingshan": 7,
+      "shimo": 6
+    },
+    "note": "Local scenes include their root city anchor, so the count across maps exceeds 79 unique nodes."
+  },
+  "browser": {
+    "origin": "http://127.0.0.1:8090",
+    "productionOrigin8086Unchanged": true,
+    "checks": [
+      "Pixi map rendered without console errors",
+      "Clicked actual canvas oasis marker and opened route/cost detail",
+      "Bought food: real gold and inventory update",
+      "Accepted and completed merchant quest once: reward and trust update",
+      "Travelled Wutan -> Qingshan with time and vigor costs, auto local-scene switch",
+      "Main game existing Shimo start inferred correctly",
+      "NPC free talk opened main chat with draft, did not send request",
+      "Main game food purchase persisted gold=3, food=1, hour=8, minute=6 after reload",
+      "390x844 main-game layout: document scrollWidth=390, map width=330, action panel reachable",
+      "Lightweight renderer: HTML location buttons, travel, clue discovery and gathering rewards",
+      "Reloaded lightweight demo: discovered grotto retained, NPC markers rendered"
+    ],
+    "screenshots": [
+      "D:/doupo/world-shimo-desktop.png",
+      "D:/doupo/world-shimo-route.png",
+      "D:/doupo/world-shimo-mobile.png"
+    ],
+    "notVerified": [
+      "Real touch hardware/pinch gesture",
+      "Low-end physical device performance",
+      "Live paid LLM provider completion",
+      "All later-game content and real-world measured geography"
+    ]
+  },
+  "dynamicMovement": {
+    "date": "2026-10-24",
+    "checks": [
+      "Male main-game character displays Xiao Yan sprite",
+      "Female demo switch displays Xun Er and persists across reload",
+      "Clicking seek-NPC immediately starts walking with visible progress",
+      "Arrival opens nearby NPC interaction card",
+      "Mid-route stop saved partial coordinates, one game minute and only partial vigor cost",
+      "WASD walking and Escape stop verified in browser",
+      "No paid live model calls"
+    ],
+    "screenshots": [
+      "D:/doupo/world-xiaoyan-moving-live.png",
+      "D:/doupo/world-xuner-moving-live.png"
+    ],
+    "scope": "Three local road networks plus animated inter-region graph travel; hand-authored navigation, not pixel-perfect building collision"
+  }
+}

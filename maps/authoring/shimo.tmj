@@ -1,0 +1,211 @@
+{
+  "type": "map",
+  "version": "1.10",
+  "tiledversion": "1.12.2",
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "width": 48,
+  "height": 32,
+  "tilewidth": 32,
+  "tileheight": 32,
+  "infinite": false,
+  "nextlayerid": 3,
+  "nextobjectid": 7,
+  "layers": [
+    {
+      "id": 1,
+      "name": "无字地形底图",
+      "type": "imagelayer",
+      "image": "../../assets/images/world-shimo.png",
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": 2,
+      "name": "地点与交互锚点",
+      "type": "objectgroup",
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "objects": [
+        {
+          "id": 1,
+          "name": "石漠城",
+          "type": "city",
+          "x": 768,
+          "y": 921.6,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "shimo"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "shimo"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "城门补给场",
+          "type": "market",
+          "x": 660.48,
+          "y": 706.56,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "shimo-supply"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "shimo"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "佣兵驻地外",
+          "type": "guild",
+          "x": 476.16,
+          "y": 501.76,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "shimo-camp"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "shimo"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "沙漠向导营地",
+          "type": "guild",
+          "x": 998.4,
+          "y": 614.4,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "shimo-guide"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "shimo"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "近郊绿洲",
+          "type": "wild",
+          "x": 1198.08,
+          "y": 409.6,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "shimo-oasis"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "shimo"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "name": "风蚀瞭望台",
+          "type": "ruin",
+          "x": 998.4,
+          "y": 256,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "shimo-watch"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "shimo"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

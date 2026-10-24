@@ -1,0 +1,1806 @@
+{
+  "type": "map",
+  "version": "1.10",
+  "tiledversion": "1.12.2",
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "width": 48,
+  "height": 32,
+  "tilewidth": 32,
+  "tileheight": 32,
+  "infinite": false,
+  "nextlayerid": 3,
+  "nextobjectid": 62,
+  "layers": [
+    {
+      "id": 1,
+      "name": "无字地形底图",
+      "type": "imagelayer",
+      "image": "../../assets/images/world-atlas.png",
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": 2,
+      "name": "地点与交互锚点",
+      "type": "objectgroup",
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "objects": [
+        {
+          "id": 1,
+          "name": "乌坦城",
+          "type": "city",
+          "x": 368.64,
+          "y": 440.32,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "wutan"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "青山镇",
+          "type": "town",
+          "x": 261.12,
+          "y": 604.16,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "qingshan"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "魔兽山脉",
+          "type": "mountain-range",
+          "x": 184.32,
+          "y": 491.52,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "beast-mountains"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "黑岩城",
+          "type": "city",
+          "x": 476.16,
+          "y": 337.92,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackrock"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "漠城",
+          "type": "city",
+          "x": 368.64,
+          "y": 696.32,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "mo-city"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "name": "塔戈尔大沙漠",
+          "type": "desert",
+          "x": 276.48,
+          "y": 839.68,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "tager"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "name": "石漠城",
+          "type": "city",
+          "x": 460.8,
+          "y": 778.24,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "shimo"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "name": "青莲相关地底岩浆洞穴",
+          "type": "cave",
+          "x": 522.24,
+          "y": 860.16,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "lotus-cave"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "name": "蛇人族沙漠中心城市与神殿",
+          "type": "settlement",
+          "x": 153.6,
+          "y": 901.12,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "snake-center"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "name": "盐城",
+          "type": "city",
+          "x": 583.68,
+          "y": 645.12,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "salt-city"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 11,
+          "name": "加玛帝都",
+          "type": "city",
+          "x": 568.32,
+          "y": 245.76,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "capital"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 12,
+          "name": "云岚山",
+          "type": "mountain",
+          "x": 522.24,
+          "y": 143.36,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "yunlan"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 13,
+          "name": "镇鬼关",
+          "type": "fortress",
+          "x": 645.12,
+          "y": 399.36,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "ghost-pass"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 14,
+          "name": "黑山要塞",
+          "type": "fortress",
+          "x": 691.2,
+          "y": 276.48,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackhill-fort"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 15,
+          "name": "玄黄要塞",
+          "type": "fortress",
+          "x": 629.76,
+          "y": 122.88,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "xuanhuang-fort"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 16,
+          "name": "赤壁平原",
+          "type": "plain",
+          "x": 752.64,
+          "y": 122.88,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "redplain"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 17,
+          "name": "黑角域",
+          "type": "region",
+          "x": 706.56,
+          "y": 614.4,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackcorner"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 18,
+          "name": "黑印城",
+          "type": "city",
+          "x": 645.12,
+          "y": 665.6,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackseal"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 19,
+          "name": "和平镇",
+          "type": "town",
+          "x": 768,
+          "y": 583.68,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "peace"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 20,
+          "name": "迦南学院外院",
+          "type": "academy",
+          "x": 783.36,
+          "y": 532.48,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "outer"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 21,
+          "name": "迦南学院内院",
+          "type": "academy",
+          "x": 721.92,
+          "y": 481.28,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "inner"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 22,
+          "name": "天焚炼气塔",
+          "type": "structure",
+          "x": 768,
+          "y": 450.56,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "tower"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 23,
+          "name": "学院地下岩浆世界",
+          "type": "underground-region",
+          "x": 798.72,
+          "y": 481.28,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "magma"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 24,
+          "name": "天涯城",
+          "type": "city",
+          "x": 875.52,
+          "y": 399.36,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "tianya"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 25,
+          "name": "天擎山脉",
+          "type": "mountain-range",
+          "x": 829.44,
+          "y": 327.68,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "tianqing"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 26,
+          "name": "中州",
+          "type": "macro-region",
+          "x": 1105.92,
+          "y": 409.6,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "zhongzhou"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 27,
+          "name": "天北城",
+          "type": "city",
+          "x": 983.04,
+          "y": 225.28,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "tianbei"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 28,
+          "name": "万蛇峡",
+          "type": "gorge",
+          "x": 906.24,
+          "y": 256,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "wanshe"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 29,
+          "name": "栖凤山",
+          "type": "mountain",
+          "x": 1013.76,
+          "y": 143.36,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "qifeng"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 30,
+          "name": "天目山脉",
+          "type": "mountain-range",
+          "x": 1121.28,
+          "y": 163.84,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "tianmu"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 31,
+          "name": "天山血潭",
+          "type": "resource-site",
+          "x": 1182.72,
+          "y": 122.88,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "bloodpool"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 32,
+          "name": "雷山／风雷山脉大会区域",
+          "type": "mountain",
+          "x": 1228.8,
+          "y": 225.28,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "leishan"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 33,
+          "name": "天黄城",
+          "type": "city",
+          "x": 1105.92,
+          "y": 501.76,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "tianhuang"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 34,
+          "name": "焚炎谷",
+          "type": "sect-territory",
+          "x": 1213.44,
+          "y": 573.44,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "burning-valley"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 35,
+          "name": "叶城",
+          "type": "city",
+          "x": 1059.84,
+          "y": 604.16,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "ye-city"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 36,
+          "name": "圣丹城",
+          "type": "city",
+          "x": 1167.36,
+          "y": 460.8,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "holy-pill"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 37,
+          "name": "丹塔星域",
+          "type": "sealed-space",
+          "x": 1213.44,
+          "y": 419.84,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "starfield"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 38,
+          "name": "亡魂山脉",
+          "type": "mountain-range",
+          "x": 952.32,
+          "y": 92.16,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "dead-soul"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 39,
+          "name": "天星山脉",
+          "type": "mountain-range",
+          "x": 1044.48,
+          "y": 706.56,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "tianxing"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 40,
+          "name": "星陨阁总部／星界",
+          "type": "hidden-space",
+          "x": 998.4,
+          "y": 768,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "star-realm"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 41,
+          "name": "兽域",
+          "type": "region",
+          "x": 1351.68,
+          "y": 706.56,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "beast-region"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 42,
+          "name": "骸骨山脉",
+          "type": "mountain-range",
+          "x": 1259.52,
+          "y": 798.72,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "bone-mountains"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 43,
+          "name": "古龙岛",
+          "type": "island-space",
+          "x": 1428.48,
+          "y": 829.44,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "dragon-islands"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 44,
+          "name": "虚空雷池",
+          "type": "energy-region",
+          "x": 1474.56,
+          "y": 911.36,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "void-thunder"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 45,
+          "name": "古圣城",
+          "type": "city",
+          "x": 1397.76,
+          "y": 378.88,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "ancient-city"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 46,
+          "name": "古界",
+          "type": "independent-realm",
+          "x": 1459.2,
+          "y": 471.04,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "ancient-realm"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 47,
+          "name": "天墓",
+          "type": "special-realm",
+          "x": 1459.2,
+          "y": 563.2,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "heaven-tomb"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 48,
+          "name": "莽荒镇",
+          "type": "town",
+          "x": 1367.04,
+          "y": 92.16,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "wild-town"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 49,
+          "name": "莽荒古域",
+          "type": "wild-region",
+          "x": 1443.84,
+          "y": 51.2,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "wild-region"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 50,
+          "name": "冥蛇地脉",
+          "type": "underground-region",
+          "x": 1367.04,
+          "y": 901.12,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "snake-veins"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 51,
+          "name": "九幽黄泉",
+          "type": "lake",
+          "x": 1305.6,
+          "y": 952.32,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "yellow-spring"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 52,
+          "name": "妖火平原",
+          "type": "event-region",
+          "x": 1274.88,
+          "y": 81.92,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "demon-plain"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 53,
+          "name": "妖火空间",
+          "type": "sealed-realm",
+          "x": 1320.96,
+          "y": 30.72,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "demon-realm"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 54,
+          "name": "陨落山脉",
+          "type": "mountain-range",
+          "x": 936.96,
+          "y": 686.08,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "fallen-mountains"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 55,
+          "name": "神农山脉",
+          "type": "mountain-range",
+          "x": 1105.92,
+          "y": 901.12,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "shennong"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 56,
+          "name": "药界",
+          "type": "independent-realm",
+          "x": 1152,
+          "y": 983.04,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "medicine-realm"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 57,
+          "name": "葬天山脉",
+          "type": "mountain-range",
+          "x": 875.52,
+          "y": 102.4,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "buried-heaven"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 58,
+          "name": "魂界",
+          "type": "independent-realm",
+          "x": 906.24,
+          "y": 30.72,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "soul-realm"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 59,
+          "name": "陀舍古帝洞府",
+          "type": "ancient-realm",
+          "x": 829.44,
+          "y": 552.96,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "emperor-cave"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 60,
+          "name": "异火广场",
+          "type": "structure",
+          "x": 890.88,
+          "y": 563.2,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "fire-plaza"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 61,
+          "name": "双帝山",
+          "type": "mountain",
+          "x": 1167.36,
+          "y": 348.16,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "two-emperors"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "world"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

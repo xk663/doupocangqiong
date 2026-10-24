@@ -1,0 +1,240 @@
+{
+  "type": "map",
+  "version": "1.10",
+  "tiledversion": "1.12.2",
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "width": 48,
+  "height": 32,
+  "tilewidth": 32,
+  "tileheight": 32,
+  "infinite": false,
+  "nextlayerid": 3,
+  "nextobjectid": 8,
+  "layers": [
+    {
+      "id": 1,
+      "name": "无字地形底图",
+      "type": "imagelayer",
+      "image": "../../assets/images/world-qingshan.png",
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": 2,
+      "name": "地点与交互锚点",
+      "type": "objectgroup",
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "objects": [
+        {
+          "id": 1,
+          "name": "青山镇",
+          "type": "town",
+          "x": 768,
+          "y": 921.6,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "qingshan"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "qingshan"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "青山药铺",
+          "type": "shop",
+          "x": 614.4,
+          "y": 593.92,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "qingshan-herbs"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "qingshan"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "山脚客栈",
+          "type": "inn",
+          "x": 460.8,
+          "y": 747.52,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "qingshan-inn"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "qingshan"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "采药队营地",
+          "type": "guild",
+          "x": 844.8,
+          "y": 768,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "qingshan-camp"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "qingshan"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "入山小径",
+          "type": "wild",
+          "x": 844.8,
+          "y": 389.12,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "forest-trail"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "qingshan"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "name": "溪瀑山谷",
+          "type": "wild",
+          "x": 1182.72,
+          "y": 358.4,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "forest-waterfall"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "qingshan"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "name": "隐蔽岩隙",
+          "type": "ruin",
+          "x": 384,
+          "y": 266.24,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "forest-grotto"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "qingshan"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

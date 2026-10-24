@@ -1,0 +1,269 @@
+{
+  "type": "map",
+  "version": "1.10",
+  "tiledversion": "1.12.2",
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "width": 48,
+  "height": 32,
+  "tilewidth": 32,
+  "tileheight": 32,
+  "infinite": false,
+  "nextlayerid": 3,
+  "nextobjectid": 9,
+  "layers": [
+    {
+      "id": 1,
+      "name": "无字地形底图",
+      "type": "imagelayer",
+      "image": "../../assets/images/world-wutan.png",
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": 2,
+      "name": "地点与交互锚点",
+      "type": "objectgroup",
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "objects": [
+        {
+          "id": 1,
+          "name": "乌坦城",
+          "type": "city",
+          "x": 768,
+          "y": 921.6,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "wutan"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "wutan"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "萧家宅邸",
+          "type": "compound",
+          "x": 460.8,
+          "y": 307.2,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "xiao-home"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "wutan"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "坊市长街",
+          "type": "market",
+          "x": 737.28,
+          "y": 512,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "wutan-market"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "wutan"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "临街客栈",
+          "type": "inn",
+          "x": 491.52,
+          "y": 665.6,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "wutan-inn"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "wutan"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "拍卖场外",
+          "type": "auction",
+          "x": 1059.84,
+          "y": 358.4,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "wutan-auction"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "wutan"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "name": "药材铺",
+          "type": "shop",
+          "x": 998.4,
+          "y": 614.4,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "wutan-herbs"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "wutan"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "name": "佣兵告示处",
+          "type": "guild",
+          "x": 1152,
+          "y": 768,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "wutan-guild"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "wutan"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "name": "城门驿道",
+          "type": "gate",
+          "x": 768,
+          "y": 901.12,
+          "width": 0,
+          "height": 0,
+          "point": true,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "wutan-gate"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "wutan"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

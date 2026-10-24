@@ -13,6 +13,8 @@
 <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js" defer></script>
 <script src="assets/js/tavern-core.js"></script>
 <script src="assets/js/user-flames.js"></script>
+<script src="assets/js/creation-rules.js"></script>
+<script src="assets/js/lore-canon.js"></script>
 <style>
 /* === CSS Custom Properties === */
 :root {
@@ -1107,6 +1109,12 @@ input:checked + .toggle-slider::before { background:var(--text-primary);transfor
 .import-zone input { display:none; }
 </style>
 <link rel="stylesheet" href="assets/css/atelier.css">
+<link rel="stylesheet" href="assets/css/creation.css">
+<link rel="stylesheet" href="assets/css/world-map.css">
+<script src="assets/js/world-data.js"></script>
+<script src="assets/js/world-navigation.js"></script><script src="assets/js/world-core.js"></script>
+<script src="assets/js/world-bridge.js"></script>
+<script src="assets/js/world-ui.js"></script>
 </head>
 <body>
 
@@ -1115,7 +1123,7 @@ input:checked + .toggle-slider::before { background:var(--text-primary);transfor
   <header class="landing-masthead"><div class="landing-brand"><span class="landing-seal">斗</span><span>斗气大陆 · 修行录</span></div><span class="landing-edition">THE CULTIVATION CHRONICLES</span></header>
   <main class="landing-body">
     <section class="landing-copy">
-      <p class="landing-kicker">三一六纪元 · 卷一</p>
+      <p class="landing-kicker">山河初启 · 众生录</p>
       <h1>斗破苍穹</h1>
       <p class="landing-description">一纸命书，万里山河。<br>从乌坦城出发，写下属于你的修行故事。</p>
       <div id="title-menu">
@@ -1128,37 +1136,23 @@ input:checked + .toggle-slider::before { background:var(--text-primary);transfor
     </section>
     <aside class="landing-art" aria-label="青山云海插画"><img src="assets/mountain-scroll.svg" alt="青绿山峦与云海间的修行亭阁"><p class="landing-verse">一念起，万火生。<br>山海之外，自有天地。</p><span class="landing-art-label">山河为卷 · 众生为墨</span></aside>
   </main>
-  <footer class="landing-footer"><span>自由探索 / 角色扮演 / 万千际遇</span><span>斗气大陆 · 三一六纪元</span></footer>
+  <footer class="landing-footer"><span>自由探索 / 角色扮演 / 万千际遇</span><span>斗气大陆 · 众生新篇</span></footer>
 </div>
 
 <!-- VIEW: Character Creation -->
-<div id="view-creation" class="view" style="flex-direction:column;background:var(--bg-deep);">
-  <!-- Step indicator -->
-  <div id="creation-steps" style="display:flex;justify-content:center;gap:0;padding:20px 0 0;position:relative;z-index:2;">
-    <div class="step-indicator active" data-step="0"><span class="step-num">零</span><span class="step-label">基础</span></div>
-    <div class="step-line"></div>
-    <div class="step-indicator" data-step="1"><span class="step-num">壹</span><span class="step-label">种族</span></div>
-    <div class="step-line"></div>
-    <div class="step-indicator" data-step="2"><span class="step-num">贰</span><span class="step-label">身份</span></div>
-    <div class="step-line"></div>
-    <div class="step-indicator" data-step="3"><span class="step-num">叁</span><span class="step-label">数值</span></div>
-    <div class="step-line"></div>
-    <div class="step-indicator" data-step="4"><span class="step-num">肆</span><span class="step-label">天赋</span></div>
-    <div class="step-line"></div>
-    <div class="step-indicator" data-step="5"><span class="step-num">伍</span><span class="step-label">机缘</span></div>
-  </div>
-  <!-- Points display -->
-  <div id="creation-points-bar" style="text-align:center;padding:12px;position:relative;z-index:2;">
-    <span style="font-family:var(--font-serif);color:var(--text-muted);">可用点数：</span>
-    <span id="creation-points-value" style="font-family:var(--font-serif);font-size:28px;color:var(--text-dim);">0</span>
-  </div>
-  <!-- Step content container -->
-  <div id="creation-content" style="flex:1;overflow-y:auto;padding:0 48px 20px;position:relative;z-index:2;"></div>
-  <!-- Bottom navigation -->
-  <div id="creation-nav" style="display:flex;justify-content:center;gap:20px;padding:16px;border-top:1px solid var(--border-subtle);position:relative;z-index:2;">
-    <button id="creation-prev" class="creation-nav-btn" onclick="creationPrev()" style="display:none;">← 上一步</button>
-    <button id="creation-next" class="creation-nav-btn primary" onclick="creationNext()">下一步 →</button>
-  </div>
+<div id="view-creation" class="view">
+  <aside class="creation-rail" aria-label="山河新生插画与角色预览">
+    <div class="creation-brand"><span>斗</span><div>斗破苍穹<small>众 生 录 · 新 人 生</small></div></div>
+    <button type="button" class="creation-rail-back" onclick="showView('view-title')">← 返回首页</button>
+    <div class="creation-art-quote"><span>山河为卷 · 众生为墨</span><h2>此间天地<br>由你落笔</h2><p>没有既定的传奇。<br>从一缕斗气，走向自己的山河。</p></div>
+    <section class="creation-person" aria-label="实时角色预览"><div class="creation-person-title"><strong id="creation-person-name">无名修行者</strong><span id="creation-mode-label">原著框架</span></div><p id="creation-person-meta">人族 · 散修</p><dl><div><dt>第一站</dt><dd id="creation-summary-origin">乌坦城</dd></div><div><dt>斗气属性</dt><dd id="creation-summary-attrs">尚未感应</dd></div><div><dt>天赋禀赋</dt><dd id="creation-summary-talents">0 项</dd></div></dl></section>
+  </aside>
+  <main class="creation-main">
+    <header class="creation-masthead"><div class="creation-masthead-title"><span>THE BOOK OF BEGINNINGS</span><h1>开启一段新人生</h1></div><div id="creation-points-bar" role="status" aria-live="polite"><span>可用点数</span><strong id="creation-points-value">70</strong><small id="creation-budget-detail">已用30 / 100点</small><div class="creation-budget-track"><i id="creation-budget-progress"></i></div></div></header>
+    <nav id="creation-steps" aria-label="创角步骤"><button type="button" class="step-indicator active" data-step="0" onclick="CreationUI.go(0)"><span class="step-num">01</span><span><span class="step-label">落笔</span><small>姓名与旅程</small></span></button><button type="button" class="step-indicator" data-step="1" onclick="CreationUI.go(1)"><span class="step-num">02</span><span><span class="step-label">血脉</span><small>种族与来处</small></span></button><button type="button" class="step-indicator" data-step="2" onclick="CreationUI.go(2)"><span class="step-num">03</span><span><span class="step-label">出身</span><small>身份与志向</small></span></button><button type="button" class="step-indicator" data-step="3" onclick="CreationUI.go(3)"><span class="step-num">04</span><span><span class="step-label">根基</span><small>六维与潜力</small></span></button><button type="button" class="step-indicator" data-step="4" onclick="CreationUI.go(4)"><span class="step-num">05</span><span><span class="step-label">天赋</span><small>禀赋与属性</small></span></button><button type="button" class="step-indicator" data-step="5" onclick="CreationUI.go(5)"><span class="step-num">06</span><span><span class="step-label">启程</span><small>行囊与初见</small></span></button></nav>
+    <div id="creation-content" aria-labelledby="creation-page-title"></div>
+    <footer id="creation-nav"><div class="creation-nav-progress"><strong id="creation-progress-label">01 / 06</strong><span id="creation-step-hint">姓名与旅程</span></div><div class="creation-nav-actions"><button type="button" id="creation-prev" class="creation-nav-btn" onclick="creationPrev()">← 上一步</button><button type="button" id="creation-next" class="creation-nav-btn primary" onclick="creationNext()">继续 · 血脉 →</button></div></footer>
+  </main>
 </div>
 
 <!-- VIEW: Game World -->
@@ -1493,6 +1487,7 @@ function addQuest(name, desc, reward, penalty, difficulty) {
   return q;
 }
 function completeQuest(qid) {
+  if(String(qid).startsWith('map-')){showToast('地图委托请到委托人处交付，进度由地图记录','info');return;}
   var idx = QuestSystem.quests.findIndex(function(q){return q.id===qid;});
   if (idx<0) return;
   var q = QuestSystem.quests.splice(idx,1)[0];
@@ -1501,6 +1496,7 @@ function completeQuest(qid) {
   showToast('任务完成：'+q.name+' · 奖励：'+q.reward,'success');
 }
 function failQuest(qid) {
+  if(String(qid).startsWith('map-')){showToast('地图委托请到委托人处交付，进度由地图记录','info');return;}
   var idx = QuestSystem.quests.findIndex(function(q){return q.id===qid;});
   if (idx<0) return;
   var q = QuestSystem.quests.splice(idx,1)[0];
@@ -1543,6 +1539,7 @@ async function rewindToSnapshot(sid) {
     if (snap.questSystem && typeof QuestSystem !== 'undefined') Object.assign(QuestSystem,TavernCore.clone(snap.questSystem));
     if (snap.worldState) Object.assign(WorldState,TavernCore.clone(snap.worldState));
     TimeRewind.snapshots = TimeRewind.snapshots.slice(0,TimeRewind.snapshots.indexOf(snap) + 1);
+    if(typeof WorldMapBridge!=='undefined')WorldMapBridge.clearProposal();
     saveToLocalStorage(); renderTavernMessages(); showToast('时空回溯完成：' + snap.time,'success');
   } catch(e) { showToast('回溯失败：' + e.message,'error'); }
 }
@@ -1590,8 +1587,8 @@ const TIME_HOUR_NAMES = ['子时','丑时','寅时','卯时','辰时','巳时','
 const TIME_SEASONS = ['春','夏','秋','冬'];
 
 var GameTime = {
-  era: '三一六纪元',
-  year: 316,
+  era: '开局纪年（游戏）',
+  year: 1,
   month: 9,   // 1-12
   day: 15,    // 1-30
   hour: 0,    // 0-23 (小时)
@@ -1608,7 +1605,7 @@ function getSeason() {
 }
 
 function getTimeString() {
-  return GameTime.era + ' · ' + GameTime.year + '年 ' + TIME_MONTH_NAMES[GameTime.month - 1] + ' ' + GameTime.day + '日 ' + TIME_HOUR_NAMES[GameTime.hour] + ' · ' + getSeason();
+  return GameTime.era + ' · ' + GameTime.year + '年 ' + TIME_MONTH_NAMES[GameTime.month - 1] + ' ' + GameTime.day + '日 ' + (padNum(GameTime.hour,2)+':'+padNum(GameTime.minute||0,2)) + ' · ' + getSeason();
 }
 
 // ==============================
@@ -1642,21 +1639,11 @@ function getCurrentTimeString() {
 }
 
 function advanceTime(hours) {
-  if (!hours || hours <= 0) return;
-  GameTime.totalHours += hours;
-  GameTime.hour += hours;
-  while (GameTime.hour >= 12) {
-    GameTime.hour -= 12;
-    GameTime.day++;
-    if (GameTime.day > 30) {
-      GameTime.day = 1;
-      GameTime.month++;
-      if (GameTime.month > 12) {
-        GameTime.month = 1;
-        GameTime.year++;
-      }
-    }
-  }
+  if(!Number.isFinite(hours)||hours<=0)return;
+  GameTime.totalHours=(GameTime.totalHours||0)+hours;
+  var minutes=(GameTime.minute||0)+Math.round(hours*60);
+  GameTime.minute=minutes%60;GameTime.hour+=Math.floor(minutes/60);
+  while(GameTime.hour>=24){GameTime.hour-=24;GameTime.day++;if(GameTime.day>30){GameTime.day=1;GameTime.month++;if(GameTime.month>12){GameTime.month=1;GameTime.year++;}}}
 }
 
 // ==============================
@@ -1869,45 +1856,16 @@ function switchGameView(viewId, btn) {
 // ==============================
 
 function updatePointsDisplay() {
-  var el = document.getElementById('creation-points-value');
-  if (!el) return;
-  if (!GameState.player.difficulty) {
-    // No difficulty selected yet — show 0
-    el.textContent = '0';
-    el.style.color = 'var(--text-dim)';
-    return;
-  }
-  var remaining = GameState.player.points - GameState.player.pointsSpent;
-  el.textContent = remaining;
-  el.style.color = remaining > 20 ? 'var(--accent-green)' : remaining > 5 ? '#ffaa00' : '#ff4444';
+  var el=document.getElementById('creation-points-value');
+  if(!el)return;
+  var remaining=GameState.player.points-GameState.player.pointsSpent;
+  el.textContent=remaining.toLocaleString();
+  el.classList.toggle('over-budget',remaining<0);
+  if(typeof CreationUI!=='undefined')CreationUI.summary();
 }
 
 function recalculatePoints() {
-  var spent = 0;
-  // Race cost
-  var race = RACES.find(function(r) { return r.id === GameState.player.race; });
-  if (race) spent += race.cost;
-  // Identity cost
-  var identity = IDENTITIES.find(function(i) { return i.id === GameState.player.identity; });
-  if (identity) spent += identity.cost;
-  // Base stats: each point costs 1
-  var bs = GameState.player.baseStats;
-  for (var k in bs) { if (bs.hasOwnProperty(k)) spent += bs[k]; }
-  // Talent costs (skip free talents from puzzle reward)
-  var freeTalents = GameState.player.freeTalents || [];
-  GameState.player.talents.forEach(function(tid) {
-    if (freeTalents.indexOf(tid) >= 0) return; // free talent, skip cost
-    for (var t = 0; t < TALENT_TIERS.length; t++) {
-      var tier = TALENT_TIERS[t];
-      if (TALENTS[tier.key].some(function(tl) { return tl.id === tid; })) {
-        spent += tier.cost;
-        break;
-      }
-    }
-  });
-  // Douqi attribute costs: first free, second 10 points
-  if (GameState.player.douqiAttributes.length >= 2) spent += 10;
-  GameState.player.pointsSpent = spent;
+  GameState.player.pointsSpent = CreationRules.spent(GameState.player, {races:RACES,identities:IDENTITIES,tiers:TALENT_TIERS,talents:TALENTS});
   updatePointsDisplay();
 }
 
@@ -1916,27 +1874,12 @@ function recalculatePoints() {
 // ==============================
 
 function updatePerformanceStats() {
-  var race = RACES.find(function(r) { return r.id === GameState.player.race; });
-  if (!race) return;
-  var bs = GameState.player.baseStats;
-  var c = race.coeff;
-  var perf = {
-    hp: Math.round(bs.endurance * 20 * c.hp),
-    dp: Math.round(bs.douqi * 20 * c.dp),
-    pa: Math.round(bs.strength * 8 * c.pa),
-    da: Math.round(bs.douqi * 8 * c.da),
-    pd: Math.round((bs.endurance + bs.strength) * 4 * c.pd),
-    dd: Math.round((bs.douqi + bs.soul) * 4 * c.dd),
-    ph: Math.round(bs.agility * 5 * c.ph),
-    dh: Math.round(bs.soul * 5 * c.dh),
-    cr: Math.round(bs.agility * c.cr * 10) / 10
-  };
-  GameState.player.performanceStats = perf;
-  for (var k in perf) {
-    if (!perf.hasOwnProperty(k)) continue;
-    var el = document.getElementById('perf-stat-' + k);
-    if (el) el.textContent = k === 'cr' ? perf[k] + '%' : perf[k];
-  }
+  var perf = CreationRules.performance(GameState.player,RACES);
+  GameState.player.performanceStats=perf;
+  Object.keys(perf).forEach(function(k) {
+    var el=document.getElementById('perf-stat-'+k);
+    if(el)el.textContent=k==='cr'?perf[k]+'%':perf[k];
+  });
 }
 
 // ==============================
@@ -1975,59 +1918,26 @@ function startNewGame() {
     sexOrgan: { appearance:'', depth:'', width:'', isVirgin:true },
     sexMindset: { philosophy:'', surfaceKinks:[], deepKinks:[] }
   };
-  // Reset puzzle state
-  puzzleSolved = false;
-  puzzleRewardEarned = false;
-  puzzleSkipChecked = false;
-  puzzleAttempts = 0;
+  Object.assign(GameState.player, {gender:'male',difficulty:'normal',points:100,race:'human',identity:'wanderer',worldMode:'canon',startLocation:'wutan',starterKit:'traveller',woodAffinity:false,creationStep:0});
   showView('view-creation');
-  creationCurrentStep = -1;
-  creationNext();
+  recalculatePoints();
+  updatePerformanceStats();
+  CreationUI.go(0,true);
 }
 
 function creationNext() {
-  creationCurrentStep++;
-  if (creationCurrentStep > 5) { confirmCreation(); return; }
-  var prevBtn = document.getElementById('creation-prev');
-  var nextBtn = document.getElementById('creation-next');
-  if (prevBtn) prevBtn.style.display = creationCurrentStep === 0 ? 'none' : 'inline-block';
-  if (nextBtn) nextBtn.textContent = creationCurrentStep === 5 ? '确认创角' : '下一步 →';
-  updateStepIndicator();
-  switch(creationCurrentStep) {
-    case 0: renderCreationStep0(); break;
-    case 1: renderCreationStep1(); break;
-    case 2: renderCreationStep2(); break;
-    case 3: renderCreationStep3(); break;
-    case 4: renderCreationStep4(); break;
-    case 5: renderCreationStep5(); break;
-  }
+  if (creationCurrentStep === 5) { confirmCreation(); return; }
+  CreationUI.go(creationCurrentStep + 1);
 }
 
-function creationPrev() {
-  creationCurrentStep = Math.max(0, creationCurrentStep - 1);
-  var prevBtn = document.getElementById('creation-prev');
-  var nextBtn = document.getElementById('creation-next');
-  if (prevBtn) prevBtn.style.display = creationCurrentStep === 0 ? 'none' : 'inline-block';
-  if (nextBtn) nextBtn.textContent = creationCurrentStep === 4 ? '确认创角' : '下一步 →';
-  updateStepIndicator();
-  switch(creationCurrentStep) {
-    case 0: renderCreationStep0(); break;
-    case 1: renderCreationStep1(); break;
-    case 2: renderCreationStep2(); break;
-    case 3: renderCreationStep3(); break;
-    case 4: renderCreationStep4(); break;
-    case 5: renderCreationStep5(); break;
-  }
+function creationPrev() { CreationUI.go(Math.max(0, creationCurrentStep - 1));
 }
 
 function updateStepIndicator() {
   document.querySelectorAll('#creation-steps .step-indicator').forEach(function(el, i) {
-    el.classList.remove('active', 'done');
-    if (i < creationCurrentStep) el.classList.add('done');
-    if (i === creationCurrentStep) el.classList.add('active');
-  });
-  document.querySelectorAll('#creation-steps .step-line').forEach(function(el, i) {
+    el.classList.toggle('active', i === creationCurrentStep);
     el.classList.toggle('done', i < creationCurrentStep);
+    if (i === creationCurrentStep) el.setAttribute('aria-current','step'); else el.removeAttribute('aria-current');
   });
 }
 
@@ -2035,51 +1945,7 @@ function updateStepIndicator() {
 // STEP 0: BASIC INFO
 // ==============================
 
-function renderCreationStep0() {
-  var container = document.getElementById('creation-content');
-  container.innerHTML =
-    '<div style="max-width:700px;margin:0 auto;">' +
-      '<h2 style="text-align:center;margin-bottom:24px;">创角 · 基础信息</h2>' +
-      '<div class="form-group">' +
-        '<label class="form-label">姓名</label>' +
-        '<div style="display:flex;gap:8px;">' +
-          '<input type="text" id="input-name" class="form-input" placeholder="输入姓名..." value="' + (GameState.player.name || '') + '" style="flex:1;" oninput="GameState.player.name=this.value;saveToLocalStorage()">' +
-          '<button class="dice-btn" onclick="randomName()" title="随机生成">' +
-            '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="8" r="1.5" fill="currentColor"/><circle cx="8" cy="16" r="1.5" fill="currentColor"/><circle cx="16" cy="16" r="1.5" fill="currentColor"/></svg>' +
-          '</button>' +
-        '</div>' +
-      '</div>' +
-      '<div class="form-group">' +
-        '<label class="form-label">性别</label>' +
-        '<div class="option-group" id="gender-group">' +
-          '<button class="option-btn' + (GameState.player.gender === 'male' ? ' selected' : '') + '" data-value="male" onclick="selectGender(\'male\',this)">男</button>' +
-          '<button class="option-btn' + (GameState.player.gender === 'female' ? ' selected' : '') + '" data-value="female" onclick="selectGender(\'female\',this)">女</button>' +
-          '<button class="option-btn' + (GameState.player.gender === 'futa' ? ' selected' : '') + '" data-value="futa" onclick="selectGender(\'futa\',this)">扶她</button>' +
-        '</div>' +
-      '</div>' +
-      '<div class="form-group">' +
-        '<label class="form-label">年龄</label>' +
-        '<input type="number" id="input-age" class="form-input" min="0" value="' + GameState.player.age + '" ' +
-          'oninput="updateAge(parseInt(this.value))" style="width:120px;">' +
-        '<span style="font-size:10px;color:var(--text-muted);margin-left:8px;">非负数即可</span>' +
-      '</div>' +
-      '<div class="form-group">' +
-        '<label class="form-label">难度选择</label>' +
-        '<div id="difficulty-group" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">' +
-          DIFFICULTY.map(function(d) {
-            var sel = GameState.player.difficulty === d.id;
-            return '<div class="difficulty-card' + (sel ? ' selected' : '') + '" data-diff="' + d.id + '" onclick="selectDifficulty(\'' + d.id + '\',this)" style="border-color:' + d.color + '33;">' +
-              '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-                '<span style="color:' + d.color + ';font-weight:500;">' + d.name + '</span>' +
-                '<span style="color:var(--text-primary);font-family:var(--font-serif);">' + d.points.toLocaleString() + ' 点</span>' +
-              '</div>' +
-              '<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">' + d.desc + '</div>' +
-            '</div>';
-          }).join('') +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  document.getElementById('creation-prev').style.display = 'none';
+function renderCreationStep0() { CreationUI.render(0);
 }
 
 function randomName() {
@@ -2093,714 +1959,139 @@ function randomName() {
   saveToLocalStorage();
 }
 
-function selectGender(val, el) {
-  document.querySelectorAll('#gender-group .option-btn').forEach(function(b) { b.classList.remove('selected'); });
-  el.classList.add('selected');
-  GameState.player.gender = val;
-  saveToLocalStorage();
+function selectGender(val) { CreationUI.pick('gender',val);
 }
 
-function updateAge(val) {
-  if (isNaN(val) || val < 0) val = 0;
-  GameState.player.age = val;
-  var input = document.getElementById('input-age');
-  if (input && input.value < 0) input.value = val;
-  saveToLocalStorage();
+function updateAge(val) { CreationUI.field('age',val);
 }
 
-function selectDifficulty(id, el) {
-  document.querySelectorAll('#difficulty-group .difficulty-card').forEach(function(c) { c.classList.remove('selected'); });
-  el.classList.add('selected');
-  var d = DIFFICULTY.find(function(dd) { return dd.id === id; });
-  GameState.player.difficulty = id;
-  GameState.player.points = d.points;
-  GameState.player.pointsSpent = 0;
-  updatePointsDisplay();
-  saveToLocalStorage();
+function selectDifficulty(id) { CreationUI.difficulty(id);
 }
 
 // ==============================
 // STEP 1: RACE SELECTION
 // ==============================
 
-function renderCreationStep1() {
-  var container = document.getElementById('creation-content');
-  container.innerHTML =
-    '<h2 style="text-align:center;margin-bottom:24px;">壹 · 选择种族</h2>' +
-    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;max-width:900px;margin:0 auto;">' +
-      RACES.map(function(r) {
-        var sel = GameState.player.race === r.id;
-        return '<div class="race-card' + (sel ? ' selected' : '') + '" data-race="' + r.id + '" onclick="selectRace(\'' + r.id + '\',this)" style="border-color:' + r.color + '33;">' +
-          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
-            '<span style="color:' + r.color + ';font-weight:600;font-size:15px;">' + r.name + '</span>' +
-            '<span style="color:var(--text-primary);font-size:12px;">' + r.cost + '点</span>' +
-          '</div>' +
-          '<p style="font-size:12px;color:var(--text-body);margin:0;">' + r.desc + '</p>' +
-          '<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;font-size:10px;">' +
-            '<span style="color:' + (r.coeff.hp >= 1.4 ? 'var(--accent-fire)' : 'var(--text-muted)') + ';">生命' + (r.coeff.hp >= 1.4 ? '↑' : '~') + '</span>' +
-            '<span style="color:' + (r.coeff.da >= 1.4 ? 'var(--accent-purple)' : 'var(--text-muted)') + ';">斗攻' + (r.coeff.da >= 1.4 ? '↑' : '~') + '</span>' +
-            '<span style="color:' + (r.coeff.pa >= 1.4 ? 'var(--accent-green)' : 'var(--text-muted)') + ';">物攻' + (r.coeff.pa >= 1.4 ? '↑' : '~') + '</span>' +
-          '</div>' +
-        '</div>';
-      }).join('') +
-    '</div>';
+function renderCreationStep1() { CreationUI.render(1);
 }
 
-function selectRace(id, el) {
-  document.querySelectorAll('.race-card').forEach(function(c) { c.classList.remove('selected'); });
-  el.classList.add('selected');
-  GameState.player.race = id;
-  recalculatePoints();
-  saveToLocalStorage();
+function selectRace(id) { CreationUI.pick('race',id);
 }
 
 // ==============================
 // STEP 2: IDENTITY SELECTION
 // ==============================
 
-function renderCreationStep2() {
-  var container = document.getElementById('creation-content');
-  container.innerHTML =
-    '<h2 style="text-align:center;margin-bottom:24px;">贰 · 选择身份</h2>' +
-    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;max-width:900px;margin:0 auto;">' +
-      IDENTITIES.map(function(id) {
-        var sel = GameState.player.identity === id.id;
-        return '<div class="identity-card' + (sel ? ' selected' : '') + '" data-identity="' + id.id + '" onclick="selectIdentity(\'' + id.id + '\',this)">' +
-          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
-            '<span style="color:var(--text-primary);font-size:15px;font-weight:600;">' + id.name + '</span>' +
-            '<span style="color:var(--text-primary);font-size:12px;">' + id.cost + '点</span>' +
-          '</div>' +
-          '<p style="font-size:12px;color:var(--text-body);margin:0;">' + id.desc + '</p>' +
-        '</div>';
-      }).join('') +
-    '</div>';
+function renderCreationStep2() { CreationUI.render(2);
 }
 
-function selectIdentity(id, el) {
-  document.querySelectorAll('.identity-card').forEach(function(c) { c.classList.remove('selected'); });
-  el.classList.add('selected');
-  GameState.player.identity = id;
-  recalculatePoints();
-  saveToLocalStorage();
+function selectIdentity(id) { CreationUI.pick('identity',id);
 }
 
 // ==============================
 // STEP 3: STATS ALLOCATION
 // ==============================
 
-function renderCreationStep3() {
-  var container = document.getElementById('creation-content');
-  container.innerHTML =
-    '<div style="max-width:800px;margin:0 auto;">' +
-      '<h2 style="text-align:center;margin-bottom:6px;">叁 · 调整数值</h2>' +
-      '<p style="text-align:center;color:var(--text-muted);font-size:12px;margin-bottom:20px;">每点属性消耗 1 可用点数 · 调整范围 0-20</p>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">' +
-        '<div>' +
-          '<h4 style="color:var(--text-primary);margin-bottom:12px;">基础属性（可调整）</h4>' +
-          STAT_CONFIG.map(function(s) {
-            return '<div class="stat-row">' +
-              '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
-                '<span style="color:var(--text-body);font-size:13px;">' + s.label + '</span>' +
-                '<span style="color:var(--text-primary);font-family:var(--font-serif);" id="stat-val-' + s.key + '">' + GameState.player.baseStats[s.key] + '</span>' +
-              '</div>' +
-              '<input type="range" class="form-slider stat-slider" min="0" max="20" value="' + GameState.player.baseStats[s.key] + '"' +
-                ' data-stat="' + s.key + '" oninput="updateStat(\'' + s.key + '\',parseInt(this.value))">' +
-              '<div style="font-size:10px;color:var(--text-muted);">' + s.desc + '</div>' +
-            '</div>';
-          }).join('') +
-        '</div>' +
-        '<div>' +
-          '<h4 style="color:var(--text-secondary);margin-bottom:12px;">表现属性（种族加成自动计算）</h4>' +
-          '<div id="perf-stats-display" style="font-size:13px;">' +
-            Object.keys(PERF_STAT_LABELS).map(function(k) {
-              return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-subtle);">' +
-                '<span style="color:var(--text-body);">' + PERF_STAT_LABELS[k] + '</span>' +
-                '<span style="color:var(--text-primary);font-family:var(--font-serif);" id="perf-stat-' + k + '">0</span>' +
-              '</div>';
-            }).join('') +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  updatePerformanceStats();
+function renderCreationStep3() { CreationUI.render(3);
 }
 
-function updateStat(key, val) {
-  GameState.player.baseStats[key] = val;
-  var el = document.getElementById('stat-val-' + key);
-  if (el) el.textContent = val;
-  recalculatePoints();
-  updatePerformanceStats();
-  saveToLocalStorage();
+function updateStat(key,val) { CreationUI.setStat(key,val);
 }
 
 // ==============================
 // STEP 4: TALENTS + ATTRIBUTES
 // ==============================
 
-function renderCreationStep4() {
-  var container = document.getElementById('creation-content');
-  container.innerHTML =
-    '<h2 style="text-align:center;margin-bottom:24px;">肆 · 天赋词条 & 斗气属性</h2>' +
-    '<div style="margin-bottom:24px;">' +
-      '<h4 style="color:var(--text-primary);margin-bottom:12px;">天赋词条（' + GameState.player.talents.length + ' 已选）</h4>' +
-      TALENT_TIERS.map(function(tier) {
-        return '<div style="margin-bottom:12px;">' +
-          '<div style="color:' + tier.color + ';font-size:12px;margin-bottom:6px;font-weight:500;">' + tier.label + ' · ' + tier.cost + '点/个</div>' +
-          '<div style="display:flex;flex-wrap:wrap;gap:6px;">' +
-            TALENTS[tier.key].map(function(t) {
-              var sel = GameState.player.talents.indexOf(t.id) >= 0;
-              return '<button class="talent-chip' + (sel ? ' selected' : '') + '" ' +
-                'data-talent="' + t.id + '" data-tier="' + tier.key + '" onclick="toggleTalent(\'' + t.id + '\',\'' + tier.key + '\',this)" ' +
-                'style="border-color:' + tier.color + '33;" title="' + t.desc + '">' +
-                t.name +
-              '</button>';
-            }).join('') +
-          '</div>' +
-        '</div>';
-      }).join('') +
-    '</div>' +
-    '<div style="text-align:center;">' +
-      '<h4 style="color:var(--text-primary);margin-bottom:4px;">斗气属性 · 命运转盘</h4>' +
-      '<p style="font-size:11px;color:var(--text-muted);margin-bottom:16px;">首次<span style="color:var(--accent-green);">免费</span> · 第二次消耗 <span style="color:var(--text-primary);">10 点</span> · 最多获得2种属性</p>' +
-      '<div class="lottery-container">' +
-        '<div class="wheel-wrapper">' +
-          '<div class="wheel-pointer"></div>' +
-          '<canvas id="lottery-wheel" class="wheel-canvas" width="320" height="320"></canvas>' +
-          '<button id="wheel-spin-btn" class="wheel-center-btn" onclick="spinWheel()">' +
-            (GameState.player.douqiAttributes.length >= 2 ? '继续抽取 (替换)' : '抽 奖') +
-          '</button>' +
-        '</div>' +
-        '<div id="lottery-record" style="margin-top:8px;">' +
-          '<span style="font-size:11px;color:var(--text-muted);">已获得属性：</span>' +
-          (GameState.player.douqiAttributes.length === 0 ?
-            '<span style="font-size:11px;color:var(--text-dim);">暂无</span>' :
-            GameState.player.douqiAttributes.map(function(aid) {
-              var attr = DOUQI_ATTRS.find(function(a) { return a.id === aid; });
-              return attr ? '<span class="attr-record-tag" style="color:' + attr.color + ';border-color:' + attr.color + '44;background:' + attr.color + '11;">' + attr.name + '</span>' : '';
-            }).join(' ')) +
-        '</div>' +
-        '<p style="font-size:10px;color:var(--text-muted);margin-top:6px;">风克木 木克土 土克水 水克火 火克金 金克风 雷克冰 冰克木 光暗互克 空间克毒 毒克光</p>' +
-      '</div>' +
-    '</div>';
-  setTimeout(function() { drawWheel(); updateLotteryRecord(); }, 150);
+function renderCreationStep4() { CreationUI.render(4);
 }
 
 // ==============================
 // LOTTERY WHEEL
 // ==============================
 
-var wheelRotation = 0; // Current CSS rotation in radians (accumulated)
-var isSpinning = false;
-
-function drawWheel(highlightIndex) {
-  // highlightIndex: index of segment to glow, or -1 / undefined for none
-  if (typeof highlightIndex === 'undefined') highlightIndex = -1;
-  var canvas = document.getElementById('lottery-wheel');
-  if (!canvas) return;
-  var ctx = canvas.getContext('2d');
-  var cx = 160, cy = 160, r = 150;
-  var segments = DOUQI_ATTRS.length;
-  var arcSize = (2 * Math.PI) / segments;
-
-  ctx.clearRect(0, 0, 320, 320);
-
-  // Draw outer ring
-  ctx.beginPath();
-  ctx.arc(cx, cy, r + 8, 0, 2 * Math.PI);
-  ctx.strokeStyle = 'rgba(212,168,75,0.4)';
-  ctx.lineWidth = 3;
-  ctx.stroke();
-
-  // Draw segments
-  for (var i = 0; i < segments; i++) {
-    var startAngle = i * arcSize;
-    var endAngle = startAngle + arcSize;
-
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, r, startAngle, endAngle);
-    ctx.closePath();
-
-    // Highlight winning segment with glow
-    if (i === highlightIndex) {
-      ctx.fillStyle = 'rgba(212,168,75,0.25)';
-      ctx.shadowColor = 'rgba(212,168,75,0.9)';
-      ctx.shadowBlur = 24;
-    } else {
-      ctx.fillStyle = i % 2 === 0 ? '#0d0d18' : '#111122';
-      ctx.shadowColor = 'transparent';
-      ctx.shadowBlur = 0;
-    }
-    ctx.fill();
-    // Reset shadow for stroke
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur = 0;
-
-    // Segment border — brighter for highlighted
-    ctx.strokeStyle = i === highlightIndex ? 'rgba(212,168,75,0.9)' : 'rgba(212,168,75,0.15)';
-    ctx.lineWidth = i === highlightIndex ? 2.5 : 1;
-    ctx.stroke();
-
-    // Attribute name
-    var midAngle = startAngle + arcSize / 2;
-    var textR = r * 0.65;
-    var tx = cx + Math.cos(midAngle) * textR;
-    var ty = cy + Math.sin(midAngle) * textR;
-
-    ctx.save();
-    ctx.translate(tx, ty);
-    ctx.rotate(midAngle + Math.PI / 2);
-    ctx.fillStyle = i === highlightIndex ? '#ffffff' : DOUQI_ATTRS[i].color;
-    ctx.font = 'bold 13px "Noto Serif SC", serif';
-    ctx.textAlign = 'center';
-    // Glow text shadow for highlighted segment
-    if (i === highlightIndex) {
-      ctx.shadowColor = 'rgba(255,255,255,0.8)';
-      ctx.shadowBlur = 8;
-    }
-    ctx.fillText(DOUQI_ATTRS[i].name, 0, 0);
-    ctx.restore();
-  }
-
-  // Center circle
-  ctx.beginPath();
-  ctx.arc(cx, cy, 36, 0, 2 * Math.PI);
-  ctx.fillStyle = '#0a0a12';
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(212,168,75,0.5)';
-  ctx.lineWidth = 2;
-  ctx.stroke();
-}
-
-function spinWheel() {
-  if (isSpinning) return;
-
-  // First spin is free, second costs 10 points
-  var attrCount = GameState.player.douqiAttributes.length;
-  var cost = attrCount === 0 ? 0 : 10;
-  var remaining = GameState.player.points - GameState.player.pointsSpent;
-  if (remaining < cost) {
-    showToast('点数不足！需要 ' + cost + ' 点', 'error');
-    return;
-  }
-
-  isSpinning = true;
-  var btn = document.getElementById('wheel-spin-btn');
-  if (btn) btn.disabled = true;
-
-  // Deduct points
-  GameState.player.pointsSpent += cost;
-  updatePointsDisplay();
-  saveToLocalStorage();
-
-  // Clear previous highlight before spinning
-  drawWheel(-1);
-
-  var arcSize = (2 * Math.PI) / DOUQI_ATTRS.length;
-  var randomSegment = Math.floor(Math.random() * DOUQI_ATTRS.length);
-  var extraSpins = Math.floor(Math.random() * 5) + 6; // 6-10 full rotations
-
-  // Pointer is at top of wheel (12 o'clock = -π/2 from canvas 3 o'clock)
-  // Segment i is drawn at canvas angle [i*arcSize, (i+1)*arcSize], center at (i+0.5)*arcSize
-  // After CSS rotation by θ, canvas angle α appears on screen at α + θ
-  // For segment to be under pointer: (randomSegment + 0.5)*arcSize + θ ≡ -π/2 (mod 2π)
-  // θ ≡ -π/2 - (randomSegment + 0.5)*arcSize (mod 2π)
-  var baseAngle = -Math.PI / 2 - (randomSegment + 0.5) * arcSize;
-  // Normalize to [0, 2π)
-  baseAngle = ((baseAngle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-  var targetRotation = extraSpins * 2 * Math.PI + baseAngle;
-
-  var canvas = document.getElementById('lottery-wheel');
-  if (canvas) {
-    canvas.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
-    wheelRotation = targetRotation;
-    canvas.style.transform = 'rotate(' + (wheelRotation * 180 / Math.PI) + 'deg)';
-  }
-
-  // Determine result after spin animation
-  setTimeout(function() {
-    isSpinning = false;
-
-    // Redraw with winning segment glowing under pointer
-    drawWheel(randomSegment);
-
-    // Get the landed attribute — exactly ONE attribute per spin
-    var landedAttr = DOUQI_ATTRS[randomSegment];
-
-    // Already owned?
-    if (GameState.player.douqiAttributes.indexOf(landedAttr.id) >= 0) {
-      showToast('该属性已拥有，请继续尝试', 'info');
-    } else if (GameState.player.douqiAttributes.length >= 2) {
-      // Already have 2, need to replace one
-      showReplaceModal(landedAttr);
-    } else {
-      // Add directly
-      GameState.player.douqiAttributes.push(landedAttr.id);
-      showToast('获得斗气属性：' + landedAttr.name, 'success');
-      updateLotteryRecord();
-      recalculatePoints();
-      saveToLocalStorage();
-    }
-
-    // Update button state
-    if (btn) {
-      btn.textContent = GameState.player.douqiAttributes.length >= 2 ? '继续抽取 (替换)' : '抽 奖';
-      btn.disabled = false;
-    }
-  }, 4200);
-}
-
-function updateLotteryRecord() {
-  var record = document.getElementById('lottery-record');
-  if (!record) return;
-  record.innerHTML =
-    '<span style="font-size:11px;color:var(--text-muted);">已获得属性：</span>' +
-    (GameState.player.douqiAttributes.length === 0 ?
-      '<span style="font-size:11px;color:var(--text-dim);">暂无</span>' :
-      GameState.player.douqiAttributes.map(function(aid) {
-        var attr = DOUQI_ATTRS.find(function(a) { return a.id === aid; });
-        return attr ? '<span class="attr-record-tag" style="color:' + attr.color + ';border-color:' + attr.color + '44;background:' + attr.color + '11;">' + attr.name + '</span>' : '';
-      }).join(' '));
-  // Update spin button text
-  var btn = document.getElementById('wheel-spin-btn');
-  if (btn) {
-    btn.textContent = GameState.player.douqiAttributes.length >= 2 ? '继续抽取 (替换)' : '抽 奖';
-    btn.disabled = false;
-  }
-}
-
-function showReplaceModal(newAttr) {
-  var existing = GameState.player.douqiAttributes;
-  var html = '<h3 style="margin-bottom:12px;">选择要替换的属性</h3>' +
-    '<p style="font-size:12px;color:var(--text-body);margin-bottom:16px;">新属性：<span style="color:' + newAttr.color + ';font-weight:600;">' + newAttr.name + '</span></p>' +
-    '<div style="display:flex;gap:10px;">' +
-    existing.map(function(aid, i) {
-      var attr = DOUQI_ATTRS.find(function(a) { return a.id === aid; });
-      if (!attr) return '';
-      return '<button class="identity-card" style="flex:1;cursor:pointer;" onclick="replaceAttribute(' + i + ',\'' + newAttr.id + '\')">' +
-        '<span style="color:' + attr.color + ';font-size:16px;font-weight:600;">' + attr.name + '</span>' +
-        '</button>';
-    }).join('') +
-    '</div>' +
-    '<button class="text-btn" style="margin-top:12px;width:100%;" onclick="closeAllModals()">取消（保留原有属性）</button>';
-  showModal(html);
-}
-
-function replaceAttribute(oldIndex, newAttrId) {
-  GameState.player.douqiAttributes[oldIndex] = newAttrId;
-  closeAllModals();
-  updateLotteryRecord();
-  recalculatePoints();
-  saveToLocalStorage();
-  var newAttr = DOUQI_ATTRS.find(function(a) { return a.id === newAttrId; });
-  showToast('已替换为：' + (newAttr ? newAttr.name : ''), 'success');
-}
-
-function toggleTalent(id, tier, el) {
-  var idx = GameState.player.talents.indexOf(id);
-  if (idx >= 0) {
-    GameState.player.talents.splice(idx, 1);
-    el.classList.remove('selected');
-  } else {
-    GameState.player.talents.push(id);
-    el.classList.add('selected');
-  }
-  recalculatePoints();
-  // Update count
-  var countLabel = document.querySelector('#creation-content h4');
-  if (countLabel) countLabel.textContent = '天赋词条（' + GameState.player.talents.length + ' 已选）';
-  saveToLocalStorage();
-}
-
-// ==============================
-// STEP 5: PATTERN PUZZLE (机缘)
-// ==============================
-
-var puzzleAnswer = 0;
-var puzzleSolved = false;
-var puzzleRewardEarned = false;
-var puzzleSkipChecked = false;
-var puzzleSequence = [];
-
-function generatePuzzle() {
-  var puzzles = [
-    function() {
-      var start = randInt(1, 20), diff = randInt(2, 9);
-      var seq = [];
-      for (var i = 0; i < 5; i++) seq.push(start + diff * i);
-      return { sequence: seq, answer: start + diff * 5, rule: '等差数列' };
-    },
-    function() {
-      var start = randInt(1, 4), ratio = randInt(2, 4);
-      var seq = []; var v = start;
-      for (var i = 0; i < 5; i++) { seq.push(v); v *= ratio; }
-      return { sequence: seq, answer: v, rule: '等比数列' };
-    },
-    function() {
-      var a = randInt(1, 5), b = randInt(2, 8);
-      var seq = [a, b];
-      for (var i = 2; i < 6; i++) seq.push(seq[i-1] + seq[i-2]);
-      return { sequence: seq.slice(0, 5), answer: seq[5], rule: '斐波那契式' };
-    },
-    function() {
-      var start = randInt(1, 6);
-      var seq = [];
-      for (var i = 0; i < 5; i++) seq.push((start + i) * (start + i));
-      return { sequence: seq, answer: (start + 5) * (start + 5), rule: '平方数' };
-    },
-    function() {
-      var start = randInt(2, 6); var seq = [start]; var v = start;
-      for (var i = 1; i < 5; i++) { v = (i % 2 === 1) ? v * 2 : v - 1; seq.push(v); }
-      return { sequence: seq, answer: (seq.length % 2 === 1) ? v * 2 : v - 1, rule: '交替乘2减1' };
-    },
-    function() {
-      var start = randInt(1, 4); var seq = [];
-      for (var i = 0; i < 5; i++) { var n = start + i; seq.push(n * (n + 1) / 2); }
-      var n = start + 5;
-      return { sequence: seq, answer: n * (n + 1) / 2, rule: '三角形数' };
-    },
-    function() {
-      var start = randInt(0, 3); var seq = [];
-      for (var i = 0; i < 5; i++) seq.push(Math.pow(2, start + i));
-      return { sequence: seq, answer: Math.pow(2, start + 5), rule: '2的幂次方' };
-    },
-    function() {
-      var diff = randInt(3, 8); var seq = [randInt(1, 5)];
-      for (var i = 1; i < 5; i++) seq.push(seq[i-1] + diff * i);
-      return { sequence: seq, answer: seq[4] + diff * 5, rule: '增量递增' };
-    }
-  ];
-  return puzzles[Math.floor(Math.random() * puzzles.length)]();
-}
-
-function randInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function renderCreationStep5() {
-  if (!puzzleSolved) {
-    var puzzle = generatePuzzle();
-    puzzleAnswer = puzzle.answer;
-    puzzleSequence = puzzle.sequence;
-    puzzleRewardEarned = false;
-  }
-  var container = document.getElementById('creation-content');
-  var seqHTML = puzzleSequence.map(function(n, i) {
-    return '<span style="font-family:var(--font-serif);font-size:28px;color:var(--text-primary);padding:8px 16px;background:rgba(212,168,75,0.08);border-radius:8px;border:1px solid var(--border-gold);">' + n + '</span>' +
-      (i < 4 ? '<span style="color:var(--text-muted);font-size:20px;">→</span>' : '');
-  }).join('');
-
-  var isSkipped = puzzleRewardEarned && !puzzleSolved;
-  container.innerHTML =
-    '<div style="max-width:600px;margin:0 auto;text-align:center;">' +
-      '<h2 style="margin-bottom:8px;">伍 · 机缘测试</h2>' +
-      '<p style="color:var(--text-muted);font-size:12px;margin-bottom:24px;">天道有常，万物有序——找出规律便是机缘</p>' +
-      (isSkipped ?
-        '<div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;padding:32px 24px;margin-bottom:20px;">' +
-          '<p style="font-size:40px;margin-bottom:8px;">🐷</p>' +
-          '<p style="color:var(--text-dim);font-size:14px;">你选择了不动脑，与机缘擦肩而过~</p>' +
-        '</div>'
-      : !puzzleSolved ?
-        '<div style="background:var(--bg-card);border:1px solid var(--border-gold);border-radius:12px;padding:32px 24px;margin-bottom:20px;">' +
-          '<p style="color:var(--text-secondary);font-size:11px;margin-bottom:12px;letter-spacing:2px;">请找出下列数字的规律，填入下一个数字</p>' +
-          '<div style="display:flex;gap:10px;justify-content:center;align-items:center;margin-bottom:24px;flex-wrap:wrap;">' +
-            seqHTML +
-            '<span style="font-family:var(--font-serif);font-size:28px;color:var(--accent-purple);padding:8px 16px;background:rgba(192,132,252,0.08);border-radius:8px;border:1px dashed var(--accent-purple);">?</span>' +
-          '</div>' +
-          '<div style="display:flex;gap:10px;justify-content:center;align-items:center;">' +
-            '<input type="number" id="puzzle-input" class="form-input" style="width:140px;text-align:center;font-size:18px;font-family:var(--font-serif);" placeholder="你的答案">' +
-            '<button class="summary-action-btn" onclick="checkPuzzle()">验证</button>' +
-          '</div>' +
-          '<p id="puzzle-feedback" style="margin-top:12px;font-size:12px;min-height:20px;"></p>' +
-          '<div style="margin-top:16px;display:flex;align-items:center;justify-content:center;gap:8px;">' +
-            '<input type="checkbox" id="puzzle-skip-check" onchange="puzzleSkipChecked=this.checked">' +
-            '<label for="puzzle-skip-check" style="font-size:12px;color:var(--text-dim);cursor:pointer;">🐷 我是小猪，不想动脑（勾选后跳过机缘，可直接创角）</label>' +
-          '</div>' +
-        '</div>'
-      :
-        '<div style="background:var(--bg-card);border:2px solid var(--accent-green);border-radius:12px;padding:32px 24px;margin-bottom:20px;">' +
-          '<p style="font-family:var(--font-serif);font-size:22px;color:var(--accent-green);margin-bottom:8px;">✨ 机缘已得 ✨</p>' +
-          '<p style="color:var(--text-body);font-size:14px;">天道已然认可你的悟性</p>' +
-        '</div>'
-      ) +
-      (!puzzleRewardEarned && puzzleSolved ? '<button class="summary-action-btn" onclick="claimPuzzleReward()" style="font-size:16px;padding:12px 32px;">领取机缘</button>' : '') +
-      (puzzleRewardEarned && puzzleSolved ? '<p style="color:var(--accent-green);font-size:13px;">奖励已领取，请继续下一步</p><p style="color:var(--text-dim);font-size:10px;">（你不是小猪，你很聪明）</p>' : '') +
-    '</div>';
-}
-
-var puzzleAttempts = 0;
-
-function checkPuzzle() {
-  var input = document.getElementById('puzzle-input');
-  var feedback = document.getElementById('puzzle-feedback');
-  if (!input || !feedback) return;
-  var val = parseInt(input.value);
-  if (isNaN(val)) {
-    feedback.innerHTML = '<span style="color:#ff6644;">请输入一个数字</span>';
-    return;
-  }
-  if (val === puzzleAnswer) {
-    puzzleSolved = true;
-    puzzleAttempts = 0;
-    renderCreationStep5();
-  } else {
-    puzzleAttempts++;
-    if (puzzleAttempts >= 3) {
-      puzzleAttempts = 0;
-      var puzzle = generatePuzzle();
-      puzzleAnswer = puzzle.answer;
-      puzzleSequence = puzzle.sequence;
-      feedback.innerHTML = '<span style="color:#ffaa00;">换了一题，再试试吧！新规律等你发现~</span>';
-      renderCreationStep5();
-    } else {
-      feedback.innerHTML = '<span style="color:#ff6644;">不对哦，还剩 ' + (3 - puzzleAttempts) + ' 次机会~</span>';
-      input.value = '';
-      input.focus();
-    }
-  }
-}
-
-function claimPuzzleReward() {
-  if (puzzleRewardEarned) return;
-  puzzleRewardEarned = true;
-
-  // Add two usable items to player's inventory
-  GameState.player.inventory.push(
-    { id:'it_gift_fire_puzzle', name:'异火大礼包', qty:1, icon:'🔥', desc:'随机获得一种异火，可直接认主', usable:true, action:'openFireGift' },
-    { id:'it_gender_capsule_puzzle', name:'性转胶囊', qty:1, icon:'💊', desc:'服用后转换性别（男→女→扶她→男）', usable:true, action:'useGenderCapsule' }
-  );
-
-  showModal(
-    '<div style="text-align:center;max-width:500px;">' +
-      '<p style="font-family:var(--font-serif);font-size:20px;color:var(--accent-green);margin-bottom:12px;">🎉 机缘降临 🎉</p>' +
-      '<div style="background:rgba(212,168,75,0.05);border:1px solid var(--border-gold);border-radius:8px;padding:20px;margin-bottom:12px;">' +
-        '<p style="font-family:var(--font-serif);font-size:18px;color:var(--text-primary);line-height:2;letter-spacing:3px;">哇，好久没见过这么聪明的小猪了</p>' +
-      '</div>' +
-      '<img src="捕获1.PNG" style="max-width:100%;max-height:260px;border-radius:8px;border:2px solid var(--border-gold);margin-bottom:12px;" alt="机缘">' +
-      '<p style="color:var(--text-body);font-size:13px;">获得道具：<span style="color:#ff6b35;">🔥 异火大礼包</span> + <span style="color:#ee88ff;">💊 性转胶囊</span></p>' +
-      '<p style="color:var(--text-muted);font-size:10px;">两者均为可使用道具，请在「概要→储物袋」中使用</p>' +
-      '<button class="summary-action-btn" style="margin-top:12px;" onclick="closeAllModals();renderCreationStep5();">收下机缘</button>' +
-    '</div>'
-  );
-  saveToLocalStorage();
-}
-
-function skipPuzzleReward() {
-  puzzleRewardEarned = true;
-  showModal(
-    '<div style="text-align:center;">' +
-      '<p style="font-size:40px;margin-bottom:12px;">🐷</p>' +
-      '<p style="font-family:var(--font-serif);font-size:16px;color:var(--text-primary);">好吧，小猪就小猪~</p>' +
-      '<p style="color:var(--text-muted);font-size:12px;">未领取任何机缘，不影响创角点数</p>' +
-      '<button class="summary-action-btn" style="margin-top:12px;" onclick="closeAllModals();renderCreationStep5();">继续</button>' +
-    '</div>'
-  );
+function renderCreationStep5() { CreationUI.render(5);
 }
 
 function confirmCreation() {
-  var p = GameState.player;
-  // Read name from input
-  var nameInput = document.getElementById('input-name');
-  if (nameInput) p.name = nameInput.value.trim();
-
-  if (!p.name) { showToast('请输入姓名', 'error'); creationCurrentStep = 0; renderCreationStep0(); updateStepIndicator(); return; }
-  if (!p.gender) { showToast('请选择性别', 'error'); creationCurrentStep = 0; renderCreationStep0(); updateStepIndicator(); return; }
-  if (!p.difficulty) { showToast('请选择难度', 'error'); creationCurrentStep = 0; renderCreationStep0(); updateStepIndicator(); return; }
-  if (!p.race) { showToast('请选择种族', 'error'); creationCurrentStep = 1; renderCreationStep1(); updateStepIndicator(); return; }
-  if (!p.identity) { showToast('请选择身份', 'error'); creationCurrentStep = 2; renderCreationStep2(); updateStepIndicator(); return; }
-  if (p.pointsSpent > p.points) { showToast('点数不足！请调整分配，当前超出 ' + (p.pointsSpent - p.points) + ' 点', 'error'); return; }
-  if (!puzzleSolved && !puzzleSkipChecked) { showToast('请答对机缘测试或勾选「我是小猪」跳过', 'error'); creationCurrentStep = 5; renderCreationStep5(); updateStepIndicator(); return; }
+  if(GameState.phase!=='creation')return;
+  recalculatePoints();updatePerformanceStats();
+  var errors=CreationRules.validate(GameState.player,CreationUI.catalog());
+  if(errors.length){showToast(errors[0].message,'error');CreationUI.go(errors[0].step,true);return;}
+  if(tavernState.isLoading||!db){showToast('聊天数据正在准备，请稍后再启程','info');return;}
+  document.getElementById('creation-next').disabled=true;
   startGame();
 }
 
 function startGame() {
-  GameState.phase = 'game';
-  // Initialize time
-  GameTime = { era:'三一六纪元', year:316, month:9, day:15, hour:0, totalHours:0 };
-  // Initialize economy from identity
-  var funds = getIdentityStartingFunds(GameState.player.identity);
-  Economy = { gold:funds.gold, silver:funds.silver, copper:funds.copper, spiritStones:funds.spiritStones };
-  // Initialize inventory with starter items
-  GameState.player.inventory = [
-    { id:'it_gift_fire', name:'异火大礼包', qty:1, icon:'🔥', desc:'随机获得一种异火，可直接认主', usable:true, action:'openFireGift' },
-    { id:'it_gender_capsule', name:'性转胶囊', qty:1, icon:'💊', desc:'服用后转换性别（男→女→扶她→男）', usable:true, action:'useGenderCapsule' },
-    { id:'it1', name:'聚气散', qty:3, icon:'💊', desc:'基础修炼丹药，可小幅提升斗气' },
-    { id:'it2', name:'低阶药材', qty:5, icon:'🌿', desc:'常见灵药，炼药基础材料' },
-    { id:'it3', name:'回气丹', qty:1, icon:'💊', desc:'一阶丹药，可恢复斗气' }
-  ];
-  // Initialize skills based on identity
-  GameState.player.skills = getIdentityStartingSkills(GameState.player.identity);
-  // Initialize relationships
-  GameState.player.relationships = [
-    { name:'药老', status:'师徒', affinity:95, desc:'灵魂寄居，传授炼药术' },
-    { name:'萧薰儿', status:'青梅', affinity:90, desc:'古族后裔，自幼相伴' }
-  ];
-  // Initialize history
-  GameState.player.history = [];
-  addHistory('踏入斗气大陆，以' + (getIdentityName() || '未知身份') + '之姿，开启修炼之路');
-  addHistory('初始资金：' + Economy.gold + '金币 ' + Economy.silver + '银币 ' + Economy.spiritStones + '灵石');
-  showView('view-game');
-  initGameWorld();
-  saveToLocalStorage();
-  showToast('创角完成！踏入斗气大陆...', 'success');
-  // Generate AI opening scene and switch to game view
-  setTimeout(function() {
-    generateOpeningScene().then(function() {
-      var btn = document.querySelector('[data-view="tavern"]');
-      if (btn) switchGameView('tavern', btn);
-    }).catch(function(e) { showToast('开场生成失败：' + e.message, 'error'); });
-  }, 500);
+  var p=GameState.player;
+  var initial=CreationRules.initialState(p);
+  GameState.phase='game';p.name=p.name.trim();p.realm=initial.realm;p.soulRealm=initial.soulRealm;
+  GameTime=initial.time;WorldState=initial.world;
+  var funds=getIdentityStartingFunds(p.identity);
+  Economy={gold:funds.gold,silver:0,copper:0,spiritStones:CreationRules.isFree(p)?funds.spiritStones:0};
+  if(typeof WorldMapBridge!=='undefined')WorldMapBridge.cancelMovement();
+  delete p.exploration;
+  if(typeof WorldMapBridge!=='undefined')WorldMapBridge.clearProposal();
+  p.inventory=initial.inventory;p.skills=getIdentityStartingSkills(p.identity);p.relationships=initial.relationships;p.history=[];
+  p.equipment={weapon:null,armor:null,accessory:null,ring:null};
+  // A new life owns new time, quests and rewind state; existing named saves/chats remain intact.
+  if(tavernState.isSending)stopTavernStream();
+  tavernState.activeChatId=null;
+  TimeRewind.snapshots=[];StudioState.cultivating=false;StudioState.activeRoom=null;
+  QuestSystem.quests=[];QuestSystem.completed=[];QuestSystem.failed=[];
+  if(typeof WorldMapBridge!=='undefined')WorldMapBridge.ensure();
+  addHistory('从'+WorldState.specificSpot+'启程，以'+getIdentityName()+'的身份踏入斗气大陆。');
+  addHistory('初始盘缠：'+Economy.gold+'金币。随身物资以所选行囊为准。');
+  showView('view-game');initGameWorld();saveToLocalStorage();
+  showToast('档案已落笔，新的旅程开始了','success');
+  generateOpeningScene().catch(function(e){showToast('开场生成失败：'+e.message,'error');});
 }
 
 function buildCharacterIntro() {
-  var p = GameState.player;
-  var race = (RACES.find(function(r){return r.id===p.race})||{}).name||'未知';
-  var identity = (IDENTITIES.find(function(i){return i.id===p.identity})||{}).name||'未知';
-  var diff = (DIFFICULTY.find(function(d){return d.id===p.difficulty})||{}).name||'普通';
-  var stats = p.baseStats;
-  var talents = p.talents.map(function(tid){
-    for(var tier=0;tier<TALENT_TIERS.length;tier++){
-      var found = TALENTS[TALENT_TIERS[tier].key].find(function(t){return t.id===tid});
-      if(found) return found.name;
-    }
-    return tid;
-  });
-  var attrs = p.douqiAttributes.map(function(aid){
-    var found = DOUQI_ATTRS.find(function(a){return a.id===aid});
-    return found?found.name:aid;
-  });
-
-  return '【角色档案】\n' +
-    '姓名：' + (p.name||'未知') + '\n' +
-    '性别：' + (p.gender==='male'?'男':p.gender==='female'?'女':'扶她') + '\n' +
-    '年龄：' + p.age + '岁\n' +
-    '难度：' + diff + '\n' +
-    '种族：' + race + '\n' +
-    '身份：' + identity + '\n' +
-    '力量：' + stats.strength + ' | 身法：' + stats.agility + ' | 耐力：' + stats.endurance + '\n' +
-    '斗气：' + stats.douqi + ' | 灵魂力：' + stats.soul + ' | 速度：' + stats.speed + '\n' +
-    '天赋词条：' + (talents.length>0?talents.join('、'):'无') + '\n' +
-    '斗气属性：' + (attrs.length>0?attrs.join('、'):'无') + '\n' +
-    '当前所在地：加玛帝国·乌坦城·萧家\n' +
-    '当前时间：三一六纪元 · 九月十五日\n' +
-    '修炼境界：斗者·三星\n' +
-    '持有物品：聚气散×3、低阶药材×5、回气丹×1、异火大礼包×1';
+  var p=GameState.player;
+  var talentNames=p.talents.map(function(id){for(var tier of TALENT_TIERS){var found=TALENTS[tier.key].find(function(t){return t.id===id;});if(found)return found.name+'：'+found.desc;}return id;});
+  var attrNames=p.douqiAttributes.map(function(id){return (DOUQI_ATTRS.find(function(a){return a.id===id;})||{}).name||id;});
+  var kit=CreationRules.kits.find(function(x){return x.id===p.starterKit;});
+  return '【角色档案】\n'+
+    '姓名：'+p.name+'\n性别：'+({male:'男',female:'女',futa:'自定义'}[p.gender]||'未说明')+'\n年龄：'+p.age+'岁\n'+
+    '难度：'+(DIFFICULTY.find(function(d){return d.id===p.difficulty;})||{}).name+'\n'+
+    '种族：'+(RACES.find(function(r){return r.id===p.race;})||{}).name+'\n身份：'+getIdentityName()+'\n'+
+    STAT_CONFIG.map(function(s){return s.label+'：'+p.baseStats[s.key];}).join(' | ')+'\n'+
+    '天赋词条：'+(talentNames.join('；')||'无')+'\n斗气属性：'+attrNames.join('、')+(p.woodAffinity?'（火属性夹带一丝木气）':'')+'\n'+
+    '当前所在地：'+WorldState.location+' · '+WorldState.specificSpot+'\n当前时间：'+getTimeString()+'\n'+
+    '修炼境界：'+p.realm+'\n灵魂境界：'+p.soulRealm+'\n持有物品：'+p.inventory.map(function(i){return i.name+'×'+i.qty;}).join('、')+'\n'+
+    '人物关系：尚未建立；不是萧炎，不默认拜师药老、结识薰儿或拥有萧家院落。\n'+
+    '叙事规则：'+(CreationRules.isFree(p)?'自由演绎，超常禀赋为游戏改编，仍需追踪条件与代价。':'依原著框架独立成长；不自动授予异火、斗王化翼、斗尊空间能力或高品炼药资格。')+'\n'+
+    '世界边界：火属性夹带木气及灵魂感知是炼药条件；灵魂境界与斗气境界独立；功法斗技分天地玄黄。开局纪年是游戏时间，不是原著历法。高阶族群秘密不能作为所有NPC的共同常识。\n'+
+    '行囊方案：'+(kit?kit.name:'旧存档物资');
 }
 
 async function generateOpeningScene() {
   if (tavernState.isLoading || !db) { showToast('聊天数据库仍在加载，请稍后重试', 'error'); return; }
   if (tavernState.isSending) return;
+  var openingPlayer=GameState.player;
   var intro = buildCharacterIntro(), preset = tavernState.presets[0];
   var chat = createChatSession({name:(GameState.player.name || '修炼者') + ' - 新人生',characterName:'斗破苍穹',presetId:preset ? preset.id : '',lorebookIds:tavernState.activeLorebookIds.slice()});
+  chat.characterCard={name:'斗气大陆',description:'你是斗气大陆的叙事者，围绕玩家的独立角色、当前地点和已发生事实推进故事。',personality:'人物有各自目标与知情范围，尊重玩家选择，追踪条件和代价。',scenario:'玩家自行创角，原著人物并非预设同伴。实际状态以角色档案和后续事实为准。',firstMessage:''};
   chat.messages.push(createChatMessage('system',intro));
-  await db.chats.put(chat); tavernState.chats.unshift(chat); tavernState.activeChatId = chat.id;
+  await db.chats.put(chat);
+  if(GameState.player!==openingPlayer||GameState.phase!=='game')return;
+  tavernState.chats.unshift(chat); tavernState.activeChatId = chat.id;
+  if(!tavernState.tavernSettings)tavernState.tavernSettings=createDefaultTavernSettings();
+  tavernState.tavernSettings.activeChatId=chat.id;
+  await db.tavernSettings.put(tavernState.tavernSettings);
+  if(GameState.player!==openingPlayer||GameState.phase!=='game')return;
+  saveToLocalStorage();
   renderTavernSessionList(); renderTavernMessages();
   if (!getTavernApi('primary')) {
-    var mockOpening = '晨曦透过窗棂洒在萧家后院的青石板上，你从闭关中醒来，感受到丹田中斗气如涓涓细流般涌动。三一六纪元的秋风带着魔兽山脉的苍凉气息拂过面庞。你是来自乌坦城的' + (GameState.player.name||'修炼者') + '，以' + ((RACES.find(function(r){return r.id===GameState.player.race})||{}).name||'未知') + '之躯踏上了这条以斗气逆天改命的不归路。\n\n远处的魔兽山脉如巨兽匍匐，那里是无数佣兵埋骨之地，也是强者崛起的试炼场。坊市的喧嚣隐隐传来，萧家后院的老槐树沙沙作响——新的一天，新的修炼。\n\n——你的斗气之路，从这里开始。';
-    chat.messages.push(createChatMessage('assistant',mockOpening)); await db.chats.put(chat); renderTavernMessages(); showToast('开场已生成（离线模式）','info'); return;
+    var origin=CreationRules.places.find(function(x){return x.id===GameState.player.startLocation;})||CreationRules.places[0];
+    var mockOpening=origin.opening+'\n\n你是'+GameState.player.name+'，一名刚开始修习的'+getIdentityName()+'。行囊中装着'+GameState.player.inventory.map(function(i){return i.name+'×'+i.qty;}).join('、')+'。眼前的选择不止一条，先从你愿意迈出的那一步开始。';
+    chat.messages.push(createChatMessage('assistant','## maintext\n'+mockOpening+'\n\n## option\n'+origin.options.map(function(o){return '- '+o;}).join('\n')));
+    await db.chats.put(chat);
+    if(GameState.player!==openingPlayer||GameState.phase!=='game')return;
+    renderTavernMessages(); showToast('开场已生成（离线模式）','info'); return;
   }
-  await runTavernTurn('请依据角色档案，以第二人称撰写 200—300 字的乌坦城开场，并给出三个行动选项。',false);
+  await runTavernTurn('请依据角色档案与实际出发地点，以第二人称撰写200—300字开场，并给出三个符合身份与境界的行动选项。不要默认萧家居所、师徒或亲密关系，不赠送异火；未发生的事只作为线索。',false);
 }
 
 function getIdentityName() {
@@ -2833,31 +2124,20 @@ function getIdentityStartingSkills(identityId) {
   return base;
 }
 
-function continueGame() {
-  // 优先从存档管理器加载最新存档，确保刷新后能继续
-  var saves = getSaves();
-  if (saves.length > 0) {
-    var latest = saves.sort(function(a, b) { return b.timestamp - a.timestamp; })[0];
-    if (latest.player && latest.player.name && latest.player.race) {
-      GameState.player = JSON.parse(JSON.stringify(latest.player));
-      if (latest.settings) {
-        GameState.settings = JSON.parse(JSON.stringify(latest.settings));
-        // Migrate old key field
-        if (GameState.settings.apis) GameState.settings.apis.forEach(function(api) {
-          if (api.key && !api.apiKey) api.apiKey = api.key;
-        });
-      }
-      saveToLocalStorage(); // 同步到自动存档
-    }
+async function continueGame() {
+  if(GameState.phase==='creation' && GameState.player.worldMode){
+    showView('view-creation');CreationUI.go(GameState.player.creationStep||0,true);return;
   }
-  if (!GameState.player.name || !GameState.player.race) {
-    showToast('暂无有效存档，请开启新人生', 'warning');
-    return;
+  if(tavernState.isLoading||!db){showToast('聊天数据正在恢复，请稍后继续','info');return;}
+  // Current autosave owns player, world and chat state together. Never replace just
+  // the player with an unrelated named save when resuming a newer life.
+  if(!GameState.player.name||!GameState.player.race){
+    var saves=getSaves().slice().sort(function(a,b){return b.timestamp-a.timestamp;});
+    if(!saves.length){showToast('暂无有效进度，请开启新人生','warning');return;}
+    try{await restoreGameSnapshot(saves[0]);}catch(e){showToast('恢复失败：'+e.message,'error');return;}
   }
-  showView('view-game');
-  GameState.phase = 'game';
-  initGameWorld();
-  showToast('继续人生...欢迎回来，' + GameState.player.name, 'info');
+  showView('view-game');GameState.phase='game';initGameWorld();saveToLocalStorage();
+  showToast('欢迎回来，'+GameState.player.name,'info');
 }
 
 // ==============================
@@ -3031,55 +2311,10 @@ function _loadMapScripts(cb) {
 }
 
 function buildWorldMap() {
-  var container = document.getElementById('game-view-worldmap');
-  if (!container) return;
-  if (container._mapBuilt) { if (window._mapEngine) window._mapEngine._resize(); return; }
-  _loadMapScripts(function() {
-  container._mapBuilt = true;
-
-  // Sync REGION_DATA for existing functions
-  REGION_DATA = {};
-  MAP_REGIONS.forEach(function(r) { REGION_DATA[r.id] = r; });
-  SUB_LOCATIONS = MAP_SUB_LOCATIONS;
-
-  container.innerHTML =
-    '<div style="flex:1;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#b8956a 0%,#c4a47a 30%,#b8956a 60%,#a08060 100%);padding:20px 30px;overflow:hidden;min-height:0;">' +
-      '<div style="position:relative;width:100%;max-width:1100px;min-height:580px;background:linear-gradient(180deg,#f5ead0 0%,#efe0c0 15%,#f2e5c8 50%,#ead8b0 85%,#e8d4a8 100%);box-shadow:0 12px 40px rgba(0,0,0,0.35),inset 0 0 120px rgba(139,90,43,0.08);padding:36px 44px 44px;display:flex;flex-direction:column;border:3px solid #8b6914;border-radius:2px;">' +
-        '<div style="position:absolute;top:-20px;left:0;right:0;height:26px;background:linear-gradient(180deg,#b8956a,#9a7a50,#7a5a30,#9a7a50,#b8956a);border:2.5px solid #5a3a1a;border-radius:5px;box-shadow:0 6px 12px rgba(0,0,0,0.3);"></div>' +
-        '<div style="position:absolute;bottom:-20px;left:0;right:0;height:26px;background:linear-gradient(180deg,#b8956a,#9a7a50,#7a5a30,#9a7a50,#b8956a);border:2.5px solid #5a3a1a;border-radius:5px;box-shadow:0 6px 12px rgba(0,0,0,0.3);"></div>' +
-        '<div style="text-align:center;margin-bottom:8px;">' +
-          '<h3 style="font-family:\'ZCOOL KuaiLe\',\'Noto Serif SC\',cursive;color:#4a2a10;font-size:1.8em;margin:0;letter-spacing:8px;">斗 气 大 陆</h3>' +
-          '<div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-top:2px;">' +
-            '<span style="width:50px;height:1px;background:linear-gradient(90deg,transparent,#8b6914);"></span>' +
-            '<span id="time-display-map" style="font-size:0.7em;color:#6b4a2a;font-family:var(--font-serif);"></span>' +
-            '<span style="font-size:0.6em;color:#8b6914;">·</span>' +
-            '<span style="font-size:0.7em;color:#6b4a2a;">点击区域 | 滚轮缩放 | 拖拽平移</span>' +
-            '<span style="width:50px;height:1px;background:linear-gradient(90deg,#8b6914,transparent);"></span>' +
-          '</div>' +
-        '</div>' +
-        '<div id="map-canvas-wrap" style="flex:1;position:relative;min-height:440px;border:2px solid #b8956a;border-radius:2px;overflow:hidden;box-shadow:inset 0 0 40px rgba(139,90,43,0.1);">' +
-          '<canvas id="map-canvas" style="width:100%;height:100%;display:block;"></canvas>' +
-        '</div>' +
-        '<div style="display:flex;justify-content:center;gap:16px;margin-top:8px;font-size:9px;color:#6b4a2a;flex-wrap:wrap;">' +
-          '<span>点击区域详情 | 悬停高亮 | 滚轮缩放拖拽 | 搜索定位 | ☁️ 灵气感知</span>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-
-  var canvas = document.getElementById('map-canvas');
-  if (canvas) {
-    window._mapEngine = new MapEngine(canvas, {
-      onRegionClick: function(regionId) { openRegionDetail(regionId); },
-      onSubClick: function(regionId, index, sub) { openSubLocationDetail(regionId, index); },
-      onHoverChange: function() {}
-    });
-    var wrap = document.getElementById('map-canvas-wrap');
-    if (wrap && typeof renderMapControls === 'function') renderMapControls(wrap, window._mapEngine);
-  }
-  }); // end _loadMapScripts callback
+  var container=document.getElementById('game-view-worldmap');
+  if(!container||GameState.phase!=='game')return;
+  WorldMapUI.mount(container).catch(function(e){showToast('地图未能展开：'+e.message,'error');});
 }
-
-
 
 function openRegionDetail(regionId) {
   var r = REGION_DATA[regionId];
@@ -3128,7 +2363,7 @@ function buildStudio() {
   var container = document.getElementById('game-view-studio');
   var player = GameState.player || {};
   var playerName = player.name || '修炼者';
-  var realm = player.realm || '斗者·三星';
+  var realm = player.realm || '境界未记录';
   var spirit = Economy ? Economy.spiritStones : 0;
   var gold = Economy ? Economy.gold : 0;
   var activeRoom = StudioState.activeRoom;
@@ -3137,7 +2372,7 @@ function buildStudio() {
     // ── 顶部状态栏 ──
     '<div style="padding:10px 20px;background:var(--bg-panel);border-bottom:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">' +
       '<div style="display:flex;align-items:center;gap:14px;">' +
-        '<span style="font-family:var(--font-serif);color:var(--text-primary);font-size:15px;">🏯 修炼驻地 · 乌坦城萧家后院</span>' +
+        '<span style="font-family:var(--font-serif);color:var(--text-primary);font-size:15px;">🏯 修炼驻地 · ' + escapeHtml(WorldState.specificSpot) + '</span>' +
         '<span style="font-size:10px;color:var(--text-muted);">驻地 Lv.1 · 3/8 房间</span>' +
       '</div>' +
       '<div style="display:flex;gap:16px;align-items:center;font-size:11px;">' +
@@ -3337,11 +2572,10 @@ function expandRoom(dir) {
 
 function buildPersonnel() {
   var container = document.getElementById('game-view-personnel');
-  var chars = [
-    { name: '萧炎', realm: '斗者·三星', skill: '焚决', soul: '凡境中期', fire: '—', loyalty: 100, avatar: '萧' },
-    { name: '药老', realm: '斗尊（残魂）', skill: '炼药术·宗师', soul: '天境', fire: '骨灵冷火', loyalty: 95, avatar: '药' },
-    { name: '萧薰儿', realm: '斗者·五星', skill: '金帝焚天炎', soul: '凡境后期', fire: '金帝焚天炎', loyalty: 100, avatar: '薰' }
-  ];
+  if(!container)return;
+  var player=GameState.player;
+  var chars=[{name:player.name,realm:player.realm||'未记录',skill:(player.skills||[]).map(function(s){return s.name;}).join('、')||'尚未修习',soul:player.soulRealm||'未记录',fire:'—',loyalty:100,avatar:(player.name||'你').slice(0,1)}].concat((player.relationships||[]).map(function(r){return {name:r.name,realm:r.realm||'未知',skill:r.skill||'未知',soul:r.soul||'未知',fire:r.fire||'—',loyalty:Math.min(100,Math.max(0,Number(r.affinity)||0)),avatar:(r.name||'客').slice(0,1)};}));
+
   container.innerHTML =
     '<div style="padding:12px 20px;background:var(--bg-panel);border-bottom:1px solid var(--border-subtle);display:flex;justify-content:space-between;flex-shrink:0;">' +
       '<span style="font-family:var(--font-serif);color:var(--text-primary);font-size:15px;">人员管理</span>' +
@@ -3350,20 +2584,20 @@ function buildPersonnel() {
     '<div style="flex:1;overflow-y:auto;padding:20px;">' +
       '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">' +
         chars.map(function(c) {
-          return '<div class="personnel-card" onclick="openCharacterDetail(\'' + c.name + '\')">' +
+          return '<div class="personnel-card" onclick="openCharacterDetail(' + TavernCore.handlerArg(c.name) + ')">' +
             '<div style="display:flex;align-items:center;gap:14px;">' +
               '<div class="char-avatar">' +
-                '<span>' + c.avatar + '</span>' +
+                '<span>' + escapeHtml(c.avatar) + '</span>' +
               '</div>' +
               '<div>' +
-                '<div style="color:var(--text-primary);font-family:var(--font-serif);font-size:15px;">' + c.name + '</div>' +
-                '<div style="color:var(--text-secondary);font-size:11px;">' + c.realm + '</div>' +
+                '<div style="color:var(--text-primary);font-family:var(--font-serif);font-size:15px;">' + escapeHtml(c.name) + '</div>' +
+                '<div style="color:var(--text-secondary);font-size:11px;">' + escapeHtml(c.realm) + '</div>' +
               '</div>' +
             '</div>' +
             '<div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;">' +
-              '<div><span style="color:var(--text-muted);">功法：</span><span>' + c.skill + '</span></div>' +
-              '<div><span style="color:var(--text-muted);">灵魂力：</span><span>' + c.soul + '</span></div>' +
-              '<div style="grid-column:1/-1;"><span style="color:var(--text-muted);">异火：</span><span style="color:' + (c.fire === '—' ? 'var(--text-dim)' : 'var(--accent-fire)') + ';">' + c.fire + '</span></div>' +
+              '<div><span style="color:var(--text-muted);">功法：</span><span>' + escapeHtml(c.skill) + '</span></div>' +
+              '<div><span style="color:var(--text-muted);">灵魂力：</span><span>' + escapeHtml(c.soul) + '</span></div>' +
+              '<div style="grid-column:1/-1;"><span style="color:var(--text-muted);">异火：</span><span style="color:' + (c.fire === '—' ? 'var(--text-dim)' : 'var(--accent-fire)') + ';">' + escapeHtml(c.fire) + '</span></div>' +
               '<div style="grid-column:1/-1;">' +
                 '<span style="color:var(--text-muted);">忠诚度：</span>' +
                 '<span style="color:' + (c.loyalty >= 90 ? 'var(--accent-green)' : 'var(--accent-fire)') + ';">' +
@@ -3391,10 +2625,10 @@ function openCharacterDetail(name) {
   showModal(
     '<h3 style="margin-bottom:12px;">' + name + '</h3>' +
     '<div style="font-size:13px;display:flex;flex-direction:column;gap:6px;">' +
-      '<div><span style="color:var(--text-muted);">境界：</span><span style="color:var(--text-primary);">' + c.realm + '</span></div>' +
-      '<div><span style="color:var(--text-muted);">功法：</span><span>' + c.skill + '</span></div>' +
-      '<div><span style="color:var(--text-muted);">灵魂力：</span><span>' + c.soul + '</span></div>' +
-      '<div><span style="color:var(--text-muted);">异火：</span><span style="color:var(--accent-fire);">' + c.fire + '</span></div>' +
+      '<div><span style="color:var(--text-muted);">境界：</span><span style="color:var(--text-primary);">' + escapeHtml(c.realm) + '</span></div>' +
+      '<div><span style="color:var(--text-muted);">功法：</span><span>' + escapeHtml(c.skill) + '</span></div>' +
+      '<div><span style="color:var(--text-muted);">灵魂力：</span><span>' + escapeHtml(c.soul) + '</span></div>' +
+      '<div><span style="color:var(--text-muted);">异火：</span><span style="color:var(--accent-fire);">' + escapeHtml(c.fire) + '</span></div>' +
       '<div style="color:var(--text-body);margin-top:8px;">' + c.desc + '</div>' +
     '</div>'
   );
@@ -5177,7 +4411,7 @@ function renderEconomyBar() {
 function renderTimeDisplay() {
   var html = '<span class="time-era">' + GameTime.era + '</span> · ' +
     GameTime.year + '年 ' + TIME_MONTH_NAMES[GameTime.month - 1] + ' ' +
-    GameTime.day + '日 ' + TIME_HOUR_NAMES[GameTime.hour] + ' · ' + getSeason();
+    GameTime.day + '日 ' + (padNum(GameTime.hour,2)+':'+padNum(GameTime.minute||0,2)) + ' · ' + getSeason();
   var el1 = document.getElementById('time-display');
   if (el1) el1.innerHTML = html;
   var el2 = document.getElementById('time-display-map');
@@ -6011,6 +5245,11 @@ function assembleTavernPrompt(opts) {
   var plan = TavernCore.promptPlan({preset:preset, characterCard:charCard, userName:userName,
     location:location, lorebookMatches:lorebookMatches});
   var systemParts = [];
+  if(typeof WorldMapBridge!=='undefined'){
+    var mapFacts=WorldMapBridge.promptContext();
+    if(mapFacts)systemParts.push(mapFacts);
+    if(!tavernState.tavernSettings?.pureTextMode)systemParts.push('地图行动可选协议：需要建议玩家行动时，可在正文外添加一个 <world_action>{"type":"travel","targetId":"已知地点ID","mode":"walk"}</world_action>，或 type 为 explore/rest/talk（talk 使用 npcId）。只使用地图已确认事实中的ID；不得自动结算、赠送物资或越过入口条件。建议由玩家在地图中确认。');
+  }
 
   // Depth prompt (based on relationship affinity)
   try {
@@ -6163,6 +5402,7 @@ async function initTavernDB() {
     if (!l.length) { var defaultBook = createDefaultLorebook(); await db.lorebooks.put(defaultBook); l = [defaultBook]; }
     for (var bi = 0; bi < l.length; bi++) {
       if (DoupoUserFlames.migrateBook(l[bi])) await db.lorebooks.put(l[bi]);
+      if (typeof LoreCanon!=='undefined' && LoreCanon.migrateBook(l[bi])) await db.lorebooks.put(l[bi]);
       if (l[bi].engineVersion === 2) continue;
       (l[bi].entries || []).forEach(function(e) { if (e.selective && !(e.secondaryKeys || []).length) { e.excludeRecursion = true; e.selective = false; } });
       l[bi].engineVersion = 2; await db.lorebooks.put(l[bi]);
@@ -6207,23 +5447,23 @@ function createDefaultLorebook() {
     createLorebookEntry({ keys:['落雁帝国','慕兰帝国'], content:'落雁帝国与慕兰帝国位于加玛帝国北部，三国并称西北大陆三大帝国。落雁帝国以金雁宗为最强宗门；慕兰帝国则有慕兰谷，以魔兽驯养和合击之术闻名。三国时有联盟与纷争。' }),
 
     // ========== 二、修炼体系 ==========
-    createLorebookEntry({ keys:['修炼','斗气','境界'], content:'斗气大陆修炼体系由低到高：斗者→斗师→大斗师→斗灵→斗王→斗皇→斗宗→斗尊→斗圣→斗帝。每个大境界分一至九星。修炼本质是吸收天地斗气淬炼经脉骨骼，在丹田凝聚斗气漩涡。斗王可凝聚斗气化翼飞行；斗皇可踏空而行；斗宗可初步掌握空间之力；斗尊可开辟空间通道；斗圣可自成一方天地；斗帝可开辟世界，万载以来仅陀舍古帝一人达到。' }),
-    createLorebookEntry({ keys:['功法','功法等级'], content:'功法分为天、地、玄、黄四阶，每阶又分低级、中级、高级。功法决定斗气修炼速度和斗气储量上限。高级功法可使斗气更为凝练精纯，战力远超同级。焚决原为黄阶低级功法，但可通过吞噬异火无限进化，最终可升至天阶乃至超越天阶。' }),
+    createLorebookEntry({ keys:['修炼','斗气','境界'], content:"斗气修行由斗之气起步，依次为斗者、斗师、大斗师、斗灵、斗王、斗皇、斗宗、斗尊、斗圣、斗帝。斗尊巅峰还有九转积累及半圣过渡。斗王化翼、斗宗踏空，飞行斗技可形成有条件的例外。斗尊与斗圣的空间能力不同。斗帝并非单靠经验自然突破；源气和帝源是终局关键。初始数值不是境界等级。【原文依据：第6、116、1382、1638章】", comment:"原文校勘 · 创角规则修订" }),
+    createLorebookEntry({ keys:['功法','功法等级'], content:"功法分天地玄黄四阶，各有低、中、高三级。功法与斗技、境界、熟练及环境共同影响战斗。焚决从低阶起步，吞噬异火可进化，但有兼容和死亡风险，不能吞噬任意火焰就无限成长。【原文依据：第2、1638章】", comment:"原文校勘 · 创角规则修订" }),
     createLorebookEntry({ keys:['斗技','斗技等级'], content:'斗技分为天、地、玄、黄四阶，对应功法等级。斗技是将斗气转化为攻击、防御、身法、辅助等具体战斗手段的方法。高等级斗技消耗斗气更大但威力惊人。地阶以上斗技可凝聚斗气异象，天阶斗技更是拥有摧山断河之威。' }),
-    createLorebookEntry({ keys:['炼药师','炼药','丹药'], content:'炼药师是斗气大陆最尊贵的职业，可炼制提升修为、疗伤、解毒等各种丹药。炼药师分一品至九品，每品又分低中高三级。八品炼药师可炼制化形丹、破宗丹等逆天丹药；九品炼药师传说可炼制帝品丹药。炼药师需灵魂力出众，掌握火焰操控，辨识药材。丹药分十品：一至九品对应炼药师等级，帝品为传说级别。' }),
-    createLorebookEntry({ keys:['灵魂力','灵魂境界'], content:'灵魂力是炼药师的核心天赋。灵魂境界由低到高：凡境→灵境→天境→帝境。凡境灵魂为普通人水平；灵境灵魂可感知灵魂波动；天境灵魂可灵魂攻击、刻印灵魂印记；帝境灵魂可一念覆盖万里，灵魂不灭。' }),
+    createLorebookEntry({ keys:['炼药师','炼药','丹药'], content:"成为炼药师需要火属性中夹带一丝木气，并具备灵魂感知、塑造能力。要学习药方、辨识材料、提炼控火、融合与成丹。炼药师以品级衡量，身份或天赋不能替代考核、材料与训练。【原文依据：第6章】", comment:"原文校勘 · 创角规则修订" }),
+    createLorebookEntry({ keys:['灵魂力','灵魂境界'], content:"灵魂境界主要分凡境、灵境、天境、帝境。灵魂与斗气是两条成长轴，帝境灵魂不等于斗帝。灵魂影响炼药、感知与灵魂交锋；残魂也有伤损、沉睡和消耗，不能默认不灭。【原文依据：第1124、1491、1597章】", comment:"原文校勘 · 创角规则修订" }),
     createLorebookEntry({ keys:['魔核'], content:'魔核是魔兽体内能量结晶，等同于魔兽的力量核心。一至四阶魔核为低阶，五至六阶为中高阶，七阶以上极为罕见。魔核可用于炼药、炼器、驱动阵法。' }),
 
     // ========== 三、异火榜（二十三种） ==========
     createLorebookEntry({ keys:['异火','异火榜','天地奇物'], content:'异火乃天地间最霸道的火焰，共有二十三种，录于异火榜。每种异火拥有独特属性和灵智，极难驯服。炼药师若能拥有异火，炼药效率与品质大幅提升。异火之间可相互吞噬融合，吞噬者可获得更强火焰。异火榜排名：一·帝炎、二·虚无吞炎、三·净莲妖火、四·金帝焚天炎、五·生灵之焱、六·八荒破灭焱、七·九幽金祖火、八·红莲业火、九·三千焱炎火、十·九幽风炎、十一·骨灵冷火、十二·九龙雷罡火、十三·龟灵地火、十四·陨落心炎、十五·海心焰、十六·火云水炎、十七·火山石焰、十八·风雷怒炎、十九·青莲地心火、二十·龙凤焱、二十一·六道轮回炎、二十二·万兽灵火、二十三·玄黄炎。' }),
-    createLorebookEntry({ keys:['青莲地心火'], content:'青莲地心火，异火榜第十九。诞生于大地深处，历经千年青莲所化。火焰呈青色，温度惊人。位于塔戈尔大沙漠深处的地心岩浆层中，被美杜莎女王先行发现。萧炎在蛇人族圣城地下将其收服，成为他的第一种异火。' }),
-    createLorebookEntry({ keys:['陨落心炎'], content:'陨落心炎，异火榜第十四。透明无色火焰，可无视斗气防御直接灼烧灵魂。存在于迦南学院内院焚天练气塔底层岩浆世界。拥有加速修炼的逆天效果，被迦南学院视为至宝。萧炎在迦南学院内院将其收服，成为第二种异火。' }),
+    createLorebookEntry({ keys:['青莲地心火'], content:"青莲地心火排名第十九，在地底岩浆青莲中孕育。美杜莎先取走火种，萧炎随后获得并炼化；探索原洞穴时火种可能已不在。发现地点、当前持有者与炼化阶段必须区分。【原文依据：第189、199、217、234章】", comment:"原文校勘 · 创角规则修订" }),
+    createLorebookEntry({ keys:['陨落心炎'], content:"陨落心炎排名第十四，心火锻气与迦南学院天焚炼气塔有关。塔体大部分埋地下。成熟本体与后来找到的幼火分开，收服本体后学院修炼基础并非永远消失。【原文依据：第460、614、900章】", comment:"原文校勘 · 创角规则修订" }),
     createLorebookEntry({ keys:['骨灵冷火'], content:'骨灵冷火，异火榜第十一。极寒与极热并存，火焰呈森白之色。原是药老的本命异火，随药老寄居戒指中。药老陨落后此火仍为其灵魂所控。萧炎在药老指导下曾借用此火炼药。' }),
     createLorebookEntry({ keys:['净莲妖火'], content:'净莲妖火，异火榜第三。呈乳白之色，火焰如莲花绽放，拥有净化万物之力。生于妖火空间，每千年出世一次。拥有极高灵智，曾化形为人。萧炎历尽艰险将其收服，成为其最强异火之一。' }),
     createLorebookEntry({ keys:['虚无吞炎'], content:'虚无吞炎，异火榜第二。漆黑如墨，拥有吞噬万物之能。魂族魂天帝的本命异火，实力堪比九星斗圣。曾吞噬无数生灵与灵魂，是魂族千年大计的依仗之一。最终被萧炎以帝炎击败吞噬。' }),
     createLorebookEntry({ keys:['金帝焚天炎'], content:'金帝焚天炎，异火榜第四。呈金色，温度之高可焚烧天地。古族传承异火，传予古族神品血脉者。萧薰儿拥有此火，因其古族神品血脉身份。' }),
     createLorebookEntry({ keys:['三千焱炎火'], content:'三千焱炎火，异火榜第九。又名三千星空焱炎火，呈紫黑之色，火焰中有星辰闪烁。诞生于星空之中，拥有极强生命力，号称不死之火。存放于丹塔星域之中，后被萧炎收服。' }),
-    createLorebookEntry({ keys:['帝炎'], content:'帝炎，异火榜第一。并非单一异火，而是由其余二十二种异火融合而成的终极之火。陀舍古帝以帝炎成就斗帝之位。萧炎最终融合所有异火凝成帝炎，击败魂天帝。' }),
+    createLorebookEntry({ keys:['帝炎'], content:"异火榜第一关联帝炎与陀舍古帝。有灵智的异火吞噬其他二十一种，形成汇聚二十二种异火的状态，自号帝炎。不要把第一位当作开局可捡的普通自然火种。【原文依据：第1635章】", comment:"原文校勘 · 创角规则修订" }),
 
     // ========== 四、远古八族 ==========
     createLorebookEntry({ keys:['远古八族','八族'], content:'远古八族是斗气大陆最古老的八个家族，由远古时期八位斗帝的后裔组成。分别为：萧族、古族、魂族、炎族、药族、雷族、石族、灵族。每族拥有独特的血脉传承和斗帝血脉之力。千年以来八族互相制衡，魂族暗中谋划吞并其余七族。萧族千年前被魂族算计而衰落，血脉几乎断绝；灵族、石族、药族先后被魂族灭族；仅存古族、炎族、雷族尚有完整实力。' }),
@@ -6257,7 +5497,7 @@ function createDefaultLorebook() {
     createLorebookEntry({ keys:['陀舍古帝'], content:'陀舍古帝，斗气大陆最后一位斗帝，存在于远古时期。以帝炎融合二十三种异火成就斗帝。陨落后留下古帝洞府，洞府钥匙为八块陀舍古帝玉，分由远古八族各持一块。洞府中藏有帝品雏丹和异火广场，是万年来无数强者追寻的终极机缘。' }),
 
     // ========== 七、功法斗技 ==========
-    createLorebookEntry({ keys:['焚决','焚决功法'], content:'焚决，原本仅黄阶低级功法，由远古神秘强者所创。核心特性：可吞噬异火使功法进化，每吞噬一种异火，功法等级提升。修炼至大成配合多种异火可达天阶乃至帝阶。因初始等级极低无人修炼，唯有萧炎敢于冒险。最终吞噬所有异火，焚决进化为帝阶功法。' }),
+    createLorebookEntry({ keys:['焚决','焚决功法'], content:"焚决是通过吞噬异火进化的特殊功法，早期有极高风险。药老传授萧炎，陀舍古帝也曾修习，但古帝明确不是它的创造者。更早创造者未在此版原文明确，不添加原著没有的答案。【原文依据：第1638章】", comment:"原文校勘 · 创角规则修订" }),
     createLorebookEntry({ keys:['八极崩','焰分噬浪尺','佛怒火莲'], content:'萧炎的标志性斗技：八极崩——玄阶中级近身体术斗技，八重斗气叠加寸劲爆发；焰分噬浪尺——玄阶高级，以尺为引劈出火焰气浪；佛怒火莲——萧炎自创融合斗技，以多种异火凝聚火莲，威力随融合异火数量递增，最终可达到天阶斗技威力。双色火莲可重创斗皇；三色火莲可威胁斗宗；最终版帝炎火莲可毁天灭地。' }),
     createLorebookEntry({ keys:['吸掌','吹火掌'], content:'吸掌与吹火掌均为低阶斗技，但配合使用却有奇效。吸掌可隔空吸取物体或牵引身形；吹火掌反向喷射气流。二者配合可制造临时性的飞行或急停效果，在斗王之前极为实用。萧炎在斗者时期便熟练掌握。' }),
     createLorebookEntry({ keys:['天火三玄变'], content:'天火三玄变，萧族秘传斗技，分为三变：第一变·琉璃变、第二变·青莲变、第三变·星辰变。每变提升一星至三星实力，三变叠加可临时跨越数个星级。需以异火为引施展，变数越多消耗越大。萧炎在斗王时期从萧族传承中获得。' }),
@@ -6268,9 +5508,9 @@ function createDefaultLorebook() {
     createLorebookEntry({ keys:['纳戒','储物戒指'], content:'纳戒是利用空间之力开辟小型储物空间的戒指。内部空间大小与纳戒品质相关，普通纳戒空间约数尺立方，高级纳戒可达数十丈见方。纳戒内时间大致静止，物品可长期保存。萧炎最早获得的纳戒便是药老寄居的那枚漆黑古戒，品质远超普通纳戒。' }),
     createLorebookEntry({ keys:['飞行斗技','斗气化翼'], content:'斗气化翼是斗王强者的标志，可在背后凝聚斗气双翼自由飞行，速度快过大多数飞行魔兽。斗王之前可借助飞行斗技短暂飞行，但消耗巨大。罕见的飞行斗技如紫云翼，可让斗者阶段即具备飞行能力。' }),
     createLorebookEntry({ keys:['空间戒指','纳石'], content:'纳石是制作纳戒的原料，一种蕴含空间之力的稀有矿石。品质越高可炼制纳戒的内部空间越大。在加玛帝国极为珍贵，在中州相对常见。高级炼器师可用纳石炼制空间储物器具。' }),
-    createLorebookEntry({ keys:['聚气散','筑基灵液'], content:'聚气散为一品丹药，可帮助斗之气修炼者凝聚斗气感应气旋，大幅提升晋入斗者的成功率。萧炎为纳兰嫣然退婚时所收补偿即为此丹。筑基灵液为二品丹药，可加速斗者阶段斗气凝聚速度，药老以萧家后山药材为萧炎炼制。' }),
+    createLorebookEntry({ keys:['聚气散','筑基灵液'], content:"聚气散用于辅助九段斗之气者凝聚斗之气旋、晋入斗者，不是随时吃一枚就加经验的普通药物。药物用途、品级和限制需按具体丹方判断。【原文依据：第6章】", comment:"原文校勘 · 创角规则修订" }),
     createLorebookEntry({ keys:['化形丹','破宗丹','皇极丹'], content:'化形丹为七品丹药，魔兽服用后可化为人形修炼。破宗丹为六品丹药，可助斗皇巅峰突破至斗宗。皇极丹为六品丹药，可大幅提升斗皇强者修为。这三种丹药均为同阶丹药中的极品。' }),
-    createLorebookEntry({ keys:['天墓'], content:'天墓是远古强者遗留的试炼空间，每隔数年开启一次。墓中能量体为远古陨落强者灵魂所化，击败可获得能量印记提升修为。天墓分多层，越深入能量体越强。萧族先祖萧玄陨落后的残魂便封锁在天墓最深层。' }),
+    createLorebookEntry({ keys:['天墓'], content:"天墓入口与古界开放相关，内部有三层与内外时间差，存在能量体及萧玄相关遗留。它不位于天目山脉，也不是九层地牢；资格、开放与危险应随情节处理。【原文依据：第1339章】", comment:"原文校勘 · 创角规则修订" }),
     createLorebookEntry({ keys:['古帝洞府'], content:'古帝洞府是陀舍古帝陨落前留下的传承空间，万年来仅开启一次。洞府内有异火广场，陈列二十二根异火柱（帝炎为融合之火无柱），广场中央为陀舍古帝雕像。洞府深处封存帝品雏丹——服用后可毫无障碍晋入斗帝。最终魂天帝得帝品雏丹晋入斗帝，萧炎则以异火广场融合二十二种异火成就帝炎，同入斗帝境界。' }),
 
     // ========== 九、魔兽体系 ==========
@@ -6338,14 +5578,14 @@ function createDefaultLorebook() {
     createLorebookEntry({ keys:['火山石焰'], content:'火山石焰，异火榜第十七。诞生于活火山深处，呈暗红带灰。温度虽不算极高但蕴含大地厚重之力，攻击时如山崩地裂。' }),
     createLorebookEntry(DoupoUserFlames.entry(18)),
     createLorebookEntry({ keys:['火云水炎'], content:'火云水炎，异火榜第十六。呈蓝白相间，水火交融之异火。诞生于深海火山口，能在水中燃烧。拥有水之柔韧与火之暴烈。' }),
-    createLorebookEntry({ keys:['海心焰'], content:'海心焰，异火榜第十五。深蓝如海之心，诞生于深海最深处。拥有水属性的延展性和渗透力。原为韩枫所持，韩枫陨落后被萧炎吞噬融合。' }),
+    createLorebookEntry({ keys:['海心焰'], content:"海心焰排名第十五。曾由韩枫持有，后经魂殿、慕骨相关情节流转，萧炎后期获得。韩枫第一次败亡不代表萧炎立即拥有火种。【原文依据：第597、1150、1485章】", comment:"原文校勘 · 创角规则修订" }),
     createLorebookEntry({ keys:['龟灵地火'], content:'龟灵地火，异火榜第十三。呈暗绿之色，火焰形态如龟甲纹路。蕴含大地之力，防御性与持久性极强。诞生于万年龟灵陨落之地。' }),
     createLorebookEntry({ keys:['九龙雷罡火'], content:'九龙雷罡火，异火榜第十二。呈银色带雷光，火焰中有九条雷龙盘旋。焚炎谷传承异火，唐震以之为本命火焰。兼具火之焚灭与雷之迅疾。' }),
     createLorebookEntry({ keys:['九幽风炎'], content:'九幽风炎，异火榜第十。呈幽蓝之色，火焰如风飘忽不定。诞生于九幽之下阴风汇聚之处，速度在异火中名列前茅。' }),
     createLorebookEntry({ keys:['红莲业火'], content:'红莲业火，异火榜第八。呈赤红之色，火焰形态如盛放红莲。蕴含因果业力，对罪孽深重者有额外净化灼烧效果。与佛门有关。' }),
-    createLorebookEntry({ keys:['九幽金祖火'], content:'九幽金祖火，异火榜第七。金色火焰中掺杂幽暗纹路，兼具神圣与幽冥双重属性。传说由远古金乌陨落所化。' }),
+    createLorebookEntry({ keys:['九幽金祖火'], content:"九幽金祖火排名第七，炎族相关。炎烬曾融合此火与排名第十七的火山石焰。它不是九幽地冥蟒的种族传承火，名字相似不代表同源。【原文依据：第1104、1584章】", comment:"原文校勘 · 创角规则修订" }),
     createLorebookEntry({ keys:['八荒破灭焱'], content:'八荒破灭焱，异火榜第六。暗黑火焰中闪烁着紫色雷纹，蕴含毁灭之力。取"破灭八荒"之意，是纯粹破坏性最强的异火之一。' }),
-    createLorebookEntry({ keys:['生灵之焱'], content:'生灵之焱，异火榜第五。翠绿色火焰，蕴含着极强生命力。传说此火不主毁灭而主创造，可令枯木逢春、断肢重生。炼药师梦寐以求的炼丹圣火。' }),
+    createLorebookEntry({ keys:['生灵之焱'], content:"生灵之焱排名第五，神农老人持有。长于生命力、延寿与药材种子催生，需要种子和施术消耗，并非强攻最强火种。不能据此默认无条件断肢重生或无限药材。【原文依据：第1565、1566章】", comment:"原文校勘 · 创角规则修订" }),
     createLorebookEntry({ keys:['金帝焚天炎','古族异火'], content:'金帝焚天炎为古族传承异火，异火榜第四，呈璀璨金色。温度之高可焚烧天地苍穹，唯有古族神品血脉方可掌控。萧薰儿自小便被族中授予此火，是其最强底牌之一。' }),
 
     // ========== 十七、更多人物列传 ==========
@@ -6399,13 +5639,13 @@ function createDefaultLorebook() {
     createLorebookEntry({ keys:['天焚炼气塔底层','岩浆世界'], content:'焚天练气塔最底层连通着一个无边无际的地下岩浆世界。岩浆中有无数火焰蜥蜴人，深处封印着陨落心炎的本源。天火尊者被囚于此数千年，萧炎在收服陨落心炎时闯入此地。' }),
     createLorebookEntry({ keys:['圣丹城','丹域'], content:'圣丹城位于中州核心腹地，丹塔坐镇。城市划分为丹域、药域、试炼域等区域。每逢丹会举办，全大陆炼药师云集于此争夺排名。城外有丹雷山脉，常年丹雷翻滚。' }),
     createLorebookEntry({ keys:['叶城','丹会'], content:'叶城为叶家所在，城中拍卖行为中州顶级拍卖行。丹会举办时叶城为初赛场地之一。萧炎在此取得丹会参赛资格。' }),
-    createLorebookEntry({ keys:['亡魂山脉'], content:'亡魂山脉是中州极西之地的禁地，魂殿总部所在地。山脉终年笼罩着诡异黑雾，寻常修士靠近便灵魂不稳。山中有无数魂殿分殿和地牢，囚禁着各族强者灵魂。' }),
+    createLorebookEntry({ keys:['亡魂山脉'], content:"亡魂山脉位于中州西北，药老救援行动相关的魂殿分殿处于山脉中心。此处不能直接当作魂殿全部总部，更不能与魂族魂界合并。【原文依据：第1213章】", comment:"原文校勘 · 创角规则修订" }),
     createLorebookEntry({ keys:['古界','古族祖地'], content:'古界是古族以斗圣之力开辟的独立空间，入口隐藏于中州某处。古界内天地能量极为浓郁，古族族人在此世代修炼。古界中央有古帝雕像和传承祭坛，是古族血脉觉醒仪式的圣地。' }),
     createLorebookEntry({ keys:['古帝洞府','异火广场'], content:'古帝洞府核心为异火广场，呈圆形排列二十二根异火柱，每柱对应一种异火。广场中央矗立陀舍古帝雕像，雕像手握帝炎火种。萧炎在古帝洞府中融合二十二种异火成就帝炎，为击败魂天帝奠定根基。' }),
     createLorebookEntry({ keys:['妖火空间'], content:'妖火空间是净莲妖圣陨落前以毕生斗气创造的独立空间，封印净莲妖火。每千年自动开启一次，入口位于中州极北。空间内有净莲妖圣的残魂试炼，唯有通过试炼者方可获得收服净莲妖火的资格。' }),
-    createLorebookEntry({ keys:['天墓','天墓试炼'], content:'天墓是远古斗帝开辟的试炼空间，每隔数年出现于中州天目山脉。墓中分为九层，每层有远古陨落强者的灵魂能量体。击败能量体可获得能量印记——吸收后能直接提升修为甚至突破境界。萧炎在天墓最深层获萧玄全部传承。' }),
+    createLorebookEntry({ keys:['天墓','天墓试炼'], content:"天墓入口与古界开放相关，内部有三层与内外时间差，存在能量体及萧玄相关遗留。它不位于天目山脉，也不是九层地牢；资格、开放与危险应随情节处理。【原文依据：第1339章】", comment:"原文校勘 · 创角规则修订" }),
     createLorebookEntry({ keys:['丹界'], content:'丹界是远古斗帝开辟的炼丹秘境，其中遍布珍稀药材和远古丹方。丹塔掌控丹界入口，作为丹会决赛场地。萧炎在丹界中获得多种远古药材。' }),
-    createLorebookEntry({ keys:['莽荒古域'], content:'莽荒古域位于中州极东，是一片蛮荒原始森林。其中存在大量远古遗种魔兽和绝迹药材。因危险程度极高，斗宗以下修士禁入。萧炎曾多次冒险深入采集药材。' }),
+    createLorebookEntry({ keys:['莽荒古域'], content:"莽荒古域位于中州东北之外，莽荒镇是外围集结据点。兽潮、毒瘴与菩提古树事件构成探索风险，不为它补写精确坐标或所有时代统一入境规则。【原文依据：第1402章】", comment:"原文校勘 · 创角规则修订" }),
 
     // ========== 十九、功法斗技详录 ==========
     createLorebookEntry({ keys:['焰分噬浪尺'], content:'焰分噬浪尺为玄阶高级斗技，以重尺为武器劈出火焰气浪。萧炎在乌坦城拍卖场偶然所得。斗王时期以前是其主要攻击手段。' }),
@@ -6617,7 +5857,7 @@ function buildTavern() {
     '<div class="tavern-container">' +
       '<div class="tavern-body">' +
         '<div class="tavern-main" style="flex:1;">' +
-          "<header class=\"tavern-toolbar\"><div class=\"tavern-heading\"><span class=\"tavern-heading-mark\">卷</span><div><h2>命途 · 修行录</h2><p>斗气大陆 · 你的故事正在继续</p></div></div><nav class=\"tavern-tools\" aria-label=\"对话操作\"><button class=\"tavern-tool\" onclick=\"regenerateLastTavern()\" title=\"重新生成本轮回复\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 10a8 8 0 1 1 2 8M4 4v6h6\"/></svg><span>重演</span></button><button class=\"tavern-tool\" onclick=\"continueTavernStream()\" title=\"继续当前故事\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m8 5 7 7-7 7M18 5v14\"/></svg><span>续写</span></button><span class=\"tavern-tools-divider\" aria-hidden=\"true\"></span><button id=\"tavern-rewind-btn\" class=\"tavern-tool\" onclick=\"openTimeRewind()\" title=\"恢复当前会话的历史快照\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3 11a9 9 0 1 1 3 8M3 5v6h6M12 7v5l3 2\"/></svg><span id=\"tavern-rewind-label\">回溯 · 0</span></button><button class=\"tavern-tool danger\" onclick=\"resetTavernContext()\" title=\"清空当前会话，会再次确认\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5m4-5v5\"/></svg><span>重置</span></button></nav></header>" +
+          "<header class=\"tavern-toolbar\"><div class=\"tavern-heading\"><span class=\"tavern-heading-mark\">卷</span><div><h2>命途 · 修行录</h2><p>斗气大陆 · 你的故事正在继续</p></div></div><nav class=\"tavern-tools\" aria-label=\"对话操作\"><button class=\"tavern-tool\" onclick=\"regenerateLastTavern()\" title=\"重新生成本轮回复\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 10a8 8 0 1 1 2 8M4 4v6h6\"/></svg><span>重演</span></button><button class=\"tavern-tool\" onclick=\"continueTavernStream()\" title=\"继续当前故事\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m8 5 7 7-7 7M18 5v14\"/></svg><span>续写</span></button><span class=\"tavern-tools-divider\" aria-hidden=\"true\"></span><button id=\"tavern-rewind-btn\" class=\"tavern-tool\" onclick=\"openTimeRewind()\" title=\"恢复当前会话的历史快照\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3 11a9 9 0 1 1 3 8M3 5v6h6M12 7v5l3 2\"/></svg><span id=\"tavern-rewind-label\">回溯 · 0</span></button><button id=\"tavern-map-proposal\" class=\"tavern-tool\" hidden onclick=\"switchGameView('worldmap',document.getElementById('sidebar-worldmap'))\" title=\"查看并确认模型提出的地图行动\"><span>地图建议</span></button><button class=\"tavern-tool danger\" onclick=\"resetTavernContext()\" title=\"清空当前会话，会再次确认\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5m4-5v5\"/></svg><span>重置</span></button></nav></header>" +
           '<div class="tavern-messages" id="tavern-messages"></div>' +
           '<div class="tavern-input-bar">' +
             '<textarea class="tavern-input" id="tavern-input" rows="2" aria-label="书写你的行动" placeholder="此刻，你想做些什么？" onkeydown="handleTavernKeydown(event)"></textarea>' +
@@ -6787,7 +6027,8 @@ async function createNewTavernChat() {
   if (tavernState.isLoading || !db) throw new Error('聊天数据库仍在加载，请稍后重试');
   stopTavernStream();
   var settings = tavernState.tavernSettings;
-  var charName = tavernState.characterCard ? tavernState.characterCard.name : '角色';
+  var activeCard=(getActiveChat()||{}).characterCard || tavernState.characterCard;
+  var charName = activeCard ? activeCard.name : '角色';
   var count = tavernState.chats.filter(function(c) { return c.characterName === charName; }).length;
   var chat = createChatSession({
     name: charName + ' - 对话 ' + (count + 1),
@@ -6864,9 +6105,12 @@ function setTavernSendingUI(sending) {
 }
 
 async function runTavernTurn(content, regenerate) {
+  if(typeof WorldMapBridge!=='undefined'&&WorldMapBridge.isMoving()){showToast('角色正在行走，停步后再开始推演','info');return;}
+
   if (tavernState.isSending) return;
   var original = getActiveChat();
   if (!original || !db) return;
+  if(typeof WorldMapBridge!=='undefined')WorldMapBridge.ensure();
   var working = TavernCore.clone(original), before, controller = new AbortController();
   var playerAtDispatch = JSON.stringify(GameState.player);
   var request = {id:crypto.randomUUID(), chatId:original.id, controller:controller};
@@ -6899,9 +6143,9 @@ async function runTavernTurn(content, regenerate) {
     var books = tavernState.lorebooks.filter(function(b) { return (working.lorebookIds || []).includes(b.id); });
     var history = working.messages.slice(0,-1);
     var scan = history.slice(-6).map(function(m) { return m.content; }).join('\n') + '\n' + content;
-    var result = assembleTavernPrompt({preset:preset, userInput:content, history:history,
+    var result = assembleTavernPrompt({preset:preset, characterCard:working.characterCard, userInput:content, history:history,
       variables:working.variables, lorebookMatches:matchLorebookEntries(scan, books),
-      location:GameState.player.location || '加玛帝国·乌坦城', userName:working.userName || GameState.player.name || '玩家'});
+      location:GameState.player.location || (WorldState.location+' · '+(WorldState.specificSpot||'')), userName:working.userName || GameState.player.name || '玩家'});
     // Diagnostics contain counts only, never credentials or private prompt text.
     tavernState.lastPromptStats = {estimatedTokens:result.estimatedTokens, removedMessages:result.removedMessages, estimateOnly:true};
     var msgs = document.getElementById('tavern-messages');
@@ -6924,7 +6168,10 @@ async function runTavernTurn(content, regenerate) {
     var variables = TavernCore.applyOperations(before.variables, upstore.operations);
     var legacy = extractVariables(upstore.cleaned);
     variables = mergeVariables(variables, legacy.updates);
-    var player = TavernCore.clone(before.player), processed = legacy.cleanedText;
+    var player = TavernCore.clone(before.player), processed = legacy.cleanedText.replace(/<world_action>[\s\S]*?<\/world_action>/gi,'').trim();
+    if(regenerate&&GameState.player.exploration){
+      ['exploration','inventory','location','history'].forEach(function(key){if(GameState.player[key]!==undefined)player[key]=TavernCore.clone(GameState.player[key]);});
+    }
     ['desireLust','desirePleasure'].forEach(function(key) {
       if (variables[key] !== undefined && Number.isFinite(Number(variables[key]))) player[key] = Math.max(0,Math.min(100,Number(variables[key])));
     });
@@ -6953,6 +6200,7 @@ async function runTavernTurn(content, regenerate) {
     } finally { if (abortTransaction) controller.signal.removeEventListener('abort', abortTransaction); }
     ensureCurrent();
     GameState.player = player;
+    if(typeof WorldMapBridge!=='undefined'&&!tavernState.tavernSettings?.pureTextMode)WorldMapBridge.offerProposal(full,request.chatId);
     tavernState.chats = tavernState.chats.map(function(c) { return c.id === working.id ? working : c; });
     saveToLocalStorage();
   } catch(e) {
@@ -6963,6 +6211,7 @@ async function runTavernTurn(content, regenerate) {
       tavernState.activeRequest = null; tavernState.streamAbortController = null; tavernState.isSending = false;
       var typingEl = document.getElementById('tavern-typing'); if (typingEl) typingEl.remove();
       setTavernSendingUI(false); renderTavernMessages(); updateTavernInfo();
+      if(typeof WorldMapBridge!=='undefined')WorldMapBridge.refresh();
     }
   }
 }
@@ -6997,6 +6246,7 @@ async function resetTavernContext() {
   stopTavernStream();
   chat.messages = [];
   chat.variables = {};
+  if(typeof WorldMapBridge!=='undefined')WorldMapBridge.clearProposal();
   chat.updatedAt = Date.now();
   await db.chats.put(chat);
   renderTavernMessages();
@@ -7004,6 +6254,8 @@ async function resetTavernContext() {
 }
 
 function updateTavernInfo() {
+  var mapSuggestion=document.getElementById('tavern-map-proposal');
+  if(mapSuggestion)mapSuggestion.hidden=!(typeof WorldMapBridge!=='undefined'&&WorldMapBridge.getProposal());
   var rewindButton = document.getElementById('tavern-rewind-label');
   if (rewindButton) rewindButton.textContent = '回溯 · ' + TimeRewind.snapshots.filter(function(s) { return s.chatId === tavernState.activeChatId; }).length;
   var chat = getActiveChat();
@@ -7828,5 +7080,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<script src="assets/js/creation-ui.js"></script>
 </body>
 </html>
