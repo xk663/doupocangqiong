@@ -1,6 +1,6 @@
 # 斗破苍穹 · 修炼模拟
 
-> 基于《斗破苍穹》世界观的 AI 修炼模拟游戏 — 纯前端 HTML/CSS/JS 单文件应用
+> 基于《斗破苍穹》世界观的 AI 修炼模拟游戏 — 原生 HTML/CSS/JS 静态前端
 
 [![GitHub Pages](https://img.shields.io/badge/在线体验-GitHub%20Pages-brightgreen)](https://xk663.github.io/doupocangqiong/)
 ![License](https://img.shields.io/badge/license-MIT-blue)
@@ -34,11 +34,12 @@
 
 ```
 doupocangqiong/
-├── index.html          # 主游戏页面（~500KB 单文件应用）
+├── index.html          # 主游戏页面
 ├── map.html            # 大地图独立页面
 ├── game.html           # 旧版游戏页面（备份）
 ├── assets/
 │   ├── js/
+│   │   ├── tavern-core.js      # 独立聊天内核：提示词、世界书、流式、导入与安全工具
 │   │   ├── map-data.js         # 地图区域数据
 │   │   ├── map-engine.js       # Canvas 地图引擎
 │   │   ├── map-controls.js     # 地图交互控件
@@ -78,3 +79,31 @@ python -m http.server 8080
 ---
 
 🤖 Built with [Claude Code](https://claude.com/claude-code)
+
+## 聊天内核优化（2026-10-24）
+
+本轮参考 [tavernlike-codex](https://github.com/xk663/tavernlike-codex) 的分层与验证流程，在现有原生前端上实现修订，没有引入 React 或构建依赖。
+
+- 统一角色、世界书、预设排序与消息角色的组装；支持上下文容量设置，超限时裁剪旧对话并为回复预留空间。Token 用量为估算。
+- 统一 OpenAI 兼容、Ollama 与 Kobold 请求；停止生成不再触发额外请求，过期回复不能覆盖已重置或切换的会话。
+- 重演复用当前输入与生成前状态，不重复添加玩家消息或结算变量；旧回合没有快照时明确提示。
+- 世界书递归匹配遵守禁用、次关键词、递归限制及预算；启动不再覆盖用户编辑的默认世界书。
+- v2 存档包含聊天、变量、角色卡、预设、世界书、时空、经济、驻地与任务进度；导出和云备份剔除密钥及 Webhook。旧版存档仍可恢复其原有数据，但无法补回原本未保存的聊天。
+- 设置 → 核心中填写自己的 Discord Webhook，点击时才上传聊天进度；不需要 Discord OAuth。历史版本公开的共享 Webhook 应由其持有人在 Discord 撤销，删除源码不会撤销凭据。
+- 支持 JSON 角色卡和 PNG `chara`/`ccv3` tEXt 元数据；管理界面对角色、存档及相关预设字段做转义。
+
+详情、兼容范围与验证记录见 [本轮优化说明](docs/chat-core-optimization.md)。`game.html` 和 `sillytavern.html` 为历史入口，本轮功能改动集中于 `index.html`；旧 `game.html` 仅移除了公开 Webhook。
+
+### 界面与异火设定更新
+
+- 首页、角色档案、聊天阅读区与推演工具栏采用新的山水、纸色与青玉视觉样式，兼顾窄屏布局。
+- 按作者补充文档接入第18名风怒龙炎、第20名幽冥毒火、第21名阴阳双炎，同步异火榜和默认世界书，并修正第16–23名的错位。
+- 旧默认世界书只迁移与旧版内容完全匹配的条目，保留启用状态；已编辑或导入的世界书不覆盖。详情见[异火修改说明](docs/user-flame-supplement.md)。
+
+### 回归验证方法
+
+安装 Node.js 20 或更高版本后，在项目目录执行，无需安装测试依赖：
+
+```bash
+node --test tests/tavern-core.test.cjs
+```

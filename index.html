@@ -11,6 +11,8 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700;900&family=ZCOOL+KuaiLe&display=swap&subset=chinese-simplified" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700;900&family=ZCOOL+KuaiLe&display=swap&subset=chinese-simplified"></noscript>
 <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js" defer></script>
+<script src="assets/js/tavern-core.js"></script>
+<script src="assets/js/user-flames.js"></script>
 <style>
 /* === CSS Custom Properties === */
 :root {
@@ -1104,70 +1106,29 @@ input:checked + .toggle-slider::before { background:var(--text-primary);transfor
 .import-zone:hover { background:rgba(212,168,75,0.03);border-color:var(--text-primary); }
 .import-zone input { display:none; }
 </style>
+<link rel="stylesheet" href="assets/css/atelier.css">
 </head>
 <body>
 
 <!-- VIEW: Title Screen -->
-<div id="view-title" class="view active" style="flex-direction:column;align-items:center;justify-content:center;position:relative;background:radial-gradient(ellipse at center,#0f0f1a 0%,#050508 60%);border:2px solid rgba(212,168,75,0.2);box-shadow:inset 0 0 80px rgba(212,168,75,0.03),0 0 40px rgba(212,168,75,0.06);">
-  <!-- Dynamic cover background -->
-  <div class="title-cover-layer" id="title-cover-layer" style="display:none;">
-    <video class="title-cover-video" id="title-cover-video" muted loop playsinline preload="auto"></video>
-    <div class="title-cover-overlay"></div>
-    <div class="title-cover-vignette"></div>
-  </div>
-  <canvas id="title-particles" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;"></canvas>
-  <div style="position:relative;z-index:2;text-align:center;">
-    <div style="margin-bottom:8px;">
-      <svg width="200" height="110" viewBox="0 0 200 110" style="display:block;margin:0 auto 12px;filter:drop-shadow(0 0 30px rgba(68,204,170,0.5));">
-        <defs>
-          <linearGradient id="wingLG" x1="100%" y1="0%" x2="0%" y2="50%">
-            <stop offset="0%" stop-color="#44ccaa"/><stop offset="25%" stop-color="#22ddbb"/><stop offset="50%" stop-color="#44eecc"/><stop offset="75%" stop-color="#22bb99"/><stop offset="100%" stop-color="#118877"/>
-          </linearGradient>
-          <linearGradient id="wingRG" x1="0%" y1="0%" x2="100%" y2="50%">
-            <stop offset="0%" stop-color="#44ccaa"/><stop offset="25%" stop-color="#22ddbb"/><stop offset="50%" stop-color="#44eecc"/><stop offset="75%" stop-color="#22bb99"/><stop offset="100%" stop-color="#118877"/>
-          </linearGradient>
-        </defs>
-
-        <!-- LEFT WING -->
-        <g opacity="0.85">
-          <path d="M100 55 C75 38 48 18 24 8 C30 22 38 38 46 52 C32 42 16 30 4 28 C14 42 28 54 42 62 C28 58 12 54 2 56 C14 66 32 72 50 74 C32 70 16 68 6 72 C18 78 36 80 55 78 C38 76 22 76 12 80 C24 84 42 82 60 78 C42 76 28 78 20 82 C34 84 52 80 70 72 Z" fill="url(#wingLG)" opacity="0.5"/>
-          <path d="M100 52 C78 36 56 20 38 12 C44 24 50 38 56 50 C46 40 34 30 24 28 C32 38 44 48 54 56 C44 52 32 48 24 48 C34 56 48 60 58 64 C46 60 34 58 26 60 C36 66 50 66 62 66 C48 64 36 64 28 68 C40 70 54 68 68 62 C52 62 40 64 32 68 C44 70 58 64 72 56 Z" fill="url(#wingLG)" opacity="0.65"/>
-          <path d="M100 50 C82 38 64 26 52 20 C56 28 60 36 64 44 C56 38 46 32 38 30 C44 36 52 42 58 48 C50 46 40 44 34 44 C42 50 52 52 60 54 C50 52 40 52 34 54 C42 56 52 56 62 56 C52 56 42 56 36 60 C44 60 54 58 64 54 C52 54 42 58 38 62 C46 60 56 56 66 48 Z" fill="#44eecc" opacity="0.8"/>
-        </g>
-
-        <!-- RIGHT WING -->
-        <g opacity="0.85">
-          <path d="M100 55 C125 38 152 18 176 8 C170 22 162 38 154 52 C168 42 184 30 196 28 C186 42 172 54 158 62 C172 58 188 54 198 56 C186 66 168 72 150 74 C168 70 184 68 194 72 C182 78 164 80 145 78 C162 76 178 76 188 80 C176 84 158 82 140 78 C158 76 172 78 180 82 C166 84 148 80 130 72 Z" fill="url(#wingRG)" opacity="0.5"/>
-          <path d="M100 52 C122 36 144 20 162 12 C156 24 150 38 144 50 C154 40 166 30 176 28 C168 38 156 48 146 56 C156 52 168 48 176 48 C166 56 152 60 142 64 C154 60 166 58 174 60 C164 66 150 66 138 66 C152 64 164 64 172 68 C160 70 146 68 132 62 C148 62 160 64 168 68 C156 70 142 64 128 56 Z" fill="url(#wingRG)" opacity="0.65"/>
-          <path d="M100 50 C118 38 136 26 148 20 C144 28 140 36 136 44 C144 38 154 32 162 30 C156 36 148 42 142 48 C150 46 160 44 166 44 C158 50 148 52 140 54 C150 52 160 52 166 54 C158 56 148 56 138 56 C148 56 158 56 164 60 C156 60 146 58 136 54 C148 54 158 58 162 62 C154 60 144 56 134 48 Z" fill="#44eecc" opacity="0.8"/>
-        </g>
-
-        <!-- CENTER FLAME -->
-        <circle cx="100" cy="55" r="28" fill="none" stroke="#44eecc" stroke-width="0.4" opacity="0.25">
-          <animate attributeName="r" values="28;30;28" dur="3s" repeatCount="indefinite"/>
-        </circle>
-        <path d="M100 22 C86 34 68 42 68 54 C68 64 76 70 86 74 C90 76 94 72 100 66 C106 72 110 76 114 74 C124 70 132 64 132 54 C132 42 114 34 100 22Z" fill="rgba(68,238,204,0.15)" stroke="#44eecc" stroke-width="1.5"/>
-        <path d="M100 30 C90 38 80 46 80 54 C80 60 86 64 94 67 C97 68 99 66 100 62 C101 66 103 68 106 67 C114 64 120 60 120 54 C120 46 110 38 100 30Z" fill="rgba(68,238,204,0.3)" stroke="#22ddbb" stroke-width="1"/>
-        <circle cx="100" cy="48" r="5" fill="#88ffee" opacity="0.9">
-          <animate attributeName="r" values="5;6;5" dur="1.5s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="100" cy="48" r="2.5" fill="#fff" opacity="0.95">
-          <animate attributeName="opacity" values="0.95;0.7;0.95" dur="1s" repeatCount="indefinite"/>
-        </circle>
-      </svg>
-    </div>
-    <h1 style="font-family:var(--font-serif);font-size:52px;font-weight:900;color:var(--text-primary);letter-spacing:16px;text-shadow:0 0 40px rgba(212,168,75,0.3);margin-bottom:4px;">斗 破 苍 穹</h1>
-    <p style="font-family:var(--font-serif);font-size:14px;color:var(--text-secondary);letter-spacing:6px;margin-bottom:48px;">修 炼 模 拟 · 大 世 界 · 自 由 探 索</p>
-    <div id="title-menu" style="display:flex;flex-direction:column;gap:10px;align-items:center;">
-      <button id="btn-new-game" class="title-btn primary" onclick="startNewGame()">开 启 新 人 生</button>
-      <button id="btn-continue" class="title-btn" onclick="continueGame()">继 续 人 生</button>
-      <button id="btn-saves" class="title-btn" onclick="openSaveManager()">存 档 管 理</button>
-      <button id="btn-changelog" class="title-btn" onclick="openChangelog()">更 新 日 志</button>
-      <button id="btn-settings" class="title-btn" onclick="openSettings()">设 置</button>
-      <button id="btn-about" class="title-btn" onclick="openAbout()">关 于</button>
-    </div>
-    <p style="font-family:var(--font-serif);font-size:10px;color:var(--text-dim);margin-top:40px;letter-spacing:2px;">v2.0 · 三一六纪元 · 斗气大陆</p>
-  </div>
+<div id="view-title" class="view active">
+  <header class="landing-masthead"><div class="landing-brand"><span class="landing-seal">斗</span><span>斗气大陆 · 修行录</span></div><span class="landing-edition">THE CULTIVATION CHRONICLES</span></header>
+  <main class="landing-body">
+    <section class="landing-copy">
+      <p class="landing-kicker">三一六纪元 · 卷一</p>
+      <h1>斗破苍穹</h1>
+      <p class="landing-description">一纸命书，万里山河。<br>从乌坦城出发，写下属于你的修行故事。</p>
+      <div id="title-menu">
+        <button id="btn-new-game" class="title-btn primary" onclick="startNewGame()">开启新人生<span class="title-button-arrow" aria-hidden="true">↗</span></button>
+        <button id="btn-continue" class="title-btn" onclick="continueGame()">继续人生<span class="title-button-arrow" aria-hidden="true">→</span></button>
+      </div>
+      <nav class="landing-links" aria-label="辅助功能">
+        <button id="btn-saves" onclick="openSaveManager()">存档管理</button><button id="btn-settings" onclick="openSettings()">偏好设置</button><button id="btn-changelog" onclick="openChangelog()">更新日志</button><button id="btn-about" onclick="openAbout()">关于此卷</button>
+      </nav>
+    </section>
+    <aside class="landing-art" aria-label="青山云海插画"><img src="assets/mountain-scroll.svg" alt="青绿山峦与云海间的修行亭阁"><p class="landing-verse">一念起，万火生。<br>山海之外，自有天地。</p><span class="landing-art-label">山河为卷 · 众生为墨</span></aside>
+  </main>
+  <footer class="landing-footer"><span>自由探索 / 角色扮演 / 万千际遇</span><span>斗气大陆 · 三一六纪元</span></footer>
 </div>
 
 <!-- VIEW: Character Creation -->
@@ -1557,60 +1518,59 @@ var TimeRewind = {
   maxSnapshots: 20
 };
 function takeSnapshot(chatMessages, variables) {
-  TimeRewind.snapshots.push({
-    id: Date.now(),
-    time: new Date().toLocaleString(),
-    messages: JSON.parse(JSON.stringify(chatMessages || [])),
-    variables: JSON.parse(JSON.stringify(variables || {})),
-    player: JSON.parse(JSON.stringify(GameState.player || {}))
-  });
+  TimeRewind.snapshots.push({id:crypto.randomUUID(), chatId:tavernState.activeChatId, time:new Date().toLocaleString(),
+    messages:TavernCore.clone(chatMessages || []), variables:TavernCore.clone(variables || {}),
+    player:TavernCore.clone(GameState.player), gameTime:TavernCore.clone(GameTime), worldState:TavernCore.clone(WorldState),
+    economy:typeof Economy !== 'undefined' ? TavernCore.clone(Economy) : null, studioState:typeof StudioState !== 'undefined' ? TavernCore.clone(StudioState) : null, questSystem:typeof QuestSystem !== 'undefined' ? TavernCore.clone(QuestSystem) : null});
   if (TimeRewind.snapshots.length > TimeRewind.maxSnapshots) TimeRewind.snapshots.shift();
 }
-function rewindToSnapshot(sid) {
-  var snap = TimeRewind.snapshots.find(function(s){return s.id===sid;});
-  if (!snap) return;
-  // Restore player state
-  if (snap.player) GameState.player = snap.player;
-  // Restore chat variables
-  var activeChat = tavernState.chats.find(function(c){return c.id===tavernState.activeChatId;});
-  if (activeChat) {
-    activeChat.messages = snap.messages;
-    activeChat.variables = snap.variables;
-    activeChat.updatedAt = Date.now();
-    db.chats.put(activeChat);
-    renderTavernMessages();
-  }
-  // Remove all snapshots after this one
-  var idx = TimeRewind.snapshots.indexOf(snap);
-  if (idx >= 0) TimeRewind.snapshots = TimeRewind.snapshots.slice(0, idx + 1);
-  saveToLocalStorage();
-  showToast('时空回溯完成，已回到：'+snap.time,'success');
+async function rewindToSnapshot(sid) {
+  var snap = TimeRewind.snapshots.find(function(s) { return s.id === sid; });
+  var active = getActiveChat();
+  if (!snap || !active || snap.chatId !== active.id) { showToast('此快照不属于当前会话', 'error'); return; }
+  stopTavernStream();
+  try {
+    var restored = TavernCore.clone(active); restored.messages = TavernCore.clone(snap.messages); restored.variables = TavernCore.clone(snap.variables); restored.updatedAt = Date.now();
+    await db.transaction('rw',[db.chats,db.tavernSettings],async function() {
+      await db.chats.put(restored);
+      await db.tavernSettings.put(Object.assign({},tavernState.tavernSettings || {},{id:'main',activeChatId:restored.id,playerState:snap.player,playerStateAt:Date.now()}));
+    });
+    tavernState.chats = tavernState.chats.map(function(c) { return c.id === restored.id ? restored : c; });
+    GameState.player = TavernCore.clone(snap.player);
+    if (snap.gameTime) Object.assign(GameTime,TavernCore.clone(snap.gameTime));
+    if (snap.economy && typeof Economy !== 'undefined') Object.assign(Economy,TavernCore.clone(snap.economy));
+    if (snap.studioState && typeof StudioState !== 'undefined') Object.assign(StudioState,TavernCore.clone(snap.studioState));
+    if (snap.questSystem && typeof QuestSystem !== 'undefined') Object.assign(QuestSystem,TavernCore.clone(snap.questSystem));
+    if (snap.worldState) Object.assign(WorldState,TavernCore.clone(snap.worldState));
+    TimeRewind.snapshots = TimeRewind.snapshots.slice(0,TimeRewind.snapshots.indexOf(snap) + 1);
+    saveToLocalStorage(); renderTavernMessages(); showToast('时空回溯完成：' + snap.time,'success');
+  } catch(e) { showToast('回溯失败：' + e.message,'error'); }
 }
 
 const HEAVENLY_FLAMES = [
-  { id:'flame_1', rank:1, name:'帝炎', color:'#ffdd00', desc:'异火榜第一，万火之帝，由其余二十二种异火融合而成。金色火焰，焚天煮海，无可匹敌。' },
-  { id:'flame_2', rank:2, name:'虚无吞炎', color:'#332244', desc:'异火榜第二，漆黑如墨。拥有吞噬万物之力，曾吞噬无数强者灵魂。生于虚无之中。' },
-  { id:'flame_3', rank:3, name:'净莲妖火', color:'#ff88cc', desc:'异火榜第三，乳白泛粉。拥有净化之力，可焚尽一切污秽。莲形火焰，妖异绝美。' },
-  { id:'flame_4', rank:4, name:'金帝焚天炎', color:'#ffaa00', desc:'异火榜第四，古族传承之火。金色烈焰，传说曾焚烧过天界。炽热无比，万火臣服。' },
-  { id:'flame_5', rank:5, name:'生灵之焱', color:'#44dd44', desc:'异火榜第五，翠绿如叶。唯一拥有生命力的异火，可催生药材，治愈伤势。' },
-  { id:'flame_6', rank:6, name:'八荒破灭焱', color:'#cc4400', desc:'异火榜第六，暗红如血。蕴含毁灭之力，一招八荒破灭，方圆千里化为焦土。' },
-  { id:'flame_7', rank:7, name:'九幽金祖火', color:'#ccaa44', desc:'异火榜第七，暗金之色。九幽地冥蟒族传承之火，可焚魂炼魄。' },
-  { id:'flame_8', rank:8, name:'红莲业火', color:'#ee3333', desc:'异火榜第八，赤红如莲。蕴含业力，可焚烧因果。红莲绽放之时，万物湮灭。' },
-  { id:'flame_9', rank:9, name:'三千焱炎火', color:'#ff8844', desc:'异火榜第九，橙红如霞。又名三千星空焱炎火，蕴含星辰之力。成形于星空之中。' },
-  { id:'flame_10', rank:10, name:'九幽风炎', color:'#44cc88', desc:'异火榜第十，青绿如风。风助火势，火借风威。速度极快，难以捕捉。' },
-  { id:'flame_11', rank:11, name:'骨灵冷火', color:'#88ccff', desc:'异火榜第十一，森白冰寒。药老持有之异火，极寒极热并存。外冷内热，冰火两重天。' },
-  { id:'flame_12', rank:12, name:'九龙雷罡火', color:'#cc88ff', desc:'异火榜第十二，紫金之色。蕴含九道龙魂与雷罡之力，龙吟震天，雷火交织。' },
-  { id:'flame_13', rank:13, name:'龟灵地火', color:'#886644', desc:'异火榜第十三，褐黄如土。形如巨龟，沉于地心。防御力极强，可化作龟甲护体。' },
-  { id:'flame_14', rank:14, name:'陨落心炎', color:'#ff4466', desc:'异火榜第十四，赤红如心。迦南学院内院焚天练气塔之核心。可加速修炼，淬炼斗气。' },
-  { id:'flame_15', rank:15, name:'海心焰', color:'#4488ff', desc:'异火榜第十五，湛蓝如海。生于深海之心，水属性异火。水火交融，生生不息。' },
-  { id:'flame_16', rank:16, name:'火山石焰', color:'#884422', desc:'异火榜第十六，暗褐如石。生于火山岩浆之中。厚重沉稳，温度极高，可熔炼万物。' },
-  { id:'flame_17', rank:17, name:'风怒龙炎', color:'#66cc44', desc:'异火榜第十七，翠绿如鳞。龙形火焰，蕴含龙威。暴风骤起，烈焰焚天。' },
-  { id:'flame_18', rank:18, name:'青莲地心火', color:'#44ccaa', desc:'异火榜第十八，青绿如莲。生于大地深处，莲花形态。萧炎首个收服的异火。' },
-  { id:'flame_19', rank:19, name:'龙凤焱', color:'#ddaa44', desc:'异火榜第十九，金橙色。蕴含龙凤之力，炽热无比。龙凰血脉者持之威力倍增。' },
-  { id:'flame_20', rank:20, name:'六道轮回焱', color:'#884488', desc:'异火榜第二十，暗紫如渊。蕴含轮回之力，可焚烧灵魂六道。诡异莫测。' },
-  { id:'flame_21', rank:21, name:'万兽灵火', color:'#cc6644', desc:'异火榜第二十一，暗红如血。万兽灵魂凝聚之异火。群兽咆哮，万灵汇聚。' },
-  { id:'flame_22', rank:22, name:'玄黄炎', color:'#aaaa66', desc:'异火榜第二十二，玄黄之气。天地初开时便已存在。沉稳大气，蕴含玄黄之力。' },
-  { id:'flame_23', rank:23, name:'阴阳双炎', color:'#888888', desc:'异火榜第二十三，黑白双色。阴阳相生，黑白交缠。阴火寒冰刺骨，阳火炽热焚天。' }
+  {"id":"flame_1","rank":1,"name":"帝炎","color":"#ffdd00","desc":"异火榜第一，万火之帝，由其余二十二种异火融合而成。金色火焰，焚天煮海，无可匹敌。"},
+  {"id":"flame_2","rank":2,"name":"虚无吞炎","color":"#332244","desc":"异火榜第二，漆黑如墨。拥有吞噬万物之力，曾吞噬无数强者灵魂。生于虚无之中。"},
+  {"id":"flame_3","rank":3,"name":"净莲妖火","color":"#ff88cc","desc":"异火榜第三，乳白泛粉。拥有净化之力，可焚尽一切污秽。莲形火焰，妖异绝美。"},
+  {"id":"flame_4","rank":4,"name":"金帝焚天炎","color":"#ffaa00","desc":"异火榜第四，古族传承之火。金色烈焰，传说曾焚烧过天界。炽热无比，万火臣服。"},
+  {"id":"flame_5","rank":5,"name":"生灵之焱","color":"#44dd44","desc":"异火榜第五，翠绿如叶。唯一拥有生命力的异火，可催生药材，治愈伤势。"},
+  {"id":"flame_6","rank":6,"name":"八荒破灭焱","color":"#cc4400","desc":"异火榜第六，暗红如血。蕴含毁灭之力，一招八荒破灭，方圆千里化为焦土。"},
+  {"id":"flame_7","rank":7,"name":"九幽金祖火","color":"#ccaa44","desc":"异火榜第七，暗金之色。九幽地冥蟒族传承之火，可焚魂炼魄。"},
+  {"id":"flame_8","rank":8,"name":"红莲业火","color":"#ee3333","desc":"异火榜第八，赤红如莲。蕴含业力，可焚烧因果。红莲绽放之时，万物湮灭。"},
+  {"id":"flame_9","rank":9,"name":"三千焱炎火","color":"#ff8844","desc":"异火榜第九，橙红如霞。又名三千星空焱炎火，蕴含星辰之力。成形于星空之中。"},
+  {"id":"flame_10","rank":10,"name":"九幽风炎","color":"#44cc88","desc":"异火榜第十，青绿如风。风助火势，火借风威。速度极快，难以捕捉。"},
+  {"id":"flame_11","rank":11,"name":"骨灵冷火","color":"#88ccff","desc":"异火榜第十一，森白冰寒。药老持有之异火，极寒极热并存。外冷内热，冰火两重天。"},
+  {"id":"flame_12","rank":12,"name":"九龙雷罡火","color":"#cc88ff","desc":"异火榜第十二，紫金之色。蕴含九道龙魂与雷罡之力，龙吟震天，雷火交织。"},
+  {"id":"flame_13","rank":13,"name":"龟灵地火","color":"#886644","desc":"异火榜第十三，褐黄如土。形如巨龟，沉于地心。防御力极强，可化作龟甲护体。"},
+  {"id":"flame_14","rank":14,"name":"陨落心炎","color":"#ff4466","desc":"异火榜第十四，赤红如心。迦南学院内院焚天练气塔之核心。可加速修炼，淬炼斗气。"},
+  {"id":"flame_15","rank":15,"name":"海心焰","color":"#4488ff","desc":"异火榜第十五，湛蓝如海。生于深海之心，水属性异火。水火交融，生生不息。"},
+  {"id":"flame_fire_cloud_water","rank":16,"name":"火云水炎","color":"#7089bb","desc":"异火榜第十六，炎族火耀长老使用的异火。"},
+  {"id":"flame_16","rank":17,"name":"火山石焰","color":"#884422","desc":"异火榜第十七。炎烬曾将此火与九幽金祖火融合使用。"},
+  Object.assign({"id":"flame_17"}, DoupoUserFlames.flames.find(function(f){return f.rank===18;})),
+  {"id":"flame_18","rank":19,"name":"青莲地心火","color":"#44ccaa","desc":"异火榜第十九，孕育于地底岩浆的青莲之中，是萧炎收服的第一种异火。"},
+  Object.assign({"id":"flame_nether_poison"}, DoupoUserFlames.flames.find(function(f){return f.rank===20;})),
+  Object.assign({"id":"flame_23"}, DoupoUserFlames.flames.find(function(f){return f.rank===21;})),
+  {"id":"flame_21","rank":22,"name":"万兽灵火","color":"#cc6644","desc":"异火榜第二十二，古帝洞府异火广场与终战中出现。"},
+  {"id":"flame_22","rank":23,"name":"玄黄炎","color":"#aaaa66","desc":"异火榜第二十三，呈深黄色，古帝洞府异火广场中的火种已流失力量。"}
 ];
 
 const LLM_MOCK_RESPONSES = {
@@ -1860,7 +1820,7 @@ const GameState = {
     activeApi: null,
     systemRules: '',
     useCustomRules: false,
-    discordWebhook: 'https://discord.com/api/webhooks/1515659474730225695/814fr3NzrAunhK0p5jlC9W7-rp__o-jFVnuDUSgyE8F3nDpqo2Yx-Pxck0fP0RcCK2ag',
+    discordWebhook: '',
     discordConnected: false,
     discordClientId: '',
     discordAuthCode: ''
@@ -2789,7 +2749,7 @@ function startGame() {
     generateOpeningScene().then(function() {
       var btn = document.querySelector('[data-view="tavern"]');
       if (btn) switchGameView('tavern', btn);
-    });
+    }).catch(function(e) { showToast('开场生成失败：' + e.message, 'error'); });
   }, 500);
 }
 
@@ -2829,88 +2789,18 @@ function buildCharacterIntro() {
 }
 
 async function generateOpeningScene() {
-  var intro = buildCharacterIntro();
-
-  // Create or get active chat
-  var chat = tavernState.chats.find(function(c){return c.id===tavernState.activeChatId;});
-  if (!chat) {
-    // Create first chat
-    var preset = tavernState.presets[0];
-    chat = createChatSession({
-      name: (GameState.player.name||'修炼者') + ' - 新人生',
-      characterName: '斗破苍穹',
-      presetId: preset ? preset.id : '',
-      lorebookIds: tavernState.activeLorebookIds.slice()
-    });
-    tavernState.chats.unshift(chat);
-    tavernState.activeChatId = chat.id;
-    await db.chats.put(chat);
-  }
-
-  // Inject character intro as system context, then ask LLM to generate opening
-  var firstPrompt = intro + '\n\n【任务】\n请根据以上角色档案，以史诗玄幻风格撰写一段精彩的游戏开场白（200-300字）。描述角色在乌坦城萧家后院的清晨醒来，感受到体内斗气的涌动，望向魔兽山脉方向，开启修炼之路。以第二人称"你"来写。结尾给出3个行动选项。';
-
-  // Add to chat
-  chat.messages.push(createChatMessage('system', intro));
-  chat.messages.push(createChatMessage('user', firstPrompt));
-  chat.updatedAt = Date.now();
-
-  renderTavernSessionList();
-  renderTavernMessages();
-
-  // Call LLM
-  var api = getActiveApiConfig();
-  if (!api) {
-    // No API configured - show mock opening
+  if (tavernState.isLoading || !db) { showToast('聊天数据库仍在加载，请稍后重试', 'error'); return; }
+  if (tavernState.isSending) return;
+  var intro = buildCharacterIntro(), preset = tavernState.presets[0];
+  var chat = createChatSession({name:(GameState.player.name || '修炼者') + ' - 新人生',characterName:'斗破苍穹',presetId:preset ? preset.id : '',lorebookIds:tavernState.activeLorebookIds.slice()});
+  chat.messages.push(createChatMessage('system',intro));
+  await db.chats.put(chat); tavernState.chats.unshift(chat); tavernState.activeChatId = chat.id;
+  renderTavernSessionList(); renderTavernMessages();
+  if (!getTavernApi('primary')) {
     var mockOpening = '晨曦透过窗棂洒在萧家后院的青石板上，你从闭关中醒来，感受到丹田中斗气如涓涓细流般涌动。三一六纪元的秋风带着魔兽山脉的苍凉气息拂过面庞。你是来自乌坦城的' + (GameState.player.name||'修炼者') + '，以' + ((RACES.find(function(r){return r.id===GameState.player.race})||{}).name||'未知') + '之躯踏上了这条以斗气逆天改命的不归路。\n\n远处的魔兽山脉如巨兽匍匐，那里是无数佣兵埋骨之地，也是强者崛起的试炼场。坊市的喧嚣隐隐传来，萧家后院的老槐树沙沙作响——新的一天，新的修炼。\n\n——你的斗气之路，从这里开始。';
-    chat.messages.push(createChatMessage('assistant', mockOpening));
-    renderTavernMessages();
-    await db.chats.put(chat);
-    showToast('开场已生成（离线模式）', 'info');
-    return;
+    chat.messages.push(createChatMessage('assistant',mockOpening)); await db.chats.put(chat); renderTavernMessages(); showToast('开场已生成（离线模式）','info'); return;
   }
-
-  showToast('正在生成开场...', 'info');
-  try {
-    var messages = [];
-    // Build system prompt
-    var preset = tavernState.presets.find(function(p){return p.id===chat.presetId;})||tavernState.presets[0];
-    var systemParts = [];
-    if (preset && preset.prompt_main) systemParts.push(preset.prompt_main);
-    systemParts.push(intro);
-    messages.push({role:'system',content:systemParts.join('\n\n')});
-    messages.push({role:'user',content:firstPrompt});
-
-    var body = {
-      model: api.model || 'gpt-4o-mini',
-      messages: messages,
-      temperature: preset?preset.settings.temp_openai:0.8,
-      max_tokens: preset?preset.settings.openai_max_tokens:1024,
-      stream: false
-    };
-
-    var response = await fetch(api.url + '/v1/chat/completions', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+api.key},
-      body:JSON.stringify(body)
-    });
-    if (!response.ok) throw new Error('HTTP '+response.status);
-    var data = await response.json();
-    var reply = data.choices[0].message.content;
-
-    chat.messages.push(createChatMessage('assistant', reply));
-    chat.updatedAt = Date.now();
-    await db.chats.put(chat);
-    renderTavernMessages();
-    showToast('开场已生成 ✓', 'success');
-  } catch(e) {
-    var fallback = '晨曦微光中，你站在萧家后院的青石板上，感受到体内斗气的第一次真正觉醒。魔兽山脉的轮廓在天边若隐若现，坊市的叫卖声随风飘来。面前有无数条路——炼药、修武、闯荡、崛起。你深吸一口气，踏出了第一步。';
-    chat.messages.push(createChatMessage('assistant', fallback));
-    chat.updatedAt = Date.now();
-    await db.chats.put(chat);
-    renderTavernMessages();
-    showToast('API调用失败，使用离线开场', 'warning');
-  }
+  await runTavernTurn('请依据角色档案，以第二人称撰写 200—300 字的乌坦城开场，并给出三个行动选项。',false);
 }
 
 function getIdentityName() {
@@ -2989,9 +2879,10 @@ function buildFlamesView() {
         '<span style="font-family:var(--font-serif);font-size:24px;color:' + f.color + ';font-weight:900;">#' + f.rank + '</span>' +
         '<div>' +
           '<div style="color:var(--text-primary);font-family:var(--font-serif);font-size:15px;font-weight:600;">' + f.name + '</div>' +
-          '<div style="font-size:10px;color:var(--text-muted);">' + f.altName + '</div>' +
+          '<div style="font-size:10px;color:var(--text-muted);">' + (f.altName || '') + '</div>' +
         '</div>' +
       '</div>' +
+      (f.sourceType === 'user-supplement' ? '<div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">作者补充设定</div>' : '') +
       '<div style="font-size:11px;color:var(--text-body);line-height:1.6;">' + f.desc + '</div>' +
     '</div>';
   });
@@ -3032,14 +2923,14 @@ function buildBeautiesView() {
 // 任务 VIEW
 // ==============================
 function openTimeRewind() {
-  var snaps = TimeRewind.snapshots || [];
+  var snaps = (TimeRewind.snapshots || []).filter(function(s) { return s.chatId === tavernState.activeChatId; });
   if (snaps.length === 0) { showToast('暂无回溯记录，请先进行对话', 'info'); return; }
   var html = '<h3 style="margin-bottom:12px;">⏪ 时空回溯</h3>';
   html += '<p style="font-size:11px;color:var(--text-muted);margin-bottom:12px;">选择要回到的回合，变量和聊天内容将一并回溯</p>';
   snaps.slice().reverse().forEach(function(s, i) {
-    html += '<div class="settings-card" style="padding:10px 14px;margin-bottom:6px;cursor:pointer;" onclick="if(confirm(\'确定回溯到 '+s.time+' 吗？此操作不可撤销。\')){closeAllModals();rewindToSnapshot('+s.id+');}">' +
+    html += '<div class="settings-card" style="padding:10px 14px;margin-bottom:6px;cursor:pointer;" onclick="if(confirm(\'确认回溯当前会话到所选回合？\')){closeAllModals();rewindToSnapshot(' + TavernCore.handlerArg(s.id) + ');}">' +
       '<span style="color:var(--text-primary);">📸 回合 #' + (snaps.length - i) + '</span>' +
-      '<span style="font-size:10px;color:var(--text-muted);margin-left:10px;">' + s.time + '</span>' +
+      '<span style="font-size:10px;color:var(--text-muted);margin-left:10px;">' + escapeHtml(s.time) + '</span>' +
       '<span style="font-size:10px;color:var(--text-muted);margin-left:8px;">' + (s.messages?s.messages.length:0) + ' 条消息</span>' +
     '</div>';
   });
@@ -3517,9 +3408,9 @@ function showModal(content) {
   var container = document.getElementById('modals-container');
   var id = 'modal-' + Date.now();
   container.innerHTML +=
-    '<div class="modal-overlay" id="' + id + '" onclick="if(event.target===this)closeModal(\'' + id + '\')">' +
+    '<div class="modal-overlay" id="' + id + '" onclick="if(event.target===this)closeModal(' + TavernCore.handlerArg(id) + ')">' +
       '<div class="modal-content">' +
-        '<button class="modal-close" onclick="closeModal(\'' + id + '\')">' +
+        '<button class="modal-close" onclick="closeModal(' + TavernCore.handlerArg(id) + ')">' +
           '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>' +
         '</button>' +
         content +
@@ -3637,6 +3528,7 @@ function renderSettingsTab(key) {
     case 'tavern': renderSettingsTavern(body); break;
     case 'regex': renderSettingsRegex(body); break;
     case 'depth': renderSettingsDepth(body); break;
+    case 'discord': renderSettingsDiscord(body); break;
   }
 }
 
@@ -3810,22 +3702,7 @@ function renderSettingsCore(body) {
           '<button class="settings-action-btn" onclick="addNewApi()" style="flex:1;">＋ 添加 API</button>' +
           '<button class="settings-action-btn" onclick="forceSaveAllSettings()" style="flex:1;background:rgba(136,204,136,0.1);border-color:var(--accent-green);color:var(--accent-green);">💾 强制保存配置</button>' +
         '</div>' +
-        '<div class="settings-section-title">云同步</div>' +
-        '<p style="font-size:11px;color:var(--text-muted);margin-bottom:12px;line-height:1.5;">存档丢失联系制作者 <span style="color:var(--text-primary);">@消失</span></p>' +
-        '<label class="settings-form-label">Discord 用户名</label>' +
-        '<input type="text" id="discord-username" class="settings-form-input" placeholder="用于标记存档归属" value="' + (GameState.settings.discordUserName || '') + '" oninput="saveDiscordConfig()" style="margin-bottom:12px;">' +
-        '<div id="discord-sync-buttons" style="flex-direction:column;gap:6px;">' +
-          '<button class="settings-action-btn" onclick="syncToCloud()">⬆ 备份存档</button>' +
-          '<button class="settings-action-btn" onclick="restoreFromLocal()">📂 读取本地备份</button>' +
-          '<button class="settings-action-btn" onclick="restoreFromCloud()">☁️ 读取云端备份</button>' +
-          '<div style="height:1px;background:rgba(212,168,75,0.1);margin:4px 0;"></div>' +
-          '<button class="settings-action-btn" onclick="backupApiConfig()">⬆ 备份 API 配置</button>' +
-          '<button class="settings-action-btn" onclick="restoreApiConfig()">📂 读取本地 API 配置</button>' +
-          '<div style="font-size:9px;color:var(--accent-fire);text-align:center;">API 配置仅保存于本地，切勿丢失！</div>' +
-        '</div>' +
-        '<div style="font-size:10px;color:var(--text-muted);margin-top:4px;text-align:center;" id="last-backup-time">' +
-          (GameState.settings.lastBackupTime ? '最后备份：' + new Date(GameState.settings.lastBackupTime).toLocaleString() : '尚未备份') +
-        '</div>' +
+        '<div id="discord-settings-container"></div>' +
       '</div>' +
       // -- RIGHT COLUMN: Protocols --
       '<div>' +
@@ -3833,7 +3710,7 @@ function renderSettingsCore(body) {
         buildProtocolCards() +
       '</div>' +
     '</div>';
-  setTimeout(function() { renderApiCards(); updateDiscordStatus(); }, 50);
+  setTimeout(function() { renderApiCards(); var backup = document.getElementById('discord-settings-container'); if (backup) renderSettingsDiscord(backup); }, 50);
 }
 
 function renderSettingsApi(body) {
@@ -3849,7 +3726,7 @@ function renderSettingsApi(body) {
 
 function forceSaveAllSettings() {
   // Force-save GameState settings to localStorage
-  saveToLocalStorage();
+  if (!saveToLocalStorage()) { showToast('配置未保存：浏览器拒绝写入本地存储', 'error'); return; }
   // Also persist tavern settings to IndexedDB if available
   if (db && tavernState && tavernState.tavernSettings) {
     try {
@@ -3893,17 +3770,17 @@ function renderSettingsLorebook(body) {
       html += '<div class="settings-card">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;">' +
           '<div style="flex:1;">' +
-            '<div style="color:var(--text-primary);font-family:var(--font-serif);font-size:14px;font-weight:600;">' + book.name + '</div>' +
+            '<div style="color:var(--text-primary);font-family:var(--font-serif);font-size:14px;font-weight:600;">' + escapeHtml(book.name) + '</div>' +
             '<div style="color:var(--text-muted);font-size:11px;">' + book.entries.length + ' 条目</div>' +
           '</div>' +
           '<div style="display:flex;gap:8px;align-items:center;">' +
             '<span class="settings-label-chip" style="color:' + (active ? 'var(--accent-green)' : 'var(--text-muted)') + ';">' + (active ? '已启用' : '未启用') + '</span>' +
             '<label class="toggle-switch">' +
-              '<input type="checkbox" ' + (active ? 'checked' : '') + ' onchange="toggleLorebookActive(\'' + book.id + '\',this.checked)">' +
+              '<input type="checkbox" ' + (active ? 'checked' : '') + ' onchange="toggleLorebookActive(' + TavernCore.handlerArg(book.id) + ',this.checked)">' +
               '<span class="toggle-slider"></span>' +
             '</label>' +
-            '<button class="text-btn" onclick="openLorebookEditor(\'' + book.id + '\')">编辑</button>' +
-            '<button class="text-btn danger" onclick="deleteTavernLorebook(\'' + book.id + '\')">删除</button>' +
+            '<button class="text-btn" onclick="openLorebookEditor(' + TavernCore.handlerArg(book.id) + ')">编辑</button>' +
+            '<button class="text-btn danger" onclick="deleteTavernLorebook(' + TavernCore.handlerArg(book.id) + ')">删除</button>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -3943,19 +3820,19 @@ function renderSettingsPresets(body) {
         html += '<div class="settings-card' + (isActive ? ' active-card' : '') + '">' +
           '<div style="display:flex;justify-content:space-between;align-items:center;">' +
             '<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">' +
-              '<label class="toggle-switch" onclick="activatePresetOnly(\'' + p.id + '\')">' +
+              '<label class="toggle-switch" onclick="activatePresetOnly(' + TavernCore.handlerArg(p.id) + ')">' +
                 '<input type="radio" name="preset-active" ' + (isActive ? 'checked' : '') + ' style="pointer-events:none;">' +
                 '<span class="toggle-slider"></span>' +
               '</label>' +
-              '<div style="flex:1;min-width:0;cursor:pointer;" onclick="setActiveTavernPreset(\'' + p.id + '\')">' +
+              '<div style="flex:1;min-width:0;cursor:pointer;" onclick="setActiveTavernPreset(' + TavernCore.handlerArg(p.id) + ')">' +
               '<div style="color:var(--text-primary);font-family:var(--font-serif);font-size:14px;font-weight:600;">' +
-                (p.name || '未命名') + '</div>' +
+                escapeHtml(p.name || '未命名') + '</div>' +
               '<div style="font-size:10px;color:var(--text-muted);">' + promptCount + '/' + prompts.length + ' 提示词 · T:' + (pSettings.temp_openai || 0.8) + '</div>' +
             '</div>' +
             '<div style="display:flex;gap:4px;">' +
-              '<button class="text-btn" onclick="openPresetPromptEditor(\'' + p.id + '\')">提示词</button>' +
-              '<button class="text-btn" onclick="editTavernPreset(\'' + p.id + '\')">设置</button>' +
-              '<button class="text-btn danger" onclick="deleteTavernPreset(\'' + p.id + '\')">删除</button>' +
+              '<button class="text-btn" onclick="openPresetPromptEditor(' + TavernCore.handlerArg(p.id) + ')">提示词</button>' +
+              '<button class="text-btn" onclick="editTavernPreset(' + TavernCore.handlerArg(p.id) + ')">设置</button>' +
+              '<button class="text-btn danger" onclick="deleteTavernPreset(' + TavernCore.handlerArg(p.id) + ')">删除</button>' +
             '</div>' +
           '</div>' +
         '</div>';
@@ -3963,16 +3840,28 @@ function renderSettingsPresets(body) {
     }
     body.innerHTML = html;
   } catch(e) {
-    body.innerHTML = '<div class="settings-section-title">预设管理</div><div style="color:var(--accent-fire);padding:20px;">加载失败：' + e.message + '</div>';
+    body.innerHTML = '<div class="settings-section-title">预设管理</div><div style="color:var(--accent-fire);padding:20px;">加载失败：' + escapeHtml(e.message) + '</div>';
   }
 }
 
 // === Preset Prompt Editor ===
-function activatePresetOnly(id) {
-  tavernState.tavernSettings.activePresetId = id;
-  db.tavernSettings.put(tavernState.tavernSettings);
-  renderSettingsTab('presets');
-  showToast('已切换活跃预设', 'success');
+async function activatePresetOnly(id) {
+  try { await applyActivePreset(id); renderSettingsTab('presets'); showToast('已切换活跃预设','success'); }
+  catch(e) { showToast('预设切换失败：' + e.message,'error'); }
+}
+
+async function applyActivePreset(id) {
+  if (!tavernState.presets.some(function(p) { return p.id === id; })) throw new Error('预设不存在');
+  stopTavernStream();
+  var settings = Object.assign({},tavernState.tavernSettings,{activePresetId:id});
+  var chat = getActiveChat(), next = chat ? Object.assign({},chat,{presetId:id}) : null;
+  await db.transaction('rw',[db.chats,db.tavernSettings],async function() {
+    if (next) await db.chats.put(next);
+    await db.tavernSettings.put(settings);
+  });
+  tavernState.tavernSettings = settings;
+  if (next) tavernState.chats = tavernState.chats.map(function(c) { return c.id === next.id ? next : c; });
+  saveToLocalStorage();
 }
 
 function openPresetPromptEditor(presetId) {
@@ -3987,7 +3876,7 @@ function openPresetPromptEditor(presetId) {
 
   var html = '<div class="settings-section-title">编辑提示词：' + preset.name + '</div>';
   html += '<div style="display:flex;gap:8px;margin-bottom:12px;">' +
-    '<button class="settings-action-btn" onclick="addPresetPrompt(\'' + presetId + '\')" style="flex:1;font-size:12px;">＋ 添加提示词</button>' +
+    '<button class="settings-action-btn" onclick="addPresetPrompt(' + TavernCore.handlerArg(presetId) + ')" style="flex:1;font-size:12px;">＋ 添加提示词</button>' +
     '<button class="settings-action-btn" onclick="renderSettingsTab(\'presets\')" style="flex:1;font-size:12px;">← 返回列表</button>' +
   '</div>';
 
@@ -3995,10 +3884,10 @@ function openPresetPromptEditor(presetId) {
     var posLabel = pr.injection_position === 0 ? '角色前' : pr.injection_position === 1 ? '角色后' : 'D' + (pr.injection_position - 2);
     html += '<div class="settings-card' + (pr.enabled ? '' : '') + '" style="padding:10px 14px;margin-bottom:6px;' + (pr.enabled ? '' : 'opacity:0.4;') + '">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-        '<div style="flex:1;min-width:0;cursor:pointer;" onclick="editPresetPrompt(\'' + presetId + '\',' + idx + ')">' +
+        '<div style="flex:1;min-width:0;cursor:pointer;" onclick="editPresetPrompt(' + TavernCore.handlerArg(presetId) + ',' + idx + ')">' +
           '<div style="display:flex;align-items:center;gap:8px;">' +
             '<span style="width:8px;height:8px;border-radius:50%;background:' + (pr.enabled ? 'var(--accent-green)' : '#666') + ';flex-shrink:0;"></span>' +
-            '<span style="color:var(--text-primary);font-family:var(--font-serif);font-size:13px;font-weight:600;">' + (pr.name || '未命名') + '</span>' +
+            '<span style="color:var(--text-primary);font-family:var(--font-serif);font-size:13px;font-weight:600;">' + escapeHtml(pr.name || '未命名') + '</span>' +
             '<span style="font-size:9px;color:var(--text-muted);">' + posLabel + '</span>' +
             '<span style="font-size:9px;color:var(--text-muted);">' + (pr.role === 'user' ? '👤' : '⚙️') + '</span>' +
             (pr.system_prompt ? '<span style="font-size:8px;color:var(--accent-purple);">系统</span>' : '') +
@@ -4006,23 +3895,23 @@ function openPresetPromptEditor(presetId) {
           '<div style="font-size:10px;color:var(--text-muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (pr.content ? pr.content.substring(0, 60) : '(空)') + '</div>' +
         '</div>' +
         '<div style="display:flex;gap:2px;flex-shrink:0;margin-left:8px;">' +
-          '<button class="text-btn" onclick="movePresetPrompt(\'' + presetId + '\',' + idx + ',-1)" style="font-size:14px;" title="上移">↑</button>' +
-          '<button class="text-btn" onclick="movePresetPrompt(\'' + presetId + '\',' + idx + ',1)" style="font-size:14px;" title="下移">↓</button>' +
+          '<button class="text-btn" onclick="movePresetPrompt(' + TavernCore.handlerArg(presetId) + ',' + idx + ',-1)" style="font-size:14px;" title="上移">↑</button>' +
+          '<button class="text-btn" onclick="movePresetPrompt(' + TavernCore.handlerArg(presetId) + ',' + idx + ',1)" style="font-size:14px;" title="下移">↓</button>' +
           '<label class="toggle-switch" style="transform:scale(0.65);">' +
-            '<input type="checkbox" ' + (pr.enabled ? 'checked' : '') + ' onchange="togglePresetPrompt(\'' + presetId + '\',' + idx + ',this.checked)">' +
+            '<input type="checkbox" ' + (pr.enabled ? 'checked' : '') + ' onchange="togglePresetPrompt(' + TavernCore.handlerArg(presetId) + ',' + idx + ',this.checked)">' +
             '<span class="toggle-slider"></span>' +
           '</label>' +
-          '<button class="text-btn danger" onclick="deletePresetPrompt(\'' + presetId + '\',' + idx + ')">✕</button>' +
+          '<button class="text-btn danger" onclick="deletePresetPrompt(' + TavernCore.handlerArg(presetId) + ',' + idx + ')">✕</button>' +
         '</div>' +
       '</div>' +
     '</div>';
   });
 
   html += '<div style="display:flex;gap:8px;margin-top:12px;">' +
-    '<button class="settings-action-btn" onclick="savePresetPrompts(\'' + presetId + '\')">💾 保存提示词</button>' +
+    '<button class="settings-action-btn" onclick="savePresetPrompts(' + TavernCore.handlerArg(presetId) + ')">💾 保存提示词</button>' +
   '</div>';
   body.innerHTML = html;
-  } catch(e) { body.innerHTML = '<div class="settings-section-title">错误</div><div style="color:var(--accent-fire);padding:20px;">' + e.message + '</div>'; }
+  } catch(e) { body.innerHTML = '<div class="settings-section-title">错误</div><div style="color:var(--accent-fire);padding:20px;">' + escapeHtml(e.message) + '</div>'; }
 }
 
 function addPresetPrompt(presetId) {
@@ -4037,7 +3926,12 @@ function deletePresetPrompt(presetId, idx) {
   var preset = tavernState.presets.find(function(p) { return p.id === presetId; });
   if (!preset || !preset.prompts) return;
   preset.prompts.splice(idx, 1);
+  syncPresetPromptOrder(preset);
   openPresetPromptEditor(presetId);
+}
+
+function syncPresetPromptOrder(preset) {
+  preset.prompt_order = [{character_id:100000,order:(preset.prompts || []).map(function(pr) { return {identifier:pr.identifier,enabled:pr.enabled !== false}; })}];
 }
 
 function movePresetPrompt(presetId, idx, dir) {
@@ -4048,6 +3942,7 @@ function movePresetPrompt(presetId, idx, dir) {
   var tmp = preset.prompts[idx];
   preset.prompts[idx] = preset.prompts[newIdx];
   preset.prompts[newIdx] = tmp;
+  syncPresetPromptOrder(preset);
   openPresetPromptEditor(presetId);
 }
 
@@ -4055,28 +3950,29 @@ function togglePresetPrompt(presetId, idx, checked) {
   var preset = tavernState.presets.find(function(p) { return p.id === presetId; });
   if (!preset || !preset.prompts) return;
   preset.prompts[idx].enabled = checked;
+  syncPresetPromptOrder(preset);
 }
 
 function editPresetPrompt(presetId, idx) {
   var preset = tavernState.presets.find(function(p) { return p.id === presetId; });
   if (!preset || !preset.prompts) return;
   var pr = preset.prompts[idx];
-  var html = '<h3 style="margin-bottom:12px;">编辑提示词：' + (pr.name || '未命名') + '</h3>' +
-    '<div class="form-group"><label class="form-label">名称</label><input type="text" id="pp-name" class="form-input" value="' + (pr.name || '') + '"></div>' +
+  var html = '<h3 style="margin-bottom:12px;">编辑提示词：' + escapeHtml(pr.name || '未命名') + '</h3>' +
+    '<div class="form-group"><label class="form-label">名称</label><input type="text" id="pp-name" class="form-input" value="' + escapeHtml(pr.name || '') + '"></div>' +
     '<div style="display:flex;gap:12px;">' +
       '<div class="form-group" style="flex:1;"><label class="form-label">角色</label><select id="pp-role" class="form-input"><option value="system"' + (pr.role === 'system' ? ' selected' : '') + '>System</option><option value="user"' + (pr.role === 'user' ? ' selected' : '') + '>User</option></select></div>' +
-      '<div class="form-group" style="flex:1;"><label class="form-label">注入位置</label><select id="pp-position" class="form-input"><option value="0"' + (pr.injection_position === 0 ? ' selected' : '') + '>角色定义前</option><option value="1"' + (pr.injection_position === 1 ? ' selected' : '') + '>角色定义后</option><option value="6"' + (pr.injection_position === 6 ? ' selected' : '') + '>D4（安全深度）</option></select></div>' +
+      '<div class="form-group" style="flex:1;"><label class="form-label">注入位置</label><select id="pp-position" class="form-input"><option value="0"' + (pr.injection_position === 0 ? ' selected' : '') + '>按预设顺序</option><option value="1"' + (pr.injection_position === 1 ? ' selected' : '') + '>按聊天深度插入</option><option value="6"' + (pr.injection_position === 6 ? ' selected' : '') + '>D4（安全深度）</option></select></div>' +
     '</div>' +
     '<div class="form-group"><label class="form-label">注入深度</label><input type="number" id="pp-depth" class="form-input" value="' + (pr.injection_depth || 4) + '" min="0" max="9999"></div>' +
-    '<div class="form-group"><label class="form-label">内容（支持 {{user}} {{char}} 等占位符）</label><textarea id="pp-content" class="form-input settings-textarea" rows="8">' + (pr.content || '') + '</textarea></div>' +
+    '<div class="form-group"><label class="form-label">内容（支持 {{user}} {{char}} 等占位符）</label><textarea id="pp-content" class="form-input settings-textarea" rows="8">' + escapeHtml(pr.content || '') + '</textarea></div>' +
     '<div style="display:flex;gap:12px;margin-bottom:12px;">' +
       '<label style="font-size:11px;color:var(--text-body);display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="pp-sysprompt" ' + (pr.system_prompt ? 'checked' : '') + '> 系统提示词</label>' +
       '<label style="font-size:11px;color:var(--text-body);display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="pp-marker" ' + (pr.marker ? 'checked' : '') + '> 标记位</label>' +
       '<label style="font-size:11px;color:var(--text-body);display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="pp-forbid" ' + (pr.forbid_overrides ? 'checked' : '') + '> 禁止覆盖</label>' +
     '</div>' +
     '<div style="display:flex;gap:10px;justify-content:flex-end;">' +
-      '<button class="text-btn" onclick="openPresetPromptEditor(\'' + presetId + '\')">返回</button>' +
-      '<button class="summary-action-btn" onclick="savePresetPromptEdit(\'' + presetId + '\',' + idx + ')">保存</button>' +
+      '<button class="text-btn" onclick="openPresetPromptEditor(' + TavernCore.handlerArg(presetId) + ')">返回</button>' +
+      '<button class="summary-action-btn" onclick="savePresetPromptEdit(' + TavernCore.handlerArg(presetId) + ',' + idx + ')">保存</button>' +
     '</div>';
   showModal(html);
 }
@@ -4088,11 +3984,12 @@ function savePresetPromptEdit(presetId, idx) {
   pr.name = document.getElementById('pp-name').value;
   pr.role = document.getElementById('pp-role').value;
   pr.injection_position = parseInt(document.getElementById('pp-position').value) || 0;
-  pr.injection_depth = parseInt(document.getElementById('pp-depth').value) || 4;
+  pr.injection_depth = Math.max(0, Number(document.getElementById('pp-depth').value) || 0);
   pr.content = document.getElementById('pp-content').value;
   pr.system_prompt = document.getElementById('pp-sysprompt').checked;
   pr.marker = document.getElementById('pp-marker').checked;
   pr.forbid_overrides = document.getElementById('pp-forbid').checked;
+  syncPresetPromptOrder(preset);
   closeAllModals();
   openPresetPromptEditor(presetId);
 }
@@ -4131,7 +4028,7 @@ function importPresetFromFile() {
     var reader = new FileReader();
     reader.onload = function(ev) {
       try {
-        var data = JSON.parse(ev.target.result);
+        var data = TavernCore.parseJSON(ev.target.result);
         var p;
 
         // === Detect format ===
@@ -4140,11 +4037,11 @@ function importPresetFromFile() {
           // SillyTavern format — convert to our preset
           var presetName = (data.extensions && data.extensions.extensions && data.extensions.extensions.presetdetailnfo && data.extensions.extensions.presetdetailnfo.nameGroup) || data.name || '导入预设';
           p = createPreset({ name: presetName });
-          p.settings.temp_openai = data.temperature || 1;
+          p.settings.temp_openai = data.temperature ?? 1;
           p.settings.freq_pen_openai = data.frequency_penalty || 0;
           p.settings.pres_pen_openai = data.presence_penalty || 0;
-          p.settings.top_p_openai = data.top_p || 1;
-          p.settings.openai_max_tokens = data.openai_max_tokens || 233333;
+          p.settings.top_p_openai = data.top_p ?? 1;
+          p.settings.openai_max_tokens = data.openai_max_tokens || 1024;
           p.settings.stream_openai = data.stream_openai !== false;
           p.settings.top_k = data.top_k || 0;
           p.settings.min_p = data.min_p || 0;
@@ -4278,29 +4175,16 @@ function togglePureTextMode(checked) {
 }
 
 function renderSettingsDiscord(body) {
-  body.innerHTML =
-    '<div class="settings-section-title">Discord 云同步</div>' +
-    '<p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;line-height:1.6;">连接 Discord 账号后将自动备份存档与 API 配置到云端，随时随地继续修炼</p>' +
-    '<div class="settings-card" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;" id="discord-status">' +
-      '<span id="discord-status-dot" style="width:10px;height:10px;border-radius:50%;background:#666;flex-shrink:0;"></span>' +
-      '<span id="discord-status-text" style="font-size:13px;color:var(--text-body);">未连接</span>' +
-    '</div>' +
-    '<button id="discord-connect-btn" class="settings-action-btn" onclick="connectDiscord()" style="margin-bottom:10px;">连接 Discord</button>' +
-    '<div style="margin-top:8px;">' +
-      '<details style="font-size:11px;color:var(--text-muted);">' +
-        '<summary style="cursor:pointer;color:var(--text-secondary);font-family:var(--font-serif);letter-spacing:2px;">高级配置</summary>' +
-        '<div style="margin-top:8px;">' +
-          '<label class="settings-form-label">Discord Application Client ID</label>' +
-          '<input type="text" id="discord-client-id" class="settings-form-input" placeholder="输入你的 Discord App Client ID..." oninput="saveDiscordConfig()">' +
-        '</div>' +
-      '</details>' +
-    '</div>' +
-    '<div id="discord-sync-buttons" style="display:none;margin-top:10px;flex-direction:column;gap:8px;">' +
-      '<button class="settings-action-btn" onclick="syncToCloud()">⬆ 备份存档到云端</button>' +
-      '<button class="settings-action-btn" onclick="restoreFromCloud()">⬇ 从云端恢复存档</button>' +
-      '<button class="settings-action-btn" onclick="syncApiToCloud()">⬆ 备份 API 配置到云端</button>' +
-    '</div>';
-  setTimeout(function() { updateDiscordStatus(); }, 100);
+  body.innerHTML = '<div class="settings-section-title">Discord 云备份</div>' +
+    '<p style="font-size:12px;color:var(--text-muted);line-height:1.7;">填写你自己的频道 Webhook。仅在点击备份时上传完整进度，包含聊天内容，不含 API 密钥。无需 Discord 账号授权。</p>' +
+    '<label class="settings-form-label">你的 Webhook 地址</label>' +
+    '<input id="discord-webhook-input" type="password" class="settings-form-input" autocomplete="off" value="' + escapeHtmlAttr(GameState.settings.discordWebhook || '') + '" placeholder="https://discord.com/api/webhooks/...">' +
+    '<button class="settings-action-btn" onclick="saveDiscordConfig()">保存备份地址</button>' +
+    '<button class="settings-action-btn" onclick="syncToCloud()">⬆ 备份完整进度</button>' +
+    '<button class="settings-action-btn" onclick="restoreFromCloud()">⬇ 从云端恢复</button>' +
+    '<button class="settings-action-btn" onclick="restoreFromLocal()">📂 读取本地备份</button>' +
+    '<button class="settings-action-btn" onclick="backupApiConfig()">备份 API 配置到本机</button>' +
+    '<button class="settings-action-btn" onclick="restoreApiConfig()">恢复本机 API 配置</button>';
 }
 
 function toggleCustomRules(enabled) {
@@ -4366,35 +4250,35 @@ function renderApiCards() {
     }
     return '<div class="settings-card' + (isActive ? ' active-card' : '') + '">' +
       '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">' +
-        '<input type="text" class="settings-form-input" placeholder="名称" value="' + (api.name || '') + '" style="flex:1;" oninput="updateApiSetting(\'' + api.id + '\',\'name\',this.value);saveToLocalStorage()">' +
+        '<input type="text" class="settings-form-input" placeholder="名称" value="' + escapeHtmlAttr(api.name || '') + '" style="flex:1;" oninput="updateApiSetting(' + TavernCore.handlerArg(api.id) + ',\'name\',this.value);saveToLocalStorage()">' +
         (isActive ? '<span class="settings-label-chip" style="color:var(--text-primary);">当前活跃</span>' : '') +
         '<label class="toggle-switch" title="' + (api.enabled !== false ? '已启用' : '已禁用') + '">' +
-          '<input type="checkbox" ' + (api.enabled !== false ? 'checked' : '') + ' onchange="toggleApiEnabled(\'' + api.id + '\',this.checked)">' +
+          '<input type="checkbox" ' + (api.enabled !== false ? 'checked' : '') + ' onchange="toggleApiEnabled(' + TavernCore.handlerArg(api.id) + ',this.checked)">' +
           '<span class="toggle-slider"></span>' +
         '</label>' +
-        '<button class="text-btn danger" onclick="deleteApiConfirmed(\'' + api.id + '\')" title="删除">' +
+        '<button class="text-btn danger" onclick="deleteApiConfirmed(' + TavernCore.handlerArg(api.id) + ')" title="删除">' +
           '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14"/></svg>' +
         '</button>' +
       '</div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">' +
-        '<input type="text" class="settings-form-input" placeholder="接口地址 (https://...)" value="' + (api.url || '') + '" oninput="updateApiSetting(\'' + api.id + '\',\'url\',this.value);clearModelList(\'' + api.id + '\');saveToLocalStorage()">' +
+        '<input type="text" class="settings-form-input" placeholder="接口地址 (https://...)" value="' + escapeHtmlAttr(api.url || '') + '" oninput="updateApiSetting(' + TavernCore.handlerArg(api.id) + ',\'url\',this.value);clearModelList(' + TavernCore.handlerArg(api.id) + ');saveToLocalStorage()">' +
         '<div style="display:flex;gap:4px;">' +
-          '<input type="password" id="api-key-' + api.id + '" class="settings-form-input" placeholder="API Key" value="' + (api.apiKey || api.key || '') + '" oninput="updateApiSetting(\'' + api.id + '\',\'apiKey\',this.value);updateApiSetting(\'' + api.id + '\',\'key\',this.value);saveToLocalStorage()">' +
-          '<button class="dice-btn" onclick="toggleApiKeyVisibility(\'' + api.id + '\')" title="显示/隐藏" style="padding:6px 8px;">' +
+          '<input type="password" id="api-key-' + escapeHtmlAttr(api.id) + '" class="settings-form-input" placeholder="API Key" value="' + escapeHtmlAttr(api.apiKey || api.key || '') + '" oninput="updateApiSetting(' + TavernCore.handlerArg(api.id) + ',\'apiKey\',this.value);updateApiSetting(' + TavernCore.handlerArg(api.id) + ',\'key\',this.value);saveToLocalStorage()">' +
+          '<button class="dice-btn" onclick="toggleApiKeyVisibility(' + TavernCore.handlerArg(api.id) + ')" title="显示/隐藏" style="padding:6px 8px;">' +
             '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' +
           '</button>' +
         '</div>' +
       '</div>' +
       '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center;">' +
-        '<input type="text" id="model-' + api.id + '" class="settings-form-input" placeholder="模型名称" value="' + (api.model || '') + '" style="' + (models.length > 0 ? 'display:none;' : '') + '" onchange="updateApiSetting(\'' + api.id + '\',\'model\',this.value)">' +
-        '<select id="model-select-' + api.id + '" class="settings-form-input" style="' + (models.length > 0 ? '' : 'display:none;') + '" onchange="updateApiSetting(\'' + api.id + '\',\'model\',this.value)">' +
+        '<input type="text" id="model-' + escapeHtmlAttr(api.id) + '" class="settings-form-input" placeholder="模型名称" value="' + escapeHtmlAttr(api.model || '') + '" style="' + (models.length > 0 ? 'display:none;' : '') + '" onchange="updateApiSetting(' + TavernCore.handlerArg(api.id) + ',\'model\',this.value)">' +
+        '<select id="model-select-' + escapeHtmlAttr(api.id) + '" class="settings-form-input" style="' + (models.length > 0 ? '' : 'display:none;') + '" onchange="updateApiSetting(' + TavernCore.handlerArg(api.id) + ',\'model\',this.value)">' +
           '<option value="">选择模型...</option>' +
-          models.map(function(m) { return '<option value="' + m + '"' + (api.model === m ? ' selected' : '') + '>' + m + '</option>'; }).join('') +
+          models.map(function(m) { return '<option value="' + escapeHtmlAttr(m) + '"' + (api.model === m ? ' selected' : '') + '>' + escapeHtmlAttr(m) + '</option>'; }).join('') +
         '</select>' +
-        '<button class="dice-btn" onclick="syncModels(\'' + api.id + '\')" style="font-size:10px;white-space:nowrap;padding:6px 10px;">同步</button>' +
+        '<button class="dice-btn" onclick="syncModels(' + TavernCore.handlerArg(api.id) + ')" style="font-size:10px;white-space:nowrap;padding:6px 10px;">同步</button>' +
       '</div>' +
       '<div style="display:flex;gap:6px;margin-bottom:6px;">' +
-        '<select class="settings-form-input" style="flex:1;" onchange="updateApiSetting(\'' + api.id + '\',\'backend\',this.value);onApiBackendChange(\'' + api.id + '\',this.value);saveToLocalStorage()">' +
+        '<select class="settings-form-input" style="flex:1;" onchange="updateApiSetting(' + TavernCore.handlerArg(api.id) + ',\'backend\',this.value);onApiBackendChange(' + TavernCore.handlerArg(api.id) + ',this.value);saveToLocalStorage()">' +
           '<option value="openai"' + ((api.backend||'openai')==='openai'?' selected':'') + '>天机通灵（OpenAI）</option>' +
           '<option value="ollama"' + ((api.backend||'openai')==='ollama'?' selected':'') + '>本地灵枢（Ollama）</option>' +
           '<option value="kobold"' + ((api.backend||'openai')==='kobold'?' selected':'') + '>炉火演算（KoboldCPP）</option>' +
@@ -4402,11 +4286,11 @@ function renderApiCards() {
       '</div>' +
       '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' +
         '<span style="font-size:10px;color:var(--text-muted);white-space:nowrap;font-family:var(--font-serif);">路由权重</span>' +
-        '<input type="range" class="form-slider" min="0" max="100" value="' + (api.weight || 50) + '" style="flex:1;" oninput="updateApiSetting(\'' + api.id + '\',\'weight\',parseInt(this.value));this.nextElementSibling.textContent=this.value">' +
+        '<input type="range" class="form-slider" min="0" max="100" value="' + (api.weight || 50) + '" style="flex:1;" oninput="updateApiSetting(' + TavernCore.handlerArg(api.id) + ',\'weight\',parseInt(this.value));this.nextElementSibling.textContent=this.value">' +
         '<span style="font-size:11px;color:var(--text-primary);min-width:24px;text-align:center;font-family:var(--font-serif);">' + (api.weight || 50) + '</span>' +
       '</div>' +
       '<div style="font-size:10px;">' +
-        '<span id="sync-status-' + api.id + '" style="color:' + (api.lastSync ? 'var(--accent-green)' : 'var(--text-muted)') + ';">' + (lastSyncText || '尚未同步') + '</span>' +
+        '<span id="sync-status-' + escapeHtmlAttr(api.id) + '" style="color:' + (api.lastSync ? 'var(--accent-green)' : 'var(--text-muted)') + ';">' + (lastSyncText || '尚未同步') + '</span>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -4601,55 +4485,11 @@ function deleteApiConfirmed(apiId) {
 // ==============================
 
 function connectDiscord() {
-  var clientId = document.getElementById('discord-client-id').value.trim();
-  if (!clientId) {
-    showToast('请先在高级配置中填入 Discord App Client ID', 'warning');
-    return;
-  }
-  GameState.settings.discordClientId = clientId;
-  saveToLocalStorage();
-  var rawUri = window.location.href;
-  // Strip query/hash for the redirect URI base
-  var baseUri = rawUri.split('?')[0].split('#')[0];
-  var redirectUri = encodeURIComponent(baseUri);
-  var scopes = encodeURIComponent('identify webhook.incoming');
-  var authUrl = 'https://discord.com/oauth2/authorize?client_id=' + clientId +
-    '&response_type=code&redirect_uri=' + redirectUri +
-    '&scope=' + scopes;
-
-  showModal(
-    '<h3 style="margin-bottom:8px;">连接 Discord</h3>' +
-    '<div style="background:#1a1a2e;border:1px solid #ffcc00;border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:11px;line-height:1.6;">' +
-      '<span style="color:#ffcc00;">⚠️ 授权前必须先配置 Redirect URI：</span><br>' +
-      '1. 打开 <a href="https://discord.com/developers/applications/' + clientId + '/oauth2" target="_blank" style="color:var(--accent-blue);">Discord App OAuth2 设置</a><br>' +
-      '2. 在 Redirects 一栏点击 Add Redirect，粘贴：<br>' +
-      '<code style="background:#0a0a12;padding:2px 6px;border-radius:3px;color:#88cc88;word-break:break-all;">' + baseUri + '</code><br>' +
-      '3. 保存后回到此处点击下方按钮授权' +
-    '</div>' +
-    '<a href="' + authUrl + '" target="_blank" style="display:block;text-align:center;padding:12px;background:#5865F2;color:#fff;border-radius:6px;text-decoration:none;font-size:14px;margin-bottom:12px;">' +
-      '前往 Discord 授权' +
-    '</a>' +
-    '<p style="font-size:10px;color:var(--text-muted);">授权后页面会跳转，将地址栏中的 code 参数粘贴到下方：</p>' +
-    '<div style="display:flex;gap:8px;margin-top:8px;">' +
-      '<input type="text" id="discord-code-input" class="form-input" placeholder="粘贴授权 code..." style="flex:1;font-size:12px;" value="' + (window._pendingDiscordCode || '') + '">' +
-      '<button class="creation-nav-btn primary" onclick="completeDiscordAuth()" style="white-space:nowrap;font-size:12px;">完成连接</button>' +
-    '</div>' +
-    (window._pendingDiscordCode ? '<p style="font-size:10px;color:var(--accent-green);margin-top:4px;">✓ 已自动填入授权码</p>' : '')
-  );
+  renderSettingsTab('discord');
 }
 
 function completeDiscordAuth() {
-  var code = document.getElementById('discord-code-input');
-  if (!code) return;
-  var codeVal = code.value.trim();
-  if (!codeVal) { showToast('请粘贴授权 code', 'error'); return; }
-  window._pendingDiscordCode = null;
-  GameState.settings.discordConnected = true;
-  GameState.settings.discordAuthCode = codeVal;
-  saveToLocalStorage();
-  closeAllModals();
-  updateDiscordStatus();
-  showToast('Discord 连接成功！云同步已启用', 'success');
+  showToast('请使用自己的 Webhook 备份地址，无需账号授权', 'info');
 }
 
 function updateDiscordStatus() {
@@ -4675,68 +4515,45 @@ function updateDiscordStatus() {
 }
 
 function saveDiscordConfig() {
-  var nameEl = document.getElementById('discord-username');
-  if (nameEl) GameState.settings.discordUserName = nameEl.value.trim();
-  saveToLocalStorage();
-  var btns = document.getElementById('discord-sync-buttons');
-  if (btns) btns.style.display = 'flex';
+  var input = document.getElementById('discord-webhook-input');
+  if (!input) return;
+  try {
+    var webhook = input.value.trim() ? validateWebhook(input.value.trim()) : '';
+    if (webhook !== GameState.settings.discordWebhook) { GameState.settings.lastBackupIds = []; GameState.settings.lastBackupTime = null; }
+    GameState.settings.discordWebhook = webhook;
+    if (!saveToLocalStorage()) throw new Error('浏览器拒绝保存配置');
+    showToast('备份地址已保存', 'success');
+  } catch(e) { showToast(e.message,'error'); }
 }
 
 function getDiscordUserName() {
   return GameState.settings.discordUserName || 'player';
 }
 
-function syncToCloud() {
-  var webhookUrl = GameState.settings.discordWebhook;
-  if (!webhookUrl) { showToast('请先填入 Discord Webhook URL', 'error'); return; }
-  showToast('正在备份...', 'info');
+async function syncToCloud() {
+  try {
+    var webhook = validateWebhook(GameState.settings.discordWebhook);
+    var save = buildGameSnapshot(), json = JSON.stringify(save);
+    var form = new FormData();
+    form.append('file',new Blob([json],{type:'application/json'}),'doupo-save.json');
+    form.append('username','斗破苍穹·云同步');
+    var oldId = (GameState.settings.lastBackupIds || [])[0];
+    var response = await fetch(webhook + '?wait=true',{method:'POST',body:form});
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    var result = await response.json(); if (!result.id) throw new Error('云端未返回备份凭据');
+    GameState.settings.lastBackupIds = [result.id]; GameState.settings.lastBackupTime = Date.now();
+    var saved = saveToLocalStorage();
+    try { localStorage.setItem('doupo_cloud_backup',json); } catch(e) { saved = false; }
+    showToast(saved ? '完整进度已备份，API 密钥未上传' : '云端备份成功，但本地记录写入失败，请保存备份消息编号：' + result.id, saved ? 'success' : 'info');
+    // Keep the old backup unless the new one and its recovery pointer are confirmed.
+    if (saved && oldId) fetch(webhook + '/messages/' + encodeURIComponent(oldId),{method:'DELETE'}).catch(function() {});
+  } catch(e) { showToast('备份失败：' + e.message,'error'); }
+}
 
-  // Build single JSON with ALL save data
-  var saveData = {
-    type: 'doupo-save', version: '0.1.0', timestamp: new Date().toISOString(),
-    user: getDiscordUserName(),
-    player: GameState.player, gameTime: GameTime, worldState: WorldState,
-    settings: { apis: GameState.settings.apis, activeApi: GameState.settings.activeApi }
-  };
-  var json = JSON.stringify(saveData, null, 2);
-
-  // Overwrite local backup
-  localStorage.setItem('doupo_cloud_backup', json);
-
-  var userName = getDiscordUserName();
-  var fileName = 'doupo-save-' + userName + '.json';
-  var formData = new FormData();
-  formData.append('file', new Blob([json], { type: 'application/json' }), fileName);
-  formData.append('username', '斗破苍穹·云同步');
-
-  // If we have a previous message, delete it first (overwrite)
-  var doUpload = function() {
-    return fetch(webhookUrl + '?wait=true', { method: 'POST', body: formData })
-      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(function(data) {
-        GameState.settings.lastBackupIds = [data.id];
-        GameState.settings.lastBackupTime = Date.now();
-        saveToLocalStorage();
-        var timeEl = document.getElementById('last-backup-time');
-        if (timeEl) timeEl.textContent = '最后备份：' + new Date().toLocaleString();
-        showToast('备份完成 ✓ (' + userName + ')', 'success');
-      });
-  };
-
-  var prevMsgId = GameState.settings.lastBackupIds && GameState.settings.lastBackupIds[0];
-  if (prevMsgId) {
-    // Delete old message to replace it
-    var parts = webhookUrl.replace('https://discord.com/api/', '').split('/');
-    var delUrl = 'https://discord.com/api/v10/webhooks/' + parts[1] + '/' + parts[2] + '/messages/' + prevMsgId;
-    fetch(delUrl, { method: 'DELETE' }).then(function() {
-      doUpload().catch(function(e) { showToast('备份失败：' + e.message, 'error'); });
-    }).catch(function() {
-      // Delete failed (maybe already deleted), just upload new
-      doUpload().catch(function(e) { showToast('备份失败：' + e.message, 'error'); });
-    });
-  } else {
-    doUpload().catch(function(e) { showToast('备份失败：' + e.message, 'error'); });
-  }
+function validateWebhook(value) {
+  var url; try { url = new URL(value); } catch(e) { throw new Error('请先填写你自己的 Discord Webhook 地址'); }
+  if (url.protocol !== 'https:' || url.hostname !== 'discord.com' || !/^\/api(?:\/v\d+)?\/webhooks\/\d+\/[A-Za-z0-9_-]+\/?$/.test(url.pathname)) throw new Error('Webhook 地址格式无效');
+  return url.origin + url.pathname.replace(/\/$/,'');
 }
 
 function restoreFromLocal() {
@@ -4746,7 +4563,7 @@ function restoreFromLocal() {
 }
 
 function restoreFromCloud() {
-  var webhookUrl = GameState.settings.discordWebhook;
+  var webhookUrl; try { webhookUrl = validateWebhook(GameState.settings.discordWebhook); } catch(e) { showToast(e.message,'error'); return; }
   var msgIds = GameState.settings.lastBackupIds;
   if (!webhookUrl || !msgIds || msgIds.length === 0) {
     showToast('没有云端备份记录，请先备份', 'error');
@@ -4754,8 +4571,7 @@ function restoreFromCloud() {
   }
   showToast('正在从云端读取...', 'info');
 
-  var parts = webhookUrl.replace('https://discord.com/api/', '').split('/');
-  var apiUrl = 'https://discord.com/api/v10/webhooks/' + parts[1] + '/' + parts[2] + '/messages/' + msgIds[0];
+  var apiUrl = webhookUrl + '/messages/' + encodeURIComponent(msgIds[0]);
 
   fetch(apiUrl)
     .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
@@ -4780,30 +4596,13 @@ function doManualRestore() {
   applyRestoreData(ta.value.trim());
 }
 
-function applyRestoreData(raw) {
+async function applyRestoreData(raw) {
   try {
-    // Strip markdown code blocks, Part headers, and any leading non-JSON text
-    raw = raw.replace(/\[Part \d+\/\d+\]\n?/g, '');
-    var codeMatch = raw.match(/```(?:json)?\s*\n?([\s\S]*?)```/);
-    if (codeMatch) raw = codeMatch[1].trim();
-    // Strip anything before first {
-    var braceIdx = raw.indexOf('{');
-    if (braceIdx > 0) raw = raw.substring(braceIdx);
-    var data = JSON.parse(raw);
-    if (data.type !== 'doupo-save') { showToast('无效的备份格式', 'error'); return; }
-    if (data.player) GameState.player = data.player;
-    if (data.gameTime) Object.assign(GameTime, data.gameTime);
-    if (data.worldState) Object.assign(WorldState, data.worldState);
-    if (data.settings) {
-      if (data.settings.apis) GameState.settings.apis = data.settings.apis;
-      if (data.settings.activeApi) GameState.settings.activeApi = data.settings.activeApi;
-    }
-    saveToLocalStorage();
-    closeAllModals();
-    showToast('存档恢复成功！刷新页面生效', 'success');
-  } catch(e) {
-    showToast('JSON 解析失败：' + e.message, 'error');
-  }
+    var data = TavernCore.parseJSON(raw);
+    if (data.type !== 'doupo-save') throw new Error('无效的备份格式');
+    await restoreGameSnapshot(data); closeAllModals();
+    showToast(data.tavern ? '完整进度已恢复' : '旧版备份已恢复；此备份不含聊天历史', 'success');
+  } catch(e) { showToast('恢复失败：' + e.message, 'error'); }
 }
 
 function backupApiConfig() {
@@ -4828,28 +4627,7 @@ function restoreApiConfig() {
 }
 
 function syncApiToCloud() {
-  var webhookUrl = GameState.settings.discordWebhook;
-  if (!webhookUrl) { showToast('请先填入 Discord Webhook URL', 'error'); return; }
-  showToast('正在备份 API 配置...', 'info');
-
-  var apiData = {
-    type: 'doupo-api-config',
-    timestamp: new Date().toISOString(),
-    apis: GameState.settings.apis,
-    activeApi: GameState.settings.activeApi
-  };
-  var json = JSON.stringify(apiData, null, 2);
-
-  fetch(webhookUrl + '?wait=true', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content: '**API 配置备份** ' + new Date().toLocaleString() + '\n```json\n' + json + '\n```', username: '斗破苍穹·云同步' })
-  }).then(function(r) {
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    showToast('API 配置备份成功！', 'success');
-  }).catch(function(e) {
-    showToast('备份失败：' + e.message, 'error');
-  });
+  showToast('API 密钥仅保存在当前浏览器，不会上传；请使用完整存档备份', 'info');
 }
 
 function closeAllModals() {
@@ -4865,9 +4643,11 @@ function closeAllModals() {
 
 function saveToLocalStorage() {
   try {
-    // Merge tavern settings into GameState.settings so they survive even if IndexedDB is unavailable
-    if (tavernState && tavernState.tavernSettings) {
-      var ts = tavernState.tavernSettings;
+    var stamp = Date.now(), ts = tavernState && tavernState.tavernSettings;
+    GameState.settings.playerSavedAt = stamp;
+    if (ts) {
+      ts.playerState = TavernCore.clone(GameState.player); ts.playerStateAt = stamp;
+      GameState.settings.pureTextMode = !!ts.pureTextMode;
       GameState.settings.customTags = ts.customTags || ['maintext','option','sum','vars','thinking','think'];
       GameState.settings.activeSecondaryApi = ts.activeSecondaryApi || '';
       GameState.settings.tavernCharacterName = ts.characterName || '';
@@ -4875,31 +4655,41 @@ function saveToLocalStorage() {
       GameState.settings.tavernActivePresetId = ts.activePresetId || '';
       GameState.settings.tavernActiveLorebookIds = ts.activeLorebookIds || [];
     }
-    localStorage.setItem('doupo_settings', JSON.stringify(GameState.settings));
-    localStorage.setItem('doupo_player', JSON.stringify(GameState.player));
-    localStorage.setItem('doupo_phase', GameState.phase);
-  } catch(e) {}
+    // One atomic localStorage write prevents mixed player/settings/world revisions.
+    var runtime = {version:2,settings:GameState.settings,player:GameState.player,phase:GameState.phase,
+      gameTime:GameTime,worldState:WorldState,economy:Economy,studioState:StudioState,questSystem:QuestSystem};
+    localStorage.setItem('doupo_runtime',JSON.stringify(runtime));
+    // Best-effort compatibility copies for older entry pages; v2 reads the envelope first.
+    try {
+      localStorage.setItem('doupo_settings',JSON.stringify(GameState.settings));
+      localStorage.setItem('doupo_player',JSON.stringify(GameState.player));
+      localStorage.setItem('doupo_phase',GameState.phase);
+    } catch(e) {}
+    return true;
+  } catch(e) { return false; }
 }
 
 function loadFromLocalStorage() {
   try {
-    var settings = localStorage.getItem('doupo_settings');
-    if (settings) GameState.settings = JSON.parse(settings);
-    // Hardcoded webhook — cannot be changed by user
-    GameState.settings.discordWebhook = 'https://discord.com/api/webhooks/1515659474730225695/814fr3NzrAunhK0p5jlC9W7-rp__o-jFVnuDUSgyE8F3nDpqo2Yx-Pxck0fP0RcCK2ag';
-    // Ensure defaults for fields that might be missing from older saves
-    if (!GameState.settings.apis) GameState.settings.apis = [];
-    // Migrate old 'key' field to 'apiKey' for backward compatibility
-    GameState.settings.apis.forEach(function(api) {
-      if (api.key && !api.apiKey) api.apiKey = api.key;
-      if (!api.key && api.apiKey) api.key = api.apiKey;
-    });
+    var envelope = localStorage.getItem('doupo_runtime'), runtime = envelope ? TavernCore.parseJSON(envelope) : null;
+    var settings = runtime ? runtime.settings : TavernCore.parseJSON(localStorage.getItem('doupo_settings') || 'null');
+    var player = runtime ? runtime.player : TavernCore.parseJSON(localStorage.getItem('doupo_player') || 'null');
+    if (settings) GameState.settings = Object.assign({},GameState.settings,settings);
+    if ((GameState.settings.discordWebhook || '').includes('/webhooks/1515659474730225695/')) GameState.settings.discordWebhook = '';
+    GameState.settings.discordConnected = false; delete GameState.settings.discordAuthCode;
+    if (!Array.isArray(GameState.settings.apis)) GameState.settings.apis = [];
+    GameState.settings.apis.forEach(function(api) { if (api.key && !api.apiKey) api.apiKey = api.key; if (!api.key && api.apiKey) api.key = api.apiKey; });
     if (!GameState.settings.customTags) GameState.settings.customTags = ['maintext','option','sum','vars','thinking','think'];
     if (GameState.settings.activeSecondaryApi === undefined) GameState.settings.activeSecondaryApi = '';
-    var player = localStorage.getItem('doupo_player');
-    if (player) GameState.player = JSON.parse(player);
-    var phase = localStorage.getItem('doupo_phase');
-    if (phase) GameState.phase = phase;
+    if (player) GameState.player = player;
+    if (runtime) {
+      if (runtime.gameTime) Object.assign(GameTime,runtime.gameTime);
+      if (runtime.worldState) Object.assign(WorldState,runtime.worldState);
+      if (runtime.economy) Object.assign(Economy,runtime.economy);
+      if (runtime.studioState) Object.assign(StudioState,runtime.studioState);
+      if (runtime.questSystem) Object.assign(QuestSystem,runtime.questSystem);
+    }
+    var phase = runtime ? runtime.phase : localStorage.getItem('doupo_phase'); if (phase) GameState.phase = phase;
     return !!(player || settings);
   } catch(e) { return false; }
 }
@@ -4908,6 +4698,7 @@ function loadFromLocalStorage() {
 function syncTavernSettingsFromLocal() {
   if (!tavernState || !tavernState.tavernSettings) return;
   var s = GameState.settings;
+  if (s.pureTextMode !== undefined) tavernState.tavernSettings.pureTextMode = !!s.pureTextMode;
   if (s.customTags) tavernState.tavernSettings.customTags = s.customTags;
   if (s.activeSecondaryApi) tavernState.tavernSettings.activeSecondaryApi = s.activeSecondaryApi;
   if (s.tavernCharacterName) tavernState.tavernSettings.characterName = s.tavernCharacterName;
@@ -4974,7 +4765,7 @@ function showToast(msg, type) {
     'border-radius:6px;font-size:12px;color:var(--text-body);' +
     'animation:toast-in 0.3s ease-out;max-width:320px;' +
     'box-shadow:0 4px 16px rgba(0,0,0,0.4);';
-  toast.innerHTML = '<span style="color:' + colors[type] + ';">' + (icons[type] || 'ℹ') + '</span> ' + msg;
+  toast.innerHTML = '<span style="color:' + colors[type] + ';">' + (icons[type] || 'ℹ') + '</span> ' + escapeHtml(msg);
   container.appendChild(toast);
   setTimeout(function() {
     toast.style.animation = 'toast-out 0.3s ease-in forwards';
@@ -5151,44 +4942,97 @@ function getSaves() {
 }
 
 function saveSaves(saves) {
-  try {
-    localStorage.setItem(SAVES_KEY, JSON.stringify(saves));
-  } catch(e) { showToast('存档存储空间不足，请清理旧存档', 'error'); }
+  try { localStorage.setItem(SAVES_KEY, JSON.stringify(saves)); return true; }
+  catch(e) { showToast('存档未保存：存储空间不足或浏览器禁止写入，请导出备份', 'error'); return false; }
 }
 
 function createSave() {
-  var saves = getSaves();
-  var save = {
-    id: 'save-' + Date.now(),
-    name: '存档 ' + (saves.length + 1),
-    timestamp: Date.now(),
-    player: JSON.parse(JSON.stringify(GameState.player)),
-    settings: JSON.parse(JSON.stringify(GameState.settings))
-  };
-  saves.push(save);
-  saveSaves(saves);
-  showToast('存档成功！(' + (save.player.name || '未命名角色') + ')', 'success');
-  // If save manager is open, re-render
-  renderSaveList();
+  try {
+    var save = buildGameSnapshot();
+    var saves = getSaves(); save.name = '存档 ' + (saves.length + 1);
+    saves.push(save);
+    if (!saveSaves(saves)) return false;
+    showToast('完整存档已保存（不含 API 密钥）', 'success'); renderSaveList(); return true;
+  } catch(e) { showToast('无法存档：' + e.message, 'error'); return false; }
 }
 
-function loadSave(id) {
-  var saves = getSaves();
-  var save = saves.find(function(s) { return s.id === id; });
+function buildGameSnapshot() {
+  if (tavernState.isLoading || !db) throw new Error('聊天数据库尚未就绪，请稍后再试');
+  if (tavernState.isSending) throw new Error('请先停止推演，再保存完整进度');
+  return TavernCore.redact({type:'doupo-save', version:2, id:'save-' + crypto.randomUUID(), timestamp:Date.now(),
+    player:GameState.player, settings:GameState.settings, gameTime:GameTime, worldState:WorldState,
+    questSystem:typeof QuestSystem !== 'undefined' ? QuestSystem : null,
+    economy:typeof Economy !== 'undefined' ? Economy : null, studioState:typeof StudioState !== 'undefined' ? StudioState : null,
+    tavern:{chats:tavernState.chats, activeChatId:tavernState.activeChatId, lorebooks:tavernState.lorebooks,
+      presets:tavernState.presets, characterCard:tavernState.characterCard,
+      settings:Object.assign({}, tavernState.tavernSettings, {activeChatId:tavernState.activeChatId}),
+      activeLorebookIds:tavernState.activeLorebookIds}, snapshots:TimeRewind.snapshots});
+}
+
+function validateGameSnapshot(data) {
+  if (!data || typeof data !== 'object' || !data.player || typeof data.player !== 'object' || Array.isArray(data.player)) throw new Error('存档缺少有效的玩家数据');
+  if (data.version && Number(data.version) > 2) throw new Error('该存档版本高于当前支持版本');
+  if (data.tavern) {
+    ['chats','lorebooks','presets'].forEach(function(k) {
+      if (!Array.isArray(data.tavern[k]) || data.tavern[k].some(function(v) { return !v || typeof v.id !== 'string'; })) throw new Error('存档数据无效：' + k);
+    });
+    if (data.tavern.chats.some(function(c) { return !Array.isArray(c.messages) || c.messages.some(function(m) { return !m || !['user','assistant','system'].includes(m.role) || typeof m.content !== 'string'; }); })) throw new Error('聊天消息格式无效');
+    if (data.tavern.lorebooks.some(function(b) { return !Array.isArray(b.entries); })) throw new Error('世界书条目格式无效');
+  }
+  return data;
+}
+
+async function restoreGameSnapshot(input) {
+  if (tavernState.isLoading || !db) throw new Error('聊天数据库尚未就绪，请稍后重试');
+  var data = validateGameSnapshot(TavernCore.redact(input));
+  stopTavernStream();
+  var localSettings = GameState.settings;
+  // Credentials belong to this browser, never to imported/shared saves.
+  var settings = Object.assign({}, localSettings, data.settings || {});
+  settings.discordWebhook = localSettings.discordWebhook || '';
+  settings.discordAuthCode = ''; settings.discordConnected = false;
+  if (data.settings && Array.isArray(data.settings.apis)) {
+    settings.apis = data.settings.apis.map(function(a) {
+      var local = (localSettings.apis || []).find(function(v) { return v.id === a.id && v.url === a.url; });
+      return Object.assign({},a,{apiKey:local ? (local.apiKey || local.key || '') : '', key:local ? (local.apiKey || local.key || '') : ''});
+    });
+  }
+  var snapshot = data.tavern;
+  if (snapshot) {
+    var tables = [db.chats,db.lorebooks,db.presets,db.characterCard,db.tavernSettings];
+    await db.transaction('rw', tables, async function() {
+      // Upsert restored records; keep newer unrelated sessions in the local library.
+      await db.chats.bulkPut(snapshot.chats); await db.lorebooks.bulkPut(snapshot.lorebooks); await db.presets.bulkPut(snapshot.presets);
+      if (snapshot.characterCard) await db.characterCard.put(Object.assign({},snapshot.characterCard,{id:'active'}));
+      await db.tavernSettings.put(Object.assign({},snapshot.settings || {},{id:'main',activeChatId:snapshot.activeChatId,playerState:data.player,playerStateAt:Date.now()}));
+    });
+    function combine(saved, current) { var ids = new Set(saved.map(function(v) { return v.id; })); return saved.concat(current.filter(function(v) { return !ids.has(v.id); })); }
+    tavernState.chats = combine(snapshot.chats,tavernState.chats);
+    tavernState.lorebooks = combine(snapshot.lorebooks,tavernState.lorebooks);
+    tavernState.presets = combine(snapshot.presets,tavernState.presets);
+    tavernState.characterCard = snapshot.characterCard || tavernState.characterCard;
+    tavernState.tavernSettings = Object.assign(createDefaultTavernSettings(),snapshot.settings || {});
+    tavernState.activeLorebookIds = snapshot.activeLorebookIds || [];
+    tavernState.activeChatId = snapshot.activeChatId || null;
+  }
+  GameState.player = TavernCore.clone(data.player); GameState.settings = settings;
+  if (data.gameTime) Object.assign(GameTime,TavernCore.clone(data.gameTime));
+  if (data.worldState) Object.assign(WorldState,TavernCore.clone(data.worldState));
+  if (data.economy && typeof Economy !== 'undefined') Object.assign(Economy,TavernCore.clone(data.economy));
+  if (data.studioState && typeof StudioState !== 'undefined') Object.assign(StudioState,TavernCore.clone(data.studioState));
+  if (data.questSystem && typeof QuestSystem !== 'undefined') Object.assign(QuestSystem,TavernCore.clone(data.questSystem));
+  TimeRewind.snapshots = Array.isArray(data.snapshots) ? TavernCore.clone(data.snapshots) : [];
+  var persisted = saveToLocalStorage();
+  if (GameState.phase === 'game') initGameWorld();
+  renderTavernMessages(); renderTavernSessionList(); updateTavernInfo();
+  if (!persisted) throw new Error('进度已加载，但浏览器拒绝保存玩家设置，请导出后重试');
+}
+
+async function loadSave(id) {
+  var save = getSaves().find(function(s) { return s.id === id; });
   if (!save) { showToast('存档不存在', 'error'); return; }
-  GameState.player = JSON.parse(JSON.stringify(save.player));
-  GameState.settings = JSON.parse(JSON.stringify(save.settings));
-  // Propagate settings
-  if (GameState.settings.discordConnected === undefined) {
-    GameState.settings.discordConnected = false;
-    GameState.settings.discordClientId = '';
-  }
-  saveToLocalStorage();
-  closeAllModals();
-  if (GameState.phase === 'game') {
-    initGameWorld();
-  }
-  showToast('存档加载成功！欢迎回来，' + (save.player.name || '未知'), 'success');
+  try { await restoreGameSnapshot(save); closeAllModals(); showToast(save.tavern ? '完整进度已恢复' : '旧版玩家存档已恢复；此存档不含聊天历史', 'success'); }
+  catch(e) { showToast('加载失败：' + e.message, 'error'); }
 }
 
 function exportSave(id) {
@@ -5198,7 +5042,7 @@ function exportSave(id) {
   var playerName = (save.player.name || '未知');
   var dateStr = new Date(save.timestamp).toISOString().slice(0, 10);
   var filename = '斗破苍穹_存档_' + playerName + '_' + dateStr + '.json';
-  var blob = new Blob([JSON.stringify(save, null, 2)], { type: 'application/json' });
+  var blob = new Blob([JSON.stringify(TavernCore.redact(save), null, 2)], { type: 'application/json' });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
@@ -5226,7 +5070,7 @@ function importSave(file) {
   var reader = new FileReader();
   reader.onload = function(e) {
     try {
-      var save = JSON.parse(e.target.result);
+      var save = validateGameSnapshot(TavernCore.redact(TavernCore.parseJSON(e.target.result)));
       if (!save.id || !save.player || !save.timestamp) {
         showToast('无效的存档文件格式', 'error');
         return;
@@ -5239,7 +5083,7 @@ function importSave(file) {
         save.name = (save.name || '导入存档') + ' (导入)';
       }
       saves.push(save);
-      saveSaves(saves);
+      if (!saveSaves(saves)) return;
       showToast('存档导入成功！', 'success');
       renderSaveList();
     } catch(ex) {
@@ -5297,16 +5141,16 @@ function renderSaveListInner(saves) {
     var sizeDisplay = sizeStr > 1024 ? (sizeStr / 1024).toFixed(1) + ' KB' : sizeStr + ' B';
     return '<div class="save-entry">' +
       '<div class="save-entry-header">' +
-        '<span class="save-entry-name">' + (save.name || '存档 ' + (idx + 1)) + '</span>' +
+        '<span class="save-entry-name">' + escapeHtml(save.name || '存档 ' + (idx + 1)) + '</span>' +
         '<span style="font-size:10px;color:var(--text-dim);">' + sizeDisplay + '</span>' +
       '</div>' +
       '<div class="save-entry-meta">' +
-        '角色：' + playerName + ' · 难度：' + difficulty + ' · 种族：' + (raceName || '无') + ' · ' + dateStr +
+        '角色：' + escapeHtml(playerName) + ' · 难度：' + escapeHtml(difficulty) + ' · 种族：' + escapeHtml(raceName || '无') + ' · ' + dateStr +
       '</div>' +
       '<div class="save-entry-actions">' +
-        '<button class="save-action-btn primary" onclick="loadSave(\'' + save.id + '\')">加载</button>' +
-        '<button class="save-action-btn" onclick="exportSave(\'' + save.id + '\')">导出</button>' +
-        '<button class="save-action-btn danger" onclick="deleteSave(\'' + save.id + '\')">删除</button>' +
+        '<button class="save-action-btn primary" onclick="loadSave(' + TavernCore.handlerArg(save.id) + ')">加载</button>' +
+        '<button class="save-action-btn" onclick="exportSave(' + TavernCore.handlerArg(save.id) + ')">导出</button>' +
+        '<button class="save-action-btn danger" onclick="deleteSave(' + TavernCore.handlerArg(save.id) + ')">删除</button>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -5937,7 +5781,9 @@ function returnToTitle() {
 
 function confirmReturnToTitle() {
   closeAllModals();
-  createSave();
+  stopTavernStream();
+  if (tavernState.isSending) { showToast('推演正在停止，请稍后再次返回', 'info'); return; }
+  if (!createSave()) return;
   GameState.phase = 'title';
   showView('view-title');
   showToast('已返回主页面，进度已保存');
@@ -6070,83 +5916,7 @@ function getActiveChat() {
 
 // -- Lorebook Engine --
 function matchLorebookEntries(userInput, lorebooks, existingMatches) {
-  // existingMatches: already-triggered entry IDs for recursive chain detection
-  var triggered = existingMatches ? existingMatches.slice() : [];
-  var results = [];
-  var input = (userInput || '').toLowerCase();
-
-  lorebooks.forEach(function(book) {
-    book.entries.forEach(function(entry) {
-      if (!entry.enabled) return;
-
-      // === BLUE LIGHT (constant): always include ===
-      if (entry.constant === true) {
-        // Check if already added (avoid duplicates)
-        if (triggered.indexOf(entry.id) < 0) {
-          triggered.push(entry.id);
-          results.push({
-            bookId: book.id, bookName: book.name, entry: entry,
-            position: entry.position || 0,
-            isConstant: true
-          });
-        }
-        return; // Blue light doesn't trigger recursion
-      }
-
-      // === GREEN LIGHT: keyword match ===
-      // Skip if this entry is marked non-recursive (selective) and was triggered by another entry
-      var isRecursiveTrigger = existingMatches && existingMatches.indexOf('chain:' + entry.id) >= 0;
-      if (entry.selective && isRecursiveTrigger) return;
-
-      var matched = false;
-      // Check primary keys
-      for (var k = 0; k < entry.keys.length; k++) {
-        if (entry.keys[k] && input.indexOf(entry.keys[k].toLowerCase()) >= 0) { matched = true; break; }
-      }
-      // Check secondary keys
-      if (!matched && entry.secondaryKeys) {
-        for (var s = 0; s < entry.secondaryKeys.length; s++) {
-          if (entry.secondaryKeys[s] && input.indexOf(entry.secondaryKeys[s].toLowerCase()) >= 0) { matched = true; break; }
-        }
-      }
-
-      if (matched && triggered.indexOf(entry.id) < 0) {
-        triggered.push(entry.id);
-        results.push({
-          bookId: book.id, bookName: book.name, entry: entry,
-          position: entry.position || 0,
-          isConstant: false
-        });
-
-        // Recursive trigger: scan other entries for keywords found in this entry's content
-        if (!entry.noRecurse) {
-          var contentLower = (entry.content || '').toLowerCase();
-          lorebooks.forEach(function(innerBook) {
-            innerBook.entries.forEach(function(innerEntry) {
-              if (innerEntry.id === entry.id) return;
-              if (innerEntry.constant) return;
-              if (innerEntry.selective) return; // Non-recursive entries won't be triggered
-              if (triggered.indexOf(innerEntry.id) >= 0) return;
-              for (var ik = 0; ik < innerEntry.keys.length; ik++) {
-                if (innerEntry.keys[ik] && contentLower.indexOf(innerEntry.keys[ik].toLowerCase()) >= 0) {
-                  triggered.push('chain:' + innerEntry.id); // Mark as chain-triggered
-                  triggered.push(innerEntry.id);
-                  results.push({
-                    bookId: innerBook.id, bookName: innerBook.name, entry: innerEntry,
-                    position: innerEntry.position || 0,
-                    isConstant: false, isRecursive: true
-                  });
-                  break;
-                }
-              }
-            });
-          });
-        }
-      }
-    });
-  });
-
-  return results;
+  return TavernCore.matchLorebooks(userInput, lorebooks, {existing:existingMatches});
 }
 
 // Group lorebook entries by insertion position
@@ -6175,10 +5945,7 @@ function extractVariables(text) {
 }
 
 function mergeVariables(current, updates) {
-  var merged = {};
-  for (var k in current) { if (current.hasOwnProperty(k)) merged[k] = current[k]; }
-  for (var k in updates) { if (updates.hasOwnProperty(k)) merged[k] = updates[k]; }
-  return merged;
+  return Object.assign(TavernCore.clone(current || {}), TavernCore.clone(updates || {}));
 }
 
 // -- Parse Game Mode Output (configurable custom tags) --
@@ -6194,7 +5961,7 @@ function getOutputTags() {
 }
 
 function parseGameModeOutput(rawText) {
-  var result = { maintext:'', option:[], sum:'', vars:{}, thinking:'', think:'' };
+  var result = { maintext:'', option:[], sum:'', vars:'', thinking:'', think:'' };
   var validTags = getOutputTags();
   var re = /##\s*(\w+)\s*\n([\s\S]*?)(?=\n##\s|\n*$)/g;
   var match;
@@ -6241,68 +6008,9 @@ function assembleTavernPrompt(opts) {
   var lorebookMatches = opts.lorebookMatches || [];
   var location = opts.location || '加玛帝国·乌坦城';
 
-  // Group lorebook matches by position
-  var lbGroups = groupLorebookByPosition(lorebookMatches);
-  var depthEntries = {}; // D-depth entries: { depth: [content strings] }
-  Object.keys(lbGroups.depth).forEach(function(d) {
-    depthEntries[d] = lbGroups.depth[d].map(function(m) { return '[' + m.bookName + '] ' + m.entry.content; });
-  });
-
+  var plan = TavernCore.promptPlan({preset:preset, characterCard:charCard, userName:userName,
+    location:location, lorebookMatches:lorebookMatches});
   var systemParts = [];
-
-  // === Unified Prompt Assembly (SillyTavern-style) ===
-  // Build a virtual prompts list from either the new prompts array or legacy promptOrder
-  var promptsToInject = [];
-  if (preset && preset.prompts && preset.prompts.length > 0) {
-    promptsToInject = preset.prompts.filter(function(pr) { return pr.enabled && pr.content; });
-    promptsToInject.sort(function(a, b) { return (a.injection_order || 100) - (b.injection_order || 100); });
-  }
-  // Fallback to legacy promptOrder if prompts array doesn't exist or all have empty content
-  if (promptsToInject.length === 0 && preset && preset.promptOrder) {
-    // Legacy: convert promptOrder items to virtual prompt entries
-    preset.promptOrder.forEach(function(item) {
-      if (!item.enabled) return;
-      var content = '';
-      var itemId = item.id || '';
-      switch(itemId) {
-        case 'system_main': case 'main': content = preset.prompt_main || ''; break;
-        case 'system_nsfw': case 'nsfw': content = preset.prompt_nsfw || ''; break;
-        case 'jailbreak': content = preset.jailbreak || ''; break;
-        case 'world_info_before': case 'worldInfoBefore':
-          if (lbGroups.before.length > 0) { content = '【世界信息·前置】\n' + lbGroups.before.map(function(m) { return '[' + m.bookName + '] ' + m.entry.content; }).join('\n'); }
-          break;
-        case 'char_description': case 'charDescription':
-          content = charCard && charCard.description ? '【' + charName + '描述】\n' + charCard.description : ''; break;
-        case 'char_personality': case 'charPersonality':
-          content = charCard && charCard.personality ? '【' + charName + '性格】\n' + charCard.personality : ''; break;
-        case 'scenario': content = charCard && charCard.scenario ? '【当前场景】\n' + charCard.scenario + '\n当前时间地点：' + location : ''; break;
-        case 'world_info_after': case 'worldInfoAfter':
-          if (lbGroups.after.length > 0) { content = '【世界信息·后置】\n' + lbGroups.after.map(function(m) { return '[' + m.bookName + '] ' + m.entry.content; }).join('\n'); }
-          break;
-        case 'world_info': case 'worldInfo':
-          if (lbGroups.before.length > 0 || lbGroups.after.length > 0) { content = '【世界信息】\n' + lbGroups.before.concat(lbGroups.after).map(function(m) { return '[' + m.bookName + '] ' + m.entry.content; }).join('\n'); }
-          break;
-      }
-      if (content) {
-        promptsToInject.push({
-          enabled: true, role: 'system', content: content,
-          injection_order: 100, injection_position: 0, injection_depth: 4
-        });
-      }
-    });
-  }
-
-  // Inject all prompts with template substitution
-  promptsToInject.forEach(function(pr) {
-    var content = pr.content
-      .replace(/\{\{user\}\}/g, userName)
-      .replace(/\{\{char\}\}/g, charName)
-      .replace(/\{\{scenario\}\}/g, charCard && charCard.scenario || '')
-      .replace(/\{\{personality\}\}/g, charCard && charCard.personality || '')
-      .replace(/\{\{description\}\}/g, charCard && charCard.description || '')
-      .replace(/\{\{location\}\}/g, location);
-    systemParts.push(content);
-  });
 
   // Depth prompt (based on relationship affinity)
   try {
@@ -6361,111 +6069,23 @@ function assembleTavernPrompt(opts) {
 
   var systemMsg = systemParts.join('\n\n');
 
-  var messages = [];
-  messages.push({ role:'system', content: systemMsg });
-
-  // First message if available
-  if (charCard && charCard.firstMessage && history.length === 0) {
-    messages.push({ role:'assistant', content: charCard.firstMessage });
-  }
-
-  // Chat history with D-depth lorebook injection
-  // Build a list of all history messages + depth insertions
-  var historyWithDepth = [];
-  history.forEach(function(msg, i) {
-    historyWithDepth.push({ type: 'msg', role: msg.role, content: msg.content, index: i });
-  });
-
-  // Insert D-depth entries: position=N means inject before the Nth-from-last message
-  // D0 = before last message, D4 = 4 messages before end
-  Object.keys(depthEntries).sort(function(a, b) { return parseInt(a) - parseInt(b); }).forEach(function(depthKey) {
-    var depth = parseInt(depthKey);
-    var contents = depthEntries[depthKey];
-    if (!contents || contents.length === 0) return;
-    // D0 → insert at end (before user input), D(N) → insert N positions from end
-    var insertPos = historyWithDepth.length - (depth - 2); // position 2 = D0, position 3 = D1, etc.
-    if (insertPos < 0) insertPos = 0;
-    var depthText = '【深度注入·D' + (depth - 2) + '】\n' + contents.join('\n');
-    historyWithDepth.splice(insertPos, 0, { type: 'depth', content: depthText, depth: depth - 2 });
-  });
-
-  // Push all history messages in order
-  historyWithDepth.forEach(function(item) {
-    if (item.type === 'msg') {
-      messages.push({ role: item.role, content: item.content });
-    } else if (item.type === 'depth') {
-      messages.push({ role: 'system', content: item.content });
-    }
-  });
-
-  // Current user input
-  if (userInput) {
-    messages.push({ role: 'user', content: userInput });
-  }
-
-  return { messages: messages, systemMsg: systemMsg };
+  var settings = preset && preset.settings || {};
+  var composed = TavernCore.composePrompt({plan:plan, system:systemMsg, history:history, userInput:userInput,
+    maxContext:settings.openai_max_context || 32768, maxOutput:settings.openai_max_tokens || 1024});
+  composed.systemMsg = systemMsg;
+  return composed;
 }
 
 // -- Stream Parser (robust with buffer cap & partial-chunk recovery) --
-function StreamParser() {
-  var buffer = '';
-  var MAX_BUFFER = 65536; // 64KB cap to prevent unbounded growth
-  var listeners = [];
-
-  function feed(chunk) {
-    buffer += chunk;
-    // Prevent unbounded buffer growth (trim oldest partial content if exceeded)
-    if (buffer.length > MAX_BUFFER) {
-      var cutPoint = buffer.indexOf('\n## ', buffer.length - MAX_BUFFER / 2);
-      if (cutPoint < 0) cutPoint = buffer.length - MAX_BUFFER;
-      buffer = buffer.substring(cutPoint);
-    }
-    // Extract complete tagged sections: ## tagname \n content ... (until next ## tag or EOF)
-    var re = /##\s*(\w+)\s*\n([\s\S]*?)(?=\n##\s|\n*$)/g;
-    var lastIndex = 0;
-    var match;
-    var newContent = {};
-    while ((match = re.exec(buffer)) !== null) {
-      lastIndex = match.index + match[0].length;
-      newContent[match[1].toLowerCase()] = match[2].trim();
-    }
-    buffer = buffer.substring(lastIndex);
-    // Notify listeners
-    for (var k in newContent) {
-      if (newContent.hasOwnProperty(k)) {
-        listeners.forEach(function(fn) { fn(k, newContent[k]); });
-      }
-    }
-    return newContent;
-  }
-
-  function onTag(fn) { listeners.push(fn); }
-  function reset() { buffer = ''; }
-  function flushBuffer() {
-    // Force-parse remaining buffer as plain text (no complete tags)
-    var remaining = buffer.trim();
-    buffer = '';
-    if (remaining) listeners.forEach(function(fn) { fn('maintext', remaining); });
-    return remaining;
-  }
-
-  return { feed: feed, onTag: onTag, reset: reset, flushBuffer: flushBuffer };
+function StreamParser() { return TavernCore.streamParser();
 }
 
 // -- API Router (SillyTavern-style routing) --
 function getTavernApi(purpose) {
   var settings = GameState.settings;
-  if (!settings.apis || settings.apis.length === 0) return null;
-  // Secondary API: route variable extraction / summarization to cheaper model
-  if (purpose === 'secondary' && settings.activeSecondaryApi) {
-    var sec = settings.apis.find(function(a) { return a.id === settings.activeSecondaryApi; });
-    if (sec) return sec;
-  }
-  // Primary API: main text generation
-  if (settings.activeApi) {
-    return settings.apis.find(function(a) { return a.id === settings.activeApi; }) || settings.apis[0];
-  }
-  return settings.apis[0];
+  var apis = (settings.apis || []).filter(function(a) { return a.enabled !== false; });
+  var preferred = purpose === 'secondary' ? settings.activeSecondaryApi : settings.activeApi;
+  return apis.find(function(a) { return a.id === preferred; }) || apis[0] || null;
 }
 
 // Resolve model with provider-aware fallback (DeepSeek keys → deepseek-chat, etc.)
@@ -6476,7 +6096,7 @@ function resolveModel(api, opts) {
   // Detect DeepSeek by key format (sk- + 32 hex) or URL
   var key = api.apiKey || api.key || '';
   var url = api.url || '';
-  if (key.match(/^sk-[a-f0-9]{32}$/i) || url.indexOf('deepseek') >= 0) return 'deepseek-chat';
+  if (url.indexOf('deepseek') >= 0) return 'deepseek-chat';
   // Detect other providers
   if (url.indexOf('openai') >= 0) return 'gpt-4o-mini';
   if (url.indexOf('anthropic') >= 0 || url.indexOf('claude') >= 0) return 'claude-sonnet-4-6';
@@ -6486,73 +6106,12 @@ function resolveModel(api, opts) {
 
 
 async function callLLM(messages, opts) {
-  opts = opts || {};
-  var api = getTavernApi(opts.purpose || 'primary');
-  if (!api) throw new Error('未配置API接口，请在设置中添加');
-  var backend = api.backend || 'openai';
-
-  if (backend === 'kobold') {
-    // KoboldCPP: non-streaming fallback — return full response as choices[0].message.content
-    var prompt = messagesToKoboldPrompt(messages);
-    var koboldBody = {
-      prompt: prompt,
-      temperature: opts.temperature,
-      max_length: opts.max_tokens || 512,
-      top_p: opts.top_p
-    };
-    var kUrl = api.url; if (kUrl.slice(-1) === '/') kUrl = kUrl.slice(0, -1);
-    var kResp = await fetch(kUrl + '/api/v1/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(koboldBody)
-    });
-    if (!kResp.ok) throw new Error('炉火演算错误: ' + kResp.status);
-    var kData = await kResp.json();
-    return { choices: [{ message: { content: kData.results && kData.results[0] ? kData.results[0].text : '' } }] };
-  }
-
-  if (backend === 'ollama') {
-    var ollamaBody = {
-      model: resolveModel(api, opts),
-      messages: messages,
-      stream: false,
-      options: { temperature: opts.temperature, num_predict: opts.max_tokens || 512, top_p: opts.top_p }
-    };
-    var oUrl = api.url; if (oUrl.slice(-1) === '/') oUrl = oUrl.slice(0, -1);
-    var oResp = await fetch(oUrl + '/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(ollamaBody)
-    });
-    if (!oResp.ok) throw new Error('本地灵枢错误: ' + oResp.status);
-    var oData = await oResp.json();
-    return { choices: [{ message: { content: oData.message ? oData.message.content : '' } }] };
-  }
-
-  // OpenAI 兼容
-  var body = {
-    model: resolveModel(api, opts),
-    messages: messages
-  };
-  if (opts.temperature !== undefined) body.temperature = opts.temperature;
-  if (opts.max_tokens !== undefined) body.max_tokens = opts.max_tokens;
-  if (opts.top_p !== undefined) body.top_p = opts.top_p;
-  if (opts.stream !== undefined) body.stream = opts.stream;
-
-  var url = api.url;
-  if (url.slice(-1) === '/') url = url.slice(0, -1);
-  // Auto-append /chat/completions if not present
-  if (url.indexOf('/chat/completions') === -1) url += '/chat/completions';
-
-  var response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + (api.apiKey || api.key || ''), 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-    signal: tavernState.streamAbortController ? tavernState.streamAbortController.signal : undefined
-  });
-
-  if (!response.ok) throw new Error('API error: ' + response.status);
-  return response.json();
+  opts = Object.assign({}, opts || {});
+  var api = opts.apiId ? (GameState.settings.apis || []).find(function(a) { return a.id === opts.apiId && a.enabled !== false; }) : getTavernApi(opts.purpose || 'primary');
+  if (!api) throw new Error('未配置可用 API，请在设置中添加并启用接口');
+  opts.model = resolveModel(api, opts);
+  var text = await TavernCore.request(api, messages, opts);
+  return {choices:[{message:{content:text}}]};
 }
 
 // 将 messages 数组转为 KoboldCPP prompt 格式
@@ -6568,161 +6127,11 @@ function messagesToKoboldPrompt(messages) {
 }
 
 async function callLLMStream(messages, opts, onChunk) {
-  opts = opts || {};
-  opts.stream = true;
-  var api = getTavernApi(opts.purpose || 'primary');
-  if (!api) throw new Error('未配置API接口');
-  var backend = api.backend || 'openai';
-
-  // === 炉火演算（KoboldCPP）流式 ===
-  if (backend === 'kobold') {
-    var kPrompt = messagesToKoboldPrompt(messages);
-    var kBody = {
-      prompt: kPrompt,
-      temperature: opts.temperature || 0.7,
-      max_length: opts.max_tokens || 512,
-      top_p: opts.top_p || 0.9,
-      stream: true
-    };
-    var kUrl = api.url; if (kUrl.slice(-1) === '/') kUrl = kUrl.slice(0, -1);
-    var kResponse = await fetch(kUrl + '/api/v1/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(kBody),
-      signal: tavernState.streamAbortController ? tavernState.streamAbortController.signal : undefined
-    });
-    if (!kResponse.ok) throw new Error('炉火演算错误: ' + kResponse.status);
-    var kReader = kResponse.body.getReader();
-    var kDecoder = new TextDecoder();
-    var kFull = '';
-    try {
-      while (true) {
-        var kr = await kReader.read(); if (kr.done) break;
-        var kChunk = kDecoder.decode(kr.value, { stream: true });
-        kFull += kChunk;
-        if (onChunk) onChunk(kChunk, kFull);
-      }
-    } finally { try { kReader.cancel(); } catch(e) {} }
-    return kFull;
-  }
-
-  // === 本地灵枢（Ollama）流式 ===
-  if (backend === 'ollama') {
-    var oBody = {
-      model: resolveModel(api, opts),
-      messages: messages,
-      stream: true,
-      options: { temperature: opts.temperature || 0.7, num_predict: opts.max_tokens || 512, top_p: opts.top_p || 0.9 }
-    };
-    var oUrl = api.url; if (oUrl.slice(-1) === '/') oUrl = oUrl.slice(0, -1);
-    var oResp = await fetch(oUrl + '/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(oBody),
-      signal: tavernState.streamAbortController ? tavernState.streamAbortController.signal : undefined
-    });
-    if (!oResp.ok) { var oErr = await oResp.text().catch(function(){return '';}); throw new Error('本地灵枢错误 ' + oResp.status + ': ' + oErr.slice(0,200)); }
-    var oReader = oResp.body.getReader();
-    var oDecoder = new TextDecoder();
-    var oFull = '';
-    var oBuf = '';
-    try {
-      while (true) {
-        var or = await oReader.read(); if (or.done) break;
-        oBuf += oDecoder.decode(or.value, { stream: true });
-        var oLines = oBuf.split('\n'); oBuf = oLines.pop() || '';
-        for (var oi = 0; oi < oLines.length; oi++) {
-          if (!oLines[oi].trim()) continue;
-          try {
-            var oJson = JSON.parse(oLines[oi]);
-            var oContent = oJson && oJson.message && oJson.message.content;
-            if (oContent) { oFull += oContent; if (onChunk) onChunk(oContent, oFull); }
-          } catch(e) {}
-        }
-      }
-    } finally { try { oReader.cancel(); } catch(e) {} }
-    return oFull;
-  }
-
-  // === 天机通灵（OpenAI 兼容）流式 ===
-  var body = {
-    model: resolveModel(api, opts),
-    messages: messages,
-    stream: true,
-    temperature: opts.temperature
-  };
-  if (opts.max_tokens !== undefined) body.max_tokens = opts.max_tokens;
-  if (opts.top_p !== undefined) body.top_p = opts.top_p;
-
-  var url = api.url;
-  if (url.slice(-1) === '/') url = url.slice(0, -1);
-  if (url.indexOf('/chat/completions') === -1) url += '/chat/completions';
-
-  var response;
-  var lastError;
-  for (var attempt = 0; attempt < 2; attempt++) {
-    try {
-      response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + (api.apiKey || api.key || ''), 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-        signal: tavernState.streamAbortController ? tavernState.streamAbortController.signal : undefined
-      });
-      if (response.ok) break;
-      if (response.status >= 500 && attempt === 0) {
-        body.stream = false;
-        continue;
-      }
-    } catch(e) { lastError = e; }
-  }
-
-  if (!response || !response.ok) {
-    throw new Error('API error: ' + (response ? response.status : lastError ? lastError.message : 'unknown'));
-  }
-
-  // 非流式回退
-  if (!body.stream) {
-    var data = await response.json();
-    var content = data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message.content : '';
-    if (onChunk) onChunk(content, content);
-    return content;
-  }
-
-  var reader = response.body.getReader();
-  var decoder = new TextDecoder();
-  var fullContent = '';
-  var leftover = '';
-
-  try {
-    while (true) {
-      var result = await reader.read();
-      if (result.done) break;
-      var text = leftover + decoder.decode(result.value, { stream: true });
-      leftover = '';
-      var lines = text.split('\n');
-      if (text.charAt(text.length - 1) !== '\n') {
-        leftover = lines.pop();
-      }
-      for (var i = 0; i < lines.length; i++) {
-        var line = lines[i].trim();
-        if (!line.startsWith('data: ')) continue;
-        var sseData = line.substring(6);
-        if (sseData === '[DONE]') { reader.cancel(); break; }
-        try {
-          var json = JSON.parse(sseData);
-          var delta = json.choices && json.choices[0] && json.choices[0].delta;
-          if (delta && delta.content) {
-            fullContent += delta.content;
-            if (onChunk) onChunk(delta.content, fullContent);
-          }
-        } catch(e) { /* skip malformed SSE chunks */ }
-      }
-    }
-  } finally {
-    try { reader.cancel(); } catch(e) {}
-  }
-
-  return fullContent;
+  opts = Object.assign({}, opts || {});
+  var api = opts.apiId ? (GameState.settings.apis || []).find(function(a) { return a.id === opts.apiId && a.enabled !== false; }) : getTavernApi(opts.purpose || 'primary');
+  if (!api) throw new Error('未配置可用 API，请在设置中添加并启用接口');
+  opts.model = resolveModel(api, opts);
+  return TavernCore.request(api, messages, opts, onChunk);
 }
 
 // -- Tavern Database Operations --
@@ -6751,38 +6160,23 @@ async function initTavernDB() {
     var s = await db.tavernSettings.get('main');
     var c = await db.chats.orderBy('updatedAt').reverse().toArray();
 
-    // === Lorebook repair: remove blanks, update default ===
-    var defaultBook = createDefaultLorebook();
-    var cleaned = [];
-    var foundDefault = false;
-    for (var i = 0; i < l.length; i++) {
-      // Remove books with 0 entries
-      if (!l[i].entries || l[i].entries.length === 0) {
-        await db.lorebooks.delete(l[i].id);
-        continue;
-      }
-      // Update the default book to latest content
-      if (l[i].name === '斗破苍穹世界观') {
-        l[i].entries = defaultBook.entries;
-        await db.lorebooks.put(l[i]);
-        foundDefault = true;
-      }
-      cleaned.push(l[i]);
+    if (!l.length) { var defaultBook = createDefaultLorebook(); await db.lorebooks.put(defaultBook); l = [defaultBook]; }
+    for (var bi = 0; bi < l.length; bi++) {
+      if (DoupoUserFlames.migrateBook(l[bi])) await db.lorebooks.put(l[bi]);
+      if (l[bi].engineVersion === 2) continue;
+      (l[bi].entries || []).forEach(function(e) { if (e.selective && !(e.secondaryKeys || []).length) { e.excludeRecursion = true; e.selective = false; } });
+      l[bi].engineVersion = 2; await db.lorebooks.put(l[bi]);
     }
-    // If no default book found, create it
-    if (!foundDefault) {
-      await db.lorebooks.put(defaultBook);
-      cleaned.unshift(defaultBook);
-    }
-    tavernState.lorebooks = cleaned;
-    // === end lorebook repair ===
+    tavernState.lorebooks = l;
 
     tavernState.presets = p.length > 0 ? p : [createPreset()];
     tavernState.characterCard = card || createDefaultCharacterCard();
     tavernState.tavernSettings = s || createDefaultTavernSettings();
+    if (s && s.playerState && (s.playerStateAt || 0) > (GameState.settings.playerSavedAt || 0)) GameState.player = TavernCore.clone(s.playerState);
     // 迁移旧配置——补充缺少的字段
     if (tavernState.tavernSettings.pureTextMode === undefined) tavernState.tavernSettings.pureTextMode = false;
     tavernState.chats = c;
+    tavernState.activeChatId = s && c.some(function(chat) { return chat.id === s.activeChatId; }) ? s.activeChatId : (c[0] ? c[0].id : null);
     tavernState.activeLorebookIds = tavernState.tavernSettings.activeLorebookIds || [];
     // Restore tavern settings from localStorage (dual-save — takes priority over DB defaults)
     syncTavernSettingsFromLocal();
@@ -6939,10 +6333,10 @@ function createDefaultLorebook() {
     // ========== 十六、二十三种异火逐一列传 ==========
     createLorebookEntry({ keys:['玄黄炎'], content:'玄黄炎，异火榜第二十三。深黄之色，为异火榜末位。虽排名最末但仍是天地奇物，温度远超凡火。存在于地底玄黄精气汇聚之处，炼化难度相对较低。' }),
     createLorebookEntry({ keys:['万兽灵火'], content:'万兽灵火，异火榜第二十二。火焰呈暗红之色，燃烧时有万兽咆哮之音。据说由远古万兽精魂凝聚而成，对魔兽拥有天然的压制之力。' }),
-    createLorebookEntry({ keys:['六道轮回炎'], content:'六道轮回炎，异火榜第二十一。呈灰白之色，蕴含六道轮回法则，可灼烧灵魂本源。传说此火曾是一位修轮回道的斗圣陨落后所化。' }),
-    createLorebookEntry({ keys:['龙凤焱'], content:'龙凤焱，异火榜第二十。呈金红双色交织，火焰中隐约有龙凤虚影盘旋。由远古真龙与天凰精血交融而生，同时具备龙炎与凤火的特性。' }),
+    createLorebookEntry(DoupoUserFlames.entry(21)),
+    createLorebookEntry(DoupoUserFlames.entry(20)),
     createLorebookEntry({ keys:['火山石焰'], content:'火山石焰，异火榜第十七。诞生于活火山深处，呈暗红带灰。温度虽不算极高但蕴含大地厚重之力，攻击时如山崩地裂。' }),
-    createLorebookEntry({ keys:['风雷怒炎'], content:'风雷怒炎，异火榜第十八。青紫交织的火焰，诞生于雷暴频发的高空风雷层。火焰中蕴含风雷之力，速度极快。' }),
+    createLorebookEntry(DoupoUserFlames.entry(18)),
     createLorebookEntry({ keys:['火云水炎'], content:'火云水炎，异火榜第十六。呈蓝白相间，水火交融之异火。诞生于深海火山口，能在水中燃烧。拥有水之柔韧与火之暴烈。' }),
     createLorebookEntry({ keys:['海心焰'], content:'海心焰，异火榜第十五。深蓝如海之心，诞生于深海最深处。拥有水属性的延展性和渗透力。原为韩枫所持，韩枫陨落后被萧炎吞噬融合。' }),
     createLorebookEntry({ keys:['龟灵地火'], content:'龟灵地火，异火榜第十三。呈暗绿之色，火焰形态如龟甲纹路。蕴含大地之力，防御性与持久性极强。诞生于万年龟灵陨落之地。' }),
@@ -7223,19 +6617,13 @@ function buildTavern() {
     '<div class="tavern-container">' +
       '<div class="tavern-body">' +
         '<div class="tavern-main" style="flex:1;">' +
-          '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 12px;gap:6px;">' +
-            '<div style="display:flex;gap:4px;">' +
-              '<button class="text-btn" onclick="regenerateLastTavern()" title="重演天机——重新生成最后一条回复" style="font-size:10px;">🔄 重演天机</button>' +
-              '<button class="text-btn" onclick="continueTavernStream()" title="续断推演——继续生成被截断的回复" style="font-size:10px;">➕ 续断推演</button>' +
-              '<button class="text-btn" onclick="resetTavernContext()" title="重置因缘——清空当前会话" style="font-size:10px;">🔮 重置因缘</button>' +
-            '</div>' +
-            '<button class="text-btn" onclick="openTimeRewind()" title="时空回溯" style="font-size:10px;">⏪ 时空回溯 (' + (TimeRewind.snapshots?TimeRewind.snapshots.length:0) + ')</button>' +
-          '</div>' +
+          "<header class=\"tavern-toolbar\"><div class=\"tavern-heading\"><span class=\"tavern-heading-mark\">卷</span><div><h2>命途 · 修行录</h2><p>斗气大陆 · 你的故事正在继续</p></div></div><nav class=\"tavern-tools\" aria-label=\"对话操作\"><button class=\"tavern-tool\" onclick=\"regenerateLastTavern()\" title=\"重新生成本轮回复\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 10a8 8 0 1 1 2 8M4 4v6h6\"/></svg><span>重演</span></button><button class=\"tavern-tool\" onclick=\"continueTavernStream()\" title=\"继续当前故事\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m8 5 7 7-7 7M18 5v14\"/></svg><span>续写</span></button><span class=\"tavern-tools-divider\" aria-hidden=\"true\"></span><button id=\"tavern-rewind-btn\" class=\"tavern-tool\" onclick=\"openTimeRewind()\" title=\"恢复当前会话的历史快照\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3 11a9 9 0 1 1 3 8M3 5v6h6M12 7v5l3 2\"/></svg><span id=\"tavern-rewind-label\">回溯 · 0</span></button><button class=\"tavern-tool danger\" onclick=\"resetTavernContext()\" title=\"清空当前会话，会再次确认\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5m4-5v5\"/></svg><span>重置</span></button></nav></header>" +
           '<div class="tavern-messages" id="tavern-messages"></div>' +
           '<div class="tavern-input-bar">' +
-            '<textarea class="tavern-input" id="tavern-input" rows="2" placeholder="书写命数...（Enter发送，Shift+Enter换行）" onkeydown="handleTavernKeydown(event)"></textarea>' +
+            '<textarea class="tavern-input" id="tavern-input" rows="2" aria-label="书写你的行动" placeholder="此刻，你想做些什么？" onkeydown="handleTavernKeydown(event)"></textarea>' +
             '<button class="tavern-send-btn" id="tavern-send-btn" onclick="sendTavernMessage()">推演</button>' +
           '</div>' +
+          '<p class="composer-caption">Enter 落笔 · Shift + Enter 换行　/　故事由你决定</p>' +
         '</div>' +
       '</div>' +
     '</div>';
@@ -7253,8 +6641,8 @@ function renderTavernSessionList() {
     var active = c.id === tavernState.activeChatId;
     var date = new Date(c.updatedAt);
     var dateStr = date.getMonth()+1 + '/' + date.getDate() + ' ' + date.getHours() + ':' + String(date.getMinutes()).padStart(2,'0');
-    return '<div class="tavern-session-item' + (active ? ' active' : '') + '" onclick="switchTavernChat(\'' + c.id + '\')">' +
-      '<div class="sess-name">' + (c.name || '未命名') + '</div>' +
+    return '<div class="tavern-session-item' + (active ? ' active' : '') + '" onclick="switchTavernChat(' + TavernCore.handlerArg(c.id) + ')">' +
+      '<div class="sess-name">' + escapeHtml(c.name || '未命名') + '</div>' +
       '<div class="sess-meta">' + c.messages.length + '条消息 · ' + dateStr + '</div>' +
     '</div>';
   }).join('');
@@ -7273,44 +6661,12 @@ function renderTavernMessages() {
     return;
   }
 
-  // Incremental render: only build HTML for the last few messages if already rendered
-  var lastRendered = msgs._lastRenderedCount || 0;
-  var newlyAdded = chat.messages.slice(lastRendered);
-  var isIncremental = lastRendered > 0 && newlyAdded.length <= 3 && msgs.children.length > 0;
-
-  if (isIncremental && newlyAdded.length > 0) {
-    // Append only new messages to existing DOM
-    newlyAdded.forEach(function(msg) {
-      if (msg.role === 'user') {
-        var div = document.createElement('div');
-        div.className = 'msg user';
-        div.textContent = msg.content;
-        msgs.appendChild(div);
-      } else if (msg.role === 'assistant') {
-        var frag = buildAssistantMessageDOM(msg);
-        msgs.appendChild(frag);
-      }
-    });
-  } else {
     // Full rebuild
     var frag = document.createDocumentFragment();
     chat.messages.forEach(function(msg) {
       if (msg.role === 'system') {
         if (msg.content.indexOf('【角色档案】') >= 0) {
-          var card = document.createElement('div');
-          card.className = 'msg-profile-card';
-          card.style.cssText = 'background:var(--bg-card);border:1px solid var(--border-gold);border-radius:8px;padding:14px;margin:8px 0;font-size:12px;line-height:1.7;color:var(--text-body);max-width:480px;';
-          var title = document.createElement('div');
-          title.style.cssText = 'font-family:var(--font-serif);color:var(--text-primary);font-size:14px;margin-bottom:8px;';
-          title.textContent = '📜 ' + (GameState.player.name || '修炼者') + ' · 角色档案';
-          card.appendChild(title);
-          var bodyText = document.createElement('div');
-          bodyText.innerHTML = escapeHtml(msg.content.replace('【角色档案】\n', '')).replace(/\n/g, '<br>');
-          bodyText.textContent = msg.content.replace('【角色档案】\n', '');
-          card.appendChild(title);
-          var lines = msg.content.replace('【角色档案】\n', '').split('\n');
-          lines.forEach(function(line) { var p = document.createElement('div'); p.textContent = line; card.appendChild(p); });
-          frag.appendChild(card);
+          frag.appendChild(buildCharacterProfileDOM(msg.content));
         }
         return;
       }
@@ -7325,17 +6681,35 @@ function renderTavernMessages() {
     });
     msgs.textContent = '';
     msgs.appendChild(frag);
-  }
-
   msgs._lastRenderedCount = chat.messages.length;
   // Deferred scroll using requestAnimationFrame
   requestAnimationFrame(function() { msgs.scrollTop = msgs.scrollHeight; });
 }
 
+function buildCharacterProfileDOM(content) {
+  var card = document.createElement('details'); card.className = 'msg-profile-card';
+  var summary = document.createElement('summary'); summary.className = 'profile-summary';
+  var avatar = document.createElement('span'); avatar.className = 'profile-avatar'; avatar.textContent = (GameState.player.name || '修')[0];
+  var heading = document.createElement('div'); heading.className = 'profile-heading';
+  var title = document.createElement('strong'); title.textContent = GameState.player.name || '修炼者';
+  var subtitle = document.createElement('small'); subtitle.textContent = '人物档案 · 初始命书';
+  var toggle = document.createElement('span'); toggle.className = 'profile-toggle'; toggle.textContent = '查看档案';
+  heading.appendChild(title); heading.appendChild(subtitle); summary.appendChild(avatar); summary.appendChild(heading); summary.appendChild(toggle); card.appendChild(summary);
+  var grid = document.createElement('dl'); grid.className = 'profile-grid';
+  content.replace('【角色档案】','').split('\n').filter(function(line) { return line.trim(); }).forEach(function(line) {
+    var split = line.indexOf('：');
+    var field = document.createElement('div'); field.className = 'profile-field' + (line.length > 35 ? ' wide' : '');
+    var term = document.createElement('dt'); term.textContent = split >= 0 ? line.slice(0,split) : '修行记事';
+    var value = document.createElement('dd'); value.textContent = split >= 0 ? line.slice(split + 1) : line;
+    field.appendChild(term); field.appendChild(value); grid.appendChild(field);
+  });
+  card.appendChild(grid); return card;
+}
+
 // Helper: build a single assistant message as a DOM fragment
 function buildAssistantMessageDOM(msg) {
   var frag = document.createDocumentFragment();
-  var parsed = parseGameModeOutput(msg.content);
+  var parsed = parseGameModeOutput(applyRegexScripts(msg.content, 0));
 
   if (parsed.thinking) {
     var det = document.createElement('details');
@@ -7403,17 +6777,15 @@ function buildAssistantMessageDOM(msg) {
   return frag;
 }
 
-function escapeHtml(text) {
-  if (!text) return '';
-  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function escapeHtml(text) { return TavernCore.escapeHtml(text);
 }
-function escapeHtmlAttr(text) {
-  if (!text) return '';
-  return text.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function escapeHtmlAttr(text) { return TavernCore.escapeHtml(text);
 }
 
 // -- Tavern Chat Actions --
 async function createNewTavernChat() {
+  if (tavernState.isLoading || !db) throw new Error('聊天数据库仍在加载，请稍后重试');
+  stopTavernStream();
   var settings = tavernState.tavernSettings;
   var charName = tavernState.characterCard ? tavernState.characterCard.name : '角色';
   var count = tavernState.chats.filter(function(c) { return c.characterName === charName; }).length;
@@ -7431,19 +6803,23 @@ async function createNewTavernChat() {
   await db.chats.put(chat);
   tavernState.chats.unshift(chat);
   tavernState.activeChatId = chat.id;
+  settings.activeChatId = chat.id; await db.tavernSettings.put(settings);
   renderTavernSessionList();
   renderTavernMessages();
   updateTavernInfo();
 }
 
 function switchTavernChat(id) {
+  if (id !== tavernState.activeChatId) stopTavernStream();
   tavernState.activeChatId = id;
+  if (tavernState.tavernSettings) { tavernState.tavernSettings.activeChatId = id; db.tavernSettings.put(tavernState.tavernSettings).catch(function() {}); }
   renderTavernSessionList();
   renderTavernMessages();
   updateTavernInfo();
 }
 
 async function deleteTavernChat(id) {
+  if (id === tavernState.activeChatId) stopTavernStream();
   await db.chats.delete(id);
   tavernState.chats = tavernState.chats.filter(function(c) { return c.id !== id; });
   if (tavernState.activeChatId === id) {
@@ -7463,244 +6839,144 @@ function selectTavernOption(optionText) {
 }
 
 function handleTavernKeydown(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.keyCode !== 229) {
     e.preventDefault();
     sendTavernMessage();
   }
 }
 
 async function sendTavernMessage() {
-  // 阻断推演：如果正在推演中，点击按钮中止
-  if (tavernState.isSending) {
-    stopTavernStream();
-    return;
-  }
+  if (tavernState.isSending) { stopTavernStream(); return; }
   var input = document.getElementById('tavern-input');
-  if (!input) return;
+  if (!input || !input.value.trim()) return;
   var content = input.value.trim();
-  if (!content) return;
-
-  var chat = getActiveChat();
-  if (!chat) {
-    await createNewTavernChat();
-    chat = getActiveChat();
-    if (!chat) return;
+  if (!getActiveChat()) {
+    try { await createNewTavernChat(); } catch(e) { showToast('无法新建对话：' + e.message, 'error'); return; }
   }
-
-  tavernState.isSending = true;
-  // 创建中断控制器
-  tavernState.streamAbortController = new AbortController();
-  var btn = document.getElementById('tavern-send-btn');
-  var inputEl = document.getElementById('tavern-input');
-  if (btn) { btn.textContent = '阻断'; btn.style.background = 'rgba(255,107,53,0.15)'; btn.style.color = 'var(--accent-fire)'; }
-  if (inputEl) inputEl.disabled = true;
   input.value = '';
+  await runTavernTurn(content, false);
+}
 
-  // Take snapshot before sending (for time rewind)
-  takeSnapshot(chat.messages, chat.variables);
+function setTavernSendingUI(sending) {
+  var btn = document.getElementById('tavern-send-btn'), input = document.getElementById('tavern-input');
+  if (btn) { btn.textContent = sending ? '阻断' : '推演'; btn.disabled = false; }
+  if (input) input.disabled = sending;
+}
 
-  // Add user message
-  chat.messages.push(createChatMessage('user', content));
-  chat.updatedAt = Date.now();
-  renderTavernMessages();
-
-  // Get preset
-  var preset = tavernState.presets.find(function(p) { return p.id === chat.presetId; }) || tavernState.presets[0];
-  if (!preset) preset = createPreset();
-
-  // Get active lorebooks
-  var activeBooks = tavernState.lorebooks.filter(function(b) { return chat.lorebookIds.indexOf(b.id) >= 0; });
-
-  // Match lorebook entries
-  var lorebookMatches = matchLorebookEntries(content, activeBooks);
-
-  // Get location from game state
-  var location = '加玛帝国·乌坦城';
-
-  // Assemble prompt
-  var result = assembleTavernPrompt({
-    preset: preset,
-    userInput: content,
-    history: chat.messages.slice(0, -1),
-    variables: chat.variables,
-    lorebookMatches: lorebookMatches,
-    location: location
-  });
-
+async function runTavernTurn(content, regenerate) {
+  if (tavernState.isSending) return;
+  var original = getActiveChat();
+  if (!original || !db) return;
+  var working = TavernCore.clone(original), before, controller = new AbortController();
+  var playerAtDispatch = JSON.stringify(GameState.player);
+  var request = {id:crypto.randomUUID(), chatId:original.id, controller:controller};
+  tavernState.activeRequest = request;
+  tavernState.streamAbortController = controller;
+  tavernState.isSending = true;
+  setTavernSendingUI(true);
+  function ensureCurrent() {
+    TavernCore.checkAbort(controller.signal);
+    if (tavernState.activeRequest !== request || tavernState.activeChatId !== request.chatId || !tavernState.chats.some(function(c) { return c.id === request.chatId; })) throw TavernCore.abortError();
+  }
   try {
-    // Show typing indicator
-    var msgs = document.getElementById('tavern-messages');
-    if (msgs) {
-      var typingDiv = document.createElement('div');
-      typingDiv.className = 'msg-maintext typing';
-      typingDiv.id = 'tavern-typing';
-      msgs.appendChild(typingDiv);
-      msgs.scrollTop = msgs.scrollHeight;
-    }
-
-    // Try streaming, fallback to non-streaming
-    var fullResponse = '';
-    var streamParser = StreamParser();
-    var streamContent = {};
-
-    streamParser.onTag(function(tag, content) {
-      streamContent[tag] = content;
-      // Live update the typing indicator with maintext
-      if (tag === 'maintext') {
-        var typing = document.getElementById('tavern-typing');
-        if (typing) typing.textContent = content;
-      }
-    });
-
-    try {
-      fullResponse = await callLLMStream(result.messages, {
-        model: preset.settings.openai_model || undefined,
-        temperature: preset.settings.temp_openai,
-        max_tokens: preset.settings.openai_max_tokens,
-        purpose: 'primary'
-      }, function(chunk, accumulated) {
-        streamParser.feed(chunk);
-      });
-      // Flush any remaining buffer content at stream end
-      var flushed = streamParser.flushBuffer();
-      if (flushed && flushed !== fullResponse) {
-        fullResponse = fullResponse || flushed;
-      }
-    } catch(e) {
-      // Fallback to non-streaming
-      var data = await callLLM(result.messages, {
-        model: preset.settings.openai_model || undefined,
-        temperature: preset.settings.temp_openai,
-        max_tokens: preset.settings.openai_max_tokens,
-        purpose: 'primary'
-      });
-      fullResponse = data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message.content : '';
-    }
-
-    // Remove typing indicator
-    var typing = document.getElementById('tavern-typing');
-    if (typing) typing.remove();
-
-    // Apply regex scripts (display layer)
-    fullResponse = applyRegexScripts(fullResponse, 0);
-
-    // Parse upstore variables
-    var upstoreResult = parseUpstore(fullResponse);
-    var processedText = upstoreResult.cleaned;
-    var nextVars = mergeVariables(chat.variables || {}, upstoreResult.updates);
-
-    // Handle toggle operations
-    upstoreResult.operations.forEach(function(op) {
-      if (op.type === 'toggle' && op.key && nextVars.hasOwnProperty(op.key)) {
-        if (nextVars[op.key] === true || nextVars[op.key] === 'true' || nextVars[op.key] === 1) {
-          nextVars[op.key] = false;
-        } else {
-          nextVars[op.key] = true;
-        }
-      }
-    });
-
-    // Sync upstore variables to player desire state
-    if (nextVars.desireLust !== undefined) {
-      var lustVal = parseFloat(nextVars.desireLust);
-      if (!isNaN(lustVal)) GameState.player.desireLust = Math.min(100, Math.max(0, lustVal));
-    }
-    if (nextVars.desirePleasure !== undefined) {
-      var pleasVal = parseFloat(nextVars.desirePleasure);
-      if (!isNaN(pleasVal)) GameState.player.desirePleasure = Math.min(100, Math.max(0, pleasVal));
-    }
-
-    // ── Desire Overflow Mechanics ──
-
-    // Lust check: enter heat state at 100
-    if (GameState.player.desireLust >= 100) {
-      GameState.player.isInHeat = true;
-      if (!chat._heatTriggered) {
-        chat._heatTriggered = true;
-        processedText = '🔥 *身体深处涌起难以抑制的燥热，呼吸变得急促，眼神逐渐迷离——已然陷入了发情状态...*\n\n' + processedText;
-      }
-    } else if (GameState.player.desireLust < 30 && GameState.player.isInHeat) {
-      // Cool down if lust drops below 30
-      GameState.player.isInHeat = false;
-      chat._heatTriggered = false;
-    }
-
-    // Pleasure check: climax at 100, then decay
-    if (GameState.player.desirePleasure >= 100) {
-      processedText = processedText + '\n\n💥 *达到高潮——快感如潮水般席卷全身，身体不受控制地微微颤抖，片刻后才缓缓平复...*';
-      // Decay pleasure after climax
-      GameState.player.desirePleasure = Math.max(0, GameState.player.desirePleasure - 40);
-      nextVars.desirePleasure = GameState.player.desirePleasure;
-      if (GameState.player.desireLust < 100) {
-        // Slight lust reduction too
-        GameState.player.desireLust = Math.max(0, GameState.player.desireLust - 10);
-        nextVars.desireLust = GameState.player.desireLust;
-      }
-    }
-
-    // Extract <var> tags as well (legacy support)
-    var varResult = extractVariables(processedText);
-    nextVars = mergeVariables(nextVars, varResult.updates);
-    processedText = varResult.cleanedText;
-
-    // Add assistant message
-    chat.messages.push(createChatMessage('assistant', processedText));
-    chat.variables = nextVars;
-    chat.updatedAt = Date.now();
-
-    await db.chats.put(chat);
-    renderTavernMessages();
-  } catch(e) {
-    var typing2 = document.getElementById('tavern-typing');
-    if (typing2) typing2.remove();
-    if (e.name === 'AbortError') {
-      showToast('推演已阻断', 'info');
+    if (regenerate) {
+      var replay = TavernCore.regeneration(original);
+      content = replay.content; working.messages = replay.messages; before = replay.before;
+      working.variables = TavernCore.clone(before.variables);
     } else {
-      showToast('天机推演失败: ' + e.message, 'error');
-      console.error('Tavern send error:', e);
+      before = {variables:TavernCore.clone(working.variables || {}), player:TavernCore.clone(GameState.player)};
+      var user = createChatMessage('user', content);
+      user.turnBefore = before; working.messages.push(user);
+      working.updatedAt = Date.now();
+      // Persist the user turn first so a failed request is recoverable without re-appending input.
+      await db.chats.put(working); ensureCurrent();
+      tavernState.chats = tavernState.chats.map(function(c) { return c.id === working.id ? TavernCore.clone(working) : c; });
+      takeSnapshot(original.messages, before.variables);
+      renderTavernMessages();
+    }
+    ensureCurrent();
+    var preset = tavernState.presets.find(function(p) { return p.id === working.presetId; }) || tavernState.presets[0] || createPreset();
+    var books = tavernState.lorebooks.filter(function(b) { return (working.lorebookIds || []).includes(b.id); });
+    var history = working.messages.slice(0,-1);
+    var scan = history.slice(-6).map(function(m) { return m.content; }).join('\n') + '\n' + content;
+    var result = assembleTavernPrompt({preset:preset, userInput:content, history:history,
+      variables:working.variables, lorebookMatches:matchLorebookEntries(scan, books),
+      location:GameState.player.location || '加玛帝国·乌坦城', userName:working.userName || GameState.player.name || '玩家'});
+    // Diagnostics contain counts only, never credentials or private prompt text.
+    tavernState.lastPromptStats = {estimatedTokens:result.estimatedTokens, removedMessages:result.removedMessages, estimateOnly:true};
+    var msgs = document.getElementById('tavern-messages');
+    if (msgs) { var typing = document.createElement('div'); typing.id = 'tavern-typing'; typing.className = 'msg-maintext typing'; typing.textContent = '正在推演…'; msgs.appendChild(typing); }
+    var parser = StreamParser();
+    parser.onTag(function(tag, text) { if (tag !== 'maintext') return; ensureCurrent(); var el = document.getElementById('tavern-typing'); if (el) el.textContent = text; });
+    var sampling = preset.settings || {};
+    var opts = {model:sampling.openai_model || undefined, temperature:sampling.temp_openai,
+      max_tokens:sampling.openai_max_tokens, top_p:sampling.top_p_openai,
+      frequency_penalty:sampling.freq_pen_openai, presence_penalty:sampling.pres_pen_openai,
+      purpose:'primary', apiId:sampling.apiId || '', signal:controller.signal};
+    var full;
+    if (sampling.stream_openai === false) {
+      var data = await callLLM(result.messages, opts); full = data.choices[0].message.content;
+    } else full = await callLLMStream(result.messages, opts, function(chunk) { ensureCurrent(); parser.feed(chunk); });
+    ensureCurrent();
+    if (!full || !full.trim()) throw new Error('模型返回空回复，未更新本轮状态');
+    parser.flushBuffer();
+    var upstore = parseUpstore(full);
+    var variables = TavernCore.applyOperations(before.variables, upstore.operations);
+    var legacy = extractVariables(upstore.cleaned);
+    variables = mergeVariables(variables, legacy.updates);
+    var player = TavernCore.clone(before.player), processed = legacy.cleanedText;
+    ['desireLust','desirePleasure'].forEach(function(key) {
+      if (variables[key] !== undefined && Number.isFinite(Number(variables[key]))) player[key] = Math.max(0,Math.min(100,Number(variables[key])));
+    });
+    if (player.desireLust >= 100) player.isInHeat = true;
+    else if (player.desireLust < 30) player.isInHeat = false;
+    if (player.desirePleasure >= 100) {
+      player.desirePleasure = Math.max(0,player.desirePleasure - 40);
+      variables.desirePleasure = player.desirePleasure;
+      if (player.desireLust < 100) { player.desireLust = Math.max(0,(player.desireLust || 0) - 10); variables.desireLust = player.desireLust; }
+    }
+    if (JSON.stringify(GameState.player) !== playerAtDispatch) throw new Error('推演期间角色状态发生变化，请重演本轮以避免覆盖进度');
+    var assistant = createChatMessage('assistant', processed);
+    assistant.turnBefore = before;
+    working.messages.push(assistant); working.variables = variables; working.updatedAt = Date.now();
+    // Abort a stale transaction rather than reviving a reset/deleted session.
+    var abortTransaction;
+    try {
+      await db.transaction('rw', [db.chats, db.tavernSettings], async function(tx) {
+        ensureCurrent();
+        abortTransaction = function() { try { tx.abort(); } catch(e) {} };
+        controller.signal.addEventListener('abort', abortTransaction, {once:true});
+        await db.chats.put(working);
+        await db.tavernSettings.put(Object.assign({},tavernState.tavernSettings || {},{id:'main',activeChatId:working.id,playerState:player,playerStateAt:Date.now()}));
+        ensureCurrent();
+      });
+    } finally { if (abortTransaction) controller.signal.removeEventListener('abort', abortTransaction); }
+    ensureCurrent();
+    GameState.player = player;
+    tavernState.chats = tavernState.chats.map(function(c) { return c.id === working.id ? working : c; });
+    saveToLocalStorage();
+  } catch(e) {
+    if (e.name === 'AbortError' || controller.signal.aborted) showToast('推演已阻断，可用重演天机重试本轮', 'info');
+    else showToast('推演失败：' + e.message, 'error');
+  } finally {
+    if (tavernState.activeRequest === request) {
+      tavernState.activeRequest = null; tavernState.streamAbortController = null; tavernState.isSending = false;
+      var typingEl = document.getElementById('tavern-typing'); if (typingEl) typingEl.remove();
+      setTavernSendingUI(false); renderTavernMessages(); updateTavernInfo();
     }
   }
-
-  tavernState.isSending = false;
-  tavernState.streamAbortController = null;
-  if (btn) { btn.textContent = '推演'; btn.style.background = ''; btn.style.color = ''; btn.disabled = false; }
-  if (inputEl) inputEl.disabled = false;
-  if (inputEl) inputEl.focus();
 }
 
 // 阻断推演（中止当前流式请求）
 function stopTavernStream() {
-  if (tavernState.streamAbortController) {
-    tavernState.streamAbortController.abort();
-    tavernState.streamAbortController = null;
-  }
+  if (tavernState.activeRequest) tavernState.activeRequest.controller.abort();
+  else if (tavernState.streamAbortController) tavernState.streamAbortController.abort();
+  // Keep request ownership until finally; a cancelled request must never start a fallback.
 }
 
 // 重演天机 — 删除最后一条AI回复后重新生成
 async function regenerateLastTavern() {
-  if (tavernState.isSending) return;
-  var chat = getActiveChat();
-  if (!chat) return;
-  // 找到最后一条assistant消息并删除
-  var lastIdx = -1;
-  for (var i = chat.messages.length - 1; i >= 0; i--) {
-    if (chat.messages[i].role === 'assistant') { lastIdx = i; break; }
-  }
-  if (lastIdx === -1) { showToast('无可重演的回复', 'info'); return; }
-  chat.messages.splice(lastIdx, 1);
-  chat.updatedAt = Date.now();
-  await db.chats.put(chat);
-  renderTavernMessages();
-  // 找到触发消息并重新发送
-  var triggerContent = '';
-  for (var j = lastIdx - 1; j >= 0; j--) {
-    if (chat.messages[j].role === 'user') { triggerContent = chat.messages[j].content; break; }
-  }
-  if (triggerContent) {
-    var input = document.getElementById('tavern-input');
-    if (input) { input.value = triggerContent; }
-    sendTavernMessage();
-  }
+  if (!tavernState.isSending) await runTavernTurn('', true);
 }
 
 // 续断推演 — 在当前会话最后追加"请继续"
@@ -7718,6 +6994,7 @@ async function resetTavernContext() {
   var chat = getActiveChat();
   if (!chat) return;
   if (!confirm('确定要重置因缘，清空当前会话的全部对话？')) return;
+  stopTavernStream();
   chat.messages = [];
   chat.variables = {};
   chat.updatedAt = Date.now();
@@ -7727,6 +7004,8 @@ async function resetTavernContext() {
 }
 
 function updateTavernInfo() {
+  var rewindButton = document.getElementById('tavern-rewind-label');
+  if (rewindButton) rewindButton.textContent = '回溯 · ' + TimeRewind.snapshots.filter(function(s) { return s.chatId === tavernState.activeChatId; }).length;
   var chat = getActiveChat();
   var infoEl = document.getElementById('tavern-session-info');
   if (infoEl && chat) {
@@ -7736,7 +7015,8 @@ function updateTavernInfo() {
 
 // -- Tavern Modals --
 function openTavernCharacterModal() {
-  var card = tavernState.characterCard || createDefaultCharacterCard();
+  var card = TavernCore.clone(tavernState.characterCard || createDefaultCharacterCard());
+  Object.keys(card).forEach(function(k) { if (typeof card[k] === 'string') card[k] = escapeHtml(card[k]); });
   var html = '<h3 style="margin-bottom:16px;">角色卡管理</h3>' +
     '<div class="char-card-preview">' +
       '<div class="char-avatar-lg">' + (card.name ? card.name[0] : '?') + '</div>' +
@@ -7779,40 +7059,13 @@ async function saveCharacterCard() {
 }
 
 async function importCharacterCard(event) {
-  var file = event.target.files[0];
-  if (!file) return;
+  var file = event.target.files[0]; if (!file) return;
   try {
-    var text = await file.text();
-    // Try JSON
-    try {
-      var json = JSON.parse(text);
-      if (json.spec === 'chara_card_v2' || json.data) {
-        var data = json.data || json;
-        var card = tavernState.characterCard || createDefaultCharacterCard();
-        card.name = data.name || json.name || '';
-        card.description = data.description || '';
-        card.personality = data.personality || '';
-        card.scenario = data.scenario || '';
-        card.firstMessage = data.first_mes || data.firstMessage || '';
-        tavernState.characterCard = card;
-        await db.characterCard.put(card);
-        closeAllModals();
-        showToast('角色卡导入成功：' + card.name, 'success');
-        var nameEl = document.getElementById('tavern-char-name');
-        if (nameEl) nameEl.textContent = card.name;
-        return;
-      }
-    } catch(e) {}
-    // Fallback: treat as plain text character description
-    var card2 = tavernState.characterCard || createDefaultCharacterCard();
-    card2.description = text.substring(0, 500);
-    tavernState.characterCard = card2;
-    await db.characterCard.put(card2);
-    closeAllModals();
-    showToast('已导入文本作为角色描述', 'success');
-  } catch(e) {
-    showToast('导入失败: ' + e.message, 'error');
-  }
+    var card = await TavernCore.importCard(file);
+    await db.characterCard.put(card); tavernState.characterCard = card;
+    closeAllModals(); showToast('角色卡导入成功：' + card.name, 'success');
+    var name = document.getElementById('tavern-char-name'); if (name) name.textContent = card.name;
+  } catch(e) { showToast('导入失败：' + e.message, 'error'); }
 }
 
 function openTavernLorebookModal() {
@@ -7824,13 +7077,13 @@ function openTavernLorebookModal() {
       var active = tavernState.activeLorebookIds.indexOf(book.id) >= 0;
       html += '<div class="lorebook-item">' +
         '<div style="flex:1;">' +
-          '<div class="lb-name">' + book.name + '</div>' +
+          '<div class="lb-name">' + escapeHtml(book.name) + '</div>' +
           '<div class="lb-count">' + book.entries.length + ' 条目</div>' +
         '</div>' +
         '<div style="display:flex;gap:6px;align-items:center;">' +
-          '<input type="checkbox" class="lorebook-toggle" ' + (active ? 'checked' : '') + ' onchange="toggleLorebookActive(\'' + book.id + '\',this.checked)">' +
-          '<button class="text-btn" onclick="openLorebookEditor(\'' + book.id + '\')">编辑</button>' +
-          '<button class="text-btn danger" onclick="deleteTavernLorebook(\'' + book.id + '\')">删除</button>' +
+          '<input type="checkbox" class="lorebook-toggle" ' + (active ? 'checked' : '') + ' onchange="toggleLorebookActive(' + TavernCore.handlerArg(book.id) + ',this.checked)">' +
+          '<button class="text-btn" onclick="openLorebookEditor(' + TavernCore.handlerArg(book.id) + ')">编辑</button>' +
+          '<button class="text-btn danger" onclick="deleteTavernLorebook(' + TavernCore.handlerArg(book.id) + ')">删除</button>' +
         '</div>' +
       '</div>';
     });
@@ -7843,8 +7096,8 @@ function openTavernLorebookModal() {
 function openLorebookEditor(bookId) {
   var book = tavernState.lorebooks.find(function(b) { return b.id === bookId; });
   if (!book) return;
-  var html = '<h3 style="margin-bottom:16px;">编辑：' + book.name + '</h3>' +
-    '<div class="form-group"><label class="form-label">世界书名称</label><input type="text" id="lb-name" class="form-input" value="' + book.name + '"></div>' +
+  var html = '<h3 style="margin-bottom:16px;">编辑：' + escapeHtml(book.name) + '</h3>' +
+    '<div class="form-group"><label class="form-label">世界书名称</label><input type="text" id="lb-name" class="form-input" value="' + escapeHtml(book.name) + '"></div>' +
     '<h4 style="color:var(--text-primary);margin:12px 0;">条目（' + book.entries.length + '）</h4>' +
     '<div id="lb-entries" style="max-height:300px;overflow-y:auto;">';
   book.entries.forEach(function(entry, idx) {
@@ -7856,18 +7109,18 @@ function openLorebookEditor(bookId) {
     var lightLabel = isBlue ? '蓝' : '绿';
     html += '<div class="entry-row">' +
       '<span style="width:10px;height:10px;border-radius:50%;background:' + dotColor + ';box-shadow:0 0 6px ' + dotGlow + ';flex-shrink:0;" title="' + (isBlue ? '蓝灯·始终发送' : '绿灯·关键词触发') + '"></span>' +
-      '<span class="entry-key" style="color:var(--accent-blue);min-width:80px;">' + (entry.keys.join(',') || (isBlue ? '(始终发送)' : '无关键词')) + '</span>' +
+      '<span class="entry-key" style="color:var(--accent-blue);min-width:80px;">' + escapeHtml(entry.keys.join(',') || (isBlue ? '(始终发送)' : '无关键词')) + '</span>' +
       '<span style="font-size:10px;color:var(--text-muted);min-width:28px;">' + posLabel + '</span>' +
-      '<span class="entry-content" style="flex:1;">' + (entry.comment || entry.content.substring(0, 40)) + '</span>' +
-      '<button class="text-btn" onclick="editLorebookEntry(\'' + bookId + '\',' + idx + ')">✎</button>' +
-      '<button class="text-btn danger" onclick="removeLorebookEntry(\'' + bookId + '\',' + idx + ')">✕</button>' +
+      '<span class="entry-content" style="flex:1;">' + escapeHtml(entry.comment || entry.content.substring(0, 40)) + '</span>' +
+      '<button class="text-btn" onclick="editLorebookEntry(' + TavernCore.handlerArg(bookId) + ',' + idx + ')">✎</button>' +
+      '<button class="text-btn danger" onclick="removeLorebookEntry(' + TavernCore.handlerArg(bookId) + ',' + idx + ')">✕</button>' +
     '</div>';
   });
   html += '</div>' +
-    '<button class="add-api-btn" onclick="addLorebookEntry(\'' + bookId + '\')">+ 添加条目</button>' +
+    '<button class="add-api-btn" onclick="addLorebookEntry(' + TavernCore.handlerArg(bookId) + ')">+ 添加条目</button>' +
     '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">' +
       '<button class="text-btn" onclick="openTavernLorebookModal()">返回</button>' +
-      '<button class="summary-action-btn" onclick="saveLorebookEditor(\'' + bookId + '\')">保存</button>' +
+      '<button class="summary-action-btn" onclick="saveLorebookEditor(' + TavernCore.handlerArg(bookId) + ')">保存</button>' +
     '</div>';
   showModal(html);
 }
@@ -7887,6 +7140,7 @@ async function deleteTavernLorebook(id) {
 }
 
 function toggleLorebookActive(id, checked) {
+  stopTavernStream();
   if (checked) {
     if (tavernState.activeLorebookIds.indexOf(id) < 0) tavernState.activeLorebookIds.push(id);
   } else {
@@ -7896,6 +7150,7 @@ function toggleLorebookActive(id, checked) {
     tavernState.tavernSettings.activeLorebookIds = tavernState.activeLorebookIds;
     db.tavernSettings.put(tavernState.tavernSettings);
   }
+  var chat = getActiveChat(); if (chat) { chat.lorebookIds = tavernState.activeLorebookIds.slice(); db.chats.put(chat).catch(function(e) { showToast('世界书选择未保存：' + e.message,'error'); }); }
   renderSettingsTab('lorebook');
   saveToLocalStorage();
 }
@@ -7920,7 +7175,9 @@ function removeLorebookEntry(bookId, idx) {
 function editLorebookEntry(bookId, idx) {
   var book = tavernState.lorebooks.find(function(b) { return b.id === bookId; });
   if (!book) return;
-  var entry = book.entries[idx];
+  var entry = TavernCore.clone(book.entries[idx]);
+  entry.comment = escapeHtml(entry.comment || ''); entry.content = escapeHtml(entry.content || '');
+  entry.keys = (entry.keys || []).map(escapeHtml);
   var isConstant = entry.constant === true;
   var pos = entry.position || 0;
   var posLabel = pos === 0 ? '角色定义前' : pos === 1 ? '角色定义后' : 'D' + (pos - 2);
@@ -7955,15 +7212,15 @@ function editLorebookEntry(bookId, idx) {
     // Recursion controls
     '<div style="display:flex;gap:16px;align-items:center;margin-bottom:12px;">' +
       '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text-body);">' +
-        '<input type="checkbox" id="entry-selective" ' + (entry.selective ? 'checked' : '') + '><span>不可递归（不被其他条目触发）</span>' +
+        '<input type="checkbox" id="entry-selective" ' + (entry.excludeRecursion ? 'checked' : '') + '><span>不可递归（不被其他条目触发）</span>' +
       '</label>' +
       '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text-body);">' +
         '<input type="checkbox" id="entry-norecurse" ' + (entry.noRecurse ? 'checked' : '') + '><span>防止进一步递归（不触发其他条目）</span>' +
       '</label>' +
     '</div>' +
     '<div style="display:flex;gap:10px;justify-content:flex-end;">' +
-      '<button class="text-btn" onclick="openLorebookEditor(\'' + bookId + '\')">返回</button>' +
-      '<button class="summary-action-btn" onclick="saveLorebookEntryEdit(\'' + bookId + '\',' + idx + ')">保存条目</button>' +
+      '<button class="text-btn" onclick="openLorebookEditor(' + TavernCore.handlerArg(bookId) + ')">返回</button>' +
+      '<button class="summary-action-btn" onclick="saveLorebookEntryEdit(' + TavernCore.handlerArg(bookId) + ',' + idx + ')">保存条目</button>' +
     '</div>';
   showModal(html);
 }
@@ -8003,7 +7260,7 @@ function saveLorebookEntryEdit(bookId, idx) {
   entry.position = parseInt(document.getElementById('entry-position').value) || 0;
   entry.keys = document.getElementById('entry-keys').value.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
   entry.content = document.getElementById('entry-content').value;
-  entry.selective = document.getElementById('entry-selective').checked;
+  entry.excludeRecursion = document.getElementById('entry-selective').checked;
   entry.noRecurse = document.getElementById('entry-norecurse').checked;
   db.lorebooks.put(book).then(function() {
     openLorebookEditor(bookId);
@@ -8028,13 +7285,13 @@ function openTavernPresetModal() {
   tavernState.presets.forEach(function(p) {
     var isActive = tavernState.tavernSettings && tavernState.tavernSettings.activePresetId === p.id;
     html += '<div class="preset-card' + (isActive ? ' active' : '') + '">' +
-      '<div style="flex:1;" onclick="setActiveTavernPreset(\'' + p.id + '\')">' +
-        '<div class="preset-name">' + p.name + (isActive ? ' ●' : '') + '</div>' +
+      '<div style="flex:1;" onclick="setActiveTavernPreset(' + TavernCore.handlerArg(p.id) + ')">' +
+        '<div class="preset-name">' + escapeHtml(p.name) + (isActive ? ' ●' : '') + '</div>' +
         '<div class="preset-model">模型：' + (p.settings.openai_model || '默认') + ' · Temp:' + p.settings.temp_openai + ' · MaxT:' + p.settings.openai_max_tokens + '</div>' +
       '</div>' +
       '<div style="display:flex;gap:4px;">' +
-        '<button class="text-btn" onclick="editTavernPreset(\'' + p.id + '\')">编辑</button>' +
-        '<button class="text-btn danger" onclick="deleteTavernPreset(\'' + p.id + '\')">删除</button>' +
+        '<button class="text-btn" onclick="editTavernPreset(' + TavernCore.handlerArg(p.id) + ')">编辑</button>' +
+        '<button class="text-btn danger" onclick="deleteTavernPreset(' + TavernCore.handlerArg(p.id) + ')">删除</button>' +
       '</div>' +
     '</div>';
   });
@@ -8053,7 +7310,7 @@ function editTavernPreset(id) {
   var selectedApiId = p.settings.apiId || '';
   apis.forEach(function(api) {
     if (api.enabled === false) return;
-    apiOptions += '<option value="' + api.id + '"' + (selectedApiId === api.id ? ' selected' : '') + '>' + (api.name || api.url || api.id) + '</option>';
+    apiOptions += '<option value="' + escapeHtmlAttr(api.id) + '"' + (selectedApiId === api.id ? ' selected' : '') + '>' + escapeHtml(api.name || api.url || api.id) + '</option>';
   });
 
   // Build model options for each API (stored as data attributes for JS filtering)
@@ -8062,60 +7319,53 @@ function editTavernPreset(id) {
     var models = (api.models && api.models.length > 0) ? api.models : (api.model ? [api.model] : []);
     apiModelsJson[api.id] = models;
   });
-  var apiModelsJsonStr = JSON.stringify(apiModelsJson).replace(/"/g, '&quot;');
+  var apiModelsJsonStr = escapeHtmlAttr(JSON.stringify(apiModelsJson));
 
   // Build initial model dropdown
   var currentModel = p.settings.openai_model || '';
   var modelOptions = '<option value="">接口默认</option>';
   if (selectedApiId && apiModelsJson[selectedApiId]) {
     apiModelsJson[selectedApiId].forEach(function(m) {
-      modelOptions += '<option value="' + m + '"' + (currentModel === m ? ' selected' : '') + '>' + m + '</option>';
+      modelOptions += '<option value="' + escapeHtmlAttr(m) + '"' + (currentModel === m ? ' selected' : '') + '>' + escapeHtmlAttr(m) + '</option>';
     });
   }
-  if (currentModel && modelOptions.indexOf('value="' + currentModel + '" selected') < 0) {
-    modelOptions += '<option value="' + currentModel + '" selected>' + currentModel + ' (当前)</option>';
+  if (currentModel && modelOptions.indexOf('value="' + escapeHtmlAttr(currentModel) + '" selected') < 0) {
+    modelOptions += '<option value="' + escapeHtmlAttr(currentModel) + '" selected>' + escapeHtmlAttr(currentModel) + ' (当前)</option>';
   }
 
   var html = '<h3>编辑预设</h3>' +
-    '<div class="form-group"><label class="form-label">预设名称</label><input type="text" id="preset-name" class="form-input" value="' + p.name + '"></div>' +
-    '<div class="form-group"><label class="form-label">接口</label><select id="preset-api" class="form-input" onchange="updatePresetModelSelect(\'' + id + '\')">' + apiOptions + '</select></div>' +
+    '<div class="form-group"><label class="form-label">预设名称</label><input type="text" id="preset-name" class="form-input" value="' + escapeHtmlAttr(p.name) + '"></div>' +
+    '<div class="form-group"><label class="form-label">接口</label><select id="preset-api" class="form-input" onchange="updatePresetModelSelect(' + TavernCore.handlerArg(id) + ')">' + apiOptions + '</select></div>' +
     '<div class="form-group"><label class="form-label">模型</label><select id="preset-model" class="form-input">' + modelOptions + '</select></div>' +
     '<span style="display:none;" id="preset-api-models" data-models="' + apiModelsJsonStr + '"></span>' +
-    '<div class="form-group"><label class="form-label">Temperature (' + (p.settings.temp_openai||0.8) + ')</label><input type="range" class="form-slider" id="preset-temp" min="0" max="2" step="0.05" value="' + (p.settings.temp_openai||0.8) + '" oninput="document.getElementById(\'preset-temp-val\').textContent=this.value"></div>' +
-    '<div style="text-align:center;color:var(--text-primary);" id="preset-temp-val">' + (p.settings.temp_openai||0.8) + '</div>' +
+    '<div class="form-group"><label class="form-label">Temperature (' + (p.settings.temp_openai ?? 0.8) + ')</label><input type="range" class="form-slider" id="preset-temp" min="0" max="2" step="0.05" value="' + (p.settings.temp_openai ?? 0.8) + '" oninput="document.getElementById(\'preset-temp-val\').textContent=this.value"></div>' +
+    '<div style="text-align:center;color:var(--text-primary);" id="preset-temp-val">' + (p.settings.temp_openai ?? 0.8) + '</div>' +
     '<div class="form-group"><label class="form-label">Max Tokens</label><input type="number" id="preset-maxtok" class="form-input" value="' + (p.settings.openai_max_tokens||1024) + '"></div>' +
-    '<div class="form-group"><label class="form-label">主提示词</label><textarea id="preset-main" class="form-input" rows="3">' + (p.prompt_main||'') + '</textarea></div>' +
-    '<div class="form-group"><label class="form-label">越狱提示</label><textarea id="preset-jailbreak" class="form-input" rows="2">' + (p.jailbreak||'') + '</textarea></div>' +
+    '<div class="form-group"><label class="form-label">上下文容量（Token，按模型设置；用量为估算）</label><input type="number" id="preset-context" class="form-input" min="1024" value="' + (p.settings.openai_max_context || 32768) + '"></div>' +
+    '<div class="form-group"><label class="form-label">主提示词</label><textarea id="preset-main" class="form-input" rows="3">' + escapeHtml(p.prompt_main||'') + '</textarea></div>' +
+    '<div class="form-group"><label class="form-label">越狱提示</label><textarea id="preset-jailbreak" class="form-input" rows="2">' + escapeHtml(p.jailbreak||'') + '</textarea></div>' +
     '<h4 style="color:var(--text-primary);margin:12px 0;">Prompt 排序</h4>' +
     '<div id="preset-order-list">' + (p.promptOrder||[]).map(function(item, idx) {
-      return '<div class="entry-row"><span style="flex:1;">' + item.id + '</span>' +
-        '<input type="checkbox" ' + (item.enabled ? 'checked' : '') + ' onchange="tavernState.presets.find(function(pr){return pr.id===\'' + id + '\'}).promptOrder[' + idx + '].enabled=this.checked">' +
+      return '<div class="entry-row"><span style="flex:1;">' + escapeHtml(item.id) + '</span>' +
+        '<input type="checkbox" ' + (item.enabled ? 'checked' : '') + ' onchange="tavernState.presets.find(function(pr){return pr.id===' + TavernCore.handlerArg(id) + '}).promptOrder[' + idx + '].enabled=this.checked">' +
         '</div>';
     }).join('') + '</div>' +
     '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">' +
       '<button class="text-btn" onclick="closeAllModals()">取消</button>' +
-      '<button class="summary-action-btn" onclick="saveTavernPreset(\'' + id + '\')">保存</button>' +
+      '<button class="summary-action-btn" onclick="saveTavernPreset(' + TavernCore.handlerArg(id) + ')">保存</button>' +
     '</div>';
   showModal(html);
 }
 
 function updatePresetModelSelect(presetId) {
-  var apiEl = document.getElementById('preset-api');
-  var modelEl = document.getElementById('preset-model');
-  var dataEl = document.getElementById('preset-api-models');
-  if (!apiEl || !modelEl || !dataEl) return;
-  var apiId = apiEl.value;
-  var allModels = JSON.parse(dataEl.getAttribute('data-models').replace(/&quot;/g, '"'));
-  var models = apiId ? (allModels[apiId] || []) : [];
-  var currentVal = modelEl.value;
-  modelEl.innerHTML = '<option value="">接口默认</option>';
-  models.forEach(function(m) {
-    modelEl.innerHTML += '<option value="' + m + '"' + (currentVal === m ? ' selected' : '') + '>' + m + '</option>';
+  var api = document.getElementById('preset-api'), model = document.getElementById('preset-model'), data = document.getElementById('preset-api-models');
+  if (!api || !model || !data) return;
+  var models = TavernCore.parseJSON(data.getAttribute('data-models'))[api.value] || [], current = model.value;
+  model.textContent = '';
+  [{value:'',text:'接口默认'}].concat(models.map(function(m) { return {value:m,text:m}; }),current && !models.includes(current) ? [{value:current,text:current + '（当前）'}] : []).forEach(function(item) {
+    var option = document.createElement('option'); option.value = item.value; option.textContent = item.text; model.appendChild(option);
   });
-  // Keep current model if not in new list
-  if (currentVal && modelEl.innerHTML.indexOf('value="' + currentVal + '" selected') < 0) {
-    modelEl.innerHTML += '<option value="' + currentVal + '" selected>' + currentVal + ' (当前)</option>';
-  }
+  model.value = current;
 }
 
 async function saveTavernPreset(id) {
@@ -8125,203 +7375,19 @@ async function saveTavernPreset(id) {
   p.settings.apiId = document.getElementById('preset-api').value;
   p.settings.openai_model = document.getElementById('preset-model').value;
   p.settings.temp_openai = parseFloat(document.getElementById('preset-temp').value);
-  p.settings.openai_max_tokens = parseInt(document.getElementById('preset-maxtok').value) || 1024;
+  var outputLimit = Number(document.getElementById('preset-maxtok').value), contextLimit = Number(document.getElementById('preset-context').value);
+  if (!Number.isInteger(outputLimit) || outputLimit < 1 || !Number.isInteger(contextLimit) || contextLimit < 1024 || outputLimit >= contextLimit) { showToast('回复长度应为正整数，且必须小于上下文容量', 'error'); return; }
+  p.settings.openai_max_tokens = outputLimit; p.settings.openai_max_context = contextLimit;
   p.prompt_main = document.getElementById('preset-main').value;
   p.jailbreak = document.getElementById('preset-jailbreak').value;
+  (p.prompts || []).forEach(function(pr) { if (pr.identifier === 'main') pr.content = p.prompt_main; if (pr.identifier === 'jailbreak') pr.content = p.jailbreak; });
   await db.presets.put(p);
   closeAllModals();
   showToast('预设已保存');
 }
 
 async function importDoupoDarkSidePreset() {
-  showToast('正在加载 DarkSide 预设框架...', 'info');
-  try {
-    var resp = await fetch('assets/darkside-source.json');
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    var src = await resp.json();
-
-    // === Adapt: assistant definition ===
-    var mainPrompt = src.prompts.find(function(x) { return x.identifier === 'main'; });
-    if (mainPrompt) {
-      mainPrompt.content = mainPrompt.content
-        .replace(/小猫之神/g, '斗气大陆·天道意志')
-        .replace(/可爱的小猫/g, '执掌天道的存在')
-        .replace(/小鱼干/g, '丹药')
-        .replace(/信徒/g, '修炼者')
-        .replace(/喵/g, '')
-        .replace(/可爱治愈/g, '史诗宏大')
-        .replace(/可能还有些色情喵/g, '包含修炼者的爱恨情仇');
-      mainPrompt.name = '（不要关）天道意志初始化';
-    }
-
-    // === Adapt: writing style ===
-    var writingPrompt = src.prompts.find(function(x) { return x.identifier === 'f74e1da4-358f-41cc-84d2-a40c52e42d71'; });
-    if (writingPrompt) {
-      writingPrompt.content =
-        '正文保持史诗玄幻基调，以斗气大陆的宏大叙事为底色。\n\n' +
-        '# 斗破苍穹·文风铁律\n' +
-        '- 史诗感为先：叙事宏大，境界突破伴随天地异象，斗气化翼遮天蔽日\n' +
-        '- 弱肉强食：修仙界冷酷无情，强者为尊，弱者如蝼蚁\n' +
-        '- 严谨称谓：按境界使用道友/前辈/晚辈，称谓错误可能招致杀身之祸\n' +
-        '- 战斗描写突出：斗气化铠、斗气化翼、异火焚天、斗技对轰\n' +
-        '- 修炼体系严格：斗者→斗师→大斗师→斗灵→斗王→斗皇→斗宗→斗尊→斗圣→斗帝\n' +
-        '- 禁止使用"不是……而是……"句式\n' +
-        '- 禁止"一丝""不易察觉""几不可察"等软描写\n' +
-        '- 段落以大段为主，少单句成段\n' +
-        '- 环境描写融入斗气大陆元素：异火纹路、丹香弥漫、斗气波动\n' +
-        '# 核心写作原则\n' +
-        '行为优先于标注：用角色的具体行动展示情绪，而非直接描述\n' +
-        '对话裸奔：台词即情绪，不附加语气描写\n' +
-        '肢体语言覆盖全身：不止眼神和手，姿态、站位、斗气流转皆可传情\n' +
-        '情绪浓度不必全程高涨：允许角色不反应或延迟反应\n' +
-        '留白：不写满，让修炼者的命运留有悬念';
-      writingPrompt.name = '📝文风|斗破史诗';
-    }
-
-    // === Adapt: NSFW ===
-    var nsfwPrompt = src.prompts.find(function(x) { return x.identifier === 'b0930f00-156e-428a-8247-4977549ca41f'; });
-    if (nsfwPrompt) {
-      nsfwPrompt.content = '双修场景要温柔细腻，以灵气交融、灵魂共鸣等玄幻隐喻表达。禁止粗暴激烈。生理反应用诗化语言弱化。在没有修炼者要求时不应结束双修，将回复停在双修中途。';
-      nsfwPrompt.name = '❤️双修风格|温柔';
-    }
-    var nsfwHard = src.prompts.find(function(x) { return x.identifier === '9f6fb39c-5373-47a0-a3d9-dc6fcbbe83de'; });
-    if (nsfwHard) {
-      nsfwHard.content = '双修要注重情欲细节，用玄幻隐喻描写灵气交融、丹田共鸣、灵魂纠缠。最大化欲望氛围但保持诗意。没有修炼者要求时不应结束，将回复停在双修中途。';
-      nsfwHard.name = '❤️双修风格|浓烈';
-    }
-
-    // === Adapt: content tag ===
-    var contentTag = src.prompts.find(function(x) { return x.identifier === 'f65144f0-d39e-43e6-84e7-5c1d78a1a23d'; });
-    if (contentTag) {
-      contentTag.content = '正文要用<content></content>标签包裹，这是斗气大陆天道的格式要求。';
-    }
-
-    // === Adapt: summary ===
-    var summaryPrompt = src.prompts.find(function(x) { return x.identifier === '3867af9e-9bad-4fdf-9ef8-83ca07d8c68e'; });
-    if (summaryPrompt) {
-      summaryPrompt.content = '正文结束后写100字剧情总结，概括本次修炼历程，用<summary></summary>包住。时间地点、境界变化、重要伏笔都要记录。';
-    }
-
-    // === Adapt: thinking ===
-    var thinkPrompt = src.prompts.find(function(x) { return x.identifier === '69280283-1348-44fd-8d62-b30aa7fe539d'; });
-    if (thinkPrompt) {
-      thinkPrompt.content = thinkPrompt.content
-        .replace(/小猫之神/g, '天道意志')
-        .replace(/小猫/g, '天道')
-        .replace(/喵喵叫/g, '俯瞰众生')
-        .replace(/信徒/g, '修炼者')
-        .replace(/小鱼干/g, '天道眷顾');
-    }
-
-    // === Adapt: avoid words ===
-    var avoidPrompt = src.prompts.find(function(x) { return x.identifier === '8cdce8e9-3f74-4068-bfab-64376b137cce'; });
-    if (avoidPrompt) {
-      avoidPrompt.content = '<avoid_words>\n禁止使用：一丝、不容置疑、不易察觉、几不可察\n禁止句式：不是……而是……、他没有……（而是做了什么）\n额外禁止：科技词汇、现代网络梗、非斗气大陆世界观的所有概念\n</avoid_words>';
-    }
-
-    // === Adapt: disclaimer ===
-    var discPrompt = src.prompts.find(function(x) { return x.identifier === 'a579e015-eed7-45c4-aa1d-24c6df2974ea'; });
-    if (discPrompt) {
-      discPrompt.content = discPrompt.content
-        .replace(/SoliUmbra/g, '斗破苍穹·修炼模拟')
-        .replace(/类脑OΔYΣΣEIA/g, '斗气大陆')
-        .replace(/预设仅作为研究AI伦理与安全的实验项目/g, '本预设仅用于斗破苍穹修炼模拟游戏');
-    }
-
-    // === Adapt: cat message → hidden ===
-    var catMsg = src.prompts.find(function(x) { return x.identifier === 'be05728f-8311-4df0-a130-b0dae12b904e'; });
-    if (catMsg) {
-      catMsg.enabled = false;
-    }
-
-    // === Adapt: preset name and metadata ===
-    src.extensions = src.extensions || {};
-    if (src.extensions.extensions && src.extensions.extensions.presetdetailnfo) {
-      src.extensions.extensions.presetdetailnfo.nameGroup = '斗破·DarkSide 天道意志 v1.1';
-      src.extensions.extensions.presetdetailnfo.updateNote = '斗破苍穹适配版';
-    }
-
-    // === Import regex scripts from the preset ===
-    var regexes = (src.extensions && src.extensions.SPreset && src.extensions.SPreset.RegexBinding && src.extensions.SPreset.RegexBinding.regexes) || [];
-    regexes.forEach(function(r) {
-      // Check if already exists
-      var exists = regexScripts.some(function(rs) { return rs.scriptName === r.scriptName; });
-      if (!exists && r.scriptName !== '世界书标记' && r.scriptName !== '转义') {
-        regexScripts.push({
-          id: 'ds-' + r.id,
-          scriptName: r.scriptName,
-          findRegex: r.findRegex,
-          replaceString: r.replaceString,
-          placement: String(r.placement[0] || '2'),
-          disabled: r.disabled || false,
-          promptOnly: r.promptOnly || false,
-          runOnEdit: r.runOnEdit !== false,
-          substituteRegex: r.substituteRegex || 0,
-          minDepth: r.minDepth,
-          maxDepth: r.maxDepth
-        });
-      }
-    });
-
-    // === Create the preset ===
-    var p = createPreset({
-      name: '斗破·DarkSide天道意志 v1.1',
-      settings: {
-        openai_model: '', temp_openai: src.temperature || 1,
-        openai_max_tokens: src.openai_max_tokens || 233333,
-        top_p_openai: src.top_p || 1,
-        freq_pen_openai: src.frequency_penalty || 0,
-        pres_pen_openai: src.presence_penalty || 0,
-        stream_openai: src.stream_openai !== false
-      }
-    });
-
-    // Map prompts that have enabled=true and role=system as prompt_main
-    var mainParts = [];
-    var nsfwParts = [];
-    var jbParts = [];
-    src.prompts.forEach(function(pr) {
-      if (!pr.enabled) return;
-      if (pr.role === 'user') {
-        jbParts.push(pr.content);
-      } else if (pr.system_prompt) {
-        mainParts.push(pr.content);
-      }
-    });
-    p.prompt_main = mainParts.join('\n\n') || '斗气大陆·天道意志';
-    p.prompt_nsfw = nsfwParts.join('\n\n') || '';
-    p.jailbreak = jbParts.join('\n\n') || '';
-
-    // Map prompt_order to promptOrder
-    var orderMap = (src.prompt_order && src.prompt_order[1] && src.prompt_order[1].order) || [];
-    var orderItems = [];
-    orderMap.forEach(function(o) {
-      var pr = src.prompts.find(function(x) { return x.identifier === o.identifier; });
-      if (pr) {
-        orderItems.push({
-          id: pr.identifier,
-          name: pr.name || pr.identifier,
-          enabled: o.enabled !== false
-        });
-      }
-    });
-    // Add essential items not in order
-    var hasItem = function(id) { return orderItems.some(function(x) { return x.id === id; }); };
-    if (!hasItem('world_info_before')) orderItems.splice(2, 0, { id:'world_info_before', name:'世界书·前置', enabled:true });
-    if (!hasItem('world_info_after')) orderItems.splice(orderItems.length - 2, 0, { id:'world_info_after', name:'世界书·后置', enabled:true });
-    if (!hasItem('chat_history')) orderItems.push({ id:'chat_history', name:'对话历史', enabled:true });
-    if (!hasItem('user_input')) orderItems.push({ id:'user_input', name:'用户输入', enabled:true });
-    p.promptOrder = orderItems;
-
-    tavernState.presets.unshift(p);
-    await db.presets.put(p);
-    saveToLocalStorage();
-    renderSettingsTab('presets');
-    showToast('DarkSide·斗破天道意志 v1.1 已导入（含正则脚本） ✓', 'success');
-  } catch(e) {
-    console.error('Import failed:', e);
-    showToast('导入失败：' + e.message, 'error');
-  }
+  showToast('项目未附带 DarkSide 预设文件，请使用“导入预设”选择你已有的 JSON 文件', 'info');
 }
 
 async function addNewTavernPreset() {
@@ -8339,9 +7405,8 @@ async function deleteTavernPreset(id) {
 }
 
 async function setActiveTavernPreset(id) {
-  tavernState.tavernSettings.activePresetId = id;
-  await db.tavernSettings.put(tavernState.tavernSettings);
-  openTavernPresetModal();
+  try { await applyActivePreset(id); openTavernPresetModal(); }
+  catch(e) { showToast('预设切换失败：' + e.message,'error'); }
 }
 
 function openTavernSettingsModal() {
@@ -8661,7 +7726,7 @@ function editRegexScript(id) {
     '<div class="form-group"><label class="form-label">注入位置 (0=显示 1=Prompt 2=两层)</label><input type="number" id="rs-placement" class="form-input" value="' + (rs.placement||'0') + '" min="0" max="2"></div>' +
     '<div style="display:flex;gap:10px;justify-content:flex-end;">' +
       '<button class="text-btn" onclick="renderSettingsTab(\'regex\')">返回</button>' +
-      '<button class="summary-action-btn" onclick="saveRegexScript(\'' + id + '\')">保存</button>' +
+      '<button class="summary-action-btn" onclick="saveRegexScript(' + TavernCore.handlerArg(id) + ')">保存</button>' +
     '</div>';
   showModal(html);
 }
@@ -8729,7 +7794,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initTitleCover();
   // Initialize Tavern database (async, non-blocking)
   initTavernDB().catch(function(e) { console.warn('Tavern DB init:', e); });
-  var hasData = loadFromLocalStorage() || (localStorage.getItem('doupo_saves') && JSON.parse(localStorage.getItem('doupo_saves')).length > 0);
+  var hasData = loadFromLocalStorage() || getSaves().length > 0;
   var continueBtn = document.getElementById('btn-continue');
   if (continueBtn && hasData) {
     continueBtn.classList.add('primary');
@@ -8742,13 +7807,14 @@ document.addEventListener('DOMContentLoaded', function() {
   var urlParams = new URLSearchParams(window.location.search);
   var oauthCode = urlParams.get('code');
   if (oauthCode) {
+    // Discard legacy authorization codes; webhook backups do not use OAuth.
+    oauthCode = null;
     // Clean URL
     if (window.history && window.history.replaceState) {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
     // Store code for use when user opens Discord connection dialog
-    window._pendingDiscordCode = oauthCode;
-    showToast('检测到 Discord 授权码，打开云同步完成连接即可自动填入', 'success');
+    window._pendingDiscordCode = null;
   }
   // ESC to close settings panel
   document.addEventListener('keydown', function(e) {
