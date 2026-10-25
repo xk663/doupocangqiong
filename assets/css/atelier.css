@@ -83,3 +83,34 @@ button:focus-visible,summary:focus-visible{outline:2px solid #9aaf82;outline-off
 @media(max-width:1000px){.landing-copy{padding-left:1%}.landing-body{padding-left:7%;padding-right:4%}.landing-verse{right:1%}.tavern-toolbar{padding:18px 24px;gap:12px}.tavern-tools{gap:4px}.tavern-tool{padding:9px}.tavern-heading-mark{display:none}.tavern-heading{min-width:120px}.msg-maintext{padding:27px}.tavern-messages{padding-left:26px;padding-right:26px}}
 @media(max-width:700px){#view-title:before{inset:12px}.landing-masthead{padding:28px 8%}.landing-edition{display:none}.landing-body{display:block;min-height:0;padding:28px 9% 40px;flex:1}.landing-copy{position:relative;padding:20px 0;z-index:1}.landing-copy h1{font-size:61px}.landing-description{font-size:13px}.landing-art{position:absolute;inset:0 -30% 0 15%;opacity:.22;z-index:-1}.landing-verse,.landing-art-label{display:none}.landing-footer{padding:0 9% 28px;font-size:9px}.landing-footer span:last-child{display:none}#title-menu{max-width:370px}.landing-links{gap:20px}.tavern-toolbar{flex-wrap:wrap;padding:15px 18px;gap:13px;min-height:0}.tavern-heading h2{font-size:17px}.tavern-tools{width:100%;justify-content:space-between;gap:4px}.tavern-tool{padding:8px;font-size:11px;gap:5px}.tavern-tools-divider{display:none}.tavern-tool svg{width:13px;height:13px}.tavern-messages{padding:20px 15px 30px}.msg-maintext{padding:23px 21px;font-size:15px;line-height:2.05}.profile-summary{padding:16px}.profile-grid{grid-template-columns:1fr 1fr;margin:0 17px;gap:12px}.profile-toggle{font-size:0}.profile-summary small{font-size:10px}.tavern-input-bar{margin:0 12px 10px;padding:10px;border-radius:10px;gap:4px}.tavern-send-btn{padding:10px 13px}.composer-caption{font-size:9px;padding-bottom:12px}#view-game{--sidebar-width:56px}#game-sidebar{gap:3px!important}.sidebar-btn{width:43px;min-height:46px;height:46px}.sidebar-btn span{font-size:9px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
+/* Approved Gu-clan reunion key art; retain the original first-version handhold. */
+#view-title{background:#29312e url('../images/title-gu-reunion.png?v=7') center center/cover no-repeat;color:#fff4df;position:relative}
+#view-title:before{inset:0;border:0;background:linear-gradient(90deg,rgba(12,23,25,.86) 0%,rgba(15,28,29,.7) 26%,rgba(18,30,30,.24) 48%,transparent 65%);z-index:-1}
+#view-title .landing-body{display:flex;min-height:440px;padding:0 6.5% 32px;gap:0}
+#view-title .landing-copy{padding:20px 0;max-width:480px}
+#view-title .landing-masthead,#view-title .landing-brand,#view-title .landing-edition{color:#f1e6cd;text-shadow:0 2px 10px #142326}
+#view-title .landing-kicker{color:#e7c895}
+#view-title .landing-copy h1{font-size:clamp(52px,5.4vw,86px);color:#fff1d2;text-shadow:0 3px 22px #14232680;white-space:nowrap}
+#view-title .landing-description{color:#e0dfd3;text-shadow:0 2px 8px #142326}
+#view-title #title-menu .title-btn{background:#142b2c99;color:#fff0d2;border-color:#d8c8a666;backdrop-filter:blur(10px)}
+#view-title #title-menu .title-btn.primary{background:#dfc28e;color:#263b36;border-color:#e8d4af}
+#view-title #title-menu .title-btn:hover{background:#28433ce6;border-color:#ead8ac}
+#view-title #title-menu .title-btn.primary:hover{background:#f1d8a8}
+#view-title .landing-links button{color:#e1dfd1;text-shadow:0 2px 7px #142326}
+#view-title .landing-links button:hover{color:#fff3cd;border-color:#e8d4af}
+#view-title .landing-footer,#view-title .landing-footer span:first-child{color:#f0e8d5;text-shadow:0 2px 8px #142326}
+#view-title .title-btn:focus-visible,#view-title .landing-links button:focus-visible{outline:2px solid #fff1cc;outline-offset:5px}
+@media(max-width:700px){
+ #view-title{background-position:78% center}
+ #view-title:before{inset:0;background:linear-gradient(180deg,#101f2770 0%,#101f2740 25%,#102326d9 58%,#102326f2 100%)}
+ #view-title .landing-masthead{padding:24px 7%;font-size:10px}
+ #view-title .landing-body{align-items:flex-end;padding:140px 7% 26px;min-height:0}
+ #view-title .landing-copy{width:100%;max-width:420px;padding:12px 0}
+ #view-title .landing-copy h1{font-size:clamp(44px,11vw,65px);margin-bottom:12px}
+ #view-title .landing-kicker{margin-bottom:16px;font-size:10px}
+ #view-title .landing-description{margin-bottom:24px;font-size:12px}
+ #view-title #title-menu{gap:10px}
+ #view-title #title-menu .title-btn{padding:13px 10px;font-size:13px;letter-spacing:1px}
+ #view-title .landing-links{gap:20px;margin-top:19px}
+ #view-title .landing-footer{padding:0 7% 20px}
+}

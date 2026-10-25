@@ -1,0 +1,67 @@
+/* Jade navigation, warm paper ledgers, and code-drawn ornamental seals. */
+#view-game{--sidebar-width:104px}
+#game-sidebar{background:radial-gradient(ellipse at 0 0,#617a61aa,transparent 55%),linear-gradient(165deg,#233e37,#122d2b)!important;box-shadow:5px 0 24px #162e301a;border-right:1px solid #a5b19855;padding:18px 8px!important;gap:8px!important;overflow-y:auto;scrollbar-width:none}
+#game-sidebar>div:first-child{width:57px!important;height:52px!important;min-height:52px;border-radius:17px 4px 17px 4px!important;background:linear-gradient(140deg,#c8b78522,#f9efd906)!important;border-color:#d4c59888!important;position:relative}
+#game-sidebar>div:first-child:after{content:'山 河 行 旅';position:absolute;font-size:7px;letter-spacing:1px;bottom:-14px;color:#a4b6a4;white-space:nowrap}
+#game-sidebar>div:nth-child(2){margin-top:13px}
+#game-sidebar>div:nth-child(3){width:100%;gap:7px!important;flex:1 0 auto!important}
+#game-sidebar .sidebar-btn{width:82px;height:57px;min-height:57px;flex-shrink:0;display:flex;flex-direction:row;gap:10px;justify-content:flex-start;padding:10px;border-radius:12px;color:#b8c7b7;border:1px solid transparent;position:relative;transition:background .18s,color .18s,transform .18s}
+#game-sidebar .sidebar-btn svg{width:19px;height:19px;flex-shrink:0;opacity:.85}
+#game-sidebar .sidebar-label{font-size:11px;letter-spacing:1px;white-space:nowrap}
+#game-sidebar .sidebar-btn:hover{background:#e6e2c515;color:#ffefc7;transform:translateX(2px)}
+#game-sidebar .sidebar-btn.active{background:linear-gradient(130deg,#e3d6ac,#bdcaad);color:#263f35;box-shadow:0 5px 15px #061b2633;border-color:#eee2bd}
+#game-sidebar .sidebar-btn.active:before{content:'';position:absolute;left:-9px;top:18px;width:3px;height:20px;background:#eed4a0;border-radius:4px}
+#game-sidebar .sidebar-btn:focus-visible{outline:2px solid #eddaaa;outline-offset:1px}
+.journal-page{flex:1;min-height:0;overflow:auto;padding:38px clamp(20px,4vw,64px) 50px;background:radial-gradient(ellipse at 95% 0,#d8dec65c,transparent 48%),repeating-linear-gradient(0deg,#8b977604 0 1px,transparent 1px 5px),#f4f3eb;color:#344a3d}
+.journal-heading{display:flex;align-items:center;justify-content:space-between;gap:22px;padding-bottom:25px;border-bottom:1px solid #d7dccd;margin-bottom:24px}
+.journal-eyebrow{display:block;font-size:10px;letter-spacing:3px;color:#8c805e;margin-bottom:13px}
+.journal-heading h1{font:600 clamp(27px,3vw,40px)/1.35 var(--font-serif);color:#294c3b;margin:0 0 12px;letter-spacing:4px}
+.journal-page p{line-height:1.9;font-size:13px;color:#627062;margin:10px 0;overflow-wrap:anywhere}
+.journal-heading p{margin:0;max-width:650px}
+.journal-metric{padding:6px 6px 6px 24px;border-left:1px solid #c8cebd;min-width:100px;text-align:center}
+.journal-metric strong{display:block;font:500 32px/1.4 var(--font-serif);color:#38624a}
+.journal-metric span{display:block;font-size:10px;letter-spacing:2px;color:#83917b}
+.journal-note{font-size:11px;line-height:1.8;color:#778269;border-left:2px solid #b6bb91;padding:8px 14px;margin:15px 0 24px;background:#e9ebdf88}
+.journal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:20px;align-items:stretch}
+.journal-card{background:#fffef8;border:1px solid #dce0d1;border-radius:16px;padding:26px;min-width:0;box-shadow:0 5px 18px #24463405;position:relative;overflow:hidden}
+.journal-card h3{font:600 20px/1.5 var(--font-serif);color:#335b43;margin:0 0 12px}
+.journal-card h2{font:500 27px/1.5 var(--font-serif);color:#31563f;margin:9px 0}
+.journal-card h4{font-size:12px;font-weight:500;color:#8c805e;margin:24px 0 8px;letter-spacing:2px}
+.journal-tag{display:inline-block;color:#79856a;background:#eef0e5;border:1px solid #e0e4d5;border-radius:5px;font-size:10px;padding:4px 9px;line-height:1.5}
+.journal-filters{display:flex;gap:8px;margin:20px 0 26px;flex-wrap:wrap}
+.journal-filters button,.journal-button{border:1px solid #cdd5c0;background:#fffdf7;color:#466347;padding:10px 17px;border-radius:8px;font-size:12px;cursor:pointer}
+.journal-filters .selected,.journal-button:hover{background:#355d49;color:#fff5da;border-color:#355d49}
+.journal-page button:focus-visible,.journal-page summary:focus-visible{outline:2px solid #527650;outline-offset:3px}
+.flame-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr))}
+.flame-card{padding:23px 25px 25px;border-top:2px solid color-mix(in srgb,var(--fire) 50%,#667754);min-height:225px}
+.flame-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;position:relative}
+.flame-number{font:500 34px/1 var(--font-serif);color:#829275;letter-spacing:-2px}
+.flame-ornament{position:absolute;right:13px;bottom:3px;color:var(--fire);opacity:.09;font-size:118px;line-height:1;pointer-events:none}
+.flame-card p{position:relative;margin-bottom:0;font-size:12px}
+.journal-card[hidden]{display:none}
+.portrait-card{padding-top:32px;background:linear-gradient(155deg,#fffef8 60%,#edf0e3)}
+.portrait-seal{position:absolute;top:22px;right:22px;display:grid;place-items:center;width:56px;height:66px;border:1px solid #cdd6bf;border-radius:28px 28px 9px 9px;font:27px var(--font-serif);color:#7d9372;background:#e7eddd77}
+.portrait-card>.journal-eyebrow{max-width:calc(100% - 70px)}
+.portrait-card h3{font-size:25px;max-width:calc(100% - 65px)}
+.journal-card details{border-top:1px solid #e0e4d7;padding-top:14px;margin-top:18px}
+.journal-page summary{cursor:pointer;color:#5d7955;font-size:12px;line-height:1.7}
+.journal-guide{border:1px solid #d5ddca;border-radius:12px;padding:20px;margin-top:25px;background:#edf0e5}
+.journal-guide>.journal-grid{margin-top:20px}
+.journal-card dl{display:grid;grid-template-columns:80px 1fr;gap:10px;font-size:12px;margin:18px 0}
+.journal-card dt{color:#829174}.journal-card dd{margin:0;color:#38553d}
+.journal-empty{padding:32px 20px;text-align:center;border:1px dashed #cdd5c1;border-radius:14px;margin:20px 0;background:#ffffff44}
+.journal-empty>span{font-size:36px;color:#a2b192}.journal-empty h3{font:20px var(--font-serif);color:#617d56}
+.self-card{background:linear-gradient(130deg,#344f40,#526d51);color:#e5e6d1}.self-card h2,.self-card p{color:#f0eed9}
+.studio-banner{padding:30px 35px;background:linear-gradient(110deg,#344f43,#688063);border-radius:16px;color:#fff3d8;position:relative;overflow:hidden;margin-bottom:25px}
+.studio-banner:after{content:'山';position:absolute;right:18px;top:-50px;font:220px var(--font-serif);color:#e6ecd316;pointer-events:none}
+.journal-page .studio-banner h2{font:30px var(--font-serif);margin:8px 0;color:#fff2d7}.studio-banner p,.studio-banner .journal-eyebrow{color:#e0e6d1}
+.studio-card{padding-top:32px}.studio-glyph{display:grid;place-items:center;width:64px;height:68px;border:1px solid #cbd5bc;border-radius:28px 28px 8px 8px;color:#748e61;font:30px var(--font-serif);margin-bottom:25px;background:linear-gradient(#f3f6e9,#e5eddb)}
+.studio-card .journal-button{width:100%;margin-top:15px}.studio-card .journal-note{min-height:54px;margin-bottom:0}
+.quest-ledger{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}.quest-ledger section>h2{font:20px var(--font-serif);margin:0 0 20px;color:#466345;display:flex;justify-content:space-between}.quest-ledger h2>span{font:12px var(--font-sans);border:1px solid #ccd7c0;border-radius:20px;padding:4px 10px}.quest-card{margin-bottom:15px}.quest-card h3{margin-top:15px}.quest-reward{color:#956d35!important}
+#game-view-summary .summary-container{background:#f4f3eb;min-width:0}.summary-header{padding:25px 30px;background:linear-gradient(100deg,#eff0e4,#fffdf7);flex-wrap:wrap;gap:15px;border-bottom:1px solid #d7dccd}.summary-tabs{padding:14px 25px;gap:8px;background:#edeee3;flex-wrap:wrap}.summary-tab{border:1px solid #d2dac6;border-radius:8px;padding:10px 15px;color:#607154}.summary-tab.active{background:#355d49;color:#fff4d8;border-color:#355d49}.summary-body{padding:30px;min-width:0}.summary-section{border:1px solid #dbe0d1;background:#fffef8;border-radius:14px;padding:24px;margin-bottom:20px}.summary-section h4{font-size:17px;color:#365a40;letter-spacing:2px;margin-bottom:18px}.summary-kv{padding:12px 0;gap:15px}.summary-kv .val{overflow-wrap:anywhere;min-width:0;color:#44573f}.summary-kv .key{color:#829174}
+@media(max-width:1050px){.quest-ledger{grid-template-columns:1fr}.journal-page{padding:28px 25px}.journal-heading h1{font-size:29px}}
+@media(max-width:700px){#view-game{--sidebar-width:66px}#game-sidebar{padding:14px 4px!important;gap:6px!important}#game-sidebar>div:first-child{width:42px!important;height:43px!important;min-height:43px}#game-sidebar .sidebar-btn{width:53px;height:54px;min-height:54px;flex-direction:column;justify-content:center;padding:6px 2px;gap:4px;border-radius:10px}#game-sidebar .sidebar-label{font-size:9px;letter-spacing:1px}#game-sidebar .sidebar-btn svg{width:18px;height:18px}#game-sidebar .sidebar-btn.active:before{left:-4px}.journal-page{padding:24px 16px 35px}.journal-heading{align-items:flex-start;gap:12px;padding-bottom:18px}.journal-heading h1{font-size:25px;letter-spacing:2px}.journal-heading p{font-size:11px}.journal-metric{min-width:48px;padding:4px 0 4px 10px}.journal-metric strong{font-size:25px}.journal-metric span{font-size:9px;letter-spacing:0}.journal-grid{gap:14px}.journal-card{padding:22px}.journal-page p{font-size:12px}.studio-banner{padding:24px}.summary-body{padding:18px 14px}.summary-header{padding:18px 14px}.summary-tabs{padding:12px;gap:5px}.summary-tab{font-size:11px;padding:8px 10px}.summary-section{padding:18px}.summary-kv .key{width:70px}.journal-eyebrow{letter-spacing:2px}}
+@media(prefers-reduced-motion:reduce){#game-sidebar .sidebar-btn{transition:none}}
+.summary-body .journal-card p{color:#627062;font-size:13px;line-height:1.9;margin:10px 0;overflow-wrap:anywhere}
+.summary-body .journal-guide p{color:#627062;font-size:13px;line-height:1.9}
+@media(max-width:700px){.journal-heading .journal-metric{max-width:43%}.journal-heading .journal-metric strong{font-size:22px;overflow-wrap:anywhere}}

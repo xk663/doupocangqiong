@@ -50,6 +50,14 @@
     var budget = options.budget == null ? 8192 : options.budget;
     var seen = new Set(options.existing || []), used = 0, result = [], queue = [];
     var entries = [];
+    var trace = options.trace;
+    function record(item, status, depth) {
+      if (!trace) return;
+      var id=item.book.id+':'+item.entry.id, row=trace.find(function(x){return x.id===id;});
+      if(row && row.status==='matched')return;
+      var value={id:id,bookId:item.book.id,bookName:item.book.name,entryId:item.entry.id,label:item.entry.comment || (item.entry.keys || []).join('、') || '无名称条目',status:status,depth:depth};
+      if(row)Object.assign(row,value);else trace.push(value);
+    }
     (books || []).forEach(function(b) { (b.entries || []).forEach(function(e) { entries.push({ book:b, entry:e }); }); });
     entries.sort(function(a, b) { return (b.entry.priority ?? b.entry.order ?? 0) - (a.entry.priority ?? a.entry.order ?? 0); });
     function hits(keys, input) { return (keys || []).filter(Boolean).map(function(k) { return input.includes(String(k).toLowerCase()); }); }
@@ -65,11 +73,13 @@
     function scan(input, depth) {
       entries.forEach(function(item) {
         var e = item.entry, identity = item.book.id + ':' + e.id;
-        if (e.enabled === false || e.disable === true || seen.has(identity) || seen.has(e.id)) return;
+        if (e.enabled === false || e.disable === true) {record(item,'disabled',depth);return;}
+        if (seen.has(identity) || seen.has(e.id)) return;
         if (depth > 0 && (e.excludeRecursion || e.exclude_recursion || e.constant)) return;
-        if (!(depth === 0 && e.constant) && !matches(e, input)) return;
+        if (!(depth === 0 && e.constant) && !matches(e, input)) {record(item,'no-match',depth);return;}
         var cost = estimateTokens(e.content);
-        if (used + cost > budget) return;
+        if (used + cost > budget) {record(item,'budget',depth);return;}
+        record(item,'matched',depth);
         seen.add(identity); used += cost;
         result.push({bookId:item.book.id, bookName:item.book.name, entry:e, position:e.position || 0, isConstant:!!e.constant, isRecursive:depth > 0});
         if (!e.noRecurse && !e.preventRecursion && !e.prevent_recursion && depth < maxDepth) queue.push({text:String(e.content || '').toLowerCase(), depth:depth + 1});
@@ -130,6 +140,8 @@
     // History/input cannot be silently disabled: they define the turn itself.
     if (!blocks.some(function(b) { return b.marker === 'chatHistory'; })) blocks.push({marker:'chatHistory'});
     if (!blocks.some(function(b) { return b.marker === 'userInput'; })) blocks.push({marker:'userInput'});
+    // Depth-injected lore uses the same macros as ordinary preset blocks.
+    depth.forEach(function(d){d.content=String(d.content||'').replace(/\{\{(user|char|location)\}\}/g,function(_,key){return key==='user'?(options.userName||'玩家'):key==='char'?(card.name||'角色'):(options.location||'');});});
     return {blocks:blocks, depth:depth};
   }
   function composePrompt(options) {

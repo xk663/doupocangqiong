@@ -12,6 +12,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700;900&family=ZCOOL+KuaiLe&display=swap&subset=chinese-simplified"></noscript>
 <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js" defer></script>
 <script src="assets/js/tavern-core.js"></script>
+<script src="assets/js/tavern-wiring.js"></script>
 <script src="assets/js/user-flames.js"></script>
 <script src="assets/js/creation-rules.js"></script>
 <script src="assets/js/lore-canon.js"></script>
@@ -1115,6 +1116,8 @@ input:checked + .toggle-slider::before { background:var(--text-primary);transfor
 <script src="assets/js/world-navigation.js"></script><script src="assets/js/world-core.js"></script>
 <script src="assets/js/world-bridge.js"></script>
 <script src="assets/js/world-ui.js"></script>
+<link rel="stylesheet" href="assets/css/journal.css">
+<link rel="stylesheet" href="assets/css/tavern-settings.css">
 </head>
 <body>
 
@@ -1134,7 +1137,6 @@ input:checked + .toggle-slider::before { background:var(--text-primary);transfor
         <button id="btn-saves" onclick="openSaveManager()">存档管理</button><button id="btn-settings" onclick="openSettings()">偏好设置</button><button id="btn-changelog" onclick="openChangelog()">更新日志</button><button id="btn-about" onclick="openAbout()">关于此卷</button>
       </nav>
     </section>
-    <aside class="landing-art" aria-label="青山云海插画"><img src="assets/mountain-scroll.svg" alt="青绿山峦与云海间的修行亭阁"><p class="landing-verse">一念起，万火生。<br>山海之外，自有天地。</p><span class="landing-art-label">山河为卷 · 众生为墨</span></aside>
   </main>
   <footer class="landing-footer"><span>自由探索 / 角色扮演 / 万千际遇</span><span>斗气大陆 · 众生新篇</span></footer>
 </div>
@@ -1459,18 +1461,8 @@ var StudioState = {
 // ==============================
 // BEAUTY RANKINGS (美人榜)
 // ==============================
-var BEAUTY_RANKINGS = [
-  { name:'美杜莎女王·彩鳞', title:'蛇人族女王', realm:'斗宗', desc:'艳绝沙漠，冷艳无双。七彩吞天蟒血脉，进化后化为九彩吞天蟒。身姿妖娆，气质尊贵，杀伐果断中藏着对萧炎的一缕柔情。', secret:'蛇人族女王之躯，天生媚骨。腰肢如蛇柔软，肌肤冰凉如玉。与萧炎诞下一女萧潇后，更添成熟风韵。', avatar:'👑' },
-  { name:'萧薰儿', title:'古族神女', realm:'斗皇', desc:'古族神品血脉，金帝焚天炎掌控者。气质清雅出尘，如空谷幽兰。对萧炎用情至深，不惜违抗族规。外表温柔，实则实力深不可测。', secret:'古族神女之体，肌肤如凝脂白玉。神品血脉赋予她超越凡俗的体质，体内金帝焚天炎更添一份神圣不可侵犯之感。', avatar:'🌟' },
-  { name:'小医仙', title:'毒宗宗主', realm:'斗宗', desc:'天生厄难毒体，白发如雪，清纯外表下藏着惊天毒功。与萧炎相识于微时，是少数几个在他废材时期便真心相待的人。', secret:'厄难毒体使她周身弥漫微不可察的毒香，肌肤触之冰凉。白发及腰，眼眸含着化不开的孤寂。以三种异火炼制毒丹后，毒体得以控制。', avatar:'🌿' },
-  { name:'云韵', title:'云岚宗宗主', realm:'斗皇', desc:'云岚宗宗主，风属性斗气掌控者。容貌端庄秀丽，气质高贵典雅。与萧炎在魔兽山脉的偶遇，是两人命运纠缠的开端。', secret:'宗主之尊下藏着柔软的心。肌肤温润，体态丰盈。风属性斗气使她举手投足间带着飘逸之姿。与萧炎那段不知彼此身份的日子，是她最珍视的记忆。', avatar:'🌪️' },
-  { name:'雅妃', title:'米特尔首席拍卖师', realm:'斗者', desc:'米特尔家族拍卖场首席拍卖师，容貌妖娆妩媚，气质成熟动人。在萧炎少年时期便识其不凡，多次给予帮助。', secret:'成熟女性的魅力在她身上展现得淋漓尽致。丰腴的身材、慵懒的声线、不经意间流露的风情，让无数竞拍者为之倾倒。与萧炎保持着微妙的暧昧。', avatar:'💋' },
-  { name:'纳兰嫣然', title:'云岚宗少宗主', realm:'斗王', desc:'云岚宗少宗主，云韵亲传弟子。自幼与萧炎有婚约，因萧炎变为废材而退婚，激其立下三年之约。容貌清丽，性格骄傲。', secret:'少宗主之身尚未经人事。退婚之举虽伤害了萧炎，却也激励他崛起。三年后再败于萧炎之手，心中复杂的悔意与傲气交织至今。', avatar:'🏹' },
-  { name:'紫研', title:'太虚古龙皇女', realm:'斗王', desc:'太虚古龙皇族血脉，外表如十二三岁少女却力大无穷。喜食药材丹药如零食，天真烂漫中藏着龙族的威严。', secret:'虽是少女外表，却已有数百年寿元。龙族化形之体娇小玲珑，但本体为万丈太虚古龙。成年后身材会迅速发育，潜力不可估量。', avatar:'🐉' },
-  { name:'曹颖', title:'丹塔妖孽', realm:'斗尊', desc:'丹塔妖孽级炼药天才，八品炼药师。容貌倾城，气质高傲。在丹会上与萧炎同台竞技，对其炼药术心服口服。', secret:'炼丹时的专注使她散发着知性之美。指尖控火的细腻动作、凝丹时的屏息姿态，是另一种慑人心魄的魅力。', avatar:'💎' },
-  { name:'夭夜', title:'加玛帝国公主', realm:'斗灵', desc:'加玛帝国皇室公主，加刑天孙女。容貌绝美，性格温柔中带着皇家傲气。对萧炎有倾慕之情。', secret:'皇家公主之躯，肌肤娇嫩如水。虽出身尊贵却不娇纵，对萧炎的情愫深藏心底，从未言明。', avatar:'👸' },
-  { name:'韩月', title:'韩家大小姐', realm:'斗王', desc:'中州韩家大小姐，迦南学院内院学员。气质清冷如月，身材高挑。与萧炎在中州相识。', secret:'清冷外表下是细腻的心思。修长的双腿和冷艳的面容让人不敢轻易靠近，但熟悉之后会发现她温柔的一面。', avatar:'🌙' }
-];
+// Canon character profiles live in journal-panels.js.
+var BEAUTY_RANKINGS = [];
 
 // ==============================
 // QUEST SYSTEM (任务系统)
@@ -1545,29 +1537,29 @@ async function rewindToSnapshot(sid) {
 }
 
 const HEAVENLY_FLAMES = [
-  {"id":"flame_1","rank":1,"name":"帝炎","color":"#ffdd00","desc":"异火榜第一，万火之帝，由其余二十二种异火融合而成。金色火焰，焚天煮海，无可匹敌。"},
-  {"id":"flame_2","rank":2,"name":"虚无吞炎","color":"#332244","desc":"异火榜第二，漆黑如墨。拥有吞噬万物之力，曾吞噬无数强者灵魂。生于虚无之中。"},
-  {"id":"flame_3","rank":3,"name":"净莲妖火","color":"#ff88cc","desc":"异火榜第三，乳白泛粉。拥有净化之力，可焚尽一切污秽。莲形火焰，妖异绝美。"},
-  {"id":"flame_4","rank":4,"name":"金帝焚天炎","color":"#ffaa00","desc":"异火榜第四，古族传承之火。金色烈焰，传说曾焚烧过天界。炽热无比，万火臣服。"},
-  {"id":"flame_5","rank":5,"name":"生灵之焱","color":"#44dd44","desc":"异火榜第五，翠绿如叶。唯一拥有生命力的异火，可催生药材，治愈伤势。"},
-  {"id":"flame_6","rank":6,"name":"八荒破灭焱","color":"#cc4400","desc":"异火榜第六，暗红如血。蕴含毁灭之力，一招八荒破灭，方圆千里化为焦土。"},
-  {"id":"flame_7","rank":7,"name":"九幽金祖火","color":"#ccaa44","desc":"异火榜第七，暗金之色。九幽地冥蟒族传承之火，可焚魂炼魄。"},
-  {"id":"flame_8","rank":8,"name":"红莲业火","color":"#ee3333","desc":"异火榜第八，赤红如莲。蕴含业力，可焚烧因果。红莲绽放之时，万物湮灭。"},
-  {"id":"flame_9","rank":9,"name":"三千焱炎火","color":"#ff8844","desc":"异火榜第九，橙红如霞。又名三千星空焱炎火，蕴含星辰之力。成形于星空之中。"},
-  {"id":"flame_10","rank":10,"name":"九幽风炎","color":"#44cc88","desc":"异火榜第十，青绿如风。风助火势，火借风威。速度极快，难以捕捉。"},
-  {"id":"flame_11","rank":11,"name":"骨灵冷火","color":"#88ccff","desc":"异火榜第十一，森白冰寒。药老持有之异火，极寒极热并存。外冷内热，冰火两重天。"},
-  {"id":"flame_12","rank":12,"name":"九龙雷罡火","color":"#cc88ff","desc":"异火榜第十二，紫金之色。蕴含九道龙魂与雷罡之力，龙吟震天，雷火交织。"},
-  {"id":"flame_13","rank":13,"name":"龟灵地火","color":"#886644","desc":"异火榜第十三，褐黄如土。形如巨龟，沉于地心。防御力极强，可化作龟甲护体。"},
-  {"id":"flame_14","rank":14,"name":"陨落心炎","color":"#ff4466","desc":"异火榜第十四，赤红如心。迦南学院内院焚天练气塔之核心。可加速修炼，淬炼斗气。"},
-  {"id":"flame_15","rank":15,"name":"海心焰","color":"#4488ff","desc":"异火榜第十五，湛蓝如海。生于深海之心，水属性异火。水火交融，生生不息。"},
-  {"id":"flame_fire_cloud_water","rank":16,"name":"火云水炎","color":"#7089bb","desc":"异火榜第十六，炎族火耀长老使用的异火。"},
-  {"id":"flame_16","rank":17,"name":"火山石焰","color":"#884422","desc":"异火榜第十七。炎烬曾将此火与九幽金祖火融合使用。"},
+  {"id":"flame_1","rank":1,"name":"帝炎","color":"#ffdd00","desc":"异火榜首，万火汇聚的至尊之炎，关联陀舍古帝与异火吞噬进化的终极秘密。"},
+  {"id":"flame_2","rank":2,"name":"虚无吞炎","color":"#332244","desc":"生于虚无，擅长吞噬，具有灵智。本体、子火与借用力量需加区分。"},
+  {"id":"flame_3","rank":3,"name":"净莲妖火","color":"#ff88cc","desc":"乳白妖异，具净化与幻境之能；妖火空间、妖圣遗留与火婴关联不同阶段。"},
+  {"id":"flame_4","rank":4,"name":"金帝焚天炎","color":"#ffaa00","desc":"古族传承异火，薰儿持有。金色火焰威能强大，传承与掌控皆有门槛。"},
+  {"id":"flame_5","rank":5,"name":"生灵之焱","color":"#44dd44","desc":"翠绿之火，神农老人持有。擅长催生药材，施展需要种子并消耗力量。"},
+  {"id":"flame_6","rank":6,"name":"八荒破灭焱","color":"#cc4400","desc":"黑色火焰，蕴含强大破坏力量，炎族火炫曾以此火迎战妖火空间中的强敌。"},
+  {"id":"flame_7","rank":7,"name":"九幽金祖火","color":"#ccaa44","desc":"炎族传承相关的强大异火，炎烬曾将其与火山石焰融合，威能更进一步。"},
+  {"id":"flame_8","rank":8,"name":"红莲业火","color":"#ee3333","desc":"火焰呈妖艳红莲之象，炎族火稚曾使用，是炎族掌握的强大异火之一。"},
+  {"id":"flame_9","rank":9,"name":"三千焱炎火","color":"#ff8844","desc":"成形于星空，吸纳星辰之力，关联丹塔星域与强大恢复力。"},
+  {"id":"flame_10","rank":10,"name":"九幽风炎","color":"#44cc88","desc":"药族人物曾使用的异火，关联药星极与万火长老等不同情节。"},
+  {"id":"flame_11","rank":11,"name":"骨灵冷火","color":"#88ccff","desc":"森白火焰，极寒与炽热并存。药老的标志异火，后有师徒传承。"},
+  {"id":"flame_12","rank":12,"name":"九龙雷罡火","color":"#cc88ff","desc":"焚炎谷传承异火，关联唐震与血魂印记；掌控需面对传承条件。"},
+  {"id":"flame_13","rank":13,"name":"龟灵地火","color":"#886644","desc":"异火榜第十三，药族药天曾使用，曾出现在争夺净莲妖火的风波之中。"},
+  {"id":"flame_14","rank":14,"name":"陨落心炎","color":"#ff4466","desc":"心火锻气，关联天焚炼气塔。成熟火与幼生火种是两条不同线索。"},
+  {"id":"flame_15","rank":15,"name":"海心焰","color":"#4488ff","desc":"海蓝异火，曾由韩枫持有，后经魂殿体系流转；所有权随剧情变化。"},
+  {"id":"flame_fire_cloud_water","rank":16,"name":"火云水炎","color":"#7089bb","desc":"异火榜第十六，炎族火耀长老曾使用；原文对其生态与能力着墨较少。"},
+  {"id":"flame_16","rank":17,"name":"火山石焰","color":"#884422","desc":"异火榜第十七，炎烬曾将它与九幽金祖火融合使用。"},
   Object.assign({"id":"flame_17"}, DoupoUserFlames.flames.find(function(f){return f.rank===18;})),
-  {"id":"flame_18","rank":19,"name":"青莲地心火","color":"#44ccaa","desc":"异火榜第十九，孕育于地底岩浆的青莲之中，是萧炎收服的第一种异火。"},
+  {"id":"flame_18","rank":19,"name":"青莲地心火","color":"#44ccaa","desc":"地底岩浆中青莲孕育的异火，伴莲台而生，是萧炎收服的第一种异火。"},
   Object.assign({"id":"flame_nether_poison"}, DoupoUserFlames.flames.find(function(f){return f.rank===20;})),
   Object.assign({"id":"flame_23"}, DoupoUserFlames.flames.find(function(f){return f.rank===21;})),
-  {"id":"flame_21","rank":22,"name":"万兽灵火","color":"#cc6644","desc":"异火榜第二十二，古帝洞府异火广场与终战中出现。"},
-  {"id":"flame_22","rank":23,"name":"玄黄炎","color":"#aaaa66","desc":"异火榜第二十三，呈深黄色，古帝洞府异火广场中的火种已流失力量。"}
+  {"id":"flame_21","rank":22,"name":"万兽灵火","color":"#cc6644","desc":"古帝洞府异火广场及终战中出现；具体野外分布与生态资料有限。"},
+  {"id":"flame_22","rank":23,"name":"玄黄炎","color":"#aaaa66","desc":"深黄色异火，古帝洞府异火广场中的火种已流失力量。"}
 ];
 
 const LLM_MOCK_RESPONSES = {
@@ -1829,6 +1821,7 @@ function switchGameView(viewId, btn) {
   var target = document.getElementById('game-view-' + viewId);
   if (target) target.classList.add('active');
   document.querySelectorAll('.sidebar-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.querySelectorAll('#game-sidebar [data-view]').forEach(function(b){if(b===btn)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
   if (btn) btn.classList.add('active');
   // Refresh time/economy on view switch
   if (viewId === 'summary') {
@@ -1840,6 +1833,8 @@ function switchGameView(viewId, btn) {
     buildWorldMap();
   } else if (viewId === 'tavern') {
     buildTavern();
+  } else if (viewId === 'personnel') {
+    buildPersonnel();
   } else if (viewId === 'studio') {
     buildStudio();
   } else if (viewId === 'flames') {
@@ -2148,55 +2143,14 @@ async function continueGame() {
 // 异火榜 VIEW
 // ==============================
 function buildFlamesView() {
-  var container = document.getElementById('game-view-flames');
-  if (!container) return;
-  var html = '<div style="padding:12px 20px;background:var(--bg-panel);border-bottom:1px solid var(--border-subtle);"><span style="font-family:var(--font-serif);color:var(--text-primary);font-size:15px;">🔥 异火榜 · 二十三种天地奇火</span></div>';
-  html += '<div style="flex:1;overflow-y:auto;padding:16px 20px;">';
-  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;">';
-  HEAVENLY_FLAMES.forEach(function(f) {
-    html += '<div class="settings-card" style="border-left:3px solid ' + f.color + ';padding:12px 16px;">' +
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' +
-        '<span style="font-family:var(--font-serif);font-size:24px;color:' + f.color + ';font-weight:900;">#' + f.rank + '</span>' +
-        '<div>' +
-          '<div style="color:var(--text-primary);font-family:var(--font-serif);font-size:15px;font-weight:600;">' + f.name + '</div>' +
-          '<div style="font-size:10px;color:var(--text-muted);">' + (f.altName || '') + '</div>' +
-        '</div>' +
-      '</div>' +
-      (f.sourceType === 'user-supplement' ? '<div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">作者补充设定</div>' : '') +
-      '<div style="font-size:11px;color:var(--text-body);line-height:1.6;">' + f.desc + '</div>' +
-    '</div>';
-  });
-  html += '</div></div>';
-  container.innerHTML = html;
+  return DoupoPanels.flameView();
 }
 
 // ==============================
 // 美人榜 VIEW
 // ==============================
 function buildBeautiesView() {
-  var container = document.getElementById('game-view-beauties');
-  if (!container) return;
-  var html = '<div style="padding:12px 20px;background:var(--bg-panel);border-bottom:1px solid var(--border-subtle);"><span style="font-family:var(--font-serif);color:var(--text-primary);font-size:15px;">👑 美人榜 · 斗气大陆红颜录</span></div>';
-  html += '<div style="flex:1;overflow-y:auto;padding:16px 20px;">';
-  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;">';
-  BEAUTY_RANKINGS.forEach(function(b, i) {
-    html += '<div class="settings-card" style="padding:16px;">' +
-      '<div style="display:flex;gap:14px;">' +
-        '<div style="font-size:48px;flex-shrink:0;">' + b.avatar + '</div>' +
-        '<div style="flex:1;min-width:0;">' +
-          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">' +
-            '<span style="color:var(--text-primary);font-family:var(--font-serif);font-size:15px;font-weight:600;">#' + (i+1) + ' ' + b.name + '</span>' +
-            '<span style="font-size:10px;color:var(--text-muted);">' + b.realm + '</span>' +
-          '</div>' +
-          '<div style="font-size:10px;color:var(--text-secondary);margin-bottom:6px;">' + b.title + '</div>' +
-          '<div style="font-size:11px;color:var(--text-body);line-height:1.6;margin-bottom:8px;">' + b.desc + '</div>' +
-          (b.secret ? '<details style="font-size:10px;color:var(--accent-purple);"><summary style="cursor:pointer;">🔒 隐秘</summary><div style="margin-top:4px;color:var(--text-body);line-height:1.5;">' + b.secret + '</div></details>' : '') +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  });
-  html += '</div></div>';
-  container.innerHTML = html;
+  return DoupoPanels.beauties();
 }
 
 // ==============================
@@ -2219,53 +2173,7 @@ function openTimeRewind() {
 }
 
 function buildQuestsView() {
-  var container = document.getElementById('game-view-quests');
-  if (!container) return;
-  var active = QuestSystem.quests || [];
-  var done = QuestSystem.completed || [];
-  var failed = QuestSystem.failed || [];
-  var html = '<div style="padding:12px 20px;background:var(--bg-panel);border-bottom:1px solid var(--border-subtle);display:flex;justify-content:space-between;">' +
-    '<span style="font-family:var(--font-serif);color:var(--text-primary);font-size:15px;">📋 任务 · ' + active.length + ' 进行中</span>' +
-    '<button class="text-btn" onclick="addQuest(\'修炼精进\',\'提升修为至当前境界巅峰\',\'经验+200\',\'无\',\'普通\');buildQuestsView();">+ 添加测试任务</button>' +
-  '</div>';
-  html += '<div style="flex:1;overflow-y:auto;padding:16px 20px;">';
-  if (active.length > 0) {
-    html += '<div style="color:var(--text-secondary);font-family:var(--font-serif);font-size:12px;margin-bottom:8px;">进行中</div>';
-    active.forEach(function(q) {
-      html += '<div class="settings-card" style="padding:12px 16px;margin-bottom:8px;border-left:3px solid #ffaa00;">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-          '<div><span style="color:var(--text-primary);font-weight:600;">' + q.name + '</span><span style="font-size:10px;color:var(--text-muted);margin-left:8px;">' + q.difficulty + '</span></div>' +
-          '<div style="display:flex;gap:4px;">' +
-            '<button class="text-btn" style="color:var(--accent-green);" onclick="completeQuest(\'' + q.id + '\');buildQuestsView();">✓ 完成</button>' +
-            '<button class="text-btn danger" onclick="failQuest(\'' + q.id + '\');buildQuestsView();">✕ 失败</button>' +
-          '</div>' +
-        '</div>' +
-        '<div style="font-size:10px;color:var(--text-muted);">' + q.desc + '</div>' +
-        '<div style="font-size:10px;margin-top:4px;"><span style="color:var(--accent-green);">奖励：' + q.reward + '</span> · <span style="color:var(--accent-fire);">惩罚：' + (q.penalty||'无') + '</span></div>' +
-      '</div>';
-    });
-  }
-  if (done.length > 0) {
-    html += '<div style="color:var(--accent-green);font-family:var(--font-serif);font-size:12px;margin:14px 0 8px;">已完成 (' + done.length + ')</div>';
-    done.slice(-5).reverse().forEach(function(q) {
-      html += '<div class="settings-card" style="padding:8px 14px;margin-bottom:4px;opacity:0.6;border-left:3px solid var(--accent-green);">' +
-        '<span style="font-size:11px;color:var(--text-body);">✓ ' + q.name + '</span><span style="font-size:9px;color:var(--text-muted);margin-left:8px;">' + q.completedAt + '</span>' +
-      '</div>';
-    });
-  }
-  if (failed.length > 0) {
-    html += '<div style="color:var(--accent-fire);font-family:var(--font-serif);font-size:12px;margin:14px 0 8px;">已失败 (' + failed.length + ')</div>';
-    failed.slice(-5).reverse().forEach(function(q) {
-      html += '<div class="settings-card" style="padding:8px 14px;margin-bottom:4px;opacity:0.5;border-left:3px solid var(--accent-fire);">' +
-        '<span style="font-size:11px;color:var(--text-body);">✕ ' + q.name + '</span><span style="font-size:9px;color:var(--text-muted);margin-left:8px;">' + q.failedAt + '</span>' +
-      '</div>';
-    });
-  }
-  if (active.length === 0 && done.length === 0 && failed.length === 0) {
-    html += '<div style="text-align:center;padding:40px;color:var(--text-dim);">暂无任务</div>';
-  }
-  html += '</div>';
-  container.innerHTML = html;
+  return DoupoPanels.quests();
 }
 
 function initGameWorld() {
@@ -2360,64 +2268,7 @@ function exploreWorld() {
 // ==============================
 
 function buildStudio() {
-  var container = document.getElementById('game-view-studio');
-  var player = GameState.player || {};
-  var playerName = player.name || '修炼者';
-  var realm = player.realm || '境界未记录';
-  var spirit = Economy ? Economy.spiritStones : 0;
-  var gold = Economy ? Economy.gold : 0;
-  var activeRoom = StudioState.activeRoom;
-
-  container.innerHTML =
-    // ── 顶部状态栏 ──
-    '<div style="padding:10px 20px;background:var(--bg-panel);border-bottom:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">' +
-      '<div style="display:flex;align-items:center;gap:14px;">' +
-        '<span style="font-family:var(--font-serif);color:var(--text-primary);font-size:15px;">🏯 修炼驻地 · ' + escapeHtml(WorldState.specificSpot) + '</span>' +
-        '<span style="font-size:10px;color:var(--text-muted);">驻地 Lv.1 · 3/8 房间</span>' +
-      '</div>' +
-      '<div style="display:flex;gap:16px;align-items:center;font-size:11px;">' +
-        '<span style="color:var(--text-muted);">' + playerName + '</span>' +
-        '<span style="color:var(--text-primary);font-family:var(--font-serif);">' + realm + '</span>' +
-        '<span style="color:#c084fc;">💎 ' + spirit + '</span>' +
-        '<span style="color:#d4a84b;">🪙 ' + gold + '</span>' +
-      '</div>' +
-    '</div>' +
-    // ── 主体：左房间列表 + 右详情面板 ──
-    '<div style="flex:1;display:flex;overflow:hidden;min-height:0;">' +
-      // 左侧 - 地图视图
-      '<div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;min-width:0;border-right:1px solid var(--border-subtle);">' +
-        '<div style="position:relative;width:460px;height:360px;">' +
-          '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:140px;height:90px;background:rgba(212,168,75,0.02);border:1px solid rgba(212,168,75,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;">' +
-            '<span style="font-family:var(--font-serif);color:var(--text-muted);font-size:11px;">萧家后院</span>' +
-          '</div>' +
-          // 三间房
-          Object.keys(ROOM_DATA).map(function(key, i) {
-            var r = ROOM_DATA[key];
-            var positions = [
-              { top:'25%', left:'10%' },
-              { top:'18%', left:'52%' },
-              { top:'60%', left:'48%' }
-            ];
-            var pos = positions[i];
-            var isActive = activeRoom === key;
-            return '<div class="studio-room" style="top:' + pos.top + ';left:' + pos.left + ';' + (isActive ? 'border-color:var(--text-primary);box-shadow:0 0 18px rgba(212,168,75,0.3);' : '') + '" onclick="selectStudioRoom(\'' + key + '\')">' +
-              '<span style="font-size:18px;">' + (r.icon || '🏠') + '</span>' +
-              '<span class="room-name">' + r.name + '</span>' +
-              '<span class="room-status">Lv.' + r.level + ' · ' + r.device.split('·')[0] + '</span>' +
-            '</div>';
-          }).join('') +
-          // 拓建按钮
-          '<button class="expand-btn" style="top:5%;left:50%;" onclick="expandRoom(\'up\')">⬆ 洞天福地</button>' +
-          '<button class="expand-btn" style="bottom:-5px;left:50%;" onclick="expandRoom(\'down\')">⬇ 地下密室</button>' +
-          '<button class="expand-btn" style="top:50%;left:-20px;" onclick="expandRoom(\'left\')">⬅ 西厢</button>' +
-          '<button class="expand-btn" style="top:50%;right:-20px;" onclick="expandRoom(\'right\')">➡ 东厢</button>' +
-        '</div>' +
-      '</div>' +
-      // 右侧 - 详情与操作面板
-      '<div style="width:340px;flex-shrink:0;display:flex;flex-direction:column;overflow-y:auto;padding:16px;gap:12px;">' +
-        (activeRoom ? buildRoomPanel(activeRoom) : buildStudioOverview()) +
-      '</div>' +
-    '</div>';
+  return DoupoPanels.studio();
 }
 
 function selectStudioRoom(key) {
@@ -2489,26 +2340,7 @@ function buildRoomPanel(key) {
 }
 
 function startCultivation() {
-  StudioState.cultivating = true;
-  StudioState.cultivatingStart = Date.now();
-  StudioState.cultivatingDuration = 30000; // 30 seconds
-  StudioState.logs.push({ time: new Date().toLocaleTimeString(), text: '开始闭关修炼' });
-  if (StudioState.logs.length > 50) StudioState.logs.shift();
-  buildStudio();
-  // Simulated completion
-  setTimeout(function() {
-    if (StudioState.cultivating) {
-      StudioState.cultivating = false;
-      StudioState.logs.push({ time: new Date().toLocaleTimeString(), text: '闭关结束，修为精进' });
-      // Grant some XP
-      if (GameState.player && GameState.player.cultivationProgress !== undefined) {
-        GameState.player.cultivationProgress = (GameState.player.cultivationProgress || 0) + 5;
-      }
-      buildStudio();
-      showToast('闭关完成！修为精进', 'success');
-    }
-  }, 30000);
-  showToast('闭关修炼开始…预计30秒', 'info');
+  return DoupoPanels.draft('meditation');
 }
 
 function getCultivationProgress() {
@@ -2521,40 +2353,15 @@ function getCultivationProgress() {
 }
 
 function startAlchemy() {
-  var recipes = ['聚气散', '筑基灵液', '回气丹', '复伤丹'];
-  var picked = recipes[Math.floor(Math.random() * recipes.length)];
-  var success = Math.random() > 0.4;
-  StudioState.logs.push({ time: new Date().toLocaleTimeString(), text: '炼制' + picked + (success ? '· 成功！' : '· 失败') });
-  if (StudioState.logs.length > 50) StudioState.logs.shift();
-  showToast((success ? '✅ ' : '❌ ') + picked + '炼制' + (success ? '成功' : '失败'), success ? 'success' : 'error');
+  return DoupoPanels.draft('alchemy');
 }
 
 function startMartialTraining() {
-  var skills = ['八极崩', '焰分噬浪尺', '吸掌', '吹火掌'];
-  var picked = skills[Math.floor(Math.random() * skills.length)];
-  StudioState.logs.push({ time: new Date().toLocaleTimeString(), text: '研习' + picked + '· 熟练度提升' });
-  if (StudioState.logs.length > 50) StudioState.logs.shift();
-  showToast('⚔️ ' + picked + ' 研习完成', 'success');
+  return DoupoPanels.draft('martial');
 }
 
 function upgradeRoom(key) {
-  var r = ROOM_DATA[key];
-  if (!r) return;
-  var cost = r.upgradeCost || {spirit:200,wood:100};
-  if (r.level >= (r.maxLevel || 5)) {
-    showToast('已达最高等级', 'warning');
-    return;
-  }
-  r.level++;
-  r.device = r.device.replace(/一阶|二阶|三阶|四阶|五阶|凡品|精品|极品|绝品|圣品/, function(m) {
-    var map = {'一阶':'二阶','二阶':'三阶','三阶':'四阶','四阶':'五阶','凡品':'精品','精品':'极品','极品':'绝品','绝品':'圣品'};
-    return map[m] || m;
-  });
-  r.effect = r.effect.replace(/\d+/, function(n) { return parseInt(n) + 5; });
-  StudioState.logs.push({ time: new Date().toLocaleTimeString(), text: r.name + '升级至 Lv.' + r.level });
-  if (StudioState.logs.length > 50) StudioState.logs.shift();
-  showToast(r.name + ' 升级完成！', 'success');
-  buildStudio();
+  return DoupoPanels.draft('expand');
 }
 
 function openRoomDetail(type) {
@@ -2562,8 +2369,7 @@ function openRoomDetail(type) {
 }
 
 function expandRoom(dir) {
-  var names = { up:'洞天福地', down:'地下密室', left:'西厢院落', right:'东厢院落' };
-  showToast('拓建「' + names[dir] + '」需要：灵石 x500，木材 x200，解锁条件 Lv.5', 'warning');
+  return DoupoPanels.draft('expand');
 }
 
 // ==============================
@@ -2571,67 +2377,11 @@ function expandRoom(dir) {
 // ==============================
 
 function buildPersonnel() {
-  var container = document.getElementById('game-view-personnel');
-  if(!container)return;
-  var player=GameState.player;
-  var chars=[{name:player.name,realm:player.realm||'未记录',skill:(player.skills||[]).map(function(s){return s.name;}).join('、')||'尚未修习',soul:player.soulRealm||'未记录',fire:'—',loyalty:100,avatar:(player.name||'你').slice(0,1)}].concat((player.relationships||[]).map(function(r){return {name:r.name,realm:r.realm||'未知',skill:r.skill||'未知',soul:r.soul||'未知',fire:r.fire||'—',loyalty:Math.min(100,Math.max(0,Number(r.affinity)||0)),avatar:(r.name||'客').slice(0,1)};}));
-
-  container.innerHTML =
-    '<div style="padding:12px 20px;background:var(--bg-panel);border-bottom:1px solid var(--border-subtle);display:flex;justify-content:space-between;flex-shrink:0;">' +
-      '<span style="font-family:var(--font-serif);color:var(--text-primary);font-size:15px;">人员管理</span>' +
-      '<span style="color:var(--text-muted);font-size:11px;">共 ' + chars.length + ' 人</span>' +
-    '</div>' +
-    '<div style="flex:1;overflow-y:auto;padding:20px;">' +
-      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">' +
-        chars.map(function(c) {
-          return '<div class="personnel-card" onclick="openCharacterDetail(' + TavernCore.handlerArg(c.name) + ')">' +
-            '<div style="display:flex;align-items:center;gap:14px;">' +
-              '<div class="char-avatar">' +
-                '<span>' + escapeHtml(c.avatar) + '</span>' +
-              '</div>' +
-              '<div>' +
-                '<div style="color:var(--text-primary);font-family:var(--font-serif);font-size:15px;">' + escapeHtml(c.name) + '</div>' +
-                '<div style="color:var(--text-secondary);font-size:11px;">' + escapeHtml(c.realm) + '</div>' +
-              '</div>' +
-            '</div>' +
-            '<div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;">' +
-              '<div><span style="color:var(--text-muted);">功法：</span><span>' + escapeHtml(c.skill) + '</span></div>' +
-              '<div><span style="color:var(--text-muted);">灵魂力：</span><span>' + escapeHtml(c.soul) + '</span></div>' +
-              '<div style="grid-column:1/-1;"><span style="color:var(--text-muted);">异火：</span><span style="color:' + (c.fire === '—' ? 'var(--text-dim)' : 'var(--accent-fire)') + ';">' + escapeHtml(c.fire) + '</span></div>' +
-              '<div style="grid-column:1/-1;">' +
-                '<span style="color:var(--text-muted);">忠诚度：</span>' +
-                '<span style="color:' + (c.loyalty >= 90 ? 'var(--accent-green)' : 'var(--accent-fire)') + ';">' +
-                  new Array(Math.floor(c.loyalty / 10) + 1).join('█') + new Array(11 - Math.floor(c.loyalty / 10)).join('░') + ' ' + c.loyalty +
-                '</span>' +
-              '</div>' +
-            '</div>' +
-          '</div>';
-        }).join('') +
-      '</div>' +
-    '</div>';
+  return DoupoPanels.personnel();
 }
 
 function openCharacterDetail(name) {
-  var chars = {
-    '萧炎': { realm: '斗者·三星', skill: '焚决（黄阶，可进化）', soul: '凡境中期', fire: '—', desc: '萧家三少爷，穿越者。身怀焚决与戒指中的药老灵魂。' },
-    '药老': { realm: '斗尊（残魂状态）', skill: '炼药术·宗师级', soul: '天境', fire: '骨灵冷火（异火榜排名第十一）', desc: '前星陨阁阁主，八品炼药宗师。因弟子背叛仅剩灵魂寄宿于戒指之中。' },
-    '萧薰儿': { realm: '斗者·五星', skill: '金帝焚天炎（古族传承）', soul: '凡境后期', fire: '金帝焚天炎（异火榜排名第四）', desc: '古族千金，自幼寄养萧家。体内封印金帝焚天炎。' }
-  };
-  var c = chars[name];
-  if (!c) {
-    showModal('<h3>' + name + '</h3><p style="color:var(--text-muted);">详细角色面板将在后续版本中开放</p>');
-    return;
-  }
-  showModal(
-    '<h3 style="margin-bottom:12px;">' + name + '</h3>' +
-    '<div style="font-size:13px;display:flex;flex-direction:column;gap:6px;">' +
-      '<div><span style="color:var(--text-muted);">境界：</span><span style="color:var(--text-primary);">' + escapeHtml(c.realm) + '</span></div>' +
-      '<div><span style="color:var(--text-muted);">功法：</span><span>' + escapeHtml(c.skill) + '</span></div>' +
-      '<div><span style="color:var(--text-muted);">灵魂力：</span><span>' + escapeHtml(c.soul) + '</span></div>' +
-      '<div><span style="color:var(--text-muted);">异火：</span><span style="color:var(--accent-fire);">' + escapeHtml(c.fire) + '</span></div>' +
-      '<div style="color:var(--text-body);margin-top:8px;">' + c.desc + '</div>' +
-    '</div>'
-  );
+  var i=(GameState.player.relationships||[]).findIndex(function(r){return r.name===name;});if(i>=0)return DoupoPanels.person(i);showToast('尚无此人物的实际关系记录','info');
 }
 
 // ==============================
@@ -3021,12 +2771,13 @@ function renderSettingsLorebook(body) {
     });
   }
   html += '<button class="settings-action-btn" onclick="addNewLorebook()">＋ 新建世界书</button>';
+  html += TavernInspector.controls();
   body.innerHTML = html;
 }
 
 function renderSettingsPresets(body) {
   try {
-    var html = '<div class="settings-section-title">预设管理</div>';
+    var html = '<div class="settings-section-title">预设管理</div><p class="wiring-help">预设控制提示词角色、顺序和插入深度。关闭世界书插入块会使已命中的内容不进入请求。</p><button class="text-btn" onclick="TavernInspector.inspect()">预览当前组装结果</button>';
     html += '<div style="display:flex;gap:8px;margin-bottom:14px;">' +
       '<button class="settings-action-btn" onclick="addNewTavernPreset()" style="flex:1;">＋ 新建预设</button>' +
       '<button class="settings-action-btn" onclick="exportActivePreset()" style="flex:1;">📤 导出</button>' +
@@ -3381,7 +3132,7 @@ function renderSettingsTavern(body) {
   body.innerHTML =
     '<div class="settings-section-title">酒馆设置</div>' +
     apiInfo +
-    '<div class="form-group"><label class="settings-form-label">用户名称（你在对话中的称呼）</label><input type="text" id="ts-username" class="settings-form-input" value="' + (s.userName||'玩家') + '" oninput="saveTavernUserName()"></div>' +
+    '<div class="settings-card"><strong>当前玩家：' + escapeHtml(GameState.player.name || '尚未创角') + '</strong><p>聊天称呼与 {{user}} 自动读取开局角色名。</p></div>' +
     '<div class="settings-card" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">' +
       '<div><div style="color:var(--text-primary);font-size:13px;font-family:var(--font-serif);">📝 纯文本模式</div><div style="font-size:10px;color:var(--text-muted);">开启后禁止 AI 输出任何 XML/HTML 标签，强制纯文本叙事</div></div>' +
       '<label class="toggle-switch">' +
@@ -3390,14 +3141,11 @@ function renderSettingsTavern(body) {
       '</label>' +
     '</div>' +
     '<p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">角色形象与设定由当前角色卡决定</p>' +
-    '<button class="settings-action-btn" onclick="saveTavernSettings()">保存酒馆设置</button>';
+    '<button class="settings-action-btn" onclick="saveTavernSettings()">保存酒馆设置</button><button class="settings-action-btn" onclick="TavernInspector.inspect()">预览本轮请求</button>';
 }
 
 function saveTavernUserName() {
-  var s = tavernState.tavernSettings || createDefaultTavernSettings();
-  s.userName = document.getElementById('ts-username').value || '玩家';
-  tavernState.tavernSettings = s;
-  db.tavernSettings.put(s);
+  showToast('玩家称呼由开局角色名决定','info');
 }
 
 function togglePureTextMode(checked) {
@@ -4491,26 +4239,7 @@ function renderSummaryTab(key) {
 
 // -- Tab: 基本信息 --
 function renderSummaryBasic(body) {
-  var p = GameState.player;
-  var race = RACES.find(function(r) { return r.id === p.race; });
-  var identity = IDENTITIES.find(function(i) { return i.id === p.identity; });
-  var diff = DIFFICULTY.find(function(d) { return d.id === p.difficulty; });
-  body.innerHTML =
-    '<div class="summary-section"><h4>基本信息</h4>' +
-      kv('姓名', p.name || '未设定') +
-      kv('性别', p.gender === 'male' ? '男' : p.gender === 'female' ? '女' : p.gender === 'futa' ? '扶她' : '未设定') +
-      kv('年龄', p.age + ' 岁') +
-      kv('种族', race ? '<span style="color:' + race.color + ';">' + race.name + '</span>' : '未选择') +
-      kv('身份', identity ? identity.name : '未选择') +
-      kv('难度', diff ? '<span style="color:' + diff.color + ';">' + diff.name + '</span>' : '未选择') +
-      kv('境界', '斗者 · 三星') +
-    '</div>' +
-    '<div class="summary-section"><h4>货币档案</h4>' +
-      kv('金币', '<span style="color:#d4a84b;">' + Economy.gold.toLocaleString() + '</span>') +
-      kv('银币', '<span style="color:#aaa;">' + Economy.silver + '</span>') +
-      kv('铜币', '<span style="color:#cc8844;">' + Economy.copper + '</span>') +
-      kv('灵石', '<span style="color:#c084fc;">' + Economy.spiritStones + '</span>') +
-    '</div>';
+  return DoupoPanels.summaryBasic(body);
 }
 
 function kv(key, val) {
@@ -5150,7 +4879,9 @@ function getActiveChat() {
 
 // -- Lorebook Engine --
 function matchLorebookEntries(userInput, lorebooks, existingMatches) {
-  return TavernCore.matchLorebooks(userInput, lorebooks, {existing:existingMatches});
+  var s = (typeof tavernState!=='undefined' && tavernState.tavernSettings) || {};
+  var cfg = TavernWiring.options(s);
+  return TavernCore.matchLorebooks(userInput, lorebooks, {existing:existingMatches,budget:cfg.budget,maxDepth:cfg.maxDepth});
 }
 
 // Group lorebook entries by insertion position
@@ -5230,11 +4961,29 @@ function parseGameModeOutput(rawText) {
 }
 
 // -- Prompt Assembler --
+function prepareTavernRequest(chat, content, history, preview) {
+  var selection=TavernWiring.resolve({player:GameState.player,chat:chat,settings:tavernState.tavernSettings,
+    globalIds:tavernState.activeLorebookIds,books:tavernState.lorebooks,presets:tavernState.presets,
+    input:content,history:history,regexes:typeof regexScripts!=='undefined'?regexScripts:[]});
+  var location=WorldState.location+' · '+(WorldState.specificSpot||'');
+  var card=chat.characterCard||tavernState.characterCard||{};
+  var result=assembleTavernPrompt({preset:selection.preset,characterCard:card,userInput:selection.input,
+    history:selection.history,variables:chat.variables||{},lorebookMatches:selection.matches,location:location,userName:selection.userName,preview:!!preview});
+  selection.trace.forEach(function(row){
+    if(row.status!=='matched')return;
+    var m=selection.matches.find(function(x){return x.bookId===row.bookId&&x.entry.id===row.entryId;});
+    var replacements={user:selection.userName,char:card.name||'角色',location:location,scenario:card.scenario||'',personality:card.personality||'',description:card.description||''};
+    var text=String(m.entry.content||'').replace(/\{\{(user|char|location|scenario|personality|description)\}\}/g,function(_,k){return replacements[k];});
+    row.status=result.messages.some(function(msg){return text&&msg.content.includes(text);})?'included':'preset-disabled';
+  });
+  return {chatId:chat.id||null,selection:selection,result:result};
+}
+
 function assembleTavernPrompt(opts) {
   opts = opts || {};
   var preset = opts.preset;
   var charCard = opts.characterCard || (tavernState && tavernState.characterCard) || null;
-  var userName = opts.userName || '玩家';
+  var userName = (GameState.player.name || '').trim() || opts.userName || '玩家';
   var charName = charCard ? charCard.name : '角色';
   var userInput = opts.userInput || '';
   var history = opts.history || [];
@@ -5266,7 +5015,7 @@ function assembleTavernPrompt(opts) {
     if (typeof getStyleGuide === 'function') systemParts.push('【文体指导】\n' + getStyleGuide());
   } catch(e) {}
   try {
-    if (typeof generateDicePool === 'function' && typeof getDicePoolText === 'function') {
+    if (!opts.preview && typeof generateDicePool === 'function' && typeof getDicePoolText === 'function') {
       generateDicePool();
       systemParts.push('[协议：公平骰池]\n检定规则：本次判定可用骰池(可根据情景选择一个骰子进行调用，只能使用以下的骰子，禁止随机)：\n' + getDicePoolText() + '\n[/协议：公平骰池]');
     }
@@ -6139,14 +5888,10 @@ async function runTavernTurn(content, regenerate) {
       renderTavernMessages();
     }
     ensureCurrent();
-    var preset = tavernState.presets.find(function(p) { return p.id === working.presetId; }) || tavernState.presets[0] || createPreset();
-    var books = tavernState.lorebooks.filter(function(b) { return (working.lorebookIds || []).includes(b.id); });
-    var history = working.messages.slice(0,-1);
-    var scan = history.slice(-6).map(function(m) { return m.content; }).join('\n') + '\n' + content;
-    var result = assembleTavernPrompt({preset:preset, characterCard:working.characterCard, userInput:content, history:history,
-      variables:working.variables, lorebookMatches:matchLorebookEntries(scan, books),
-      location:GameState.player.location || (WorldState.location+' · '+(WorldState.specificSpot||'')), userName:working.userName || GameState.player.name || '玩家'});
-    // Diagnostics contain counts only, never credentials or private prompt text.
+    var prepared = prepareTavernRequest(working,content,working.messages.slice(0,-1),false);
+    var preset = prepared.selection.preset, result = prepared.result;
+    tavernState.lastRequestInspection = prepared;
+    // Summary metrics are persisted separately; request inspection remains memory-only.
     tavernState.lastPromptStats = {estimatedTokens:result.estimatedTokens, removedMessages:result.removedMessages, estimateOnly:true};
     var msgs = document.getElementById('tavern-messages');
     if (msgs) { var typing = document.createElement('div'); typing.id = 'tavern-typing'; typing.className = 'msg-maintext typing'; typing.textContent = '正在推演…'; msgs.appendChild(typing); }
@@ -6391,20 +6136,17 @@ async function deleteTavernLorebook(id) {
   renderSettingsTab('lorebook');
 }
 
-function toggleLorebookActive(id, checked) {
+async function toggleLorebookActive(id, checked) {
   stopTavernStream();
-  if (checked) {
-    if (tavernState.activeLorebookIds.indexOf(id) < 0) tavernState.activeLorebookIds.push(id);
-  } else {
-    tavernState.activeLorebookIds = tavernState.activeLorebookIds.filter(function(lid) { return lid !== id; });
-  }
-  if (tavernState.tavernSettings) {
-    tavernState.tavernSettings.activeLorebookIds = tavernState.activeLorebookIds;
-    db.tavernSettings.put(tavernState.tavernSettings);
-  }
-  var chat = getActiveChat(); if (chat) { chat.lorebookIds = tavernState.activeLorebookIds.slice(); db.chats.put(chat).catch(function(e) { showToast('世界书选择未保存：' + e.message,'error'); }); }
-  renderSettingsTab('lorebook');
-  saveToLocalStorage();
+  var ids=tavernState.activeLorebookIds.filter(function(x){return x!==id;});if(checked)ids.push(id);
+  var settings=Object.assign({},tavernState.tavernSettings||{id:'main'},{activeLorebookIds:ids});
+  var chat=getActiveChat(),next=chat?Object.assign({},chat,{lorebookIds:ids.slice()}):null;
+  try{
+    await db.transaction('rw',[db.tavernSettings,db.chats],async function(){await db.tavernSettings.put(settings);if(next)await db.chats.put(next);});
+    tavernState.activeLorebookIds=ids;tavernState.tavernSettings=settings;
+    if(next)tavernState.chats=tavernState.chats.map(function(c){return c.id===next.id?next:c;});
+    saveToLocalStorage();renderSettingsTab('lorebook');
+  }catch(e){showToast('世界书选择未保存：'+e.message,'error');renderSettingsTab('lorebook');}
 }
 
 function addLorebookEntry(bookId) {
@@ -6428,14 +6170,13 @@ function editLorebookEntry(bookId, idx) {
   var book = tavernState.lorebooks.find(function(b) { return b.id === bookId; });
   if (!book) return;
   var entry = TavernCore.clone(book.entries[idx]);
-  entry.comment = escapeHtml(entry.comment || ''); entry.content = escapeHtml(entry.content || '');
-  entry.keys = (entry.keys || []).map(escapeHtml);
+  entry = Object.assign({},entry,{keys:(entry.keys || []).slice()});
   var isConstant = entry.constant === true;
   var pos = entry.position || 0;
   var posLabel = pos === 0 ? '角色定义前' : pos === 1 ? '角色定义后' : 'D' + (pos - 2);
   var html = '<h3 style="margin-bottom:12px;">编辑条目 #' + (idx + 1) + '</h3>' +
     // Name / comment
-    '<div class="form-group"><label class="form-label">条目名称（仅管理用，不发AI）</label><input type="text" id="entry-comment" class="form-input" value="' + (entry.comment || '') + '" placeholder="例：生日 / A城商业区"></div>' +
+    '<div class="form-group"><label class="form-label">条目名称（仅管理用，不发AI）</label><input type="text" id="entry-comment" class="form-input" value="' + escapeHtml(entry.comment || '') + '" placeholder="例：生日 / A城商业区"></div>' +
     // Green / Blue light toggle
     '<div style="display:flex;gap:16px;align-items:center;margin-bottom:12px;">' +
       '<div style="display:flex;align-items:center;gap:6px;cursor:pointer;" onclick="toggleEntryConstant()">' +
@@ -6458,9 +6199,14 @@ function editLorebookEntry(bookId, idx) {
       '</select>' +
     '</div>' +
     // Keywords (only relevant for green light)
-    '<div class="form-group" id="entry-keys-group" style="' + (isConstant ? 'opacity:0.4;' : '') + '"><label class="form-label">触发关键词（逗号分隔）' + (isConstant ? ' — 蓝灯模式忽略关键词' : '') + '</label><input type="text" id="entry-keys" class="form-input" value="' + (entry.keys.join(',') || '') + '" placeholder="例：A城, 商人, 市场"></div>' +
+    '<div class="form-group" id="entry-keys-group" style="' + (isConstant ? 'opacity:0.4;' : '') + '"><label class="form-label">触发关键词（逗号分隔）' + (isConstant ? ' — 蓝灯模式忽略关键词' : '') + '</label><input type="text" id="entry-keys" class="form-input" value="' + escapeHtml(entry.keys.join(',') || '') + '" placeholder="例：A城, 商人, 市场"></div>' +
+    '<div class="form-group"><label class="form-label">副关键词（逗号分隔）</label><input id="entry-secondary" class="form-input" value="' + escapeHtml((entry.secondaryKeys||[]).join(',')) + '"></div>' +
+    '<div class="form-group"><label class="form-label">副关键词逻辑</label><select id="entry-logic" class="form-input">' + ['至少一个命中','不全部命中','全部未命中','全部命中'].map(function(t,i){return '<option value="'+i+'" '+(Number(entry.selectiveLogic||0)===i?'selected':'')+'>'+t+'</option>';}).join('') + '</select></div>' +
+    '<label><input type="checkbox" id="entry-use-secondary" '+(entry.selective?'checked':'')+'>启用副关键词条件</label>' +
+    '<label style="margin-left:16px"><input type="checkbox" id="entry-enabled" '+(entry.enabled!==false&&!entry.disable?'checked':'')+'>启用条目</label>' +
+    '<div class="form-group"><label class="form-label">优先级（数值越高越先占预算）</label><input type="number" id="entry-priority" class="form-input" value="'+Number(entry.priority??entry.order??100)+'"></div>' +
     // Content
-    '<div class="form-group"><label class="form-label">内容</label><textarea id="entry-content" class="form-input" rows="5">' + (entry.content || '') + '</textarea></div>' +
+    '<div class="form-group"><label class="form-label">内容</label><textarea id="entry-content" class="form-input" rows="5">' + escapeHtml(entry.content || '') + '</textarea></div>' +
     // Recursion controls
     '<div style="display:flex;gap:16px;align-items:center;margin-bottom:12px;">' +
       '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text-body);">' +
@@ -6512,6 +6258,11 @@ function saveLorebookEntryEdit(bookId, idx) {
   entry.position = parseInt(document.getElementById('entry-position').value) || 0;
   entry.keys = document.getElementById('entry-keys').value.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
   entry.content = document.getElementById('entry-content').value;
+  entry.secondaryKeys = document.getElementById('entry-secondary').value.split(',').map(function(s){return s.trim();}).filter(Boolean);
+  entry.selective = document.getElementById('entry-use-secondary').checked;
+  entry.selectiveLogic = Number(document.getElementById('entry-logic').value)||0;
+  entry.enabled = document.getElementById('entry-enabled').checked; entry.disable = !entry.enabled;
+  entry.priority = Math.max(-100000,Math.min(100000,Number(document.getElementById('entry-priority').value)||0));
   entry.excludeRecursion = document.getElementById('entry-selective').checked;
   entry.noRecurse = document.getElementById('entry-norecurse').checked;
   db.lorebooks.put(book).then(function() {
@@ -6670,7 +6421,7 @@ function openTavernSettingsModal() {
     apiStatusHtml = '<div style="background:rgba(136,204,136,0.06);border:1px solid var(--accent-green);border-radius:6px;padding:10px 12px;margin-bottom:12px;">' +
       '<div style="font-size:10px;color:var(--accent-green);margin-bottom:4px;">🟢 当前活跃 API（与主页设置同步）</div>' +
       '<div style="font-size:12px;color:var(--text-primary);">' + (activeApi.name || '未命名') + '</div>' +
-      '<div style="font-size:10px;color:var(--text-muted);">' + (activeApi.model || activeApi.apiKey || activeApi.key || '') + '</div>' +
+      '<div style="font-size:10px;color:var(--text-muted);">' + escapeHtml(activeApi.model || '未指定模型') + '</div>' +
     '</div>';
   } else {
     apiStatusHtml = '<div style="background:rgba(255,107,53,0.06);border:1px solid var(--accent-fire);border-radius:6px;padding:10px 12px;margin-bottom:12px;">' +
@@ -6679,7 +6430,7 @@ function openTavernSettingsModal() {
   }
   var html = '<h3 style="margin-bottom:16px;">酒馆设置</h3>' +
     apiStatusHtml +
-    '<div class="form-group"><label class="form-label">用户名称</label><input type="text" id="ts-username" class="form-input" value="' + (s.userName||'玩家') + '"></div>' +
+    '<div class="settings-card">当前玩家：' + escapeHtml(GameState.player.name || '尚未创角') + ' · 自动读取角色档案</div>' +
     '<div class="form-group"><label class="form-label">角色名称</label><input type="text" id="ts-charname" class="form-input" value="' + (s.characterName||'') + '"></div>' +
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;background:rgba(200,180,140,0.04);border:1px solid var(--border-subtle);border-radius:6px;padding:10px 12px;">' +
       '<div><div style="font-size:12px;color:var(--text-primary);font-family:var(--font-serif);">📝 纯文本模式</div><div style="font-size:9px;color:var(--text-muted);">禁止 AI 输出 XML/HTML 标签，纯文本叙事</div></div>' +
@@ -6698,8 +6449,7 @@ function openTavernSettingsModal() {
 
 async function saveTavernSettings() {
   var s = tavernState.tavernSettings || createDefaultTavernSettings();
-  var nameEl = document.getElementById('ts-username');
-  if (nameEl) s.userName = nameEl.value || '玩家';
+  // Legacy aliases remain in old saves but are no longer used for player identity.
   tavernState.tavernSettings = s;
   await db.tavernSettings.put(s);
   showToast('酒馆设置已保存');
@@ -6715,18 +6465,7 @@ var regexScripts = [
 ];
 
 function applyRegexScripts(text, placement) {
-  // placement: 0=display, 1=prompt, 2=both
-  var result = text;
-  regexScripts.forEach(function(rs) {
-    if (rs.disabled) return;
-    var pl = parseInt(rs.placement) || 0;
-    if (pl !== 2 && pl !== placement && placement !== 2) return;
-    try {
-      var re = new RegExp(rs.findRegex, 'g' + (rs.substituteRegex ? '' : ''));
-      result = result.replace(re, rs.replaceString || '');
-    } catch(e) { console.warn('Regex error:', rs.scriptName, e); }
-  });
-  return result;
+  return TavernWiring.regex(text,regexScripts,placement,'assistant',0);
 }
 
 function addRegexScript() {
@@ -6943,57 +6682,15 @@ function updateCharacterCardDepth(depthKey, value) {
 var ALL_SETTINGS_TABS = ['core','lorebook','presets','tavern','regex','depth'];
 
 function renderSettingsRegex(body) {
-  var html = '<div class="settings-section-title">正则引擎</div>';
-  html += '<p style="font-size:11px;color:var(--text-muted);margin-bottom:16px;line-height:1.5;">自动替换 AI 输出中的内容 · placement: 0=显示层 1=Prompt层 2=两层</p>';
-  if (regexScripts.length === 0) {
-    html += '<div style="text-align:center;padding:30px;color:var(--text-dim);">暂无正则脚本</div>';
-  } else {
-    regexScripts.forEach(function(rs) {
-      html += '<div class="settings-card">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-          '<div style="flex:1;">' +
-            '<span style="color:var(--text-primary);font-size:13px;font-family:var(--font-serif);">' + (rs.scriptName || '未命名') + '</span>' +
-            '<span class="settings-label-chip" style="margin-left:8px;">层' + (rs.placement||'0') + '</span>' +
-          '</div>' +
-          '<div style="display:flex;gap:6px;">' +
-            '<button class="text-btn" onclick="editRegexScript(\'' + rs.id + '\')">编辑</button>' +
-            '<button class="text-btn danger" onclick="removeRegexScript(\'' + rs.id + '\')">删除</button>' +
-          '</div>' +
-        '</div>' +
-        '<div style="font-size:10px;color:var(--text-muted);margin-top:4px;">' + (rs.findRegex ? rs.findRegex.substring(0,100) : '(空正则)') + '</div>' +
-      '</div>';
-    });
-  }
-  html += '<button class="settings-action-btn" onclick="addRegexScript();renderSettingsTab(\'regex\')">＋ 新建脚本</button>';
-  body.innerHTML = html;
+  return TavernInspector.regexList(body);
 }
 
 function editRegexScript(id) {
-  var rs = regexScripts.find(function(r) { return r.id === id; });
-  if (!rs) return;
-  var html = '<h3>编辑正则脚本</h3>' +
-    '<div class="form-group"><label class="form-label">名称</label><input type="text" id="rs-name" class="form-input" value="' + (rs.scriptName||'') + '"></div>' +
-    '<div class="form-group"><label class="form-label">匹配正则</label><textarea id="rs-find" class="form-input" rows="2">' + (rs.findRegex||'') + '</textarea></div>' +
-    '<div class="form-group"><label class="form-label">替换为</label><textarea id="rs-replace" class="form-input" rows="2">' + (rs.replaceString||'') + '</textarea></div>' +
-    '<div class="form-group"><label class="form-label">注入位置 (0=显示 1=Prompt 2=两层)</label><input type="number" id="rs-placement" class="form-input" value="' + (rs.placement||'0') + '" min="0" max="2"></div>' +
-    '<div style="display:flex;gap:10px;justify-content:flex-end;">' +
-      '<button class="text-btn" onclick="renderSettingsTab(\'regex\')">返回</button>' +
-      '<button class="summary-action-btn" onclick="saveRegexScript(' + TavernCore.handlerArg(id) + ')">保存</button>' +
-    '</div>';
-  showModal(html);
+  return TavernInspector.regexEdit(id);
 }
 
 function saveRegexScript(id) {
-  var rs = regexScripts.find(function(r) { return r.id === id; });
-  if (!rs) return;
-  rs.scriptName = document.getElementById('rs-name').value;
-  rs.findRegex = document.getElementById('rs-find').value;
-  rs.replaceString = document.getElementById('rs-replace').value;
-  rs.placement = document.getElementById('rs-placement').value;
-  closeAllModals();
-  renderSettingsTab('regex');
-  saveToLocalStorage();
-  showToast('正则脚本已保存');
+  return TavernInspector.regexSave(id);
 }
 
 function renderSettingsDepth(body) {
@@ -7081,5 +6778,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script src="assets/js/creation-ui.js"></script>
+<script src="assets/js/journal-panels.js"></script>
+<script src="assets/js/tavern-inspector.js"></script>
 </body>
 </html>

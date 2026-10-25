@@ -22,11 +22,11 @@ var WorldMapBridge=(function(){
   if(custom){custom.commit(next,before);return;}
   const previous={player:GameState.player,economy:Economy,time:GameTime,world:WorldState,quests:QuestSystem,settings:WorldCore.clone(GameState.settings),tavernSettings:WorldCore.clone(tavernState.tavernSettings),snapshots:TimeRewind.snapshots.slice()};
   const active=typeof getActiveChat==='function'?getActiveChat():null;
-  if(active)takeSnapshot(active.messages,active.variables);
+  if(active&&!next.cosmetic)takeSnapshot(active.messages,active.variables);
   try{
    GameState.player=next.player;Economy=next.economy;GameTime=next.gameTime;WorldState=next.worldState;QuestSystem=next.questSystem;
-   GameState.player.history=GameState.player.history||[];
-   GameState.player.history.unshift({time:getTimeString(),text:next.message});GameState.player.history=GameState.player.history.slice(0,100);
+   if(!next.cosmetic){GameState.player.history=GameState.player.history||[];
+   GameState.player.history.unshift({time:getTimeString(),text:next.message});GameState.player.history=GameState.player.history.slice(0,100);}
    if(!saveToLocalStorage())throw Error('浏览器未能保存地图进度，行动已撤回');
   }catch(e){
    GameState.player=previous.player;Economy=previous.economy;GameTime=previous.time;WorldState=previous.world;QuestSystem=previous.quests;GameState.settings=previous.settings;tavernState.tavernSettings=previous.tavernSettings;TimeRewind.snapshots=previous.snapshots;throw e;

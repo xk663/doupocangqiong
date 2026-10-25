@@ -5,7 +5,7 @@ class WorldRenderer {
    if(new URLSearchParams(location.search).get('mapRenderer')==='lightweight')throw Error('lightweight');
    this.app=new PIXI.Application();await this.app.init({resizeTo:this.host,backgroundAlpha:0,antialias:true,resolution:Math.min(devicePixelRatio||1,1.5),autoDensity:true,autoStart:false,preference:'webgl'});
    this.host.dataset.renderer='pixi';this.host.appendChild(this.app.canvas);this.canvas=this.app.canvas;this.world=new PIXI.Container();this.app.stage.addChild(this.world);this.app.ticker.maxFPS=30;
-   this.app.ticker.add(t=>{if(!this.active)return;this.time=(this.time||0)+t.deltaMS/1000;for(const item of this.animated||[]){item.obj.y=item.y+Math.sin(this.time*1.3+item.phase)*1.2;}if(this.playerHalo)this.playerHalo.alpha=.35+Math.sin(this.time*2)*.15;});
+   this.app.ticker.add(t=>{if(!this.active)return;if(this.actor&&!this.walking&&this.actorPosition)this.actor.pose(this.actorPosition,this.actorDirection||0,0,(this.time||0)*1000,false,this.motion);this.time=(this.time||0)+t.deltaMS/1000;for(const item of this.animated||[]){item.obj.y=item.y+Math.sin(this.time*1.3+item.phase)*1.2;}if(this.playerHalo)this.playerHalo.alpha=.35+Math.sin(this.time*2)*.15;});
    this.bind(this.canvas,'webglcontextlost',e=>{e.preventDefault();this.fallback('图形设备暂不可用，已切换轻量地图');});
   }catch{this.fallback('使用轻量地图，地点与旅行功能仍然可用');}
   this.installInput();this.resizeObserver=new ResizeObserver(()=>this.resize());this.resizeObserver.observe(this.host);
@@ -21,15 +21,15 @@ class WorldRenderer {
  }
  installInput(){
   const el=this.host;
-  this.bind(el,'pointerdown',e=>{if(e.target.closest('button'))return;this.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});e.target.setPointerCapture?.(e.pointerId);this.last={x:e.clientX,y:e.clientY};this.moved=false;this.pinch=null;});
+  this.bind(el,'pointerdown',e=>{if(e.target.closest('button'))return;this.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});e.target.setPointerCapture?.(e.pointerId);this.last={x:e.clientX,y:e.clientY};this.dragOrigin={...this.last};this.moved=false;this.pinch=null;});
   this.bind(el,'pointermove',e=>{
    if(!this.pointers.has(e.pointerId))return;this.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
    if(this.pointers.size===2){const p=[...this.pointers.values()],dist=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);if(this.pinch)this.zoomAt(dist/this.pinch,(p[0].x+p[1].x)/2-el.getBoundingClientRect().left,(p[0].y+p[1].y)/2-el.getBoundingClientRect().top);this.pinch=dist;this.moved=true;return;}
-   const dx=e.clientX-this.last.x,dy=e.clientY-this.last.y;if(Math.abs(dx)+Math.abs(dy)>2)this.moved=true;this.pan.x+=dx;this.pan.y+=dy;this.last={x:e.clientX,y:e.clientY};this.transform();
+   if(!this.moved&&Math.hypot(e.clientX-this.dragOrigin.x,e.clientY-this.dragOrigin.y)<6)return;this.moved=true;this.manualCameraUntil=performance.now()+1200;const dx=e.clientX-this.last.x,dy=e.clientY-this.last.y;this.pan.x+=dx;this.pan.y+=dy;this.last={x:e.clientX,y:e.clientY};this.transform();
   });
   const end=e=>{if(this.mode==='dom'&&!this.moved&&e.type==='pointerup'&&!e.target.closest('button')){const rect=el.getBoundingClientRect(),scale=(this.fit||.5)*this.zoom;this.onGround?.({x:(e.clientX-rect.left-(this.width-this.W*scale)/2-this.pan.x)/scale/this.W*100,y:(e.clientY-rect.top-(this.height-this.H*scale)/2-this.pan.y)/scale/this.H*100});}this.pointers.delete(e.pointerId);this.pinch=null;if(this.pointers.size)this.last=[...this.pointers.values()][0];};this.bind(el,'pointerup',end);this.bind(el,'pointercancel',end);
   this.bind(el,'wheel',e=>{e.preventDefault();const rect=el.getBoundingClientRect();this.zoomAt(Math.exp(-e.deltaY*.001),e.clientX-rect.left,e.clientY-rect.top);},{passive:false});
-  this.bind(el,'keydown',e=>{if(e.target!==el)return;const keys={ArrowLeft:[40,0],ArrowRight:[-40,0],ArrowUp:[0,40],ArrowDown:[0,-40]};if(e.key==='Escape'){e.preventDefault();this.stopWalking();return;}if(['w','a','s','d','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();const steps={w:[0,-7],a:[-7,0],s:[0,7],d:[7,0],ArrowLeft:[-7,0],ArrowRight:[7,0],ArrowUp:[0,-7],ArrowDown:[0,7]},v=steps[e.key],p=this.actorPosition||this.model?.pose;if(p&&!this.walking)this.onGround?.({x:p.x+v[0],y:p.y+v[1]});return;}if(e.key==='+'||e.key==='=')this.zoomAt(1.2);if(e.key==='-')this.zoomAt(.8);});
+  this.bind(el,'keydown',e=>{if(e.target!==el)return;const keys={ArrowLeft:[40,0],ArrowRight:[-40,0],ArrowUp:[0,40],ArrowDown:[0,-40]};if(e.key==='Escape'){e.preventDefault();if(this.onStop)this.onStop();else this.stopWalking();return;}if(['w','a','s','d','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();const steps={w:[0,-7],a:[-7,0],s:[0,7],d:[7,0],ArrowLeft:[-7,0],ArrowRight:[7,0],ArrowUp:[0,-7],ArrowDown:[0,7]},v=steps[e.key],p=this.actorPosition||this.model?.pose;if(p&&(!this.walking||this.lastMoveKey!==e.key)){this.lastMoveKey=e.key;this.onGround?.({x:p.x+v[0],y:p.y+v[1]});}return;}if(e.key==='+'||e.key==='=')this.zoomAt(1.2);if(e.key==='-')this.zoomAt(.8);});
  }
  resize(){const r=this.host.getBoundingClientRect();if(!r.width||!r.height)return;this.width=r.width;this.height=r.height;this.fit=Math.min(r.width/this.W,r.height/this.H);if(this.app?.renderer&&this.mode!=='dom')this.app.renderer.resize(r.width,r.height);this.transform();}
  transform(){
@@ -52,6 +52,7 @@ class WorldRenderer {
  syncTicker(){if(!this.app||this.mode==='dom')return;if(this.active&&this.motion)this.app.start();else{this.app.stop();this.draw();}}
  setMotion(value){this.motion=value;this.syncTicker();}
  async render(model){
+  this.actorReady=false;this.host.dataset.actorError='false';
   const changedScene=this.model?.scene.id!==model.scene.id;this.model=model;const generation=++this.generation;
   if(changedScene)this.reset();
   if(this.mode==='dom'){this.renderFallback();return;}
@@ -59,7 +60,7 @@ class WorldRenderer {
   try{texture=await PIXI.Assets.load(model.scene.art);}catch{this.fallback('底图载入失败，可继续使用地点目录');this.renderFallback();return;}
   if(generation!==this.generation||this.destroyed)return;
   if(!this.loaded.includes(model.scene.art))this.loaded.push(model.scene.art);
-  const old=this.world.removeChildren();for(const item of old)item.destroy({children:true});for(const frame of this.avatarFrames||[])frame.destroy();this.avatarFrames=[];this.avatarSprite=null;this.actorRoot=null;this.labels=[];this.animated=[];
+  this.actor?.destroy();this.actor=null;const old=this.world.removeChildren();for(const item of old)item.destroy({children:true});this.actorRoot=null;this.labels=[];this.animated=[];
   const background=new PIXI.Sprite(texture);background.width=this.W;background.height=this.H;this.world.addChild(background);background.eventMode='static';background.cursor='crosshair';background.on('pointertap',e=>{if(!this.moved){const p=this.world.toLocal(e.global);this.onGround?.({x:p.x/this.W*100,y:p.y/this.H*100});}});
   if(model.fog){const veil=new PIXI.Graphics().rect(0,0,this.W,this.H).fill({color:0xeaf0d9,alpha:.12});this.world.addChild(veil);}
   const points=new Map(model.nodes.map(n=>[n.id,n]));
@@ -88,42 +89,27 @@ class WorldRenderer {
   for(const n of model.nodes.filter(n=>n.known)){const button=document.createElement('button');button.className='world-fallback-pin'+(n.id===model.selected?' selected':'');button.textContent=(n.id===model.playerId?'◆ ':'')+n.name;button.style.left=n.x+'%';button.style.top=n.y+'%';button.onclick=()=>this.select(n.id);this.fallbackEl.appendChild(button);}this.createFallbackAvatar(model);this.transform();
  }
  async createAvatar(model,generation){
-  const pose=model.pose;if(!pose)return;this.actorPosition={...pose};const avatar=model.avatar||WorldNavigation.avatar('male');
-  try{const texture=await PIXI.Assets.load(avatar.image);if(generation!==this.generation)return;this.avatarFrames=[];
-   const width=texture.width/4,height=texture.height/3;for(let row=0;row<3;row++)for(let col=0;col<4;col++)this.avatarFrames.push(new PIXI.Texture({source:texture.source,frame:new PIXI.Rectangle(col*width,row*height,width,height)}));
-   this.actorRoot=new PIXI.Container();const shadow=new PIXI.Graphics().ellipse(0,0,22,8).fill({color:0x1d3b26,alpha:.25});this.actorRoot.addChild(shadow);
-   this.avatarSprite=new PIXI.Sprite(this.avatarFrames[pose.direction||0]);this.avatarSprite.anchor.set(.5,.97);this.actorRoot.addChild(this.avatarSprite);this.world.addChild(this.actorRoot);this.setActorPose(pose,pose.direction||0,0);
-  }catch{const mark=new PIXI.Container();mark.addChild(new PIXI.Graphics().circle(0,-10,13).fill(0x345d45));this.actorRoot=mark;this.world.addChild(mark);this.setActorPose(pose,0,0);}
+  if(!model.pose)return;const actor=new WorldActor({world:this.world,avatar:model.avatar||WorldNavigation.avatar('male'),form:model.form});this.actor=actor;
+  try{await actor.init();if(generation!==this.generation||this.destroyed){actor.destroy();return;}this.actorRoot=actor.root;this.actorReady=true;this.actorSources=this.actorSources||[];if(!this.actorSources.includes(actor.image))this.actorSources.push(actor.image);while(this.actorSources.length>3){const old=this.actorSources.shift();if(old!==actor.image)PIXI.Assets.unload(old).catch(()=>{});}this.setActorPose(model.pose,model.pose.direction||0,0);}catch(e){actor.destroy();if(generation===this.generation){this.host.dataset.actorError='true';this.host.setAttribute('aria-description','角色贴图暂未载入，可重试地图');throw e;}}
  }
- createFallbackAvatar(model){
-  if(!model.pose)return;const avatar=model.avatar||WorldNavigation.avatar('male');this.domAvatar=document.createElement('div');this.domAvatar.className='world-walking-avatar';this.domAvatar.setAttribute('role','img');this.domAvatar.setAttribute('aria-label',avatar.name+'地图角色');this.domAvatar.style.backgroundImage='url("'+avatar.image+'")';this.fallbackEl.appendChild(this.domAvatar);this.actorPosition={...model.pose};this.setActorPose(model.pose,model.pose.direction||0,0);
- }
- sizeAvatar(){
-  const scale=(this.fit||.5)*this.zoom,height=Math.min(270,(this.width<600?58:78)/scale);
-  if(this.avatarSprite){this.avatarSprite.height=height;this.avatarSprite.width=height*(this.avatarSprite.texture.width/this.avatarSprite.texture.height);}
-  if(this.domAvatar){this.domAvatar.style.height=height+'px';this.domAvatar.style.width=height*1.125+'px';}
- }
- setActorPose(p,direction=0,frame=0){
-  this.actorPosition={x:p.x,y:p.y};this.actorDirection=direction;
-  if(this.actorRoot){this.actorRoot.position.set(p.x*this.W/100,p.y*this.H/100);if(this.avatarSprite&&this.avatarFrames?.length)this.avatarSprite.texture=this.avatarFrames[frame*4+direction];}
-  if(this.domAvatar){this.domAvatar.style.left=p.x+'%';this.domAvatar.style.top=p.y+'%';this.domAvatar.style.backgroundPosition=(direction/3*100)+'% '+(frame/2*100)+'%';}
-  this.sizeAvatar();this.draw();
- }
- stopWalking(){if(this.walking){cancelAnimationFrame(this.walking.raf);const walk=this.walking;this.walking=null;this.host.dataset.walking='false';walk.finish({completed:false,position:{...this.actorPosition}});this.clearWalkingPath();this.setActorPose(this.actorPosition,this.actorDirection,0);}}
+ createFallbackAvatar(model){this.actor?.destroy();this.actor=null;if(!model.pose)return;this.actor=new WorldActor({fallback:this.fallbackEl,avatar:model.avatar||WorldNavigation.avatar('male'),form:model.form});this.actor.init();this.actorReady=true;this.setActorPose(model.pose,model.pose.direction||0,0);}
+ sizeAvatar(){const scale=(this.fit||.5)*this.zoom,height=Math.min(270,(this.width<600?58:78)/scale);this.actor?.size(height);}
+ setActorPose(p,direction=0,frame=0,time=0){this.actorPosition={x:p.x,y:p.y};this.actorDirection=direction;this.actor?.pose(p,direction,frame,time,!!this.walking,this.motion);this.sizeAvatar();this.draw();}
+ stopWalking(reason='stop'){if(this.walking){cancelAnimationFrame(this.walking.raf);const walk=this.walking;this.walking=null;this.host.dataset.walking='false';walk.finish({completed:false,reason,position:{...this.actorPosition}});this.clearWalkingPath();this.setActorPose(this.actorPosition,this.actorDirection,0);}}
  clearWalkingPath(){if(this.walkLine){this.walkLine.destroy();this.walkLine=null;}if(this.walkTarget){this.walkTarget.destroy();this.walkTarget=null;}this.domTrail?.remove();this.domTrail=null;}
  animatePath(points,options={}){
   this.stopWalking();if(!points?.length)return Promise.resolve({completed:false});const path=points.map(p=>({...p}));let total=0;const lengths=[];for(let i=1;i<path.length;i++){const n=WorldNavigation.distance(path[i-1],path[i]);lengths.push(n);total+=n;}
   if(total<.01)return Promise.resolve({completed:true,position:path.at(-1)});
-  const duration=options.duration||Math.max(500,total/11*1000),target=path.at(-1);this.host.dataset.walking='true';
+  const duration=options.duration||Math.max(350,total/WorldNavigation.forms[options.mode||this.model.form||'walk'].speed*1000),target=path.at(-1);this.host.dataset.walking='true';
   if(this.mode!=='dom'&&this.world){this.walkLine=new PIXI.Graphics();this.walkLine.moveTo(path[0].x*this.W/100,path[0].y*this.H/100);for(const p of path.slice(1))this.walkLine.lineTo(p.x*this.W/100,p.y*this.H/100);this.walkLine.stroke({color:0xfff1af,width:4,alpha:.8});this.world.addChild(this.walkLine);this.walkTarget=new PIXI.Graphics().circle(0,0,18).stroke({color:0x567c52,width:4}).circle(0,0,7).fill(0xf7e7a0);this.walkTarget.position.set(target.x*this.W/100,target.y*this.H/100);this.world.addChild(this.walkTarget);if(this.actorRoot)this.world.addChild(this.actorRoot);}
   else if(this.fallbackEl){this.domTrail=document.createElement('div');this.domTrail.className='world-walking-target';this.domTrail.style.left=target.x+'%';this.domTrail.style.top=target.y+'%';this.fallbackEl.appendChild(this.domTrail);}
   return new Promise(finish=>{const walk={finish,elapsed:0,last:performance.now(),raf:0};this.walking=walk;
-   const tick=now=>{if(this.walking!==walk||this.destroyed)return;const dt=Math.min(60,now-walk.last);walk.last=now;if(!this.host.getClientRects().length){this.stopWalking();return;}if(document.hidden){walk.raf=requestAnimationFrame(tick);return;}
-    walk.elapsed+=dt;const progress=Math.min(1,walk.elapsed/duration),p=WorldNavigation.sample(path,progress),direction=p.direction,frame=this.motion?[0,1,0,2][Math.floor(walk.elapsed/135)%4]:0;this.setActorPose(p,direction,frame);
-    if(this.follow&&this.zoom>1.05){const scale=(this.fit||.5)*this.zoom;this.pan.x+=(-(p.x/100*this.W-this.W/2)*scale-this.pan.x)*.09;this.pan.y+=(-(p.y/100*this.H-this.H/2)*scale-this.pan.y)*.09;this.transform();}
+   const tick=now=>{if(this.walking!==walk||this.destroyed)return;const dt=Math.min(60,now-walk.last);walk.last=now;if(!this.host.getClientRects().length){this.stopWalking('hidden');return;}if(document.hidden){walk.raf=requestAnimationFrame(tick);return;}
+    walk.elapsed+=dt;const progress=Math.min(1,walk.elapsed/duration),p=WorldNavigation.sample(path,progress),direction=p.direction,frame=this.motion?[0,1,0,2][Math.floor(walk.elapsed/135)%4]:0;this.setActorPose(p,direction,frame,walk.elapsed);
+    if(this.follow&&this.zoom>1.05&&now>(this.manualCameraUntil||0)){const scale=(this.fit||.5)*this.zoom,dx=(p.x/100*this.W-this.W/2)*scale+this.pan.x,dy=(p.y/100*this.H-this.H/2)*scale+this.pan.y,alpha=1-Math.exp(-dt/140);if(Math.abs(dx)>this.width*.22)this.pan.x-=dx*alpha;if(Math.abs(dy)>this.height*.24)this.pan.y-=dy*alpha;this.transform();}
     options.onProgress?.(progress,p);if(progress<1)walk.raf=requestAnimationFrame(tick);else{this.walking=null;this.host.dataset.walking='false';this.setActorPose(target,direction,0);this.clearWalkingPath();finish({completed:true,position:target});}
    };walk.raf=requestAnimationFrame(tick);
   });
  }
- destroy(){this.stopWalking();this.destroyed=true;this.generation++;this.resizeObserver?.disconnect();this.visibilityObserver?.disconnect();for(const clean of this.cleanups)clean();if(this.app)this.app.destroy(true,{children:true,texture:false});this.host.replaceChildren();}
+ destroy(){this.stopWalking();this.destroyed=true;this.generation++;this.actor?.destroy();this.resizeObserver?.disconnect();this.visibilityObserver?.disconnect();for(const clean of this.cleanups)clean();if(this.app)this.app.destroy(true,{children:true,texture:false});this.host.replaceChildren();}
 }

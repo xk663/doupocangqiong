@@ -1,8 +1,8 @@
 {
-  "date": "2026-10-24",
+  "date": "2026-10-25",
   "automated": {
     "command": "node --test tests/*.test.cjs",
-    "passed": 80,
+    "passed": 93,
     "failed": 0,
     "livePaidModelCalls": 0
   },
@@ -61,5 +61,20 @@
       "D:/doupo/world-xuner-moving-live.png"
     ],
     "scope": "Three local road networks plus animated inter-region graph travel; hand-authored navigation, not pixel-perfect building collision"
+  },
+  "integratedForms": {
+    "avatars": [
+      "xiaoyan",
+      "xuner",
+      "xiaoyixian"
+    ],
+    "forms": [
+      "walk",
+      "convoy",
+      "flight"
+    ],
+    "singleCompleteSprite": true,
+    "riderTorsoCrop": false,
+    "browserProof": "D:/doupo/xiaoyixian-riding-fixed.png"
   }
 }

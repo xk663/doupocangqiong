@@ -1,0 +1,26 @@
+/* Settings remain a local prompt workbench, with readable controls and inspection. */
+#settings-panel{background:#f4f3eb;color:#3a513e;--bg-panel:#fffdf6;--bg-card:#fffef9;--bg-hover:#e6ebdc;--border-subtle:#d8dfcc;--border-gold:#b3c1a3;--text-primary:#355b42;--text-secondary:#728564;--text-body:#44553e;--text-muted:#78876c;--text-dim:#87937d;--accent-green:#4d7753}
+#settings-panel .settings-sidebar{background:linear-gradient(170deg,#29483b,#18332f);border-right:1px solid #bfcca366}
+#settings-panel .settings-card{border:1px solid #dbe1d1;border-radius:13px;padding:20px;background:#fffef8;box-shadow:0 3px 15px #29422e06;margin-bottom:15px}
+#settings-panel .settings-section-title{font-size:23px;letter-spacing:3px;color:#355b42;border-color:#d8dfcc;padding-bottom:18px}
+#settings-panel .settings-action-btn{border-radius:9px;border:1px solid #c6d0b8;background:#ecf0e2;color:#3d6044;min-height:43px;letter-spacing:1px}
+#settings-panel .settings-action-btn:hover{background:#dbe4cf}
+#settings-panel .settings-form-input,#settings-panel .form-input{background:#fffef8;color:#40583e;border-color:#cdd8bf;border-radius:8px}
+.wiring-guide h3{font:20px var(--font-serif);color:#3b5c3e;margin:0 0 15px}
+.wiring-guide p,.wiring-help{font-size:12px;line-height:1.9;color:#738267;margin:12px 0 18px}
+.wiring-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin:20px 0}
+.wiring-options label,.wiring-test-label{display:block;font-size:12px;line-height:1.8;margin:14px 0;color:var(--text-body)}
+.wiring-options input,.wiring-test-label input,.wiring-test-label select,.wiring-test-label textarea{display:block;width:100%;background:var(--bg-panel);border:1px solid var(--border-subtle);color:var(--text-body);border-radius:8px;padding:10px;margin-top:6px;font:inherit;box-sizing:border-box}
+.wiring-test-label textarea{min-height:80px;resize:vertical}
+.request-inspector h2{font:25px var(--font-serif);color:var(--text-primary)}
+.request-inspector p{font-size:12px;line-height:1.9;color:var(--text-body);overflow-wrap:anywhere}
+.request-inspector details{border:1px solid var(--border-subtle);border-radius:9px;padding:14px;margin:14px 0}
+.request-inspector summary{cursor:pointer;color:var(--text-primary);font-size:13px}
+.request-inspector pre,#rs-test-result{max-height:48vh;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--bg-panel);border:1px solid var(--border-subtle);padding:14px;font-size:11px;color:var(--text-body);border-radius:8px}
+.request-trace{max-height:34vh;overflow:auto}.request-trace>div{padding:10px 0;border-bottom:1px solid var(--border-subtle);font-size:11px}.request-trace strong{font-weight:500;display:block;color:var(--text-body)}.request-trace span{display:block;margin-top:5px;color:var(--text-secondary)}
+@media(max-width:700px){.wiring-options{grid-template-columns:1fr;gap:0}#settings-panel .settings-card{padding:15px}#settings-panel .settings-section-title{font-size:19px}.request-inspector details{padding:10px}}
+#settings-panel .settings-tab-sidebar{background:linear-gradient(170deg,#29483b,#18332f);border-right:1px solid #bfcca366}
+#settings-panel .settings-tab-sidebar .settings-tab-btn{color:#b5c5ae}
+#settings-panel .settings-tab-sidebar .settings-tab-btn.active{color:#f1dfb5;background:#ffffff12}
+.modal-content:has(.request-inspector){width:min(900px,92vw);max-width:900px;background:#f7f6ef;border-color:#cbd5bc;--bg-panel:#eeefe3;--border-subtle:#d0dac3;--text-primary:#365d43;--text-body:#44573d;--text-secondary:#77886a}
+@media(max-width:700px){.modal-content:has(.request-inspector){width:94vw;max-height:88dvh;padding:20px}.request-inspector h2{font-size:21px}}

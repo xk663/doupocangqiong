@@ -21,7 +21,7 @@ function context(names, overrides = {}) {
   const db = {chats:table('chats'),lorebooks:table('lorebooks'),presets:table('presets'),characterCard:table('characterCard'),tavernSettings:table('tavernSettings'),
     async transaction(mode,tables,callback){const previous=new Map(records);let aborted=false;try{await callback({abort(){aborted=true;}});if(aborted)throw core.abortError();}catch(e){records.clear();for(const [k,v]of previous)records.set(k,v);throw e;}}};
   const chat={id:'chat-a',messages:[],variables:{gold:10},presetId:'preset',lorebookIds:[]};
-  const state = {TavernCore:core,DoupoUserFlames:require('../assets/js/user-flames.js'),console,AbortController,crypto:webcrypto,URL,FormData,Blob,Set,Date,
+  const state = {TavernCore:core,TavernWiring:require('../assets/js/tavern-wiring.js'),DoupoUserFlames:require('../assets/js/user-flames.js'),console,AbortController,crypto:webcrypto,URL,FormData,Blob,Set,Date,
     document:{getElementById:el,createElement(){return {id:'',textContent:'',className:'',remove(){elements.delete(this.id);}};}},
     db,tavernState:{isLoading:false,isSending:false,chats:[chat],activeChatId:'chat-a',presets:[{id:'preset',settings:{}}],lorebooks:[],activeLorebookIds:[],tavernSettings:{},characterCard:{id:'active',name:'角色'}},
     GameState:{player:{name:'玩家',desireLust:0},settings:{apis:[{id:'api',url:'https://example.com/v1',apiKey:'LOCAL-SECRET'}]},phase:'title'},GameTime:{day:1},WorldState:{location:'A'},TimeRewind:{snapshots:[],maxSnapshots:20},SAVES_KEY:'doupo_saves',RACES:[],
@@ -31,7 +31,7 @@ function context(names, overrides = {}) {
     assembleTavernPrompt(){return {messages:[],estimatedTokens:4,removedMessages:0};},matchLorebookEntries(){return [];},StreamParser:core.streamParser,
     applyRegexScripts(text){return text;},saveToLocalStorage(){return true;},takeSnapshot(){},createDefaultTavernSettings(){return {id:'main'};},
     ...overrides};
-  vm.createContext(state);for(const name of names)vm.runInContext(source(name),state);
+  vm.createContext(state);if(names.includes('runTavernTurn'))vm.runInContext(source('prepareTavernRequest'),state);for(const name of names)vm.runInContext(source(name),state);
   return {state,records,notices,storage,el};
 }
 
@@ -162,6 +162,10 @@ test('regenerating narrative after map travel preserves map-owned inventory and 
 test('a walking character cannot start an overlapping LLM turn',async()=>{
  let calls=0;const {state,notices}=context(turnFunctions,{callLLMStream:async()=>{calls++;return 'reply';}});const bridge=installWorldBridge(state);const token=bridge.beginMovement();await state.runTavernTurn('交谈',false);assert.equal(calls,0);assert.equal(state.getActiveChat().messages.length,0);assert.ok(notices.some(n=>n.msg.includes('停步')));bridge.finishMovement(token,null);
 });
+
+test('avatar and form saves do not crowd rewind history, while the next real movement still snapshots',()=>{
+ const {state,storage}=context(['saveToLocalStorage','takeSnapshot']);const bridge=installWorldBridge(state);bridge.execute({type:'appearance',avatarId:'xiaoyixian'});bridge.execute({type:'movement-mode',mode:'convoy'});assert.equal(state.TimeRewind.snapshots.length,0);assert.equal(state.GameState.player.history,undefined);assert.equal(JSON.parse(storage.get('doupo_runtime')).player.exploration.avatarId,'xiaoyixian');assert.ok(bridge.execute({type:'walk',sceneId:'wutan',x:49,y:65,mode:'convoy'}));assert.equal(state.TimeRewind.snapshots.length,1);assert.ok(state.GameState.player.history.length);assert.equal(state.GameState.player.exploration.movementMode,'convoy');
+});
 test('successful replay replaces one assistant and applies state updates exactly once',async()=>{
   const {state}=context(turnFunctions,{callLLMStream:async()=> '正文<upstore>addSmallSum:gold:3 toggle:active</upstore>'});
   await state.runTavernTurn('前往坊市',false);assert.equal(state.getActiveChat().variables.gold,13);assert.equal(state.getActiveChat().variables.active,true);
@@ -213,6 +217,37 @@ test('the actual application assembler includes defaults alongside custom preset
   const text=result.messages.map(m=>m.content).join('\n');
   for(const value of ['CUSTOM_MAIN','UNIQUE_CHARACTER','UNIQUE_LORE'])assert.ok(text.includes(value));
   assert.equal(result.messages.filter(m=>m.content==='CURRENT_INPUT').length,1);
+});
+
+test('actual outbound chat request includes global lore, prompt regex and player name once',async()=>{
+  let outbound;
+  const {state}=context([...turnFunctions,'assembleTavernPrompt'],{regexScripts:[{findRegex:'原词',replaceString:'青莲',placement:1}],callLLMStream:async(messages)=>{outbound=messages;return '回复';}});
+  state.GameState.player.name='林见山';state.getActiveChat().userName='玩家';
+  state.tavernState.activeLorebookIds=['global'];
+  state.tavernState.lorebooks=[{id:'global',name:'已启用',entries:[entry('l',['青莲'],'{{user}}的 UNIQUE_GLOBAL_LORE')]}];
+  await state.runTavernTurn('原词',false);
+  assert.ok(outbound);const all=outbound.map(m=>m.content).join('\n');assert.ok(all.includes('林见山的 UNIQUE_GLOBAL_LORE'));
+  assert.equal(outbound.filter(m=>m.role==='user'&&m.content==='青莲').length,1);
+  assert.equal(state.getActiveChat().messages[0].content,'原词');
+  assert.equal(state.tavernState.lastRequestInspection.selection.trace[0].status,'included');
+});
+
+test('request inspection detects preset-blocked lore and preview does not generate dice',()=>{
+  let rolls=0;const {state}=context(['prepareTavernRequest','assembleTavernPrompt'],{generateDicePool(){rolls++;},getDicePoolText(){return 'DICE';}});
+  state.GameState.player.name='测试者';state.tavernState.activeLorebookIds=['b'];
+  state.tavernState.lorebooks=[{id:'b',name:'书',entries:[entry('e',['关键词'],'HIDDEN_LORE')]}];
+  state.tavernState.presets=[{id:'preset',prompt_order:[{identifier:'worldInfoBefore',enabled:false}],settings:{}}];
+  const before=JSON.stringify(state.GameState);const out=state.prepareTavernRequest(state.getActiveChat(),'关键词',[],true);
+  assert.equal(rolls,0);assert.equal(out.selection.trace[0].status,'preset-disabled');assert.equal(JSON.stringify(state.GameState),before);
+  assert.ok(!out.result.messages.some(m=>m.content.includes('HIDDEN_LORE')));
+});
+
+test('lore selection save failure preserves both global and chat binding',async()=>{
+  const {state,notices}=context(['toggleLorebookActive'],{renderSettingsTab(){},stopTavernStream(){}});
+  state.db.tavernSettings.put=async()=>{throw Error('quota');};
+  await state.toggleLorebookActive('book',true);
+  assert.equal(state.tavernState.activeLorebookIds.length,0);assert.equal(state.getActiveChat().lorebookIds.length,0);
+  assert.ok(notices.some(n=>n.type==='error'));
 });
 test('a failed cloud upload retains the old backup and performs no deletion',async()=>{
   const calls=[];
@@ -294,8 +329,12 @@ test('flame catalogue has unique ranks and names matching user modifications',()
   for(let i=0;i<23;i++)assert.equal(fires[i].rank,i+1);
   for(const [rank,name] of [[16,'火云水炎'],[17,'火山石焰'],[18,'风怒龙炎'],[19,'青莲地心火'],[20,'幽冥毒火'],[21,'阴阳双炎'],[22,'万兽灵火'],[23,'玄黄炎']])assert.equal(fires[rank-1].name,name);
   const {state}=context(['buildFlamesView'],{HEAVENLY_FLAMES:fires});
+  state.document.addEventListener=()=>{};
+  state.escapeHtml=core.escapeHtml;
+  vm.runInContext(fs.readFileSync(path.join(__dirname,'../assets/js/journal-panels.js'),'utf8'),state);
   state.buildFlamesView();
   const rendered=state.document.getElementById('game-view-flames').innerHTML;
   assert.equal(rendered.includes('undefined'),false);
-  assert.equal((rendered.match(/作者补充设定/g)||[]).length,3);
+  assert.equal((rendered.match(/>项目补充<\/span>/g)||[]).length,3);
+  for(const f of fires.filter(f=>f.sourceType==='user-supplement')){assert.ok(f.summary.length<65);assert.ok(rendered.includes(f.summary));assert.ok(!rendered.includes(f.desc));}
 });
