@@ -28,7 +28,22 @@
     var cjk = (value.match(/[\u2e80-\u9fff\uf900-\ufaff]/g) || []).length;
     return Math.ceil(cjk * 1.5 + (value.length - cjk) / 3) + 4;
   }
-  function endpoint(base, backend) {
+  function geminiBase(base) {
+    var url=new URL(base);
+    if(!/^https?:$/.test(url.protocol)||url.username||url.password)throw new Error('接口地址必须使用 HTTP 或 HTTPS');
+    if([...url.searchParams.keys()].some(function(k){return k!=='alt';}))throw new Error('Gemini 地址不要附带查询参数，密钥请填写在 Key 栏');
+    var path=url.pathname.replace(/\/+$/,'').replace(/\/models\/[^/]+:(?:streamGenerateContent|generateContent)$/,'').replace(/\/models$/,'');
+    if(/\/v1$/.test(path))path=path.replace(/\/v1$/,'/v1beta');
+    else if(!/\/v1beta$/.test(path))path+='/v1beta';
+    url.pathname=path;url.search='';url.hash='';return url.href.replace(/\/$/,'');
+  }
+  function endpoint(base, backend, model, stream) {
+    if(backend==='gemini'){
+      var prefix=geminiBase(base);if(!model)return prefix;
+      model=String(model).replace(/^models\//,'');
+      if(!/^[A-Za-z0-9._-]+$/.test(model))throw new Error('Gemini 模型标识无效');
+      return prefix+'/models/'+encodeURIComponent(model)+(stream?':streamGenerateContent?alt=sse':':generateContent');
+    }
     var url = new URL(base);
     if (!/^https?:$/.test(url.protocol) || url.username || url.password) throw new Error('接口地址必须使用 HTTP 或 HTTPS');
     var suffix = backend === 'ollama' ? '/api/chat' : backend === 'kobold' ? '/api/v1/generate' : '/chat/completions';
@@ -42,6 +57,12 @@
     return url.href;
   }
   function abortError() { var error = new Error('推演已阻断'); error.name = 'AbortError'; return error; }
+  function transportURL(api,url){
+    if(api.backend!=='gemini'||!api.localRelay)return url;
+    var target=new URL(url);
+    if(!['localhost','127.0.0.1'].includes(target.hostname)||target.port!=='8080'||target.protocol!=='http:'||!target.pathname.startsWith('/v1beta/'))throw new Error('本机通道仅支持 http://localhost:8080 的 Gemini 原生接口');
+    return '/__gemini_proxy'+target.pathname+target.search;
+  }
   function checkAbort(signal) { if (signal && signal.aborted) throw abortError(); }
 
   function matchLorebooks(text, books, options) {
@@ -176,6 +197,40 @@
   }
 
   // Content protocol parser: retain the entire accumulated response; chunks are not sections.
+  function geminiBody(messages,options,api){
+    var contents=[],system=[],started=false;
+    (messages||[]).forEach(function(m){
+      if(typeof m.content!=='string')throw new Error('Gemini 当前仅支持文本消息');
+      if((m.role==='system'||m.role==='developer')&&!started){system.push({text:m.content});return;}
+      if(!['system','developer','user','assistant'].includes(m.role))throw new Error('Gemini 当前不支持工具消息');
+      started=true;var role=m.role==='assistant'?'model':'user',text=(m.role==='system'||m.role==='developer'?'【系统补充】\n':'')+m.content;
+      if(contents.length&&contents[contents.length-1].role===role)contents[contents.length-1].parts.push({text:text});
+      else contents.push({role:role,parts:[{text:text}]});
+    });
+    if(!contents.length)contents.push({role:'user',parts:[{text:'请根据系统设定继续。'}]});
+    var config={};
+    if(options.max_tokens!==undefined)config.maxOutputTokens=options.max_tokens;
+    if(options.temperature!==undefined)config.temperature=options.temperature;
+    if(options.top_p!==undefined)config.topP=options.top_p;
+    var thinking=options.thinkingLevel||api.thinkingLevel;
+    if(thinking&&thinking!=='default'){
+      if(!['minimal','low','medium','high'].includes(thinking))throw new Error('Gemini 思考级别无效');
+      var model=String(options.model||api.model||'');
+      if(/gemini-2\.5/.test(model))throw new Error('Gemini 2.5 请使用模型默认思考级别');
+      if(thinking==='minimal'&&/gemini-(?:4|3\.8)/.test(model))throw new Error('当前模型不支持 minimal 思考级别，请选择 low');
+      config.thinkingConfig={thinkingLevel:thinking};
+    }
+    if(options.jsonMode)config.responseMimeType='application/json';
+    var body={contents:contents,generationConfig:config};if(system.length)body.systemInstruction={parts:system};return body;
+  }
+  function geminiReply(data){
+    if(data.error)throw new Error('Gemini 返回错误，请检查模型和接口配置');
+    if(data.promptFeedback&&data.promptFeedback.blockReason)throw new Error('Gemini 拒绝处理本次输入');
+    var c=data.candidates&&data.candidates[0];
+    if(!c)return {text:'',finish:null};
+    if(c.finishReason&&c.finishReason!=='STOP')throw new Error(c.finishReason==='MAX_TOKENS'?'Gemini 输出达到 token 上限，本轮未提交；请增加预设输出额度或降低思考级别':'Gemini 回复未正常完成，本轮未提交');
+    return {text:((c.content&&c.content.parts)||[]).filter(function(p){return !p.thought&&typeof p.text==='string';}).map(function(p){return p.text;}).join(''),finish:c.finishReason};
+  }
   function streamParser() {
     var text = '', listeners = [];
     function emit() {
@@ -191,13 +246,15 @@
   }
 
   async function readStream(response, backend, onChunk, signal) {
-    var reader = response.body.getReader(), decoder = new TextDecoder(), pending = '', eventData = [], full = '', done = false;
+    var reader = response.body.getReader(), decoder = new TextDecoder(), pending = '', eventData = [], full = '', done = false, geminiFinish=null;
     function accept(payload) {
       if (payload === '[DONE]') { done = true; return; }
       var data;
       try { data = JSON.parse(payload); } catch (_) { throw new Error('模型返回了无法解析的流式数据'); }
-      if (data.error) throw new Error(typeof data.error === 'string' ? data.error : data.error.message || '模型返回错误');
-      var content = backend === 'ollama' ? data.message && data.message.content : backend === 'kobold' ? data.token : data.choices && data.choices[0] && data.choices[0].delta && data.choices[0].delta.content;
+      if (data.error) throw new Error(backend==='gemini'?'Gemini 返回错误，请检查模型和接口配置':typeof data.error === 'string' ? data.error : data.error.message || '模型返回错误');
+      var gemini=backend==='gemini'?geminiReply(data):null;
+      if(gemini&&gemini.finish)geminiFinish=gemini.finish;
+      var content = gemini?gemini.text:backend === 'ollama' ? data.message && data.message.content : backend === 'kobold' ? data.token : data.choices && data.choices[0] && data.choices[0].delta && data.choices[0].delta.content;
       if (content) { full += content; if (onChunk) onChunk(content, full); }
     }
     function flushEvent() { if (eventData.length) { accept(eventData.join('\n')); eventData = []; } }
@@ -216,6 +273,8 @@
       if (final && pending) { line(pending); pending = ''; }
       if (final) flushEvent();
     }
+    var onAbort=function(){reader.cancel().catch(function(){});};
+    if(signal)signal.addEventListener('abort',onAbort,{once:true});
     try {
       while (!done) {
         checkAbort(signal);
@@ -224,14 +283,19 @@
         if (chunk.done) { pending += decoder.decode(); drain(true); break; }
         pending += decoder.decode(chunk.value, {stream:true}); drain(false);
       }
+      if(backend==='gemini'&&(geminiFinish!=='STOP'||!full.trim()))throw new Error('Gemini 流式回复不完整或缺少正文，本轮未提交');
       return full;
-    } finally { try { await reader.cancel(); } catch (_) {} reader.releaseLock(); }
+    } finally { if(signal)signal.removeEventListener('abort',onAbort);try { await reader.cancel(); } catch (_) {} reader.releaseLock(); }
   }
 
   async function request(api, messages, options, onChunk, fetcher) {
     options = options || {}; checkAbort(options.signal);
     var backend = api.backend || 'openai', stream = !!onChunk, body, headers = {'Content-Type':'application/json'};
-    if (backend === 'ollama') body = {model:options.model || api.model, messages:messages, stream:stream, options:{temperature:options.temperature ?? 0.7, num_predict:options.max_tokens ?? 1024, top_p:options.top_p ?? 1}};
+    if(backend==='gemini'){
+      if(!options.model&&!api.model)throw new Error('请填写 Gemini 模型标识');
+      body=geminiBody(messages,options,api);if(api.apiKey||api.key)headers['x-goog-api-key']=api.apiKey||api.key;
+    }
+    else if (backend === 'ollama') body = {model:options.model || api.model, messages:messages, stream:stream, options:{temperature:options.temperature ?? 0.7, num_predict:options.max_tokens ?? 1024, top_p:options.top_p ?? 1}};
     else if (backend === 'kobold') {
       // The standard generate endpoint returns JSON; do not mistake that JSON for token text.
       body = {prompt:messages.map(function(m) { return m.role + ': ' + m.content; }).join('\n\n') + '\nassistant:', temperature:options.temperature ?? 0.7, max_length:options.max_tokens ?? 1024, top_p:options.top_p ?? 1};
@@ -240,13 +304,17 @@
       ['temperature','max_tokens','top_p','frequency_penalty','presence_penalty'].forEach(function(k) { if (options[k] !== undefined) body[k] = options[k]; });
       if (api.apiKey || api.key) headers.Authorization = 'Bearer ' + (api.apiKey || api.key);
     }
-    var response = await (fetcher || fetch)(endpoint(api.url, backend), {method:'POST', headers:headers, body:JSON.stringify(body), signal:options.signal});
+    var response = await (fetcher || fetch)(transportURL(api,endpoint(api.url, backend,options.model||api.model,stream)), {method:'POST', headers:headers, body:JSON.stringify(body), signal:options.signal});
     checkAbort(options.signal);
     if (!response.ok) { var error = new Error('模型请求失败（HTTP ' + response.status + '）'); error.status = response.status; throw error; }
     var contentType = (response.headers.get('content-type') || '').toLowerCase();
     if (backend === 'kobold' || !stream || contentType.includes('application/json')) {
       var data = await response.json(); checkAbort(options.signal);
       if (data.error) throw new Error('模型返回错误，请检查模型和接口配置');
+      if(backend==='gemini'){
+        var reply=geminiReply(data);if(reply.finish!=='STOP'||!reply.text.trim())throw new Error('Gemini 回复不完整或缺少正文，本轮未提交');
+        if(onChunk)onChunk(reply.text,reply.text);return reply.text;
+      }
       var content = backend === 'kobold' ? data.results && data.results[0] && data.results[0].text : backend === 'ollama' ? data.message && data.message.content : data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
       if (typeof content !== 'string') throw new Error('模型回复缺少正文，请检查接口协议');
       if (onChunk) onChunk(content, content);
@@ -308,5 +376,5 @@
     ['personality','scenario','firstMessage'].forEach(function(k) { if (card[k] != null && typeof card[k] !== 'string') throw new Error('角色卡字段类型错误：' + k); });
     return card;
   }
-  return {clone:clone, redact:function(v) { return clone(v,true); }, escapeHtml:escapeHtml, handlerArg:handlerArg, estimateTokens:estimateTokens, endpoint:endpoint, abortError:abortError, checkAbort:checkAbort, matchLorebooks:matchLorebooks, promptPlan:promptPlan, composePrompt:composePrompt, streamParser:streamParser, request:request, readStream:readStream, applyOperations:applyOperations, regeneration:regeneration, parseJSON:parseJSON, importCard:importCard};
+  return {clone:clone, redact:function(v) { return clone(v,true); }, escapeHtml:escapeHtml, handlerArg:handlerArg, estimateTokens:estimateTokens, endpoint:endpoint, transportURL:transportURL, abortError:abortError, checkAbort:checkAbort, matchLorebooks:matchLorebooks, promptPlan:promptPlan, composePrompt:composePrompt, streamParser:streamParser, request:request, readStream:readStream, applyOperations:applyOperations, regeneration:regeneration, parseJSON:parseJSON, importCard:importCard};
 });

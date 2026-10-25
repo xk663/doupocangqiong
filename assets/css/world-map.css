@@ -10,3 +10,5 @@
 @media(max-width:1100px){.world-play-controls{gap:10px;padding:8px 15px}.world-form-hint{display:none}.world-avatar-options button{min-width:100px}.world-form-options button{min-width:80px;padding:6px 8px}}
 @media(max-width:700px){.world-play-controls{gap:6px;padding:7px 10px}.world-avatar-options,.world-form-options{width:100%;gap:5px}.world-avatar-options button{flex:1;min-width:0;padding:3px 6px 3px 2px;gap:4px}.world-avatar-options small{font-size:8px}.world-choice-portrait{width:32px;height:33px;flex-shrink:0}.world-avatar-options strong{font-size:11px}.world-form-options button{flex:1;min-width:0;padding:4px 8px;font-size:10px}.world-form-icon{width:23px;height:24px;font-size:13px}.world-form-options small{font-size:8px}.world-demo>nav{gap:4px;font-size:9px}.world-demo>nav a{margin-right:6px}}
 @media(prefers-reduced-motion:reduce){.world-rig-wings{animation:none!important}}
+
+@media(max-width:700px){.world-avatar-options{flex-wrap:wrap}.world-avatar-options button{flex:1 1 42%}}

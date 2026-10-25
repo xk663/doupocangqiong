@@ -13,10 +13,13 @@
  function options(settings){return {scanDepth:Math.max(0,Math.min(100,Math.floor(Number(settings.loreScanDepth??6)||0))),budget:Math.max(0,Math.min(32768,Math.floor(Number(settings.loreBudget??8192)||0))),maxDepth:Math.max(0,Math.min(8,Math.floor(Number(settings.loreRecursionDepth??3)||0)))};}
  function resolve(v){
   var s=v.settings||{},chat=v.chat||{},ids=new Set([...(v.globalIds||[]),...(chat.lorebookIds||[])]),cfg=options(s),trace=[];
-  var books=(v.books||[]).filter(b=>ids.has(b.id)&&b.enabled!==false);
+  var books=(v.books||[]).filter(b=>ids.has(b.id)&&b.enabled!==false&&!b.catalogArchive);
   var preset=(v.presets||[]).find(p=>p.id===chat.presetId)||(v.presets||[]).find(p=>p.id===s.activePresetId)||(v.presets||[])[0]||{};
   var input=regex(v.input,v.regexes,1,'user',0),history=(v.history||[]).map((m,i,a)=>({role:m.role,content:regex(m.content,v.regexes,1,m.role,a.length-i)}));
-  var scan=(cfg.scanDepth?history.slice(-cfg.scanDepth).map(m=>m.content).join('\n'):'')+'\n'+input;
+  // Character sheets and system instructions may mention names only to forbid assumptions.
+  // They remain in the request, but do not act as conversational keyword evidence.
+  var conversation=history.filter(m=>m.role==='user'||m.role==='assistant');
+  var scan=(cfg.scanDepth?conversation.slice(-cfg.scanDepth).map(m=>m.content).join('\n'):'')+'\n'+input;
   var matches=core.matchLorebooks(scan,books,{budget:cfg.budget,maxDepth:cfg.maxDepth,trace:trace});
   var userName=String(v.player?.name||'').trim()||'玩家';
   return {userName,preset,input,history,matches,trace,options:cfg,books:books.map(b=>({id:b.id,name:b.name})),inactiveBooks:(v.books||[]).filter(b=>!books.includes(b)).map(b=>({id:b.id,name:b.name})),missingIds:[...ids].filter(id=>!(v.books||[]).some(b=>b.id===id))};

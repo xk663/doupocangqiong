@@ -1,0 +1,16 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>存档管理 · 隔离验证</title>
+<link rel="stylesheet" href="../../assets/css/save-manager.css">
+<style>body{background:#eeeee3;color:#355541;font:14px system-ui;--font-serif:serif}main{padding:25px}.modal-overlay{position:fixed;inset:0;background:#243c3266;display:grid;place-items:center}.modal-content{position:relative;box-sizing:border-box;overflow:auto;border-radius:15px}.modal-close{position:absolute;top:15px;right:15px;background:transparent;border:0;color:#708468;font-size:24px}#notice{position:fixed;bottom:15px;right:15px;padding:12px;background:#365d49;color:#fff7dd;z-index:5;max-width:80%}button{cursor:pointer}</style>
+<script src="../../assets/js/tavern-core.js"></script><script src="../../assets/js/save-manager.js"></script>
+<script>
+var SAVES_KEY='doupo-save-library-isolated-qa',GameState={phase:'game',player:{name:'林见山',realm:'斗师三星',inventory:[],beautyChronicle:{records:{}}},settings:{}},tavernState={isSending:false,isLoading:false};
+function showToast(s){document.getElementById('notice').textContent=s;}
+function showModal(s){document.getElementById('modal').innerHTML='<div class="modal-overlay"><div class="modal-content"><button class="modal-close" onclick="closeAllModals()" aria-label="关闭">×</button>'+s+'</div></div>';}
+function closeAllModals(){document.getElementById('modal').innerHTML='';}
+function buildGameSnapshot(){return TavernCore.redact({type:'doupo-save',version:2,id:'save-'+crypto.randomUUID(),timestamp:Date.now(),player:GameState.player,settings:{},worldState:{location:'加玛帝国',specificSpot:'青山镇'},gameTime:{year:1,month:10,day:3},tavern:{activeChatId:'qa',chats:[{id:'qa',messages:[{role:'user',content:'准备采药'},{role:'assistant',content:'你来到药铺，核实药材与路线。'}]}],presets:[],lorebooks:[]},snapshots:[]});}
+function validateGameSnapshot(s){if(!s?.player||typeof s.id!=='string')throw Error('无效存档');return s;}
+async function restoreGameSnapshot(s){GameState.player=TavernCore.clone(s.player);document.getElementById('current-player').textContent=GameState.player.name+' · '+(GameState.player.realm||'');}
+function showView(){}function initGameWorld(){}
+function createSave(){return SaveManager.create();}function loadSave(id){return SaveManager.load(id);}function exportSave(id){return SaveManager.exportOne(id);}function importSave(f){return SaveManager.importFile(f);}function deleteSave(id){return SaveManager.act('trash',id);}
+document.addEventListener('DOMContentLoaded',()=>{if(!localStorage.getItem(SAVES_KEY)){let s=buildGameSnapshot();s.player={...s.player,name:'林见山',realm:'斗之气七段'};s.worldState.specificSpot='乌坦城';let rows=SaveManager.transition([],{type:'add',snapshot:s,name:'乌坦城 · 初行',note:'启程前留下的一卷'},Date.now()-86400000);s=buildGameSnapshot();s.player.realm='斗者三星';rows=SaveManager.transition(rows,{type:'add',snapshot:s,name:'魔兽山脉之前',note:'补齐药材与水囊，准备进山'},Date.now()-3600000);rows=SaveManager.transition(rows,{type:'pin',id:s.id});SaveManager.write(rows);}SaveManager.open();});
+</script><main><h1>存档管理隔离验证</h1><p>只使用专用测试存档库，不影响主游戏，不调用模型。</p><p id="current-player">林见山 · 斗师三星</p><button onclick="SaveManager.open()">打开存档管理</button></main><div id="modal"></div><div id="notice" role="status">就绪</div></html>

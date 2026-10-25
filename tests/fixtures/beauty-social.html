@@ -1,0 +1,18 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>人物互动 · 隔离验证</title>
+<link rel="stylesheet" href="../../assets/css/journal.css">
+<style>body{margin:0;background:#f4f3e8;color:#365541;font:14px system-ui;--font-serif:serif;--font-sans:system-ui}header{padding:12px 22px;background:#365541;color:#fff6db}button{cursor:pointer}textarea{font:inherit}#chat{padding:24px}#tavern-input{width:90%;height:200px}#qa-notice{position:fixed;bottom:12px;right:12px;background:#365541;color:white;padding:12px;max-width:75%;z-index:3}</style>
+<script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js" defer></script>
+<script src="../../assets/js/tavern-core.js"></script><script src="../../assets/js/beauty-roster.js"></script><script src="../../assets/js/beauty-chronicle.js"></script>
+<script>
+var GameState={phase:'game',player:{name:'隔离测试玩家'},settings:{}};
+var tavernState={activeChatId:'qa-chat',isSending:false,isLoading:false,tavernSettings:{id:'main'}};
+var HEAVENLY_FLAMES=[],db;
+function escapeHtml(s){return TavernCore.escapeHtml(s);}
+function showToast(s){document.getElementById('qa-notice').textContent=s;}
+function saveToLocalStorage(){try{localStorage.setItem('doupo_beauty_social_qa',JSON.stringify(GameState));return true;}catch(e){return false;}}
+function switchGameView(id){document.getElementById('game-view-flames').hidden=id==='tavern';document.getElementById('chat').hidden=id!=='tavern';}
+document.addEventListener('DOMContentLoaded',async function(){db=new Dexie('DoupoBeautySocialIsolatedQA');db.version(1).stores({tavernSettings:'id'});var s=await db.tavernSettings.get('main');if(s?.playerState)GameState.player=s.playerState;DoupoPanels.rankings('beauties');});
+</script><script src="../../assets/js/journal-panels.js"></script>
+<header>隔离交互验证 · 独立测试数据库，不影响主游戏；不发送模型请求</header><nav id="game-sidebar" hidden></nav><div id="game-view-flames"></div>
+<section id="chat" hidden><h2>互动草稿 · 未发送</h2><textarea id="tavern-input" aria-label="互动草稿"></textarea><p><button onclick="switchGameView('flames');DoupoPanels.rankings('beauties')">返回人物列表</button></p></section><div id="qa-notice" role="status">就绪</div>
+</html>

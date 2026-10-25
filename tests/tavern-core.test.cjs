@@ -21,7 +21,7 @@ function context(names, overrides = {}) {
   const db = {chats:table('chats'),lorebooks:table('lorebooks'),presets:table('presets'),characterCard:table('characterCard'),tavernSettings:table('tavernSettings'),
     async transaction(mode,tables,callback){const previous=new Map(records);let aborted=false;try{await callback({abort(){aborted=true;}});if(aborted)throw core.abortError();}catch(e){records.clear();for(const [k,v]of previous)records.set(k,v);throw e;}}};
   const chat={id:'chat-a',messages:[],variables:{gold:10},presetId:'preset',lorebookIds:[]};
-  const state = {TavernCore:core,TavernWiring:require('../assets/js/tavern-wiring.js'),DoupoUserFlames:require('../assets/js/user-flames.js'),console,AbortController,crypto:webcrypto,URL,FormData,Blob,Set,Date,
+  const state = {BeautyRoster:require('../assets/js/beauty-roster.js'),BeautyChronicle:require('../assets/js/beauty-chronicle.js'),StoryQuests:require('../assets/js/story-quests.js'),TavernCore:core,LoreCatalog:require('../assets/js/lore-catalog.js'),TavernWiring:require('../assets/js/tavern-wiring.js'),DoupoUserFlames:require('../assets/js/user-flames.js'),console,AbortController,crypto:webcrypto,URL,FormData,Blob,Set,Date,
     document:{getElementById:el,createElement(){return {id:'',textContent:'',className:'',remove(){elements.delete(this.id);}};}},
     db,tavernState:{isLoading:false,isSending:false,chats:[chat],activeChatId:'chat-a',presets:[{id:'preset',settings:{}}],lorebooks:[],activeLorebookIds:[],tavernSettings:{},characterCard:{id:'active',name:'角色'}},
     GameState:{player:{name:'玩家',desireLust:0},settings:{apis:[{id:'api',url:'https://example.com/v1',apiKey:'LOCAL-SECRET'}]},phase:'title'},GameTime:{day:1},WorldState:{location:'A'},TimeRewind:{snapshots:[],maxSnapshots:20},SAVES_KEY:'doupo_saves',RACES:[],
@@ -31,7 +31,7 @@ function context(names, overrides = {}) {
     assembleTavernPrompt(){return {messages:[],estimatedTokens:4,removedMessages:0};},matchLorebookEntries(){return [];},StreamParser:core.streamParser,
     applyRegexScripts(text){return text;},saveToLocalStorage(){return true;},takeSnapshot(){},createDefaultTavernSettings(){return {id:'main'};},
     ...overrides};
-  vm.createContext(state);if(names.includes('runTavernTurn'))vm.runInContext(source('prepareTavernRequest'),state);for(const name of names)vm.runInContext(source(name),state);
+  vm.createContext(state);vm.runInContext(fs.readFileSync(path.join(__dirname,'../assets/js/save-manager.js'),'utf8'),state);if(names.includes('runTavernTurn'))vm.runInContext(source('prepareTavernRequest'),state);for(const name of names)vm.runInContext(source(name),state);
   return {state,records,notices,storage,el};
 }
 
@@ -209,6 +209,17 @@ test('save names and handler arguments remain escaped',()=>{
   assert.equal(result.includes('<img'),false);assert.equal(result.includes('<svg>'),false);assert.ok(result.includes('&quot;'));
 });
 
+test('restoring saves retains beauty credentials only for the matching local endpoint and backend',async()=>{
+ const {state}=context(['restoreGameSnapshot','validateGameSnapshot','stopTavernStream'],{Economy:{},StudioState:{},QuestSystem:{}});
+ state.GameState.settings.beautyApi={url:'http://localhost:8080',backend:'gemini',apiKey:'LOCAL-BEAUTY-KEY'};
+ const data={player:{name:'恢复角色'},settings:{beautyApi:{url:'http://localhost:8080',backend:'gemini',apiKey:'IMPORTED-SECRET'}}};await state.restoreGameSnapshot(data);assert.equal(state.GameState.settings.beautyApi.apiKey,'LOCAL-BEAUTY-KEY');
+ await state.restoreGameSnapshot({...data,settings:{beautyApi:{url:'https://other.example',backend:'gemini'}}});assert.equal(state.GameState.settings.beautyApi.apiKey,'');
+});
+
+test('an asynchronous restore rolls back its database writes if the current life changes',async()=>{
+ const {state,records}=context(['restoreGameSnapshot','validateGameSnapshot','stopTavernStream','buildGameSnapshot'],{Economy:{},StudioState:{},QuestSystem:{}});const saved=state.buildGameSnapshot();state.db.presets.bulkPut=async()=>{state.GameState.player={name:'新人生'};};await assert.rejects(state.restoreGameSnapshot(saved),/已变化/);assert.equal(state.GameState.player.name,'新人生');assert.equal(records.size,0);
+});
+
 test('the actual application assembler includes defaults alongside custom preset content',()=>{
   const {state}=context(['assembleTavernPrompt','createPreset']);
   state.tavernState.characterCard={name:'薰儿',description:'UNIQUE_CHARACTER'};
@@ -298,7 +309,7 @@ test('supplemented flame lore reaches actual assembled requests and respects dis
   for(const fire of supplement.flames){
     const matches=core.matchLorebooks('寻找'+fire.name,[book]);
     const text=state.assembleTavernPrompt({preset:state.createPreset(),userInput:'寻找'+fire.name,lorebookMatches:matches}).messages.map(m=>m.content).join('\n');
-    assert.ok(text.includes(fire.desc));
+    assert.ok(text.includes(fire.summary));
     assert.ok(text.includes('项目补充设定'));
     const own=book.entries.find(e=>e.keys.includes(fire.name));
     own.enabled=false;
@@ -337,4 +348,77 @@ test('flame catalogue has unique ranks and names matching user modifications',()
   assert.equal(rendered.includes('undefined'),false);
   assert.equal((rendered.match(/>项目补充<\/span>/g)||[]).length,3);
   for(const f of fires.filter(f=>f.sourceType==='user-supplement')){assert.ok(f.summary.length<65);assert.ok(rendered.includes(f.summary));assert.ok(!rendered.includes(f.desc));}
+});
+
+test('gameplay preference appears once in budgeted payload and never mutates history',()=>{
+ const {state}=context(['assembleTavernPrompt']);const history=[{role:'user',content:'旧对话'}];
+ state.GameState.settings.gameplayPrompt={enabled:true,text:'CUSTOM_GAMEPLAY_MARKER'};
+ const opts={history,userInput:'本轮输入',preview:true};const r=state.assembleTavernPrompt(opts);
+ assert.equal(r.messages.filter(m=>m.content.includes('CUSTOM_GAMEPLAY_MARKER')).length,1);
+ assert.equal(history.length,1);assert.equal(history[0].content,'旧对话');
+ state.GameState.settings.gameplayPrompt.enabled=false;
+ assert.ok(!JSON.stringify(state.assembleTavernPrompt(opts)).includes('CUSTOM_GAMEPLAY_MARKER'));
+ state.GameState.settings.gameplayPrompt={enabled:true,text:'   '};
+ assert.ok(!JSON.stringify(state.assembleTavernPrompt(opts)).includes('【玩家玩法偏好】'));
+});
+test('gameplay save persists enabled text and rolls back in-memory config on storage error',()=>{
+ const {state,el,notices}=context(['saveGameplayPrompt','saveToLocalStorage'],{Economy:{},StudioState:{},QuestSystem:{}});
+ el('gameplay-enabled').checked=true;el('gameplay-prompt').value='慢节奏探索';state.saveGameplayPrompt();
+ assert.equal(state.GameState.settings.gameplayPrompt.text,'慢节奏探索');
+ const original=state.GameState.settings.gameplayPrompt;
+ state.localStorage.setItem=()=>{throw Error('quota')};el('gameplay-prompt').value='未保存';state.saveGameplayPrompt();
+ assert.equal(state.GameState.settings.gameplayPrompt,original);assert.equal(notices.at(-1).type,'error');
+});
+
+test('four gameplay slots independently inject enabled nonempty text in stable order',()=>{
+ const {state}=context(['assembleTavernPrompt']);
+ state.GameState.settings.gameplayPrompt={enabled:true,text:'CUSTOM_SLOT'};
+ state.GameState.settings.gameplayExtras={clear:{enabled:true,text:'CLEAR_SLOT'},shushan:{enabled:false,text:'SHUSHAN_SLOT'},intense:{enabled:true,text:'INTENSE_SLOT'}};
+ const r=state.assembleTavernPrompt({userInput:'行动',preview:true});const payload=JSON.stringify(r.messages);
+ for(const marker of ['CUSTOM_SLOT','CLEAR_SLOT','INTENSE_SLOT'])assert.equal(payload.split(marker).length-1,1);
+ assert.ok(!payload.includes('SHUSHAN_SLOT'));assert.ok(payload.indexOf('CLEAR_SLOT')<payload.indexOf('INTENSE_SLOT'));assert.ok(payload.indexOf('INTENSE_SLOT')<payload.indexOf('CUSTOM_SLOT'));
+});
+
+test('optional gameplay switches never alter the enabled clear prompt',()=>{
+ const {state}=context(['assembleTavernPrompt']);
+ const line='不主动引入色情情节，不将人物外貌、身体接触或日常交流色情化。';
+ const original='保留前文。\n'+line+'\n保留后文。';
+ state.GameState.settings.gameplayExtras={clear:{enabled:true,text:original},shushan:{enabled:false,text:''},intense:{enabled:false,text:''}};
+ const extras=state.GameState.settings.gameplayExtras;
+ for(const [a,b] of [[false,false],[true,false],[false,true],[true,true],[true,false],[false,false]]){
+  extras.shushan.enabled=a;extras.intense.enabled=b;
+  const messages=state.assembleTavernPrompt({userInput:'行动',preview:true}).messages;
+  const block=messages.find(m=>m.content.includes('【玩家玩法偏好 · 清水】')).content;
+  assert.ok(block.includes(line));assert.ok(block.includes('保留前文。'));assert.ok(block.includes('保留后文。'));
+  assert.equal(extras.clear.text,original);
+ }
+});
+
+test('story quests commit with the assistant turn, survive saving and regenerate without duplicates',async()=>{
+ const update={action:'create',name:'商道补给',desc:'商人提出补水建议',objective:'买到水囊',grade:'黄',reward:'约定报酬'};
+ const {state,records}=context(turnFunctions,{callLLMStream:async()=> '正文<quest_updates>'+JSON.stringify([update])+'</quest_updates>'});
+ await state.runTavernTurn('问商人',false);assert.equal(state.GameState.player.storyQuests.active.length,1);
+ assert.ok(!state.getActiveChat().messages.at(-1).content.includes('quest_updates'));
+ assert.equal(records.get('tavernSettings:main').playerState.storyQuests.active.length,1);
+ const id=state.GameState.player.storyQuests.active[0].id;await state.regenerateLastTavern();assert.equal(state.GameState.player.storyQuests.active.length,1);assert.equal(state.GameState.player.storyQuests.active[0].id,id);
+});
+
+test('an assistant save failure leaves no phantom story quest',async()=>{
+ const {state,notices}=context(turnFunctions,{callLLMStream:async()=>'<quest_updates>'+JSON.stringify([{action:'create',name:'测试',desc:'情景',objective:'目标',grade:'玄'}])+'</quest_updates>'});
+ const put=state.db.chats.put;state.db.chats.put=async v=>{if(v.messages.at(-1)?.role==='assistant')throw Error('quota');return put(v);};
+ await state.runTavernTurn('行动',false);assert.equal(state.GameState.player.storyQuests,undefined);assert.ok(notices.some(n=>n.type==='error'));
+});
+
+test('beauty records share the narrative transaction and regeneration restores pre-turn records',async()=>{
+ const module=require('../assets/js/beauty-chronicle.js');let runs=0;
+ const {state,records}=context(turnFunctions,{callLLMStream:async()=>'<ui_sys>2年9月16日 08:00</ui_sys>小医仙今年18岁，修为斗师。',BeautyChronicle:{update:(previous,body,config,signal,id)=>module.update(previous,body,{enabled:true,url:'https://example.com/v1',model:'test'},signal,id,async()=>{runs++;return JSON.stringify({characters:[{name:'小医仙',age:18,realm:'斗师',event:'拜访青山镇',evidence:'小医仙今年18岁，修为斗师。'}]});})}});
+ await state.runTavernTurn('拜访',false);assert.equal(state.GameState.player.beautyChronicle.records['小医仙'].events.length,1);assert.equal(records.get('tavernSettings:main').playerState.beautyChronicle.clock.year,2);
+ await state.regenerateLastTavern();assert.equal(runs,2);assert.equal(state.GameState.player.beautyChronicle.records['小医仙'].events.length,1);
+ const saved=JSON.stringify(state.GameState.player);const put=state.db.chats.put;state.db.chats.put=async v=>{if(v.messages.at(-1)?.role==='assistant')throw Error('quota');return put(v);};await state.runTavernTurn('继续',false);assert.equal(JSON.stringify(state.GameState.player),saved);
+});
+
+test('actual outbound prompts carry original characters, independent relations and correction locks once',()=>{
+ const {state}=context(['assembleTavernPrompt']);const roster=require('../assets/js/beauty-roster.js');let s=roster.edit(null,{type:'add',name:'柳知秋',bio:'山中药师'});s=roster.edit(s,{type:'correct',name:'柳知秋',values:{realm:'斗师',trust:'信任',closeness:'疏远'},locks:{realm:true}});state.GameState.player.beautyChronicle=s;
+ const out=state.assembleTavernPrompt({userInput:'拜访',preview:true});const text=JSON.stringify(out.messages);assert.equal(text.split('【本次人生人物档案】').length-1,1);for(const v of ['柳知秋','山中药师','斗师','信任','疏远','locks'])assert.ok(text.includes(v));
+ const before=roster.edit(null,{type:'add',name:'旧分支人物'});const regenerated=JSON.stringify(state.assembleTavernPrompt({userInput:'拜访',preview:true,beautyState:before}).messages);assert.ok(regenerated.includes('旧分支人物'));assert.ok(!regenerated.includes('柳知秋'));
 });

@@ -2,8 +2,8 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=requir
 const data=require('../assets/js/world-data.js'),nav=require('../assets/js/world-navigation.js'),core=require('../assets/js/world-core.js');
 function fresh(realm='斗王·一星'){const state=core.initial(data,'wutan-market','forms');return {state,player:{name:'独立角色',gender:'male',realm,inventory:[],exploration:state},economy:{gold:40},gameTime:{year:1,month:1,day:1,hour:8,minute:0,totalHours:0},worldState:{location:'乌坦城'},questSystem:{quests:[],completed:[],failed:[]}};}
 const move=(c,x,y,mode)=>core.transition(data,c,{type:'walk',sceneId:'wutan',x,y,mode});
-test('three mutually exclusive avatar choices are saved independently of gender or character identity',()=>{
- let c=fresh();assert.equal(nav.avatars.length,3);for(const a of nav.avatars){c=core.transition(data,c,{type:'appearance',avatarId:a.id});assert.equal(c.state.avatarId,a.id);assert.equal(c.player.name,'独立角色');assert.equal(c.player.gender,'male');assert.equal(c.player.realm,'斗王·一星');assert.equal(c.gameTime.totalHours,0);assert.equal(c.state.turn,0);assert.equal(c.cosmetic,true);assert.equal(core.normalize(data,JSON.parse(JSON.stringify(c.state)),c.player,c.worldState).avatarId,a.id);}
+test('four mutually exclusive avatar choices are saved independently of gender or character identity',()=>{
+ let c=fresh();assert.equal(nav.avatars.length,4);for(const a of nav.avatars){c=core.transition(data,c,{type:'appearance',avatarId:a.id});assert.equal(c.state.avatarId,a.id);assert.equal(c.player.name,'独立角色');assert.equal(c.player.gender,'male');assert.equal(c.player.realm,'斗王·一星');assert.equal(c.gameTime.totalHours,0);assert.equal(c.state.turn,0);assert.equal(c.cosmetic,true);assert.equal(core.normalize(data,JSON.parse(JSON.stringify(c.state)),c.player,c.worldState).avatarId,a.id);}
  assert.throws(()=>core.transition(data,c,{type:'appearance',avatarId:'../../secret'}),/未知/);
 });
 test('old avatar-less saves use gender defaults while an explicit choice survives gender changes',()=>{

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -13,9 +13,17 @@
 <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js" defer></script>
 <script src="assets/js/tavern-core.js"></script>
 <script src="assets/js/tavern-wiring.js"></script>
+<script src="assets/js/story-quests.js"></script>
+<script src="assets/js/beauty-roster.js"></script>
+<script src="assets/js/save-manager.js"></script>
+<script src="assets/js/beauty-chronicle.js"></script>
+<script src="assets/js/api-settings.js"></script>
 <script src="assets/js/user-flames.js"></script>
 <script src="assets/js/creation-rules.js"></script>
 <script src="assets/js/lore-canon.js"></script>
+<script src="assets/js/lore-catalog-data.js"></script>
+<script src="assets/js/lore-legacy-signatures.js"></script>
+<script src="assets/js/lore-catalog.js"></script>
 <style>
 /* === CSS Custom Properties === */
 :root {
@@ -1117,6 +1125,7 @@ input:checked + .toggle-slider::before { background:var(--text-primary);transfor
 <script src="assets/js/world-bridge.js"></script>
 <script src="assets/js/world-ui.js"></script>
 <link rel="stylesheet" href="assets/css/journal.css">
+<link rel="stylesheet" href="assets/css/save-manager.css">
 <link rel="stylesheet" href="assets/css/tavern-settings.css">
 </head>
 <body>
@@ -1198,17 +1207,11 @@ input:checked + .toggle-slider::before { background:var(--text-primary);transfor
         </svg>
         <span class="sidebar-label">概要</span>
       </button>
-      <button id="sidebar-flames" class="sidebar-btn" data-view="flames" onclick="switchGameView('flames',this)" title="异火榜">
+      <button id="sidebar-flames" class="sidebar-btn" data-view="flames" onclick="switchGameView('flames',this)" title="排行榜">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M12 2C8 8 4 12 4 16a8 8 0 0016 0c0-4-4-8-8-14z"/><path d="M12 16c1.1 0 2-.9 2-2s-2-4-2-4-2 3-2 4 .9 2 2 2z"/>
         </svg>
-        <span class="sidebar-label">异火</span>
-      </button>
-      <button id="sidebar-beauties" class="sidebar-btn" data-view="beauties" onclick="switchGameView('beauties',this)" title="美人榜">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <circle cx="12" cy="8" r="5"/><path d="M4 22c0-4 3.6-7 8-7s8 3 8 7"/><path d="M12 15l-3 3h6l-3-3z"/>
-        </svg>
-        <span class="sidebar-label">美人</span>
+        <span class="sidebar-label">排行榜</span>
       </button>
       <button id="sidebar-quests" class="sidebar-btn" data-view="quests" onclick="switchGameView('quests',this)" title="任务">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -1817,6 +1820,7 @@ function showView(viewId) {
 }
 
 function switchGameView(viewId, btn) {
+  if(viewId==='beauties'){DoupoPanels.rankTab='beauties';viewId='flames';btn=document.getElementById('sidebar-flames');}
   document.querySelectorAll('.game-subview').forEach(function(v) { v.classList.remove('active'); });
   var target = document.getElementById('game-view-' + viewId);
   if (target) target.classList.add('active');
@@ -2027,6 +2031,8 @@ function startGame() {
   if(typeof WorldMapBridge!=='undefined')WorldMapBridge.cancelMovement();
   delete p.exploration;
   if(typeof WorldMapBridge!=='undefined')WorldMapBridge.clearProposal();
+  delete p.storyQuests;
+  delete p.beautyChronicle;
   p.inventory=initial.inventory;p.skills=getIdentityStartingSkills(p.identity);p.relationships=initial.relationships;p.history=[];
   p.equipment={weapon:null,armor:null,accessory:null,ring:null};
   // A new life owns new time, quests and rewind state; existing named saves/chats remain intact.
@@ -2127,7 +2133,9 @@ async function continueGame() {
   // Current autosave owns player, world and chat state together. Never replace just
   // the player with an unrelated named save when resuming a newer life.
   if(!GameState.player.name||!GameState.player.race){
-    var saves=getSaves().slice().sort(function(a,b){return b.timestamp-a.timestamp;});
+    var saves;
+    try{saves=getSaves().filter(function(s){return s&&!s.deletedAt&&s.player&&typeof s.id==='string';}).sort(function(a,b){return Number(b.updatedAt||b.timestamp||0)-Number(a.updatedAt||a.timestamp||0);});}
+    catch(e){showToast('存档库无法读取，请在存档管理中检查；原数据未被覆盖','error');return;}
     if(!saves.length){showToast('暂无有效进度，请开启新人生','warning');return;}
     try{await restoreGameSnapshot(saves[0]);}catch(e){showToast('恢复失败：'+e.message,'error');return;}
   }
@@ -2143,14 +2151,14 @@ async function continueGame() {
 // 异火榜 VIEW
 // ==============================
 function buildFlamesView() {
-  return DoupoPanels.flameView();
+  return DoupoPanels.rankings();
 }
 
 // ==============================
 // 美人榜 VIEW
 // ==============================
 function buildBeautiesView() {
-  return DoupoPanels.beauties();
+  return DoupoPanels.rankings('beauties');
 }
 
 // ==============================
@@ -2184,7 +2192,6 @@ function initGameWorld() {
   buildPlayerSummary();
   buildTavern();
   buildFlamesView();
-  buildBeautiesView();
   buildQuestsView();
   // Select tavern (游戏) by default
   var btn = document.querySelector('[data-view="tavern"]');
@@ -2422,12 +2429,12 @@ var settingsActiveTab = 'core';
 var settingsTabLabels = {
   'core': '核心配置',
   'lorebook': '世界书管理', 'presets': '预设管理', 'tavern': '酒馆设置',
-  'regex': '正则引擎', 'depth': '深度性格'
+  'regex': '正则引擎', 'depth': '玩法'
 };
 var settingsTabShortLabels = {
   'core': '核心',
   'lorebook': '世界书', 'presets': '预设', 'tavern': '酒馆',
-  'regex': '正则', 'depth': '性格'
+  'regex': '正则', 'depth': '玩法'
 };
 var settingsTabIcons = {
   'core': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.2 4.2l2.8 2.8m10 10l2.8 2.8M1 12h4m14 0h4"/></svg>',
@@ -2676,25 +2683,8 @@ function buildProtocolSystemPrompt() {
 }
 
 function renderSettingsCore(body) {
-  body.innerHTML =
-    '<div style="display:grid;grid-template-columns:420px 1fr;gap:32px;">' +
-      // -- LEFT COLUMN: API + Discord --
-      '<div>' +
-        '<div class="settings-section-title">API 配置</div>' +
-        '<div class="settings-card-grid" id="api-cards-container" style="margin-bottom:10px;"></div>' +
-        '<div style="display:flex;gap:6px;margin-bottom:24px;">' +
-          '<button class="settings-action-btn" onclick="addNewApi()" style="flex:1;">＋ 添加 API</button>' +
-          '<button class="settings-action-btn" onclick="forceSaveAllSettings()" style="flex:1;background:rgba(136,204,136,0.1);border-color:var(--accent-green);color:var(--accent-green);">💾 强制保存配置</button>' +
-        '</div>' +
-        '<div id="discord-settings-container"></div>' +
-      '</div>' +
-      // -- RIGHT COLUMN: Protocols --
-      '<div>' +
-        '<div class="settings-section-title">正文规则</div>' +
-        buildProtocolCards() +
-      '</div>' +
-    '</div>';
-  setTimeout(function() { renderApiCards(); var backup = document.getElementById('discord-settings-container'); if (backup) renderSettingsDiscord(backup); }, 50);
+  body.innerHTML='<div class="core-settings-grid"><section><div class="settings-section-title">连接与备份</div><p class="wiring-help">按步骤配置，填写后自动保存；模型查询只验证列表接口，不消耗聊天额度。</p><div id="api-cards-container"></div><div class="api-actions"><button class="settings-action-btn" onclick="addNewApi()">添加接口</button><button class="text-btn" onclick="forceSaveAllSettings()">保存全部配置</button></div><div id="discord-settings-container"></div></section><section><div class="settings-section-title">正文规则</div>'+buildProtocolCards()+'</section></div>';
+  renderApiCards();renderSettingsDiscord(document.getElementById('discord-settings-container'));
 }
 
 function renderSettingsApi(body) {
@@ -2749,13 +2739,14 @@ function renderSettingsLorebook(body) {
   if (tavernState.lorebooks.length === 0) {
     html += '<div style="text-align:center;padding:30px;color:var(--text-dim);">暂无世界书</div>';
   } else {
-    tavernState.lorebooks.forEach(function(book) {
+    tavernState.lorebooks.filter(function(b){return !b.catalogArchive;}).forEach(function(book) {
       var active = tavernState.activeLorebookIds.indexOf(book.id) >= 0;
       html += '<div class="settings-card">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;">' +
           '<div style="flex:1;">' +
             '<div style="color:var(--text-primary);font-family:var(--font-serif);font-size:14px;font-weight:600;">' + escapeHtml(book.name) + '</div>' +
-            '<div style="color:var(--text-muted);font-size:11px;">' + book.entries.length + ' 条目</div>' +
+            '<div style="color:var(--text-muted);font-size:11px;">' + book.entries.length + ' 条目' + (book.catalogVersion ? ' · 校订版 V'+book.catalogVersion : '') + '</div>' +
+            (book.catalogSummary ? '<div class="wiring-help">保留 '+book.catalogSummary.preserved+' 条自定义 · 秘闻按阶段启用 · 原版已备份</div>' : '') +
           '</div>' +
           '<div style="display:flex;gap:8px;align-items:center;">' +
             '<span class="settings-label-chip" style="color:' + (active ? 'var(--accent-green)' : 'var(--text-muted)') + ';">' + (active ? '已启用' : '未启用') + '</span>' +
@@ -2771,6 +2762,8 @@ function renderSettingsLorebook(body) {
     });
   }
   html += '<button class="settings-action-btn" onclick="addNewLorebook()">＋ 新建世界书</button>';
+  var backups=tavernState.lorebooks.filter(function(b){return b.catalogArchive;});
+  if(backups.length)html+='<details class="lore-backups"><summary>升级前备份（'+backups.length+'本，不参与聊天）</summary>'+backups.map(function(b){return '<div class="settings-card"><strong>'+escapeHtml(b.name)+'</strong><p>'+b.entries.length+' 条原始记录</p><button class="text-btn" onclick="LoreCatalogUI.download('+TavernCore.handlerArg(b.id)+')">导出备份</button></div>';}).join('')+'</details>';
   html += TavernInspector.controls();
   body.innerHTML = html;
 }
@@ -3157,16 +3150,7 @@ function togglePureTextMode(checked) {
 }
 
 function renderSettingsDiscord(body) {
-  body.innerHTML = '<div class="settings-section-title">Discord 云备份</div>' +
-    '<p style="font-size:12px;color:var(--text-muted);line-height:1.7;">填写你自己的频道 Webhook。仅在点击备份时上传完整进度，包含聊天内容，不含 API 密钥。无需 Discord 账号授权。</p>' +
-    '<label class="settings-form-label">你的 Webhook 地址</label>' +
-    '<input id="discord-webhook-input" type="password" class="settings-form-input" autocomplete="off" value="' + escapeHtmlAttr(GameState.settings.discordWebhook || '') + '" placeholder="https://discord.com/api/webhooks/...">' +
-    '<button class="settings-action-btn" onclick="saveDiscordConfig()">保存备份地址</button>' +
-    '<button class="settings-action-btn" onclick="syncToCloud()">⬆ 备份完整进度</button>' +
-    '<button class="settings-action-btn" onclick="restoreFromCloud()">⬇ 从云端恢复</button>' +
-    '<button class="settings-action-btn" onclick="restoreFromLocal()">📂 读取本地备份</button>' +
-    '<button class="settings-action-btn" onclick="backupApiConfig()">备份 API 配置到本机</button>' +
-    '<button class="settings-action-btn" onclick="restoreApiConfig()">恢复本机 API 配置</button>';
+  return ApiSettings.backup(body);
 }
 
 function toggleCustomRules(enabled) {
@@ -3194,9 +3178,7 @@ function addApiForm() {
 }
 
 function setActiveApi(id) {
-  GameState.settings.activeApi = id;
-  showToast('已切换活跃 API', 'success');
-  renderSettingsTab('core');
+  return ApiSettings.select(id);
 }
 
 function removeApi(id) {
@@ -3213,105 +3195,19 @@ function removeApi(id) {
 // ==============================
 
 function renderApiCards() {
-  var container = document.getElementById('api-cards-container');
-  if (!container) return;
-  GameState.settings.apis = GameState.settings.apis || [];
-  if (GameState.settings.apis.length === 0) {
-    container.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:20px;text-align:center;">暂无 API 接口，点击下方按钮添加</div>';
-    return;
-  }
-  container.innerHTML = GameState.settings.apis.map(function(api) {
-    var models = api.models || [];
-    var isActive = GameState.settings.activeApi === api.id;
-    var lastSyncText = '';
-    if (api.lastSync) {
-      var d = new Date(api.lastSync);
-      lastSyncText = '已同步 ' + models.length + ' 个模型 · ' + d.toLocaleString('zh-CN');
-    } else if (models.length > 0) {
-      lastSyncText = models.length + ' 个模型可用';
-    }
-    return '<div class="settings-card' + (isActive ? ' active-card' : '') + '">' +
-      '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">' +
-        '<input type="text" class="settings-form-input" placeholder="名称" value="' + escapeHtmlAttr(api.name || '') + '" style="flex:1;" oninput="updateApiSetting(' + TavernCore.handlerArg(api.id) + ',\'name\',this.value);saveToLocalStorage()">' +
-        (isActive ? '<span class="settings-label-chip" style="color:var(--text-primary);">当前活跃</span>' : '') +
-        '<label class="toggle-switch" title="' + (api.enabled !== false ? '已启用' : '已禁用') + '">' +
-          '<input type="checkbox" ' + (api.enabled !== false ? 'checked' : '') + ' onchange="toggleApiEnabled(' + TavernCore.handlerArg(api.id) + ',this.checked)">' +
-          '<span class="toggle-slider"></span>' +
-        '</label>' +
-        '<button class="text-btn danger" onclick="deleteApiConfirmed(' + TavernCore.handlerArg(api.id) + ')" title="删除">' +
-          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14"/></svg>' +
-        '</button>' +
-      '</div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">' +
-        '<input type="text" class="settings-form-input" placeholder="接口地址 (https://...)" value="' + escapeHtmlAttr(api.url || '') + '" oninput="updateApiSetting(' + TavernCore.handlerArg(api.id) + ',\'url\',this.value);clearModelList(' + TavernCore.handlerArg(api.id) + ');saveToLocalStorage()">' +
-        '<div style="display:flex;gap:4px;">' +
-          '<input type="password" id="api-key-' + escapeHtmlAttr(api.id) + '" class="settings-form-input" placeholder="API Key" value="' + escapeHtmlAttr(api.apiKey || api.key || '') + '" oninput="updateApiSetting(' + TavernCore.handlerArg(api.id) + ',\'apiKey\',this.value);updateApiSetting(' + TavernCore.handlerArg(api.id) + ',\'key\',this.value);saveToLocalStorage()">' +
-          '<button class="dice-btn" onclick="toggleApiKeyVisibility(' + TavernCore.handlerArg(api.id) + ')" title="显示/隐藏" style="padding:6px 8px;">' +
-            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' +
-          '</button>' +
-        '</div>' +
-      '</div>' +
-      '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center;">' +
-        '<input type="text" id="model-' + escapeHtmlAttr(api.id) + '" class="settings-form-input" placeholder="模型名称" value="' + escapeHtmlAttr(api.model || '') + '" style="' + (models.length > 0 ? 'display:none;' : '') + '" onchange="updateApiSetting(' + TavernCore.handlerArg(api.id) + ',\'model\',this.value)">' +
-        '<select id="model-select-' + escapeHtmlAttr(api.id) + '" class="settings-form-input" style="' + (models.length > 0 ? '' : 'display:none;') + '" onchange="updateApiSetting(' + TavernCore.handlerArg(api.id) + ',\'model\',this.value)">' +
-          '<option value="">选择模型...</option>' +
-          models.map(function(m) { return '<option value="' + escapeHtmlAttr(m) + '"' + (api.model === m ? ' selected' : '') + '>' + escapeHtmlAttr(m) + '</option>'; }).join('') +
-        '</select>' +
-        '<button class="dice-btn" onclick="syncModels(' + TavernCore.handlerArg(api.id) + ')" style="font-size:10px;white-space:nowrap;padding:6px 10px;">同步</button>' +
-      '</div>' +
-      '<div style="display:flex;gap:6px;margin-bottom:6px;">' +
-        '<select class="settings-form-input" style="flex:1;" onchange="updateApiSetting(' + TavernCore.handlerArg(api.id) + ',\'backend\',this.value);onApiBackendChange(' + TavernCore.handlerArg(api.id) + ',this.value);saveToLocalStorage()">' +
-          '<option value="openai"' + ((api.backend||'openai')==='openai'?' selected':'') + '>天机通灵（OpenAI）</option>' +
-          '<option value="ollama"' + ((api.backend||'openai')==='ollama'?' selected':'') + '>本地灵枢（Ollama）</option>' +
-          '<option value="kobold"' + ((api.backend||'openai')==='kobold'?' selected':'') + '>炉火演算（KoboldCPP）</option>' +
-        '</select>' +
-      '</div>' +
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' +
-        '<span style="font-size:10px;color:var(--text-muted);white-space:nowrap;font-family:var(--font-serif);">路由权重</span>' +
-        '<input type="range" class="form-slider" min="0" max="100" value="' + (api.weight || 50) + '" style="flex:1;" oninput="updateApiSetting(' + TavernCore.handlerArg(api.id) + ',\'weight\',parseInt(this.value));this.nextElementSibling.textContent=this.value">' +
-        '<span style="font-size:11px;color:var(--text-primary);min-width:24px;text-align:center;font-family:var(--font-serif);">' + (api.weight || 50) + '</span>' +
-      '</div>' +
-      '<div style="font-size:10px;">' +
-        '<span id="sync-status-' + escapeHtmlAttr(api.id) + '" style="color:' + (api.lastSync ? 'var(--accent-green)' : 'var(--text-muted)') + ';">' + (lastSyncText || '尚未同步') + '</span>' +
-      '</div>' +
-    '</div>';
-  }).join('');
+  return ApiSettings.render();
 }
 
 function addNewApi() {
-  GameState.settings.apis = GameState.settings.apis || [];
-  var newApi = {
-    id: 'api-' + Date.now(),
-    name: '新接口',
-    url: '',
-    apiKey: '',
-    key: '',
-    model: '',
-    models: [],
-    enabled: true,
-    weight: 50,
-    lastSync: null,
-    backend: 'openai'  // 'openai' | 'kobold' | 'ollama'
-  };
-  GameState.settings.apis.push(newApi);
-  if (!GameState.settings.activeApi) GameState.settings.activeApi = newApi.id;
-  saveToLocalStorage();
-  renderApiCards();
-  showToast('API 接口已添加', 'success');
+  return ApiSettings.add();
 }
 
 function updateApiSetting(apiId, field, value) {
-  var api = (GameState.settings.apis || []).find(function(a) { return a.id === apiId; });
-  if (!api) return;
-  api[field] = value;
-  saveToLocalStorage();
+  return ApiSettings.change(apiId,field,value);
 }
 
 function toggleApiEnabled(apiId, checked) {
-  var api = (GameState.settings.apis || []).find(function(a) { return a.id === apiId; });
-  if (!api) return;
-  api.enabled = checked;
-  saveToLocalStorage();
+  return ApiSettings.change(apiId,'enabled',checked);
 }
 
 function toggleApiKeyVisibility(apiId) {
@@ -3355,111 +3251,11 @@ function clearModelList(apiId) {
 }
 
 function syncModels(apiId) {
-  var api = (GameState.settings.apis || []).find(function(a) { return a.id === apiId; });
-  if (!api) return;
-
-  var url = (api.url || '').trim();
-  var key = (api.key || '').trim();
-
-  if (!url) {
-    showToast('请先填写接口地址', 'error');
-    return;
-  }
-  if (!key) {
-    showToast('请先填写 API Key', 'error');
-    return;
-  }
-
-  // Show loading state
-  var statusEl = document.getElementById('sync-status-' + apiId);
-  if (statusEl) {
-    statusEl.textContent = '正在同步...';
-    statusEl.style.color = 'var(--text-secondary)';
-  }
-
-  // Build the models URL
-  var baseUrl = url.replace(/\/+$/, '');
-  var modelsUrl = baseUrl + '/v1/models';
-
-  // Make the real request
-  fetch(modelsUrl, {
-    method: 'GET',
-    headers: {
-      'Authorization': 'Bearer ' + key,
-      'Content-Type': 'application/json'
-    }
-  })
-  .then(function(response) {
-    if (!response.ok) {
-      if (response.status === 401 || response.status === 403) {
-        throw new Error('认证失败（' + response.status + '）：请检查 API Key 是否正确');
-      } else if (response.status === 404) {
-        throw new Error('接口未找到（404）：该地址不支持 /v1/models 端点');
-      } else {
-        throw new Error('请求失败（' + response.status + '）：' + response.statusText);
-      }
-    }
-    return response.json();
-  })
-  .then(function(data) {
-    // Parse response - handle both formats:
-    // OpenAI format: { object: "list", data: [{ id, created, owned_by }] }
-    // Some proxies return array directly: [{ id, ... }]
-    var models = [];
-    if (data && data.data && Array.isArray(data.data)) {
-      models = data.data.map(function(m) { return m.id; }).filter(Boolean);
-    } else if (Array.isArray(data)) {
-      models = data.map(function(m) { return m.id || m.model || m; }).filter(Boolean);
-    }
-
-    if (models.length === 0) {
-      throw new Error('接口返回了空模型列表，请检查接口地址是否正确');
-    }
-
-    // Update the API entry
-    api.models = models;
-    api.lastSync = Date.now();
-    saveToLocalStorage();
-
-    if (statusEl) {
-      statusEl.textContent = '已同步 ' + models.length + ' 个模型';
-      statusEl.style.color = 'var(--accent-green)';
-    }
-
-    // Re-render the API section
-    renderApiCards();
-
-    showToast('成功同步 ' + models.length + ' 个模型', 'success');
-  })
-  .catch(function(err) {
-    console.error('Model sync error:', err);
-    if (statusEl) {
-      statusEl.textContent = '同步失败';
-      statusEl.style.color = '#cc4444';
-    }
-
-    // Check for network errors
-    if (err.message.indexOf('Failed to fetch') >= 0 || err.message.indexOf('NetworkError') >= 0) {
-      showToast('网络错误：无法连接到接口地址，请检查 URL 或网络连接', 'error');
-    } else if (err.message.indexOf('CORS') >= 0 || err.name === 'TypeError') {
-      showToast('跨域请求被拦截：该接口可能不支持浏览器直接访问，建议使用代理', 'error');
-    } else {
-      showToast(err.message || '同步失败', 'error');
-    }
-  });
+  return ApiSettings.sync(apiId);
 }
 
 function deleteApiConfirmed(apiId) {
-  var api = (GameState.settings.apis || []).find(function(a) { return a.id === apiId; });
-  if (!api) return;
-  if (!confirm('确定要删除 API 接口「' + (api.name || '未命名') + '」吗？此操作不可撤销。')) return;
-  GameState.settings.apis = GameState.settings.apis.filter(function(a) { return a.id !== apiId; });
-  if (GameState.settings.activeApi === apiId) {
-    GameState.settings.activeApi = GameState.settings.apis.length > 0 ? GameState.settings.apis[0].id : null;
-  }
-  saveToLocalStorage();
-  renderApiCards();
-  showToast('API 接口已删除', 'info');
+  return ApiSettings.remove(apiId);
 }
 
 // ==============================
@@ -3499,13 +3295,14 @@ function updateDiscordStatus() {
 function saveDiscordConfig() {
   var input = document.getElementById('discord-webhook-input');
   if (!input) return;
+  var previous = TavernCore.clone(GameState.settings);
   try {
     var webhook = input.value.trim() ? validateWebhook(input.value.trim()) : '';
     if (webhook !== GameState.settings.discordWebhook) { GameState.settings.lastBackupIds = []; GameState.settings.lastBackupTime = null; }
     GameState.settings.discordWebhook = webhook;
     if (!saveToLocalStorage()) throw new Error('浏览器拒绝保存配置');
     showToast('备份地址已保存', 'success');
-  } catch(e) { showToast(e.message,'error'); }
+  } catch(e) { GameState.settings=previous;showToast(e.message,'error'); }
 }
 
 function getDiscordUserName() {
@@ -3588,24 +3385,11 @@ async function applyRestoreData(raw) {
 }
 
 function backupApiConfig() {
-  var apiData = { apis: GameState.settings.apis, activeApi: GameState.settings.activeApi };
-  localStorage.setItem('doupo_api_backup', JSON.stringify(apiData, null, 2));
-  showToast('API 配置已备份到本地 ✓', 'success');
+  try{var apiData={apis:GameState.settings.apis,activeApi:GameState.settings.activeApi,activeSecondaryApi:GameState.settings.activeSecondaryApi};localStorage.setItem('doupo_api_backup',JSON.stringify(apiData));showToast('API配置已备份到本浏览器','success');}catch(e){showToast('配置备份失败：浏览器拒绝写入','error');}
 }
 
 function restoreApiConfig() {
-  var json = localStorage.getItem('doupo_api_backup');
-  if (!json) { showToast('没有 API 配置备份', 'error'); return; }
-  try {
-    var data = JSON.parse(json);
-    if (data.apis) GameState.settings.apis = data.apis;
-    if (data.activeApi) GameState.settings.activeApi = data.activeApi;
-    saveToLocalStorage();
-    renderSettingsTab('core');
-    showToast('API 配置已恢复 ✓', 'success');
-  } catch(e) {
-    showToast('恢复失败：' + e.message, 'error');
-  }
+  try{var raw=localStorage.getItem('doupo_api_backup');if(!raw)throw Error('没有API配置备份');var data=TavernCore.parseJSON(raw);if(!Array.isArray(data.apis)||data.apis.some(function(a){return !a||typeof a.id!=='string'||typeof a.url!=='string';}))throw Error('API备份格式无效');var next=Object.assign({},GameState.settings,{apis:data.apis,activeApi:data.activeApi||null,activeSecondaryApi:data.activeSecondaryApi||null});if(!ApiSettings.commit(next))return;renderSettingsTab('core');showToast('API配置已恢复','success');}catch(e){showToast('恢复失败：'+e.message,'error');}
 }
 
 function syncApiToCloud() {
@@ -3917,30 +3701,21 @@ function initTitleCover() {
 var SAVES_KEY = 'doupo_saves';
 
 function getSaves() {
-  try {
-    var raw = localStorage.getItem(SAVES_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch(e) { return []; }
+  return SaveManager.read();
 }
 
 function saveSaves(saves) {
-  try { localStorage.setItem(SAVES_KEY, JSON.stringify(saves)); return true; }
-  catch(e) { showToast('存档未保存：存储空间不足或浏览器禁止写入，请导出备份', 'error'); return false; }
+  return SaveManager.write(saves);
 }
 
 function createSave() {
-  try {
-    var save = buildGameSnapshot();
-    var saves = getSaves(); save.name = '存档 ' + (saves.length + 1);
-    saves.push(save);
-    if (!saveSaves(saves)) return false;
-    showToast('完整存档已保存（不含 API 密钥）', 'success'); renderSaveList(); return true;
-  } catch(e) { showToast('无法存档：' + e.message, 'error'); return false; }
+  return SaveManager.create();
 }
 
 function buildGameSnapshot() {
   if (tavernState.isLoading || !db) throw new Error('聊天数据库尚未就绪，请稍后再试');
   if (tavernState.isSending) throw new Error('请先停止推演，再保存完整进度');
+  if((typeof WorldMapBridge!=='undefined'&&WorldMapBridge.isMoving())||(typeof BeautyRoster!=='undefined'&&BeautyRoster.isBusy()))throw new Error('请先结束移动或人物编辑，再保存完整进度');
   return TavernCore.redact({type:'doupo-save', version:2, id:'save-' + crypto.randomUUID(), timestamp:Date.now(),
     player:GameState.player, settings:GameState.settings, gameTime:GameTime, worldState:WorldState,
     questSystem:typeof QuestSystem !== 'undefined' ? QuestSystem : null,
@@ -3965,9 +3740,12 @@ function validateGameSnapshot(data) {
 }
 
 async function restoreGameSnapshot(input) {
+  if(tavernState.isSending||(typeof WorldMapBridge!=='undefined'&&WorldMapBridge.isMoving())||(typeof BeautyRoster!=='undefined'&&BeautyRoster.isBusy()))throw new Error('请先结束推演、移动或人物编辑，再恢复存档');
   if (tavernState.isLoading || !db) throw new Error('聊天数据库尚未就绪，请稍后重试');
   var data = validateGameSnapshot(TavernCore.redact(input));
   stopTavernStream();
+  var restoreOwner=GameState.player,restoreFingerprint=JSON.stringify(GameState.player),restoreChat=tavernState.activeChatId;
+  function ensureRestoreCurrent(){if(GameState.player!==restoreOwner||JSON.stringify(GameState.player)!==restoreFingerprint||tavernState.activeChatId!==restoreChat||tavernState.isSending)throw new Error('当前角色或会话已变化，已取消过期读档');}
   var localSettings = GameState.settings;
   // Credentials belong to this browser, never to imported/shared saves.
   var settings = Object.assign({}, localSettings, data.settings || {});
@@ -3979,14 +3757,20 @@ async function restoreGameSnapshot(input) {
       return Object.assign({},a,{apiKey:local ? (local.apiKey || local.key || '') : '', key:local ? (local.apiKey || local.key || '') : ''});
     });
   }
+  if(data.settings&&data.settings.beautyApi){
+    var localBeauty=localSettings.beautyApi||{},savedBeauty=data.settings.beautyApi;
+    settings.beautyApi=Object.assign({},savedBeauty,{apiKey:savedBeauty.url===localBeauty.url&&savedBeauty.backend===localBeauty.backend?(localBeauty.apiKey||''):''});
+  }
   var snapshot = data.tavern;
   if (snapshot) {
     var tables = [db.chats,db.lorebooks,db.presets,db.characterCard,db.tavernSettings];
     await db.transaction('rw', tables, async function() {
+      ensureRestoreCurrent();
       // Upsert restored records; keep newer unrelated sessions in the local library.
       await db.chats.bulkPut(snapshot.chats); await db.lorebooks.bulkPut(snapshot.lorebooks); await db.presets.bulkPut(snapshot.presets);
       if (snapshot.characterCard) await db.characterCard.put(Object.assign({},snapshot.characterCard,{id:'active'}));
       await db.tavernSettings.put(Object.assign({},snapshot.settings || {},{id:'main',activeChatId:snapshot.activeChatId,playerState:data.player,playerStateAt:Date.now()}));
+      ensureRestoreCurrent();
     });
     function combine(saved, current) { var ids = new Set(saved.map(function(v) { return v.id; })); return saved.concat(current.filter(function(v) { return !ids.has(v.id); })); }
     tavernState.chats = combine(snapshot.chats,tavernState.chats);
@@ -4011,131 +3795,31 @@ async function restoreGameSnapshot(input) {
 }
 
 async function loadSave(id) {
-  var save = getSaves().find(function(s) { return s.id === id; });
-  if (!save) { showToast('存档不存在', 'error'); return; }
-  try { await restoreGameSnapshot(save); closeAllModals(); showToast(save.tavern ? '完整进度已恢复' : '旧版玩家存档已恢复；此存档不含聊天历史', 'success'); }
-  catch(e) { showToast('加载失败：' + e.message, 'error'); }
+  return SaveManager.load(id);
 }
 
 function exportSave(id) {
-  var saves = getSaves();
-  var save = saves.find(function(s) { return s.id === id; });
-  if (!save) { showToast('存档不存在', 'error'); return; }
-  var playerName = (save.player.name || '未知');
-  var dateStr = new Date(save.timestamp).toISOString().slice(0, 10);
-  var filename = '斗破苍穹_存档_' + playerName + '_' + dateStr + '.json';
-  var blob = new Blob([JSON.stringify(TavernCore.redact(save), null, 2)], { type: 'application/json' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast('存档已导出：' + filename, 'success');
+  return SaveManager.exportOne(id);
 }
 
 function deleteSave(id) {
-  var saves = getSaves();
-  var save = saves.find(function(s) { return s.id === id; });
-  if (!save) return;
-  if (!confirm('确定要删除存档「' + (save.name || '未命名') + '」吗？此操作不可撤销。')) return;
-  saves = saves.filter(function(s) { return s.id !== id; });
-  saveSaves(saves);
-  showToast('存档已删除', 'info');
-  renderSaveList();
+  return SaveManager.act('trash',id);
 }
 
 function importSave(file) {
-  if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      var save = validateGameSnapshot(TavernCore.redact(TavernCore.parseJSON(e.target.result)));
-      if (!save.id || !save.player || !save.timestamp) {
-        showToast('无效的存档文件格式', 'error');
-        return;
-      }
-      var saves = getSaves();
-      // Avoid duplicate IDs
-      var exists = saves.find(function(s) { return s.id === save.id; });
-      if (exists) {
-        save.id = 'save-' + Date.now();
-        save.name = (save.name || '导入存档') + ' (导入)';
-      }
-      saves.push(save);
-      if (!saveSaves(saves)) return;
-      showToast('存档导入成功！', 'success');
-      renderSaveList();
-    } catch(ex) {
-      showToast('存档文件解析失败', 'error');
-    }
-  };
-  reader.readAsText(file);
+  return SaveManager.importFile(file);
 }
 
 function openSaveManager() {
-  var saves = getSaves();
-  var content =
-    '<h3 style="margin-bottom:16px;">存档管理</h3>' +
-    '<div style="display:flex;gap:8px;margin-bottom:12px;">' +
-      '<button class="save-action-btn primary" onclick="createSave();setTimeout(function(){renderSaveList();},200)" style="flex:1;">+ 新建存档</button>' +
-      '<button class="save-action-btn" onclick="document.getElementById(\'import-file-input\').click()" style="flex:1;">📥 导入存档</button>' +
-      '<input type="file" id="import-file-input" accept=".json" style="display:none;" onchange="importSave(this.files[0])">' +
-    '</div>' +
-    '<div id="save-list-container" style="max-height:50vh;overflow-y:auto;">' +
-      renderSaveListInner(saves) +
-    '</div>';
-  showModal(content);
-  // Initialize file input
-  setTimeout(function() {
-    var fileInput = document.getElementById('import-file-input');
-    if (fileInput) {
-      fileInput.value = '';
-      fileInput.onchange = function() { if (this.files[0]) importSave(this.files[0]); };
-    }
-  }, 100);
+  return SaveManager.open();
 }
 
 function renderSaveList() {
-  var container = document.getElementById('save-list-container');
-  if (!container) return;
-  var saves = getSaves();
-  container.innerHTML = renderSaveListInner(saves);
+  return SaveManager.refresh();
 }
 
 function renderSaveListInner(saves) {
-  if (!saves || saves.length === 0) {
-    return '<div class="save-empty">暂无存档</div>';
-  }
-  return saves.sort(function(a, b) { return b.timestamp - a.timestamp; }).map(function(save, idx) {
-    var playerName = (save.player && save.player.name) || '未命名';
-    var difficulty = (save.player && save.player.difficulty) || '未知';
-    var race = (save.player && save.player.race) || '';
-    var raceName = '';
-    if (race) {
-      var raceObj = RACES.find(function(r) { return r.id === race; });
-      raceName = raceObj ? raceObj.name : race;
-    }
-    var dateStr = new Date(save.timestamp).toLocaleString('zh-CN');
-    var sizeStr = JSON.stringify(save).length;
-    var sizeDisplay = sizeStr > 1024 ? (sizeStr / 1024).toFixed(1) + ' KB' : sizeStr + ' B';
-    return '<div class="save-entry">' +
-      '<div class="save-entry-header">' +
-        '<span class="save-entry-name">' + escapeHtml(save.name || '存档 ' + (idx + 1)) + '</span>' +
-        '<span style="font-size:10px;color:var(--text-dim);">' + sizeDisplay + '</span>' +
-      '</div>' +
-      '<div class="save-entry-meta">' +
-        '角色：' + escapeHtml(playerName) + ' · 难度：' + escapeHtml(difficulty) + ' · 种族：' + escapeHtml(raceName || '无') + ' · ' + dateStr +
-      '</div>' +
-      '<div class="save-entry-actions">' +
-        '<button class="save-action-btn primary" onclick="loadSave(' + TavernCore.handlerArg(save.id) + ')">加载</button>' +
-        '<button class="save-action-btn" onclick="exportSave(' + TavernCore.handlerArg(save.id) + ')">导出</button>' +
-        '<button class="save-action-btn danger" onclick="deleteSave(' + TavernCore.handlerArg(save.id) + ')">删除</button>' +
-      '</div>' +
-    '</div>';
-  }).join('');
+  return SaveManager.cards(saves);
 }
 
 // ==============================
@@ -4961,14 +4645,14 @@ function parseGameModeOutput(rawText) {
 }
 
 // -- Prompt Assembler --
-function prepareTavernRequest(chat, content, history, preview) {
+function prepareTavernRequest(chat, content, history, preview, questPlayer) {
   var selection=TavernWiring.resolve({player:GameState.player,chat:chat,settings:tavernState.tavernSettings,
     globalIds:tavernState.activeLorebookIds,books:tavernState.lorebooks,presets:tavernState.presets,
     input:content,history:history,regexes:typeof regexScripts!=='undefined'?regexScripts:[]});
   var location=WorldState.location+' · '+(WorldState.specificSpot||'');
   var card=chat.characterCard||tavernState.characterCard||{};
   var result=assembleTavernPrompt({preset:selection.preset,characterCard:card,userInput:selection.input,
-    history:selection.history,variables:chat.variables||{},lorebookMatches:selection.matches,location:location,userName:selection.userName,preview:!!preview});
+    history:selection.history,variables:chat.variables||{},lorebookMatches:selection.matches,location:location,userName:selection.userName,preview:!!preview,questState:(questPlayer||GameState.player).storyQuests,beautyState:(questPlayer||GameState.player).beautyChronicle});
   selection.trace.forEach(function(row){
     if(row.status!=='matched')return;
     var m=selection.matches.find(function(x){return x.bookId===row.bookId&&x.entry.id===row.entryId;});
@@ -4994,21 +4678,21 @@ function assembleTavernPrompt(opts) {
   var plan = TavernCore.promptPlan({preset:preset, characterCard:charCard, userName:userName,
     location:location, lorebookMatches:lorebookMatches});
   var systemParts = [];
+  if(typeof BeautyRoster!=='undefined')systemParts.push(BeautyRoster.context(Object.hasOwn(opts,'beautyState')?opts.beautyState:GameState.player.beautyChronicle));
+  if(typeof StoryQuests!=='undefined'){systemParts.push(StoryQuests.protocol);var questFacts=StoryQuests.context(Object.hasOwn(opts,'questState')?opts.questState:GameState.player.storyQuests);if(questFacts)systemParts.push(questFacts);}
   if(typeof WorldMapBridge!=='undefined'){
     var mapFacts=WorldMapBridge.promptContext();
     if(mapFacts)systemParts.push(mapFacts);
     if(!tavernState.tavernSettings?.pureTextMode)systemParts.push('地图行动可选协议：需要建议玩家行动时，可在正文外添加一个 <world_action>{"type":"travel","targetId":"已知地点ID","mode":"walk"}</world_action>，或 type 为 explore/rest/talk（talk 使用 npcId）。只使用地图已确认事实中的ID；不得自动结算、赠送物资或越过入口条件。建议由玩家在地图中确认。');
   }
 
-  // Depth prompt (based on relationship affinity)
-  try {
-    var mainAffinity = 50;
-    if (GameState && GameState.player && GameState.player.relationships && GameState.player.relationships.length > 0) {
-      mainAffinity = GameState.player.relationships[0].affinity || 50;
+  // Optional player-authored creative preferences, included in the budgeted request.
+  var extraGameplay = GameState.settings.gameplayExtras || {};
+  [extraGameplay.clear, extraGameplay.shushan, extraGameplay.intense, GameState.settings.gameplayPrompt].forEach(function(gameplay, index) {
+    if (gameplay && gameplay.enabled === true && typeof gameplay.text === 'string' && gameplay.text.trim()) {
+      systemParts.push('【玩家玩法偏好 · ' + ['清水','蜀山','重口','自定义'][index] + '】\n' + gameplay.text.trim().slice(0, 12000));
     }
-    var depthPrompt = typeof getDepthPrompt === 'function' ? getDepthPrompt(mainAffinity) : null;
-    if (depthPrompt) systemParts.push(depthPrompt);
-  } catch(e) { /* depth prompts unavailable — skip */ }
+  });
 
   // Style guide, dice pool, NPC rules, title rules, protocol — guarded
   try {
@@ -5055,6 +4739,7 @@ function assembleTavernPrompt(opts) {
     systemParts.push('【输出格式要求】\n请严格按以下XML标签分段输出：\n## maintext\n(正文叙述)\n\n## option\n- [ ] 选项1\n...\n\n在正文后必须生成<branches></branches>包裹的选项分支:\n<branches>\n[快速推进的行动]\n[最合理的行动]\n[最中立的行动]\n[最善良的行动]\n[NSFW的行动]\n</branches>\n\n同时必须紧跟<upstore></upstore>变量更新块:\n<upstore>\naddSmallSum:变量名:增量\nset:变量名:值\n</upstore>\n\n## sum\n(一句话总结)\n\n如有内心独白请放入 ## thinking 标签中。');
   }
 
+  if(tavernState.tavernSettings?.pureTextMode&&typeof StoryQuests!=='undefined')systemParts.push('纯文本模式例外：quest_updates 是可选的后台任务元数据，允许在正文末尾单独附加，由前端提取，不作为可见正文。其余正文仍按纯文本输出。');
   var systemMsg = systemParts.join('\n\n');
 
   var settings = preset && preset.settings || {};
@@ -5081,6 +4766,7 @@ function resolveModel(api, opts) {
   opts = opts || {};
   if (opts.model) return opts.model;
   if (api.model) return api.model;
+  if(api.backend==='gemini')return 'gemini-3.8-flash';
   // Detect DeepSeek by key format (sk- + 32 hex) or URL
   var key = api.apiKey || api.key || '';
   var url = api.url || '';
@@ -5149,7 +4835,9 @@ async function initTavernDB() {
     var c = await db.chats.orderBy('updatedAt').reverse().toArray();
 
     if (!l.length) { var defaultBook = createDefaultLorebook(); await db.lorebooks.put(defaultBook); l = [defaultBook]; }
+    if(typeof upgradeLoreCatalogBooks==='function')l=await upgradeLoreCatalogBooks(l);
     for (var bi = 0; bi < l.length; bi++) {
+      if(l[bi].catalogVersion>=3||l[bi].catalogArchive)continue;
       if (DoupoUserFlames.migrateBook(l[bi])) await db.lorebooks.put(l[bi]);
       if (typeof LoreCanon!=='undefined' && LoreCanon.migrateBook(l[bi])) await db.lorebooks.put(l[bi]);
       if (l[bi].engineVersion === 2) continue;
@@ -5181,394 +4869,26 @@ async function initTavernDB() {
   }
 }
 
+async function upgradeLoreCatalogBooks(books) {
+  if(typeof LoreCatalog==='undefined')return books;
+  var output=[],archives=[];
+  for(var book of books){
+    try{
+      var upgraded=await LoreCatalog.upgrade(book);
+      if(!upgraded){output.push(book);continue;}
+      await db.transaction('rw',[db.lorebooks],async function(){
+        if(!await db.lorebooks.get(upgraded.archive.id))await db.lorebooks.put(upgraded.archive);
+        await db.lorebooks.put(upgraded.book);
+      });
+      output.push(upgraded.book);
+      if(!books.some(function(b){return b.id===upgraded.archive.id;}))archives.push(upgraded.archive);
+    }catch(error){console.warn('世界书升级未写入，保留旧版：'+error.message);output.push(book);}
+  }
+  return output.concat(archives);
+}
+
 function createDefaultLorebook() {
-  var book = createLorebook({ name: '斗破苍穹世界观' });
-  book.entries = [
-
-    // ========== 一、地理与区域 ==========
-    createLorebookEntry({ keys:['加玛帝国','加玛'], content:'加玛帝国位于斗气大陆西北区域，首都为加玛圣城。帝国皇室为加氏一族。国内拥有云岚宗、炼药师公会等势力。帝国东北边境为魔兽山脉，南接塔戈尔大沙漠。整体修炼水平在西北大陆属中上，但远不及中州。' }),
-    createLorebookEntry({ keys:['乌坦城','萧家'], content:'乌坦城位于加玛帝国东北部，靠近魔兽山脉。城中有三大家族：萧家、加列家族、奥巴家族。萧家原是远古八族萧族的分支后裔，血脉稀薄。萧家坊市、后院、后山是主要活动区域。城西有拍卖场，由米特尔家族运营。' }),
-    createLorebookEntry({ keys:['魔兽山脉','魔兽'], content:'魔兽山脉横亘加玛帝国东部边境，绵延数千里。外围活跃着一至二阶魔兽，斗者级别可勉强应付；深入百里后三阶魔兽常见；核心区域存在五阶乃至六阶魔兽，其实力堪比斗王斗皇。山脉中蕴藏丰富药材与魔核，是佣兵历练之地。' }),
-    createLorebookEntry({ keys:['塔戈尔大沙漠','沙漠','蛇人族'], content:'塔戈尔大沙漠位于加玛帝国南部，酷热难耐。蛇人族世代居于沙漠深处，以美杜莎女王为尊，共有八大部落。沙漠深处隐藏着青莲地心火（异火榜第十九）的诞生之地，天地能量暴烈异常。' }),
-    createLorebookEntry({ keys:['黑角域'], content:'黑角域位于加玛帝国与中州之间，是混乱无法之地。各方逃犯、亡命之徒、黑商聚集于此，没有法律只有拳头。核心势力有黑皇宗、魔炎谷、血宗等。迦南学院坐落于黑角域中心，是唯一的中立安全区。' }),
-    createLorebookEntry({ keys:['中州','中州大陆'], content:'中州是斗气大陆的核心区域，天地能量远比其他地区浓郁。一塔一殿二宗三谷四方阁：丹塔、魂殿、天冥宗、花宗、焚炎谷、冰河谷、音谷、风雷阁、星陨阁、万剑阁、黄泉阁。强者如云，斗尊随处可见，斗圣亦不罕见。' }),
-    createLorebookEntry({ keys:['出云帝国','毒宗'], content:'出云帝国位于加玛帝国西南，以毒术闻名。毒宗是出云帝国最强势力，宗主小医仙为厄难毒体，以毒入道，实力深不可测。另有万蝎门等势力盘踞。与加玛帝国时有边境摩擦。' }),
-    createLorebookEntry({ keys:['落雁帝国','慕兰帝国'], content:'落雁帝国与慕兰帝国位于加玛帝国北部，三国并称西北大陆三大帝国。落雁帝国以金雁宗为最强宗门；慕兰帝国则有慕兰谷，以魔兽驯养和合击之术闻名。三国时有联盟与纷争。' }),
-
-    // ========== 二、修炼体系 ==========
-    createLorebookEntry({ keys:['修炼','斗气','境界'], content:"斗气修行由斗之气起步，依次为斗者、斗师、大斗师、斗灵、斗王、斗皇、斗宗、斗尊、斗圣、斗帝。斗尊巅峰还有九转积累及半圣过渡。斗王化翼、斗宗踏空，飞行斗技可形成有条件的例外。斗尊与斗圣的空间能力不同。斗帝并非单靠经验自然突破；源气和帝源是终局关键。初始数值不是境界等级。【原文依据：第6、116、1382、1638章】", comment:"原文校勘 · 创角规则修订" }),
-    createLorebookEntry({ keys:['功法','功法等级'], content:"功法分天地玄黄四阶，各有低、中、高三级。功法与斗技、境界、熟练及环境共同影响战斗。焚决从低阶起步，吞噬异火可进化，但有兼容和死亡风险，不能吞噬任意火焰就无限成长。【原文依据：第2、1638章】", comment:"原文校勘 · 创角规则修订" }),
-    createLorebookEntry({ keys:['斗技','斗技等级'], content:'斗技分为天、地、玄、黄四阶，对应功法等级。斗技是将斗气转化为攻击、防御、身法、辅助等具体战斗手段的方法。高等级斗技消耗斗气更大但威力惊人。地阶以上斗技可凝聚斗气异象，天阶斗技更是拥有摧山断河之威。' }),
-    createLorebookEntry({ keys:['炼药师','炼药','丹药'], content:"成为炼药师需要火属性中夹带一丝木气，并具备灵魂感知、塑造能力。要学习药方、辨识材料、提炼控火、融合与成丹。炼药师以品级衡量，身份或天赋不能替代考核、材料与训练。【原文依据：第6章】", comment:"原文校勘 · 创角规则修订" }),
-    createLorebookEntry({ keys:['灵魂力','灵魂境界'], content:"灵魂境界主要分凡境、灵境、天境、帝境。灵魂与斗气是两条成长轴，帝境灵魂不等于斗帝。灵魂影响炼药、感知与灵魂交锋；残魂也有伤损、沉睡和消耗，不能默认不灭。【原文依据：第1124、1491、1597章】", comment:"原文校勘 · 创角规则修订" }),
-    createLorebookEntry({ keys:['魔核'], content:'魔核是魔兽体内能量结晶，等同于魔兽的力量核心。一至四阶魔核为低阶，五至六阶为中高阶，七阶以上极为罕见。魔核可用于炼药、炼器、驱动阵法。' }),
-
-    // ========== 三、异火榜（二十三种） ==========
-    createLorebookEntry({ keys:['异火','异火榜','天地奇物'], content:'异火乃天地间最霸道的火焰，共有二十三种，录于异火榜。每种异火拥有独特属性和灵智，极难驯服。炼药师若能拥有异火，炼药效率与品质大幅提升。异火之间可相互吞噬融合，吞噬者可获得更强火焰。异火榜排名：一·帝炎、二·虚无吞炎、三·净莲妖火、四·金帝焚天炎、五·生灵之焱、六·八荒破灭焱、七·九幽金祖火、八·红莲业火、九·三千焱炎火、十·九幽风炎、十一·骨灵冷火、十二·九龙雷罡火、十三·龟灵地火、十四·陨落心炎、十五·海心焰、十六·火云水炎、十七·火山石焰、十八·风雷怒炎、十九·青莲地心火、二十·龙凤焱、二十一·六道轮回炎、二十二·万兽灵火、二十三·玄黄炎。' }),
-    createLorebookEntry({ keys:['青莲地心火'], content:"青莲地心火排名第十九，在地底岩浆青莲中孕育。美杜莎先取走火种，萧炎随后获得并炼化；探索原洞穴时火种可能已不在。发现地点、当前持有者与炼化阶段必须区分。【原文依据：第189、199、217、234章】", comment:"原文校勘 · 创角规则修订" }),
-    createLorebookEntry({ keys:['陨落心炎'], content:"陨落心炎排名第十四，心火锻气与迦南学院天焚炼气塔有关。塔体大部分埋地下。成熟本体与后来找到的幼火分开，收服本体后学院修炼基础并非永远消失。【原文依据：第460、614、900章】", comment:"原文校勘 · 创角规则修订" }),
-    createLorebookEntry({ keys:['骨灵冷火'], content:'骨灵冷火，异火榜第十一。极寒与极热并存，火焰呈森白之色。原是药老的本命异火，随药老寄居戒指中。药老陨落后此火仍为其灵魂所控。萧炎在药老指导下曾借用此火炼药。' }),
-    createLorebookEntry({ keys:['净莲妖火'], content:'净莲妖火，异火榜第三。呈乳白之色，火焰如莲花绽放，拥有净化万物之力。生于妖火空间，每千年出世一次。拥有极高灵智，曾化形为人。萧炎历尽艰险将其收服，成为其最强异火之一。' }),
-    createLorebookEntry({ keys:['虚无吞炎'], content:'虚无吞炎，异火榜第二。漆黑如墨，拥有吞噬万物之能。魂族魂天帝的本命异火，实力堪比九星斗圣。曾吞噬无数生灵与灵魂，是魂族千年大计的依仗之一。最终被萧炎以帝炎击败吞噬。' }),
-    createLorebookEntry({ keys:['金帝焚天炎'], content:'金帝焚天炎，异火榜第四。呈金色，温度之高可焚烧天地。古族传承异火，传予古族神品血脉者。萧薰儿拥有此火，因其古族神品血脉身份。' }),
-    createLorebookEntry({ keys:['三千焱炎火'], content:'三千焱炎火，异火榜第九。又名三千星空焱炎火，呈紫黑之色，火焰中有星辰闪烁。诞生于星空之中，拥有极强生命力，号称不死之火。存放于丹塔星域之中，后被萧炎收服。' }),
-    createLorebookEntry({ keys:['帝炎'], content:"异火榜第一关联帝炎与陀舍古帝。有灵智的异火吞噬其他二十一种，形成汇聚二十二种异火的状态，自号帝炎。不要把第一位当作开局可捡的普通自然火种。【原文依据：第1635章】", comment:"原文校勘 · 创角规则修订" }),
-
-    // ========== 四、远古八族 ==========
-    createLorebookEntry({ keys:['远古八族','八族'], content:'远古八族是斗气大陆最古老的八个家族，由远古时期八位斗帝的后裔组成。分别为：萧族、古族、魂族、炎族、药族、雷族、石族、灵族。每族拥有独特的血脉传承和斗帝血脉之力。千年以来八族互相制衡，魂族暗中谋划吞并其余七族。萧族千年前被魂族算计而衰落，血脉几乎断绝；灵族、石族、药族先后被魂族灭族；仅存古族、炎族、雷族尚有完整实力。' }),
-    createLorebookEntry({ keys:['萧族'], content:'萧族，远古八族之一，血脉标志为萧族族纹。千年前为八族之首，族长萧玄为九星斗圣巅峰，试图以全族血脉冲击斗帝失败，萧族从此衰落。残余族人迁徙至加玛帝国乌坦城，建立小家族萧家。族内传承功法为焚决残篇。萧炎为萧族血脉觉醒者，最终重振萧族。' }),
-    createLorebookEntry({ keys:['古族'], content:'古族，远古八族中最强的一支，由古元族长统领。古族拥有完整的斗帝血脉传承，神品血脉者可激发金帝焚天炎。族地位于中州古界，自成一方空间。古族与萧族世代交好，族规禁止与魂族通婚结盟。萧薰儿为古族神品血脉，古元之女。' }),
-    createLorebookEntry({ keys:['魂族'], content:'魂族，远古八族中最神秘邪恶的一族，族长为魂天帝，九星斗圣巅峰。魂族以灵魂为修炼根基，可吞噬他人灵魂壮大己身。千年来暗中灭掉灵族、石族、药族，收集各族血脉。魂族创建魂殿，遍布大陆收集强者灵魂。最终目的是集齐八族血脉和帝玉，开启古帝洞府夺取帝品雏丹，冲击斗帝之位。' }),
-
-    // ========== 五、势力组织 ==========
-    createLorebookEntry({ keys:['云岚宗'], content:'云岚宗位于加玛帝国首都加玛圣城外云岚山，是加玛帝国第一宗门。宗主云韵为斗皇强者。宗内设有长老会，大长老云棱掌实权。云岚宗以风属性斗气为主修方向，镇宗绝学为风之极系列斗技。纳兰嫣然为少宗主，云韵亲传弟子。后因与萧炎结仇，云岚宗被萧炎覆灭。' }),
-    createLorebookEntry({ keys:['魂殿','殿主','护法'], content:'魂殿是魂族创立的明面势力，遍布中州及西北大陆。殿主魂灭生，实力深不可测。下设天尊、护法、使者等级别。护法至少斗宗实力，使者遍布各地收集灵魂。魂殿以铁链秘法抽取强者灵魂，封印于魂殿之中。与丹塔互为宿敌。' }),
-    createLorebookEntry({ keys:['丹塔','炼药师公会'], content:'丹塔是中州炼药师圣地，位于中州圣丹城。塔内设立炼药师等级考核，收纳大陆最优秀的炼药师。三巨头：玄空子、天雷子、玄衣，皆为八品高级炼药师。丹塔拥有三千焱炎火的封印权。下设丹堂、药堂、刑堂等机构。与魂殿对立，暗中守护大陆炼药师传承。' }),
-    createLorebookEntry({ keys:['迦南学院','内院','外院'], content:'迦南学院位于黑角域中心，是斗气大陆第一学院。外院招收大陆各地学员，根据天赋分班。内院为核心修炼之地，拥有焚天练气塔加速斗气修炼。院长邙天尺为斗尊强者，神龙见首不见尾。大长老苏千掌管内院事务。学院拥有陨落心炎作为修炼至宝。' }),
-    createLorebookEntry({ keys:['焚炎谷'], content:'焚炎谷，三谷之一，位于中州焚炎山脉。谷主唐震，九星斗尊。以火属性斗气为主修，传承异火九龙雷罡火（异火榜第十二）。谷中有完整的火属性修炼体系和炼器传承。与萧炎关系良好，萧炎曾助焚炎谷炼制丹药。' }),
-    createLorebookEntry({ keys:['冰河谷'], content:'冰河谷，三谷之一，位于中州极北冰原。谷主冰河，斗尊巅峰。以冰属性斗气修炼为主，掌控极寒之力。谷中有冰属性天材地宝无数，但因修炼冰寒功法人丁不旺。曾与萧炎有过冲突后被化解。' }),
-    createLorebookEntry({ keys:['风雷阁','星陨阁','四方阁'], content:'四方阁为中州四大阁：风雷阁、星陨阁、万剑阁、黄泉阁。风雷阁以雷属性斗技为主，阁主雷尊者；星陨阁由药老所创，萧炎继任阁主；万剑阁以剑道为尊；黄泉阁修炼黄泉斗气，阁主黄泉尊者。每二十年举办四方阁大会，争夺四方阁之首。' }),
-    createLorebookEntry({ keys:['米特尔家族','拍卖场'], content:'米特尔家族是加玛帝国三大家族之一，掌控帝国商业与拍卖行业。族长米特尔·腾山为斗王强者。家族在帝国各大城市均设拍卖行，乌坦城拍卖场即为其分号。与萧家保持良好商业合作关系。' }),
-    createLorebookEntry({ keys:['炼药师公会','法犸'], content:'加玛帝国炼药师公会位于帝都，会长法犸为五品炼药师。公会负责炼药师等级考核认证、药材交易、丹方管理。是加玛帝国最受尊敬的势力之一，与云岚宗分庭抗礼。' }),
-
-    // ========== 六、核心人物 ==========
-    createLorebookEntry({ keys:['萧炎','主角'], content:'萧炎，乌坦城萧家三少爷。四岁练气十岁九段斗之气，被誉为百年难遇天才。十二岁修为莫名倒退至三段斗之气，沦为废材受尽嘲讽。十五岁得药老戒指，重拾修炼，一年内从三段斗之气重回斗者。性格坚韧不拔、恩怨分明、重情重义。以焚决吞噬异火进化功法，最终成就斗帝，号炎帝。' }),
-    createLorebookEntry({ keys:['药老','药尘','戒指'], content:'药老，本名药尘，八品炼药宗师，原星陨阁阁主。长相鹤发童颜、仙风道骨。因弟子韩枫背叛偷袭，肉身被毁，只剩灵魂寄居一枚漆黑古戒中。被萧炎母亲赠予萧炎后，药老苏醒教导萧炎修炼与炼药。掌握骨灵冷火（异火榜第十一）。对药材辨识近乎无所不知，灵魂力达天境。后萧炎为其炼制肉身复活。' }),
-    createLorebookEntry({ keys:['萧薰儿','薰儿','古薰儿'], content:'萧薰儿，古族族长古元之女，神品血脉。幼时被送入萧家寄养，与萧炎青梅竹马。外表温柔淡雅，实则实力深不可测。对萧炎用情至深，不惜违抗族规也要守护萧炎。掌握金帝焚天炎（异火榜第四），拥有古族族纹。在萧家除萧炎外对任何人都保持距离，被称为萧家明珠。' }),
-    createLorebookEntry({ keys:['美杜莎','女王','彩鳞'], content:'美杜莎女王，蛇人族女王，七彩吞天蟒血脉，斗皇巅峰强者。艳绝沙漠，杀伐果断。为守护蛇人族，以身犯险吞噬青莲地心火进化，灵魂与七彩吞天蟒融合，晋升斗宗且进化为远古异兽九彩吞天蟒。后与萧炎经历生死患难生情，生下女儿萧潇。萧炎为其取名彩鳞。' }),
-    createLorebookEntry({ keys:['小医仙'], content:'小医仙，出云帝国毒宗宗主，天生厄难毒体。外表清纯可人，实则毒功惊天，斗气为罕见的毒斗气。与萧炎相识于魔兽山脉历练，结为至交。后因毒体失控离开，在出云帝国建立毒宗。萧炎助其以三种异火炼制毒丹控制厄难毒体，使其不再为毒所困。对萧炎有情愫但从未言明。' }),
-    createLorebookEntry({ keys:['云韵'], content:'云韵，云岚宗宗主，斗皇强者，风属性斗气。容貌端庄秀丽，气质高贵。与萧炎在魔兽山脉中偶然相遇，不知彼此身份时曾共度一段时光。后因立场对立和纳兰嫣然退婚事件与萧炎关系复杂难解。是萧炎最敬重的对手与故人。' }),
-    createLorebookEntry({ keys:['纳兰嫣然'], content:'纳兰嫣然，云岚宗少宗主，云韵亲传弟子，纳兰家族嫡女。自幼与萧炎有婚约，因萧炎变为废材而率众上萧家退婚，以三枚聚气散为补偿。此举深深羞辱了萧炎，激其立下三年之约。三年后萧炎上云岚宗践约击败纳兰嫣然，洗刷耻辱。' }),
-    createLorebookEntry({ keys:['海波东'], content:'海波东，绰号冰皇，原加玛帝国十大强者之一，五星斗皇。因探查塔戈尔沙漠蛇人族时遭美杜莎女王封印实力跌至斗灵。与萧炎结识后被其以破厄丹解封，恢复斗皇实力。性格沉稳老练，后成为萧炎在加玛帝国最可靠的盟友。' }),
-    createLorebookEntry({ keys:['萧玄'], content:'萧玄，千年前萧族族长，九星斗圣巅峰。为冲击斗帝，以全族斗帝血脉为引强行突破，最终失败陨落，萧族自此衰落。陨落前将仅存的一丝灵魂和萧族传承封入天墓之中。千余年后在天墓中与萧炎相遇，将毕生传承及萧族族纹交予萧炎。' }),
-    createLorebookEntry({ keys:['魂天帝'], content:'魂天帝，魂族族长，九星斗圣巅峰。心机深沉，布局千年。以灭灵族、石族、药族为棋，收集八族血脉和八块陀舍古帝玉，开启古帝洞府。服下帝品雏丹晋入斗帝，与萧炎展开最终决战。最终被萧炎以异火广场和佛怒帝炎莲击败封印。' }),
-    createLorebookEntry({ keys:['古元'], content:'古元，古族族长，九星斗圣巅峰，萧薰儿之父。掌控完整的古族斗帝血脉之力。为人稳重正气，虽不完全认可萧炎但尊重女儿选择。在魂天帝晋入斗帝后，联合炎族、雷族残部与萧炎共抗魂族。' }),
-    createLorebookEntry({ keys:['陀舍古帝'], content:'陀舍古帝，斗气大陆最后一位斗帝，存在于远古时期。以帝炎融合二十三种异火成就斗帝。陨落后留下古帝洞府，洞府钥匙为八块陀舍古帝玉，分由远古八族各持一块。洞府中藏有帝品雏丹和异火广场，是万年来无数强者追寻的终极机缘。' }),
-
-    // ========== 七、功法斗技 ==========
-    createLorebookEntry({ keys:['焚决','焚决功法'], content:"焚决是通过吞噬异火进化的特殊功法，早期有极高风险。药老传授萧炎，陀舍古帝也曾修习，但古帝明确不是它的创造者。更早创造者未在此版原文明确，不添加原著没有的答案。【原文依据：第1638章】", comment:"原文校勘 · 创角规则修订" }),
-    createLorebookEntry({ keys:['八极崩','焰分噬浪尺','佛怒火莲'], content:'萧炎的标志性斗技：八极崩——玄阶中级近身体术斗技，八重斗气叠加寸劲爆发；焰分噬浪尺——玄阶高级，以尺为引劈出火焰气浪；佛怒火莲——萧炎自创融合斗技，以多种异火凝聚火莲，威力随融合异火数量递增，最终可达到天阶斗技威力。双色火莲可重创斗皇；三色火莲可威胁斗宗；最终版帝炎火莲可毁天灭地。' }),
-    createLorebookEntry({ keys:['吸掌','吹火掌'], content:'吸掌与吹火掌均为低阶斗技，但配合使用却有奇效。吸掌可隔空吸取物体或牵引身形；吹火掌反向喷射气流。二者配合可制造临时性的飞行或急停效果，在斗王之前极为实用。萧炎在斗者时期便熟练掌握。' }),
-    createLorebookEntry({ keys:['天火三玄变'], content:'天火三玄变，萧族秘传斗技，分为三变：第一变·琉璃变、第二变·青莲变、第三变·星辰变。每变提升一星至三星实力，三变叠加可临时跨越数个星级。需以异火为引施展，变数越多消耗越大。萧炎在斗王时期从萧族传承中获得。' }),
-    createLorebookEntry({ keys:['三千雷动','三千雷幻身'], content:'三千雷动为风雷阁镇阁身法斗技，地阶中级。施展时如雷霆闪烁，速度暴增数倍。萧炎在风雷阁所得。三千雷幻身为衍生斗技，可分化雷电幻身迷惑对手。' }),
-
-    // ========== 八、特殊物品与概念 ==========
-    createLorebookEntry({ keys:['陀舍古帝玉','古玉','帝玉'], content:'陀舍古帝玉，共八块，是开启古帝洞府的唯一钥匙。古帝陨落前将洞府钥匙分作八块交予远古八族各持一块。每块玉片蕴含古帝一丝灵魂印记，集齐八块可感应洞府位置。魂族千年布局的核心目标便是集齐八块帝玉。' }),
-    createLorebookEntry({ keys:['纳戒','储物戒指'], content:'纳戒是利用空间之力开辟小型储物空间的戒指。内部空间大小与纳戒品质相关，普通纳戒空间约数尺立方，高级纳戒可达数十丈见方。纳戒内时间大致静止，物品可长期保存。萧炎最早获得的纳戒便是药老寄居的那枚漆黑古戒，品质远超普通纳戒。' }),
-    createLorebookEntry({ keys:['飞行斗技','斗气化翼'], content:'斗气化翼是斗王强者的标志，可在背后凝聚斗气双翼自由飞行，速度快过大多数飞行魔兽。斗王之前可借助飞行斗技短暂飞行，但消耗巨大。罕见的飞行斗技如紫云翼，可让斗者阶段即具备飞行能力。' }),
-    createLorebookEntry({ keys:['空间戒指','纳石'], content:'纳石是制作纳戒的原料，一种蕴含空间之力的稀有矿石。品质越高可炼制纳戒的内部空间越大。在加玛帝国极为珍贵，在中州相对常见。高级炼器师可用纳石炼制空间储物器具。' }),
-    createLorebookEntry({ keys:['聚气散','筑基灵液'], content:"聚气散用于辅助九段斗之气者凝聚斗之气旋、晋入斗者，不是随时吃一枚就加经验的普通药物。药物用途、品级和限制需按具体丹方判断。【原文依据：第6章】", comment:"原文校勘 · 创角规则修订" }),
-    createLorebookEntry({ keys:['化形丹','破宗丹','皇极丹'], content:'化形丹为七品丹药，魔兽服用后可化为人形修炼。破宗丹为六品丹药，可助斗皇巅峰突破至斗宗。皇极丹为六品丹药，可大幅提升斗皇强者修为。这三种丹药均为同阶丹药中的极品。' }),
-    createLorebookEntry({ keys:['天墓'], content:"天墓入口与古界开放相关，内部有三层与内外时间差，存在能量体及萧玄相关遗留。它不位于天目山脉，也不是九层地牢；资格、开放与危险应随情节处理。【原文依据：第1339章】", comment:"原文校勘 · 创角规则修订" }),
-    createLorebookEntry({ keys:['古帝洞府'], content:'古帝洞府是陀舍古帝陨落前留下的传承空间，万年来仅开启一次。洞府内有异火广场，陈列二十二根异火柱（帝炎为融合之火无柱），广场中央为陀舍古帝雕像。洞府深处封存帝品雏丹——服用后可毫无障碍晋入斗帝。最终魂天帝得帝品雏丹晋入斗帝，萧炎则以异火广场融合二十二种异火成就帝炎，同入斗帝境界。' }),
-
-    // ========== 九、魔兽体系 ==========
-    createLorebookEntry({ keys:['魔兽','魔兽等级','魔兽阶位'], content:'魔兽分为一至九阶，与人类修炼境界对应：一阶=斗者、二阶=斗师、三阶=大斗师、四阶=斗灵、五阶=斗王、六阶=斗皇、七阶=斗宗、八阶=斗尊、九阶=斗圣。五阶魔兽有一定几率化形为人，但化形草可助其稳定化形。七阶以上魔兽灵智已不弱人类，可开口说话。魔兽山脉外围多为一至二阶魔兽，核心区域有四至五阶魔兽，传说深处有六阶以上魔兽沉睡。' }),
-    createLorebookEntry({ keys:['紫晶翼狮王'], content:'紫晶翼狮王，六阶魔兽，相当于人类斗皇强者。栖息于魔兽山脉深处，浑身覆盖紫色晶体鳞甲，防御力惊人。拥有紫晶封印天赋技能，可将对手斗气暂时封印。狮王守护一株伴生紫晶源，是炼制紫心破障丹的主药材。萧炎与云韵联手方才从狮王手中取得紫晶源。' }),
-    createLorebookEntry({ keys:['七彩吞天蟒','九彩吞天蟒'], content:'七彩吞天蟒为远古异兽，蛇类至尊血脉，通体七彩流转。美杜莎女王进化为七彩吞天蟒后，灵魂与此兽融合。九彩吞天蟒为七彩吞天蟒的终极进化形态，血脉之力堪比远古天蛇。萧潇（萧炎与美杜莎之女）天生拥有九彩吞天蟒血脉。' }),
-    createLorebookEntry({ keys:['太虚古龙'], content:'太虚古龙，魔兽界三大顶尖族群之一，与天妖凰族、远古天蛇并列。龙皇紫研为太虚古龙皇族血脉，体态娇小却力大无穷，以药材为食。太虚古龙族掌控空间之力，可自由穿梭虚空。族地位于无尽虚空中，寻常手段无法抵达。' }),
-    createLorebookEntry({ keys:['天妖凰族'], content:'天妖凰族，魔兽界三大顶尖族群之一，凤凰血脉后裔。族人高傲无比，视其他魔兽为低等生物。拥有涅槃重生之力，凤凰之火焚尽万物。族内等级森严，皇族血脉为最高。与太虚古龙族世代为敌。' }),
-    createLorebookEntry({ keys:['远古天蛇'], content:'远古天蛇，魔兽界三大顶尖族群之一。拥有操控时空的古老血脉，天赋神通为时间凝滞。因远古大战血脉凋零，现存的远古天蛇大多隐居避世。其精血为炼制时空类丹药的顶级材料。' }),
-    createLorebookEntry({ keys:['小紫妍','紫研'], content:'紫研，太虚古龙皇族血脉，原为迦南学院内院学员。外表如十二三岁少女，实为化形太虚古龙。牙口极好，喜食药材丹药如零食。实力随成长飞速提升，成年后可达斗圣级别。被萧炎从迦南学院带出历练。' }),
-
-    // ========== 十、更多人物 ==========
-    createLorebookEntry({ keys:['韩枫'], content:'韩枫，药老首徒，六品炼药师，掌握海心焰（异火榜第十五）。天赋异禀却心术不正，暗中勾结魂殿偷袭药老，致其肉身被毁灵魂逃逸。后占据黑角域建立黑盟，自号药皇。最终被萧炎以异火焚身而死，海心焰被萧炎吞噬。' }),
-    createLorebookEntry({ keys:['萧潇'], content:'萧潇，萧炎与美杜莎女王之女，天生九彩吞天蟒血脉。自幼天赋惊人，修炼速度远超同龄。深得美杜莎和萧炎宠爱。体内斗帝血脉与远古异兽血脉共存，是万年来罕见的双重血脉拥有者。' }),
-    createLorebookEntry({ keys:['萧战'], content:'萧战，萧家家主，萧炎之父。五星大斗师实力，在乌坦城属一流高手。为人正直刚毅，深爱子女。萧炎废材三年间始终维护儿子尊严。后萧家遭云岚宗袭击时被掳走，成为萧炎誓灭云岚宗的重要导火索。' }),
-    createLorebookEntry({ keys:['萧鼎','萧厉'], content:'萧鼎与萧厉为萧炎的两个哥哥。萧鼎性格沉稳善谋，主管萧家商业事务，后建立萧门管理漠城佣兵；萧厉为人豪爽好斗，佣兵出身。二人对萧炎极为疼爱。萧鼎曾中烙毒，萧炎炼药相救。' }),
-    createLorebookEntry({ keys:['加刑天'], content:'加刑天，加玛帝国皇室守护者，斗皇巅峰强者，帝国第一高手。守护帝国数十年，震慑内外。为人老谋深算却心怀帝国。萧炎崛起后选择与其结盟而非敌对。' }),
-    createLorebookEntry({ keys:['法犸'], content:'法犸，加玛帝国炼药师公会会长，五品巅峰炼药师。德高望重，眼光独到。最早看出萧炎炼药天赋之人，在炼药师大会上对萧炎赞赏有加。与云岚宗、皇室保持着微妙的平衡关系。' }),
-    createLorebookEntry({ keys:['若琳导师'], content:'若琳导师，迦南学院外院导师，斗灵实力。温柔善良，负责加玛帝国区域招生。正是她将萧炎招入迦南学院，对他的修炼和成长给予诸多关照。在学员中极受欢迎。' }),
-    createLorebookEntry({ keys:['琥嘉','吴昊'], content:'琥嘉与吴昊是萧炎在迦南学院同届最出色的学员，并称学院三杰。琥嘉擅长木属性斗气，性格善良体贴；吴昊以火属性斗气见长，性格热烈直率。二人与萧炎结下深厚友谊，多次并肩作战。' }),
-    createLorebookEntry({ keys:['林修崖','柳擎'], content:'林修崖为迦南学院内院强榜第一，风属性斗气，实力已达斗灵巅峰。柳擎为强榜第二，土属性斗气，防御力惊人。二人初时与萧炎有隙，后因萧炎炼制丹药之恩化敌为友。' }),
-    createLorebookEntry({ keys:['邙天尺'], content:'邙天尺，迦南学院院长，斗尊强者，神龙见首不见尾。常年游历大陆不在学院，事务交由大长老苏千代管。性格洒脱不羁，识人眼光独到。曾在萧炎不知情时暗中关注其成长。' }),
-    createLorebookEntry({ keys:['烛坤'], content:'烛坤，太虚古龙族老龙皇，紫研之父。九星斗圣巅峰，被困古帝洞府万年之久。萧炎开启洞府后将其救出，为报恩助萧炎对抗魂族。本体为万丈太虚古龙，实力深不可测。' }),
-    createLorebookEntry({ keys:['唐震'], content:'唐震，焚炎谷谷主，九星斗尊。掌握九龙雷罡火（异火榜第十二），精通火属性炼器。性格火爆直爽，爱才惜才。萧炎以炼药术助其炼制丹药后，二人建立深厚友谊。' }),
-    createLorebookEntry({ keys:['药天','药星极'], content:'药天为药族年轻一辈炼药天才，药星极为其弟。二人在丹塔炼药师大会上与萧炎同台竞技。药天炼药手法精湛，药星极天赋异禀，二人皆对萧炎心服口服。后药族被魂族所灭，药天幸存。' }),
-    createLorebookEntry({ keys:['天火尊者'], content:'天火尊者，远古斗尊巅峰强者，五轮离火法创立者。陨落后灵魂被封于岩浆世界，与陨落心炎共生。萧炎收服陨落心炎时与其相遇，天火尊者将五轮离火法传授萧炎。' }),
-    createLorebookEntry({ keys:['韩月','韩雪'], content:'韩月与韩雪是中州韩家姐妹。韩月为迦南学院内院学员，气质清冷；韩雪为韩家幼女，活泼可爱。二人在中州与萧炎相识，韩家也因此成为萧炎在中州的重要盟友。' }),
-
-    // ========== 十一、丹药与药材 ==========
-    createLorebookEntry({ keys:['丹药种类','丹药列表'], content:'斗气大陆常见丹药：一品·聚气散（助凝气旋）、凝血散（止血疗伤）；二品·筑基灵液（加速斗气凝聚）、复伤丹（内伤恢复）；三品·回气丹（快速恢复斗气）、增气散（临时增幅斗气）；四品·三纹青灵丹（斗师突破大斗师）、紫心破障丹（破除斗气屏障）；五品·斗灵丹（提升斗灵修为）、复魂丹（修复灵魂损伤）；六品·破宗丹（斗皇巅峰突破斗宗）、皇极丹（大幅提升斗皇修为）；七品·化形丹（魔兽化形）、噬生丹（延长寿命）；八品·菩提大还丹（斗尊突破斗圣）、九品·帝品雏丹（毫无障碍晋入斗帝）。' }),
-    createLorebookEntry({ keys:['药材','天材地宝'], content:'斗气大陆著名药材：冰灵焰草（冰火双属性，炼化后可增强异火抗性）、紫灵晶（滋养灵魂）、地心淬体乳（地心岩浆千年凝聚，淬炼肉身）、龙须冰火果（龙族陨落之地所生，冰火两气）、菩提子（菩提古树所结，可短暂进入顿悟状态）、魂婴果（生长于阴阳交汇处，修复灵魂损伤）、凤血灵芝（天妖凰族陨落处所生，涅槃之力）、万年青藤（炼制化形丹主材）、赤血人参（百年可增修为、千年可破瓶颈）。' }),
-    createLorebookEntry({ keys:['三纹青灵丹','紫心破障丹'], content:'三纹青灵丹为四品丹药，可助九星斗师突破至大斗师，丹成三道纹路品质最佳。紫心破障丹同为四品丹药，以大斗师突破斗灵为主效，主药材为紫晶源。二丹均为大斗师以下修士梦寐以求的破境丹药。' }),
-    createLorebookEntry({ keys:['菩提大还丹','菩提古树'], content:'菩提大还丹为八品丹药，需菩提子为主药。功效可使斗尊巅峰强者感悟天地法则，大幅提升突破斗圣的几率。菩提古树为远古神树，每千年结一次菩提子。古树下悟道一日，可抵数年苦修。' }),
-    createLorebookEntry({ keys:['帝品雏丹'], content:'帝品雏丹是陀舍古帝陨落前以毕生斗气凝聚的终极丹药，封存于古帝洞府深处。虽名为雏丹，却已是超越九品的准帝品丹药。服用者可在极短时间内毫无瓶颈地突破至斗帝境界。魂天帝服下此丹后即刻晋入斗帝。' }),
-
-    // ========== 十二、更多势力与地点 ==========
-    createLorebookEntry({ keys:['音谷'], content:'音谷，三谷之一，位于中州南部。谷中以音波斗技为修炼核心，传承古琴、箫、笛等音律斗气。音谷弟子以乐入道，斗气化作音波攻击，诡异莫测。谷主为女性斗尊，与焚炎谷、冰河谷并列。' }),
-    createLorebookEntry({ keys:['天冥宗','花宗'], content:'天冥宗与花宗并列为二宗，位于中州。天冥宗修炼天冥斗气，功法偏向阴寒，宗主为斗尊巅峰。花宗以木系功法为主，宗内多为女性修士，以百花斗气闻名，宗主花玉为斗尊。二宗实力仅次于丹塔与魂殿。' }),
-    createLorebookEntry({ keys:['万剑阁','黄泉阁'], content:'万剑阁与黄泉阁为四方阁之二。万剑阁以剑道为尊，阁中弟子人人修剑，剑意化斗气攻击，阁主剑尊者；黄泉阁修炼黄泉斗气，功法诡异霸道，阁主黄泉尊者。四方阁中星陨阁后来居上，因阁主萧炎而名震中州。' }),
-    createLorebookEntry({ keys:['黑皇宗','魔炎谷'], content:'黑皇宗与魔炎谷为黑角域两大顶级势力。黑皇宗宗主莫天行，以暗属性斗气为主，行事霸道残酷；魔炎谷谷主地魔老鬼，修炼魔炎斗气，性格阴鸷深沉。二宗在萧炎征伐黑角域时先后覆灭。' }),
-    createLorebookEntry({ keys:['血宗'], content:'血宗，黑角域血腥残忍的势力，以血属性斗气修炼，可吞噬他人精血壮大己身。宗主范痨为斗皇巅峰。曾在迦南学院外劫掠学员精血，被萧炎以异火焚杀。' }),
-    createLorebookEntry({ keys:['圣丹城'], content:'圣丹城为中州核心城市之一，丹塔所在。城市以炼丹为支柱产业，药材商铺林立，炼药师遍布。城中央矗立丹塔，塔高百丈，内设炼药师考核体系。每逢丹会举办之时，大陆炼药师云集于此。' }),
-    createLorebookEntry({ keys:['叶城'], content:'叶城为中州叶家所在城市，叶家以炼制飞行斗技和身法斗技闻名。城中拍卖行经常出现罕见的飞行斗技卷轴。萧炎曾在叶城拍得珍贵身法斗技。叶家现任家主叶重为斗宗强者。' }),
-    createLorebookEntry({ keys:['天目山脉'], content:'天目山脉位于中州中部，因山顶天目泉而得名。天目泉水对斗尊以下修炼者大有裨益，可洗涤经脉提升斗气纯度。山脉中段有天山血潭，每三年开放一次，是斗皇冲击斗宗的绝佳宝地。萧炎曾在此突破斗宗。' }),
-
-    // ========== 十三、特殊体质 ==========
-    createLorebookEntry({ keys:['厄难毒体','毒体'], content:'厄难毒体为万中无一的特殊体质。毒体拥有者天生百毒不侵，体内斗气自带剧毒，且毒力随修炼不断增长。但毒体终有失控之日，届时万毒噬心，拥有者必死无疑。唯一破解之法是以三种异火炼制毒丹将毒力封印于丹田，从此随心所欲操控毒力。小医仙为厄难毒体拥有者，萧炎为其炼制毒丹解厄。' }),
-    createLorebookEntry({ keys:['神品血脉','斗帝血脉'], content:'远古八族后裔体内蕴含斗帝血脉，血脉浓度决定修炼天赋的上限。血脉分九品，一品最低，九品最高，九品之上为神品血脉——理论上可修炼至斗圣巅峰。古族每一代仅有寥寥数人为神品血脉，萧薰儿便为其中佼佼者。血脉可借由族纹激发获得短时间实力爆发。' }),
-    createLorebookEntry({ keys:['先天满魂力','灵魂天赋'], content:'先天满魂力指出生时灵魂力便达凡境巅峰，是成为七品以上炼药师的先决条件。拥有者修炼灵魂力事半功倍，可更早掌握灵魂感知、灵魂攻击等手段。萧炎在药老指导下将灵魂力从凡境一路修炼至天境巅峰，最终在帝境灵魂的加持下炼制帝品丹药。' }),
-
-    // ========== 十四、蛇人族 ==========
-    createLorebookEntry({ keys:['蛇人族','蛇人部落'], content:'蛇人族世代居住于塔戈尔大沙漠深处，由八大部落组成：美杜莎部落（王族）、墨蛇部落、炎蛇部落、黑蛇部落、银蛇部落、赤蛇部落、青蛇部落、花蛇部落。各部落有族长统领，共同效忠美杜莎女王。蛇人半人半蛇，体质强韧，耐热抗旱，在沙漠中战力倍增。因历代受人类歧视驱赶，对人类极为敌视。' }),
-    createLorebookEntry({ keys:['蛇人族圣城'], content:'蛇人族圣城位于塔戈尔大沙漠中心绿洲，是蛇人族的都城与圣地。城墙以沙岩砌筑，城中供奉蛇人族历代先祖。圣城核心区域为美杜莎神殿，地下连通地心岩浆层——青莲地心火的诞生地。外人擅入圣城格杀勿论。' }),
-
-    // ========== 十五、远古秘辛 ==========
-    createLorebookEntry({ keys:['斗帝','斗帝之路'], content:'自陀舍古帝陨落后万年以来，斗气大陆再无斗帝诞生。远古时期天地斗气充沛时，斗帝辈出。但万年前一场天地异变导致斗气大陆的本源斗气逐渐稀薄，后世强者最多修至九星斗圣便寸步难进。突破斗帝需集齐陀舍古帝玉开启古帝洞府，获取帝品雏丹或融合全部异火。魂天帝与萧炎便是万年来唯二的新晋斗帝。' }),
-    createLorebookEntry({ keys:['双帝之战'], content:'双帝之战是萧炎与魂天帝以斗帝之姿展开的终极对决。战场遍布中州，天地为之色变。魂天帝以魂族秘法操控无数灵魂化为魂之大军；萧炎则以帝炎凝聚异火广场，召出二十二种异火之力。最终萧炎以佛怒帝炎莲焚尽魂天帝肉身，将其灵魂永封于异火广场之下。此战后萧炎号炎帝，破空前往大千世界。' }),
-    createLorebookEntry({ keys:['大千世界','无尽火域'], content:'大千世界是斗气大陆之外的更高层次位面。斗帝级别强者方有破开位面壁障前往大千世界的能力。陀舍古帝和远古斗帝们最终皆前往大千世界。萧炎在双帝之战后以炎帝之名破空而去，在大千世界中建立了无尽火域。' }),
-
-    // ========== 十六、二十三种异火逐一列传 ==========
-    createLorebookEntry({ keys:['玄黄炎'], content:'玄黄炎，异火榜第二十三。深黄之色，为异火榜末位。虽排名最末但仍是天地奇物，温度远超凡火。存在于地底玄黄精气汇聚之处，炼化难度相对较低。' }),
-    createLorebookEntry({ keys:['万兽灵火'], content:'万兽灵火，异火榜第二十二。火焰呈暗红之色，燃烧时有万兽咆哮之音。据说由远古万兽精魂凝聚而成，对魔兽拥有天然的压制之力。' }),
-    createLorebookEntry(DoupoUserFlames.entry(21)),
-    createLorebookEntry(DoupoUserFlames.entry(20)),
-    createLorebookEntry({ keys:['火山石焰'], content:'火山石焰，异火榜第十七。诞生于活火山深处，呈暗红带灰。温度虽不算极高但蕴含大地厚重之力，攻击时如山崩地裂。' }),
-    createLorebookEntry(DoupoUserFlames.entry(18)),
-    createLorebookEntry({ keys:['火云水炎'], content:'火云水炎，异火榜第十六。呈蓝白相间，水火交融之异火。诞生于深海火山口，能在水中燃烧。拥有水之柔韧与火之暴烈。' }),
-    createLorebookEntry({ keys:['海心焰'], content:"海心焰排名第十五。曾由韩枫持有，后经魂殿、慕骨相关情节流转，萧炎后期获得。韩枫第一次败亡不代表萧炎立即拥有火种。【原文依据：第597、1150、1485章】", comment:"原文校勘 · 创角规则修订" }),
-    createLorebookEntry({ keys:['龟灵地火'], content:'龟灵地火，异火榜第十三。呈暗绿之色，火焰形态如龟甲纹路。蕴含大地之力，防御性与持久性极强。诞生于万年龟灵陨落之地。' }),
-    createLorebookEntry({ keys:['九龙雷罡火'], content:'九龙雷罡火，异火榜第十二。呈银色带雷光，火焰中有九条雷龙盘旋。焚炎谷传承异火，唐震以之为本命火焰。兼具火之焚灭与雷之迅疾。' }),
-    createLorebookEntry({ keys:['九幽风炎'], content:'九幽风炎，异火榜第十。呈幽蓝之色，火焰如风飘忽不定。诞生于九幽之下阴风汇聚之处，速度在异火中名列前茅。' }),
-    createLorebookEntry({ keys:['红莲业火'], content:'红莲业火，异火榜第八。呈赤红之色，火焰形态如盛放红莲。蕴含因果业力，对罪孽深重者有额外净化灼烧效果。与佛门有关。' }),
-    createLorebookEntry({ keys:['九幽金祖火'], content:"九幽金祖火排名第七，炎族相关。炎烬曾融合此火与排名第十七的火山石焰。它不是九幽地冥蟒的种族传承火，名字相似不代表同源。【原文依据：第1104、1584章】", comment:"原文校勘 · 创角规则修订" }),
-    createLorebookEntry({ keys:['八荒破灭焱'], content:'八荒破灭焱，异火榜第六。暗黑火焰中闪烁着紫色雷纹，蕴含毁灭之力。取"破灭八荒"之意，是纯粹破坏性最强的异火之一。' }),
-    createLorebookEntry({ keys:['生灵之焱'], content:"生灵之焱排名第五，神农老人持有。长于生命力、延寿与药材种子催生，需要种子和施术消耗，并非强攻最强火种。不能据此默认无条件断肢重生或无限药材。【原文依据：第1565、1566章】", comment:"原文校勘 · 创角规则修订" }),
-    createLorebookEntry({ keys:['金帝焚天炎','古族异火'], content:'金帝焚天炎为古族传承异火，异火榜第四，呈璀璨金色。温度之高可焚烧天地苍穹，唯有古族神品血脉方可掌控。萧薰儿自小便被族中授予此火，是其最强底牌之一。' }),
-
-    // ========== 十七、更多人物列传 ==========
-    createLorebookEntry({ keys:['萧宁'], content:'萧宁，萧家大长老之孙，萧炎堂兄。年少时与萧炎多有摩擦，曾看不起沦为废材的萧炎。萧炎重振后二人关系缓和，后成为萧家骨干力量。' }),
-    createLorebookEntry({ keys:['萧媚'], content:'萧媚，萧炎堂妹。容貌俏丽，在萧炎废材时期对他态度冷淡。萧炎恢复天才光环后态度转变，但萧炎对她始终保持着客气疏离。' }),
-    createLorebookEntry({ keys:['萧玉'], content:'萧玉，萧炎堂姐，迦南学院外院学员。身材高挑，拥有一双傲人长腿。性格直爽泼辣，与萧炎关系融洽。在迦南学院中多有照应萧炎。' }),
-    createLorebookEntry({ keys:['雅妃'], content:'雅妃，米特尔家族拍卖场首席拍卖师，乌坦城分号负责人。容貌妖娆妩媚，气质成熟动人。在萧炎少年时期便识其不凡，多次给予帮助。与萧炎保持着微妙的暧昧关系。' }),
-    createLorebookEntry({ keys:['夭夜','公主'], content:'夭夜为加玛帝国皇室公主，加刑天孙女。天赋出众，实力达到斗灵级别。容貌绝美，性格温柔中带着皇家傲气。对萧炎有倾慕之情，但深知无法与薰儿等人相争。' }),
-    createLorebookEntry({ keys:['夭月'], content:'夭月为加玛帝国皇室小公主，夭夜的妹妹。天真活泼，炼药天赋不俗。被法犸收为弟子培养炼药术。对萧炎更多的是崇拜而非爱慕。' }),
-    createLorebookEntry({ keys:['云山'], content:'云山，云岚宗前任宗主，云韵之师，斗宗强者。多年前闭关突破，被魂殿趁虚而入暗中控制。出关后成为魂殿傀儡，一手策划了对萧家的袭击和对萧炎的追杀。最终被萧炎以异火击杀。' }),
-    createLorebookEntry({ keys:['云棱'], content:'云棱，云岚宗大长老，斗王巅峰。性格阴狠固执，是云岚宗打压萧家的主要推手。三番两次派人对萧家出手，最终被萧炎在云岚山上击杀。' }),
-    createLorebookEntry({ keys:['墨承'], content:'墨承，加玛帝国墨家大长老，斗灵级别。以人体试验闻名的邪恶修士，暗中为魂殿收集灵魂。曾掳走萧战，被萧炎发觉后以异火当场击杀。' }),
-    createLorebookEntry({ keys:['加列毕','奥巴帕'], content:'加列毕是乌坦城加列家族族长，奥巴帕为奥巴家族族长。二人在萧炎废材时期联合打压萧家坊市，试图吞并萧家产业。萧炎恢复实力后以丹药助萧家反制，两家族从此衰落。' }),
-    createLorebookEntry({ keys:['漠铁','漠城'], content:'漠铁为漠城佣兵团团长，萧鼎萧厉的结义兄弟。漠城位于加玛帝国南部，濒临塔戈尔大沙漠，是佣兵和冒险者进入沙漠前最后的补给站。萧炎曾在此落脚。' }),
-    createLorebookEntry({ keys:['苏千'], content:'苏千，迦南学院内院大长老，斗宗强者。在院长邙天尺常年不在的情况下全权掌管学院事务。公允正直，慧眼识人，对萧炎极为器重。萧炎收服陨落心炎时苏千从中斡旋，避免学院与萧炎冲突。' }),
-    createLorebookEntry({ keys:['琥乾'], content:'琥乾，迦南学院外院副院长，琥嘉之父，斗皇实力。负责外院日常事务和新生入学考核。为人严肃但公正。' }),
-    createLorebookEntry({ keys:['白山'], content:'白山，迦南学院外院天才学员，斗师巅峰。来自中州一个小家族，性格高傲自大。初时与萧炎争锋，被击败后心生怨恨但始终无法超越。' }),
-    createLorebookEntry({ keys:['萧门'], content:'萧门是萧炎在迦南学院内院建立的势力，核心成员包括萧炎、薰儿、琥嘉、吴昊等人。成立目的为对抗内院老牌势力，后发展为内院数一数二的强门。' }),
-    createLorebookEntry({ keys:['磐门'], content:'磐门是迦南学院内院老牌势力，以磐石般稳固著称。最初由林修崖创立，后交予柳擎管理。与萧门初期对抗后和解，成为盟友。' }),
-    createLorebookEntry({ keys:['黑擎'], content:'黑擎，太虚古龙族东龙岛统领，八星斗圣。体型魁梧的壮汉，性格豪爽。烛坤失踪万年间代管太虚古龙族事务。对紫研忠心耿耿。' }),
-    createLorebookEntry({ keys:['北龙王','西龙王','南龙王'], content:'太虚古龙族分裂后的三大龙王。北龙王野心最大，暗中勾结魂族试图一统龙族；西龙王和南龙王各自割据。三大龙王趁烛坤失踪万年间瓜分龙族疆域，后被萧炎与紫研逐一平定。' }),
-    createLorebookEntry({ keys:['凰天'], content:'凰天，天妖凰族族长，九星斗圣。本体为上古天凰，实力深不可测。因幼女被太虚古龙族掳走一事与龙族势不两立。在双帝之战中率领凰族助萧炎对抗魂族。' }),
-    createLorebookEntry({ keys:['妖啸天'], content:'妖啸天，九幽地冥蟒族族长，八星斗圣。居住于冥蛇深渊之中，性格阴沉诡异。族中以毒术和暗杀闻名。' }),
-    createLorebookEntry({ keys:['神农老人'], content:'神农老人，远古斗圣，以种植天材地宝闻名。陨落后灵魂能量化为一方药界，其中珍稀药材遍地。萧炎曾进入药界获取多种绝世药材。' }),
-    createLorebookEntry({ keys:['净莲妖圣'], content:'净莲妖圣，远古斗圣巅峰强者。原为净莲妖火化形之人，以妖火之身修至斗圣。陨落前将净莲妖火封印于妖火空间，并留下一丝残魂等待后世有缘人。萧炎在收服净莲妖火时获得其传承记忆。' }),
-    createLorebookEntry({ keys:['丹塔三巨头'], content:'丹塔三巨头：玄空子、天雷子、玄衣，皆为八品高级炼药师。玄空子性格沉稳是实际执掌者；天雷子脾气火爆掌控刑堂；玄衣为三人中唯一的女性，负责丹堂事务。三人共掌丹塔大权。' }),
-    createLorebookEntry({ keys:['曹颖'], content:'曹颖，丹塔妖孽级炼药天才，丹家传人。八品炼药师，年纪轻轻便名震中州炼药界。容貌倾城，气质高傲。在丹会上与萧炎同台竞技，对萧炎的炼药术心服口服。' }),
-    createLorebookEntry({ keys:['丹晨'], content:'丹晨，丹家少主，曹颖之弟。炼药天赋极佳，性格温和。在丹会上与萧炎相识，对萧炎敬重有加。' }),
-    createLorebookEntry({ keys:['慕骨老人'], content:'慕骨老人，魂殿天尊之一，五星斗尊。炼药术不凡，在丹会上为魂殿一方的主要战力。曾在天目山脉与萧炎交手。最终被萧炎所杀。' }),
-    createLorebookEntry({ keys:['摘星老鬼'], content:'摘星老鬼，魂殿天尊，五星斗尊。负责西北大陆魂殿事务，是萧炎在加玛帝国时期面对的最强魂殿强者。多次追杀萧炎，后被萧炎联合药老击杀。' }),
-    createLorebookEntry({ keys:['魂殿殿主','魂灭生'], content:'魂灭生，魂殿明面殿主，实力深不可测，疑似七星斗圣。统领魂殿分布大陆各地的分殿和护法，直接执行魂天帝的意志。性情冷酷无情，以收集强者灵魂为乐。双帝之战前被萧炎重创。' }),
-    createLorebookEntry({ keys:['魂元天'], content:'魂元天，魂族四魔圣之一，八星斗圣。魂天帝最信任的心腹，统领魂族精锐武力。在双帝之战中被古元击杀。' }),
-    createLorebookEntry({ keys:['魂屠'], content:'魂屠，魂族四魔圣之一，七星斗圣。残忍嗜杀，曾亲手灭掉灵族全族。在古帝洞府争夺战中被太虚古龙族追杀致死。' }),
-    createLorebookEntry({ keys:['炎烬'], content:'炎烬，炎族族长，九星斗圣。掌控炎族完整的斗帝血脉传承。古板正直，在魂天帝暴露野心后联合古族、雷族共抗魂族。双帝之战后带领炎族残余重建。' }),
-    createLorebookEntry({ keys:['雷赢'], content:'雷赢，雷族族长，九星斗圣。掌控雷族完整血脉与雷属性至高斗技。性格火爆耿直，与炎烬、古元为万年盟友。在双帝之战中身先士卒。' }),
-    createLorebookEntry({ keys:['药丹'], content:'药丹，药族族长，八星斗圣后期，大陆第一炼药圣手。药族被魂族袭击时，药丹以灵魂自爆重创来犯之敌，掩护少数族人逃离。' }),
-    createLorebookEntry({ keys:['药万归'], content:'药万归，药族叛徒，暗中投靠魂族。为了独吞药族炼药传承而出卖药族，直接导致魂族灭药族。后被萧炎和药天清理门户。' }),
-    createLorebookEntry({ keys:['石族','灵族'], content:'灵族为远古八族中最先被魂族秘密灭族的。石族紧随其后也遭魂族毒手。两族灭亡后其陀舍古帝玉被魂族夺取，族人灵魂被尽数收集入魂殿。萧炎在魂殿深处曾见灵族石族强者的被囚灵魂。' }),
-    createLorebookEntry({ keys:['小丹塔'], content:'小丹塔是丹塔内部最核心的隐秘组织，由丹塔最高层炼药师组成。大长老为传说中的九品炼药师，实力深不可测。小丹塔负责守护丹塔最高炼药传承，寻常炼药师终生不知其存在。' }),
-    createLorebookEntry({ keys:['天冥宗宗主'], content:'天冥宗宗主冥河，斗尊巅峰。修炼天冥斗气，行事阴狠。天冥宗与魂殿暗中有来往，在四方阁大会上折损于萧炎之手。' }),
-    createLorebookEntry({ keys:['黄泉尊者'], content:'黄泉尊者，黄泉阁阁主，斗尊巅峰。修炼黄泉斗气，可在战斗中召唤黄泉之水侵蚀对手灵魂。四方阁中最为神秘低调。' }),
-    createLorebookEntry({ keys:['剑尊者'], content:'剑尊者，万剑阁阁主，斗尊巅峰。一生修剑，剑意化斗气。为人正气凛然，在四方阁中与星陨阁关系最为友好。' }),
-    createLorebookEntry({ keys:['铁剑尊者'], content:'铁剑尊者，剑尊者师弟，三星斗尊。性格直爽，与风雷阁多有摩擦。曾与萧炎联手对抗魂殿。' }),
-
-    // ========== 十八、更多地点 ==========
-    createLorebookEntry({ keys:['加玛圣城','帝都'], content:'加玛圣城为加玛帝国首都，帝国政治经济中心。城中设有皇宫、炼药师公会总部、米特尔家族总部拍卖场。城市方圆百里，人口数百万。云岚宗位于城外的云岚山上，俯瞰整座圣城。' }),
-    createLorebookEntry({ keys:['漠城'], content:'漠城位于加玛帝国南部，毗邻塔戈尔大沙漠。城中有佣兵工会和大量冒险者聚集。萧炎大哥萧鼎、二哥萧厉在此建立萧门佣兵团，以漠城为大本营。' }),
-    createLorebookEntry({ keys:['黑印城'], content:'黑印城是黑角域最大城市，没有秩序、只有强者为王。城中黑市交易频繁，禁药、禁术、奴隶买卖公开进行。萧炎曾在此拍得多种珍贵药材。' }),
-    createLorebookEntry({ keys:['和平镇'], content:'和平镇是迦南学院外围入口，通往学院唯一的安全通道。镇中有迦南学院执法队维持秩序，禁止任何私斗。进入学院的外来者需在此登记。' }),
-    createLorebookEntry({ keys:['焚天练气塔'], content:'焚天练气塔位于迦南学院内院核心区域，以陨落心炎为塔心驱动。塔内斗气浓度是外界的数倍，修炼速度极大提升。塔分多层，越往下斗气越浓郁但心火灼烧越强烈。是迦南学院最宝贵的修炼资源，学院以外任何人不得擅入。' }),
-    createLorebookEntry({ keys:['天焚炼气塔底层','岩浆世界'], content:'焚天练气塔最底层连通着一个无边无际的地下岩浆世界。岩浆中有无数火焰蜥蜴人，深处封印着陨落心炎的本源。天火尊者被囚于此数千年，萧炎在收服陨落心炎时闯入此地。' }),
-    createLorebookEntry({ keys:['圣丹城','丹域'], content:'圣丹城位于中州核心腹地，丹塔坐镇。城市划分为丹域、药域、试炼域等区域。每逢丹会举办，全大陆炼药师云集于此争夺排名。城外有丹雷山脉，常年丹雷翻滚。' }),
-    createLorebookEntry({ keys:['叶城','丹会'], content:'叶城为叶家所在，城中拍卖行为中州顶级拍卖行。丹会举办时叶城为初赛场地之一。萧炎在此取得丹会参赛资格。' }),
-    createLorebookEntry({ keys:['亡魂山脉'], content:"亡魂山脉位于中州西北，药老救援行动相关的魂殿分殿处于山脉中心。此处不能直接当作魂殿全部总部，更不能与魂族魂界合并。【原文依据：第1213章】", comment:"原文校勘 · 创角规则修订" }),
-    createLorebookEntry({ keys:['古界','古族祖地'], content:'古界是古族以斗圣之力开辟的独立空间，入口隐藏于中州某处。古界内天地能量极为浓郁，古族族人在此世代修炼。古界中央有古帝雕像和传承祭坛，是古族血脉觉醒仪式的圣地。' }),
-    createLorebookEntry({ keys:['古帝洞府','异火广场'], content:'古帝洞府核心为异火广场，呈圆形排列二十二根异火柱，每柱对应一种异火。广场中央矗立陀舍古帝雕像，雕像手握帝炎火种。萧炎在古帝洞府中融合二十二种异火成就帝炎，为击败魂天帝奠定根基。' }),
-    createLorebookEntry({ keys:['妖火空间'], content:'妖火空间是净莲妖圣陨落前以毕生斗气创造的独立空间，封印净莲妖火。每千年自动开启一次，入口位于中州极北。空间内有净莲妖圣的残魂试炼，唯有通过试炼者方可获得收服净莲妖火的资格。' }),
-    createLorebookEntry({ keys:['天墓','天墓试炼'], content:"天墓入口与古界开放相关，内部有三层与内外时间差，存在能量体及萧玄相关遗留。它不位于天目山脉，也不是九层地牢；资格、开放与危险应随情节处理。【原文依据：第1339章】", comment:"原文校勘 · 创角规则修订" }),
-    createLorebookEntry({ keys:['丹界'], content:'丹界是远古斗帝开辟的炼丹秘境，其中遍布珍稀药材和远古丹方。丹塔掌控丹界入口，作为丹会决赛场地。萧炎在丹界中获得多种远古药材。' }),
-    createLorebookEntry({ keys:['莽荒古域'], content:"莽荒古域位于中州东北之外，莽荒镇是外围集结据点。兽潮、毒瘴与菩提古树事件构成探索风险，不为它补写精确坐标或所有时代统一入境规则。【原文依据：第1402章】", comment:"原文校勘 · 创角规则修订" }),
-
-    // ========== 十九、功法斗技详录 ==========
-    createLorebookEntry({ keys:['焰分噬浪尺'], content:'焰分噬浪尺为玄阶高级斗技，以重尺为武器劈出火焰气浪。萧炎在乌坦城拍卖场偶然所得。斗王时期以前是其主要攻击手段。' }),
-    createLorebookEntry({ keys:['八极崩'], content:'八极崩为玄阶中级近身体术斗技。以寸劲方式将八重斗气叠加在一击之内爆发，近身威力极大。萧炎早期招牌斗技之一，后期仍有使用。' }),
-    createLorebookEntry({ keys:['佛怒火莲'], content:'佛怒火莲是萧炎自创融合斗技，以两种或多种异火压缩融合成火莲抛出引爆。双色可重创斗皇，三色可威胁斗宗，最终版帝炎火莲可毁天灭地。施展极为危险，稍有不慎便反噬己身。' }),
-    createLorebookEntry({ keys:['五轮离火法'], content:'五轮离火法为天火尊者所创，地阶高级控火斗技。以灵魂力操控火焰化为狼、豹、狮、虎、蛟五种火兽形态攻击。五种火兽可各自为战也可合为一气，威力随操控者灵魂力增强而提升。天火尊者在天墓中将此法传授萧炎。' }),
-    createLorebookEntry({ keys:['三千雷动'], content:'三千雷动为风雷阁镇阁身法斗技，地阶中级。施展时身形如雷霆闪烁，原地留残影而真身已至数丈之外。修炼至大成可幻化三千雷影。萧炎在风雷阁中取得。' }),
-    createLorebookEntry({ keys:['三千雷幻身'], content:'三千雷幻身为三千雷动的进阶斗技，可在战斗中凝聚雷电幻身迷惑对手。幻身具备本体部分战力但极易被看穿。' }),
-    createLorebookEntry({ keys:['大天造化掌'], content:'大天造化掌为天阶低级斗技，萧炎在天墓中所得。一掌出可凝固空间、粉碎万物。消耗极大，斗尊以上方可施展。' }),
-    createLorebookEntry({ keys:['金刚琉璃身'], content:'金刚琉璃身为天阶低级炼体斗技。施展后全身覆盖琉璃般晶莹的斗气铠甲，防御力暴增数倍。可在战斗中硬抗高一个大境界的全力一击。' }),
-    createLorebookEntry({ keys:['帝印决'], content:'帝印决为古族秘传天阶斗技，以手印将斗气凝聚为帝印轰出。分为五印：开山印、翻海印、覆地印、湮天印、古帝印。五印合一可撼动天地。萧薰儿将此技传予萧炎。' }),
-    createLorebookEntry({ keys:['黄泉指','黄泉掌'], content:'黄泉指与黄泉掌为黄泉阁镇阁斗技，地阶中级。以指力或掌力凝聚黄泉斗气侵蚀对手，中招者斗气如堕黄泉般凝固。' }),
-    createLorebookEntry({ keys:['风之极','落日耀','风之极陨杀'], content:'风之极系列为云岚宗镇宗斗技：落日耀为风属性高阶攻击斗技，凝聚风刃如落日光芒四射；陨杀为风之极最强绝招，将风压缩到极致形成湮灭旋涡。云韵为风之极现任掌控者。' }),
-    createLorebookEntry({ keys:['紫云翼'], content:'紫云翼为罕见飞行斗技，可在斗者阶段便凝聚斗气化为紫色羽翼飞行。虽速度远不如斗王斗气化翼，但对低阶修士而言是逆天保命手段。' }),
-    createLorebookEntry({ keys:['天雁九行翼'], content:'天雁九行翼为金雁宗镇宗飞行斗技，地阶低级。共九层，每修炼一层飞行速度与灵活性倍增。修至九层可追风逐电。' }),
-    createLorebookEntry({ keys:['三兽蛮荒劲'], content:'三兽蛮荒劲为慕兰谷秘传功法，可吸收三种本命魔兽的精血强化己身。修炼者肉身强度远超同阶，但需承受魔兽精血的反噬之力。' }),
-    createLorebookEntry({ keys:['龙凰古甲'], content:'龙凰古甲为龙凰血脉传承铠甲，以太虚古龙与天凰之力凝聚。防御力冠绝大陆，穿上后可无视同阶大部分攻击。紫研曾将此甲赠予萧炎。' }),
-    createLorebookEntry({ keys:['毁灭火体'], content:'毁灭火体为焚炎谷秘传斗技，以九龙雷罡火淬炼肉身。施展后全身覆盖火焰铠甲，近身者皆被灼烧。唐震的成名绝技。' }),
-    createLorebookEntry({ keys:['古帝碎虚指'], content:'古帝碎虚指为陀舍古帝所创帝阶斗技。一指点出可破碎虚空、粉碎位面壁障。萧炎在古帝洞府中得到此技传承，双帝之战中以此指重创魂天帝。' }),
-
-    // ========== 二十、丹药补全 ==========
-    createLorebookEntry({ keys:['破厄丹'], content:'破厄丹为五品丹药，可破除体内封印和诅咒之力。海波东被美杜莎女王以封印术压制修为数十年，萧炎以破厄丹助其恢复斗皇实力。' }),
-    createLorebookEntry({ keys:['复灵紫丹'], content:'复灵紫丹为五品丹药，可修复受损的灵魂。对灵魂遭受创伤或被灵魂攻击者有奇效。药老化虚期间常需此丹滋养灵魂。' }),
-    createLorebookEntry({ keys:['龙力丹'], content:'龙力丹为五品丹药，炼制需龙族精血。服用后可短暂获得龙族般的肉身力量，增幅视丹药品质而定。萧炎在迦南学院期间曾炼制。' }),
-    createLorebookEntry({ keys:['清魂丹'], content:'清魂丹为三品丹药，可清除灵魂中的杂质和外来侵蚀。对刚接触灵魂修炼的炼药师尤为重要。' }),
-    createLorebookEntry({ keys:['冰灵丹'], content:'冰灵丹为四品丹药，可保护服用者在极端高温环境中不受火毒侵蚀。进入岩浆地带或收服异火时必备。萧炎在收服青莲地心火和陨落心炎前均炼制此丹。' }),
-    createLorebookEntry({ keys:['阴阳玄龙丹'], content:'阴阳玄龙丹为七品丹药，蕴含阴阳二气和龙族精魄。斗宗强者服用可大幅提升突破斗尊的几率。萧炎在丹会上以此丹震惊全场。' }),
-    createLorebookEntry({ keys:['生骨融血丹'], content:'生骨融血丹为七品丹药，可令肉身残缺者骨骼重生、血脉再续。药老恢复肉身时萧炎以此丹为根基炼制躯体。' }),
-    createLorebookEntry({ keys:['茯苓丹'], content:'茯苓丹为七品丹药，以万年茯苓为主药，可恢复衰竭的生命力。对因燃烧斗气或灵魂过度的修士有续命奇效。' }),
-    createLorebookEntry({ keys:['九阴黄泉丹'], content:'九阴黄泉丹为八品丹药，需以黄泉之水配合多种极阴药材炼制。可助修炼阴寒属性功法的斗尊突破瓶颈。' }),
-    createLorebookEntry({ keys:['菩提丹'], content:'菩提丹为八品丹药，以菩提子为主药炼制。服用后可使斗尊巅峰强者进入顿悟状态，感悟天地法则，大幅提升突破斗圣几率。' }),
-
-    // ========== 二十一、魔兽谱 ==========
-    createLorebookEntry({ keys:['魔兽','斗气化马'], content:'魔兽修炼至七阶（斗宗）可化为人形。化形后可同时修炼人类功法与魔兽天赋，实力远超同级人类。化形草可辅助五至六阶魔兽提前化形。魔兽寿命远超人类，高阶魔兽可活数千年。' }),
-    createLorebookEntry({ keys:['雪魔天猿'], content:'雪魔天猿为五阶魔兽，冰属性，栖居于极寒雪山。体型如山，力大无穷。精血是炼制冰属性丹药的上乘材料。魔兽山脉深处曾有雪魔天猿出没记载。' }),
-    createLorebookEntry({ keys:['地火蜥蜴人'], content:'地火蜥蜴人为岩浆世界土著生物，火焰属性。群居于焚天练气塔底下的岩浆海中，智力低下但数量极多。族中偶尔诞生灵智较高的蜥蜴人王。萧炎闯入岩浆世界时曾遭其围攻。' }),
-    createLorebookEntry({ keys:['深海魔鲸'], content:'深海魔鲸为八阶魔兽，居于无尽海域深处。体型可逾百里，为海洋霸主。其魔核是炼制水属性八品丹药的核心材料。' }),
-    createLorebookEntry({ keys:['天毒蝎龙兽'], content:'天毒蝎龙兽为七阶魔兽，毒属性。兼具蝎子的剧毒尾刺与龙的肉身强度。栖居于出云帝国毒瘴沼泽深处，万蝎门曾试图驯服未果。' }),
-    createLorebookEntry({ keys:['金翅大鹏'], content:'金翅大鹏为八阶飞行魔兽，速度冠绝魔兽界。金翅一展可蔽日遮天，振翅可飞越万里。栖息于中州极东之地的万丈峭壁之上。' }),
-    createLorebookEntry({ keys:['远古天魔蟒'], content:'远古天魔蟒为九阶远古异兽，九幽地冥蟒族的先祖血脉。体型可盘踞千里山脉，吐息带有腐蚀灵魂的剧毒。远古时期被陀舍古帝斩杀，精血成为九幽地冥蟒族的传承根基。' }),
-    createLorebookEntry({ keys:['九头天蛇'], content:'九头天蛇为远古天蛇族守护兽，九阶。九头各掌一种元素之力，斩断一头可迅速再生。远古时期被远古八族联合封印于中州地下。' }),
-    createLorebookEntry({ keys:['麒麟'], content:'麒麟为远古瑞兽，非魔兽谱系中的寻常魔兽。体内蕴含祥瑞之力，其角可解万毒。麒麟一族早已绝迹，唯有远古遗迹中偶见其骸骨化石。' }),
-
-    // ========== 二十二、远古八族详情补全 ==========
-    createLorebookEntry({ keys:['炎族','炎帝血脉'], content:'炎族为远古八族之一，血脉传承自远古炎帝。族人天生拥有极高的火属性亲和力，修炼火属性功法事半功倍。族中传承多种火系天阶斗技和异火掌控秘法。炎族族长炎烬为九星斗圣，族地位于中州南部的炎界之中。魂族灭族行动后炎族是少数仅存的完整八族之一。' }),
-    createLorebookEntry({ keys:['雷族','雷帝血脉'], content:'雷族为远古八族之一，血脉传承自远古雷帝。以雷属性功法为主修，族人斗气中蕴含雷霆之力。族地位于中州西部的雷界。族长雷赢为九星斗圣，与古族、炎族结成攻守同盟。族中传承的最高雷法为九天神雷诀。' }),
-    createLorebookEntry({ keys:['药族','药帝血脉'], content:'药族为远古八族之一，血脉传承自远古药帝——斗气大陆第一位帝品炼药师。族中人人通晓炼药，拥有完整的九品炼药师传承。族地位于中州北部的药界。魂族袭击时族长药丹自爆灵魂重创敌军，药族几乎全灭。药天为少数幸存者，后投入萧炎麾下。' }),
-
-    // ========== 二十三、重大事件 ==========
-    createLorebookEntry({ keys:['三年之约'], content:'三年之约是萧炎少年时期最重要的人生转折点。萧炎从天才沦为废材后，纳兰嫣然率云岚宗长老上萧家退婚，萧炎当众立下三年之约——三年后上云岚宗一战。这三年间萧炎在药老指导下拼命修炼，从三段斗之气一路突破至大斗师。三年后践约击败纳兰嫣然，洗刷耻辱。但云岚宗长老云棱违背约定对萧家出手，引发萧炎与云岚宗的全面冲突。' }),
-    createLorebookEntry({ keys:['云岚宗覆灭'], content:'萧炎击败纳兰嫣然后，云岚宗大长老云棱违背三年之约暗袭萧家，掳走萧战。萧炎怒而杀上云岚山，以三色火莲重创云山。此后萧炎远走黑角域修炼，归来时已为斗王。联合美杜莎女王、加刑天等强者再次攻打云岚宗，以陨落心炎和青莲地心火融合火莲击杀云山。云岚宗解散覆灭，云韵出走，加玛帝国格局彻底改写。' }),
-    createLorebookEntry({ keys:['黑角域之战'], content:'萧炎进入黑角域后，以炼药术和实力迅速崛起。韩枫在黑角域建立黑盟围剿萧炎，萧炎联合迦南学院内院力量反攻。最终以陨落心炎击杀韩枫，灭黑盟。此战后萧炎彻底掌控黑角域局势。' }),
-    createLorebookEntry({ keys:['丹会','炼药师大赛'], content:'丹会是中州炼药界最高盛事，由丹塔每三十年举办一次。全大陆炼药师争夺排名，魁首可获得丹塔巨头的指导资格。萧炎以化名"岩枭"参赛，在决赛中以七品丹药阴阳玄龙丹力压群雄夺得冠军。' }),
-    createLorebookEntry({ keys:['四方阁大会'], content:'四方阁大会由风雷阁、星陨阁、万剑阁、黄泉阁四大阁共同举办，旨在争夺四方阁排名。萧炎以星陨阁阁主身份参战，击败风雷阁阁主雷尊者，星陨阁登顶四方阁之首。' }),
-    createLorebookEntry({ keys:['古帝洞府开启'], content:'魂天帝集齐八块陀舍古帝玉后，古帝洞府于中州大地开启。萧炎、古元、炎烬、雷赢等强者进入洞府争夺机缘。烛坤在洞府中被困万年终于脱困。异火广场现世，萧炎融合二十二种异火成就帝炎；魂天帝夺走帝品雏丹服下晋入斗帝。' }),
-    createLorebookEntry({ keys:['魂族灭族之战','四族联盟'], content:'魂天帝晋入斗帝后，魂族全面发动对剩余各族的灭族战争。萧炎在古帝洞府中以异火广场融合异火，同时晋入斗帝。古族、炎族、雷族、太虚古龙族残部联合萧炎组成四族联盟，在中州大地与魂族展开最后决战。' }),
-    createLorebookEntry({ keys:['炎帝'], content:'萧炎融合二十二种异火成就帝炎并晋入斗帝后，世人尊称其为炎帝。双帝之战中以佛怒帝炎莲击败魂天帝，将其灵魂永封异火广场。战后破空前往大千世界，建立了无尽火域。在大千世界中炎帝之名威震诸天万界。' }),
-
-    // ========== 二十四、炼器与阵法 ==========
-    createLorebookEntry({ keys:['炼器','炼器师'], content:'炼器师是除了炼药师外最受尊敬的职业，可炼制武器、防具、空间器物等。炼器材料以各类矿石、魔核、魔兽骨骸为主。炼器与炼药不同，更依赖火候掌控和对材料性质的精准理解。高级炼器师可融合异火炼器，大幅提升器具品质。焚炎谷以炼器之术闻名中州。' }),
-    createLorebookEntry({ keys:['阵法'], content:'阵法以魔核或灵石为能源驱动，可布置攻击、防御、困敌、聚灵等效果的场域。阵法大师可布置覆盖城池的大阵。空间封锁阵可禁锢斗宗强者的空间之力；聚灵阵可汇聚天地斗气加速修炼。萧家闭关室便以聚灵阵加速斗气吸收。' }),
-    createLorebookEntry({ keys:['玄重尺'], content:'玄重尺为药老赠予萧炎的重型武器，漆黑无锋，重逾千斤。内部刻有特殊阵法，可随使用者斗气调节重量。平时背在背上负重修炼，战斗时挥舞起来势大力沉。配合焰分噬浪尺威力倍增。' }),
-    createLorebookEntry({ keys:['万兽鼎'], content:'万兽鼎为天鼎榜排名第三的药鼎，通体漆黑鼎身雕刻万兽图腾。以万种魔兽精血淬炼而成，炼药时鼎鸣如万兽咆哮。可大幅提升丹药品质与成功率。药老的专属药鼎，后传予萧炎。' }),
-    createLorebookEntry({ keys:['天鼎榜'], content:'天鼎榜收录大陆最顶级的十三尊药鼎。排名第一为圣耀鼎，传说可炼制帝品丹药；第三为万兽鼎（药老传萧炎）；第五为黑魔鼎（韩枫所持）；第七为龙凤鼎。每尊上榜药鼎各有独特属性和增幅效果。' }),
-
-    // ========== 二十五、修炼秘境与天材地宝 ==========
-    createLorebookEntry({ keys:['天山血潭'], content:'天山血潭位于天目山脉中段，每三年涌现一次。潭水呈血红之色，蕴含浓郁的天地斗气精华。斗皇巅峰修士浸泡后可一举突破至斗宗。萧炎与纳兰嫣然均在天山血潭冲击斗宗成功。' }),
-    createLorebookEntry({ keys:['地心淬体乳'], content:'地心淬体乳为大地深处岩浆千年凝炼的乳白液体，蕴含精纯大地之力。涂抹全身或直接服用可大幅度淬炼肉身，提升经脉宽度和肉身强度。萧炎在收服青莲地心火前以此淬体。' }),
-    createLorebookEntry({ keys:['菩提心'], content:'菩提心为菩提古树千年结一次的果实内核。服用后可短暂进入顿悟状态，感悟天地法则如同醍醐灌顶。斗尊巅峰服用菩提心后冲击斗圣成功率接近五成。' }),
-    createLorebookEntry({ keys:['龙凰本源果'], content:'龙凰本源果为太虚古龙与远古天凰陨落之地共同孕育的天地至宝。蕴含龙凰双重血脉之力，服用者可同时获得两种远古血脉的传承。紫研服用后血脉彻底觉醒。' }),
-    createLorebookEntry({ keys:['魂婴妖树','魂婴果'], content:'魂婴妖树生于阴阳交汇之地，以灵魂为养分。所结果实名魂婴果，可直接修复灵魂损伤。年份越久功效越强，万年魂婴果可让灵魂濒灭者起死回生。萧炎曾以魂婴果修复药老残缺灵魂。' }),
-    createLorebookEntry({ keys:['丹雨'], content:'丹雨是极为罕见的天地异象。当帝品丹药或超越九品的丹药即将出世时，天地斗气会凝结为丹雨洒落。丹雨中每一滴都蕴含精纯药力，范围可达千里。萧炎炼制帝品丹药时曾引发丹雨。' }),
-
-    // ========== 二十六、边陲势力与佣兵 ==========
-    createLorebookEntry({ keys:['狼头佣兵团'], content:'狼头佣兵团是魔兽山脉附近活跃的中型佣兵团，团长为斗师级别。常年进山猎杀低阶魔兽获取魔核和药材贩卖维持生计。萧炎少年时期曾与狼头佣兵团同入魔兽山脉历练。' }),
-    createLorebookEntry({ keys:['血战佣兵团'], content:'血战佣兵团是加玛帝国排名靠前的大型佣兵团，团长为斗灵级别。以悍不畏死的战斗风格闻名佣兵界。曾在漠城与萧门展开佣兵争夺战，最终被萧鼎设计击败吞并。' }),
-    createLorebookEntry({ keys:['沙之佣兵团'], content:'沙之佣兵团是塔戈尔大沙漠边缘的佣兵团，专精沙漠生存与寻宝。团长为斗灵级别，对沙漠地形了如指掌。曾受雇引路深入沙漠寻找青莲地心火线索。' }),
-    createLorebookEntry({ keys:['黑角域佣兵'], content:'黑角域佣兵与普通帝国佣兵截然不同。黑角域佣兵多为亡命之徒，实力从斗师到斗灵不等，行事狠辣不计后果。佣兵任务不限于猎杀魔兽，还涉及暗杀、劫掠、奴隶贩卖。' }),
-
-    // ========== 二十七、更多势力格局 ==========
-    createLorebookEntry({ keys:['金雁宗'], content:'金雁宗为落雁帝国第一宗门，以飞行斗技和身法闻名。镇宗绝学天雁九行翼为地阶飞行斗技。宗主雁落天为斗皇强者，与加玛帝国云岚宗保持微妙关系。' }),
-    createLorebookEntry({ keys:['慕兰谷','慕兰人'], content:'慕兰谷为慕兰帝国最强势力，以三兽蛮荒劲闻名。修炼方式独特——每名谷中弟子需融合三种本命魔兽精血淬炼肉身。谷主慕兰为斗皇巅峰。慕兰谷与金雁宗世代争斗，但在对抗加玛帝国时会暂时结盟。' }),
-    createLorebookEntry({ keys:['万蝎门'], content:'万蝎门位于出云帝国毒瘴沼泽，以蝎类魔兽驯养和蝎毒入道闻名。门主蝎毕岩为斗宗强者。与毒宗在出云帝国内争夺霸主地位。曾试图吞并毒宗被小医仙以厄难毒体反噬重创。' }),
-    createLorebookEntry({ keys:['天蛇府'], content:'天蛇府为中州隐世势力，与远古天蛇族有关联。修炼蛇类功法和毒术，府主实力成谜。极少参与大陆纷争，专注于守护远古天蛇遗留下的传承。' }),
-    createLorebookEntry({ keys:['冥河盟'], content:'冥河盟为黑角域新兴势力，由数个小宗门联合组成。盟中成员皆为被黑皇宗打压的幸存者。萧炎覆灭黑皇宗后间接助其崛起。' }),
-    createLorebookEntry({ keys:['狂狮帮'], content:'狂狮帮为黑角域二流势力，帮主狂狮为斗王强者。以蛮力见长，在黑角域占有一小块地盘。萧炎初入黑角域时曾与其短暂交手立威。' }),
-
-    // ========== 二十八、物品神器补全 ==========
-    createLorebookEntry({ keys:['帝印','古帝印'], content:'古帝印为古族最高传承信物，蕴含古帝一丝灵魂印记。持有者可调动古族部分血脉之力。古元将古帝印传予萧薰儿，薰儿又在关键战役中以此印召来古族援军。' }),
-    createLorebookEntry({ keys:['天妖凰翼'], content:'天妖凰翼是以天妖凰族陨落后留下的本命羽翼炼制的飞行斗技。炼化后可获得接近天妖凰的飞行速度和灵活性。极其罕见，天妖凰族对外流出的凤翼少之又少。' }),
-    createLorebookEntry({ keys:['魂玉'], content:'魂玉是魂族特制的灵魂容器，可封印强者灵魂。每块魂玉中囚禁着至少斗宗级别的灵魂能量。魂殿护法随身携带大量魂玉用于收集灵魂上交殿中。' }),
-    createLorebookEntry({ keys:['地魔老鬼的魔火令'], content:'魔火令为魔炎谷谷主地魔老鬼的令牌法器，可召唤魔炎攻击。令牌以地狱魔铁炼制，蕴含地魔老鬼的斗气印记。地魔老鬼陨落后魔火令被萧炎缴获。' }),
-    createLorebookEntry({ keys:['空间玉简'], content:'空间玉简是记录空间坐标的玉质法器。捏碎后可传送到玉简记录的地点，是远距离保命的珍贵道具。高阶炼器师方可炼制。' }),
-    createLorebookEntry({ keys:['避火衣'], content:'避火衣是以耐火材料编织的特制斗篷，可抵御高温环境。进入岩浆区域或接近异火时穿着避火衣可大幅减轻火毒伤害。萧炎收服青莲地心火前曾委托米特尔家族制作。' }),
-    createLorebookEntry({ keys:['定风珠'], content:'定风珠为深海定风蚌千年孕育的宝珠，可平息风暴、驱散迷雾。在沙漠和海洋中极为实用。' }),
-
-    // ========== 二十九、特殊修炼方式 ==========
-    createLorebookEntry({ keys:['吞噬异火'], content:'吞噬异火是焚决独有的进化方式。修炼者将异火纳入体内，以焚决功法将其炼化吞噬。吞噬成功则功法等级提升、修为暴涨；失败轻则经脉尽毁、重则当场焚为灰烬。每次吞噬需准备冰灵丹等多重防护，且必须在灵魂力足够压制异火反噬的前提下进行。萧炎前后共吞噬融合了多种异火，成就帝炎。' }),
-    createLorebookEntry({ keys:['灵魂攻击'], content:'灵魂攻击是将灵魂力凝为实质发动的攻击，直接作用于对手灵魂而非肉身。天境灵魂以上方可发出有效灵魂攻击。表现形式包括灵魂冲击、灵魂尖刺、灵魂封印等。灵魂攻击极难防御，只有灵魂力境界高于攻击者方可用灵魂力硬抗。' }),
-    createLorebookEntry({ keys:['血脉觉醒'], content:'远古八族后裔在特定条件下可触发血脉觉醒——族纹显现，实力短时间内暴涨。血脉越纯净觉醒增幅越大。觉醒后通常伴随虚弱期。萧炎在斗灵时期首次觉醒萧族族纹，战力飙升至可战斗王。' }),
-    createLorebookEntry({ keys:['合击斗技','融合斗技'], content:'合击斗技是多人将斗气融合施展的联击之术。慕兰谷的三兽蛮荒劲配合可达合击效果；萧炎自创的佛怒火莲则是异火融合斗技的极致——将多种异火压缩为火莲，引爆后威力远超单独异火的简单叠加。' }),
-
-    // ========== 三十、原著经典场景 ==========
-    createLorebookEntry({ keys:['退婚'], content:'十五岁的萧炎在萧家大厅当着全族的面被纳兰嫣然退婚。云岚宗以三枚聚气散为"赔偿"，对萧家极尽羞辱。萧炎当场撕毁婚书，咬破手指写下三年之约血书——三年后必上云岚宗，洗刷今日之辱。这是萧炎人生的转折点和修炼动力的源头。' }),
-    createLorebookEntry({ keys:['第一次吞噬异火'], content:'萧炎在塔戈尔大沙漠地心岩浆中首次尝试吞噬异火。青莲地心火被美杜莎女王先行吞噬后能量大减，萧炎在药老护法和多种丹药辅助下艰难将其炼化。吞噬过程持续数日，经脉数次几近焚毁，药老灵魂力几乎耗尽才勉强成功。焚决由此从黄阶低级进化为玄阶中级。' }),
-    createLorebookEntry({ keys:['炼药师大会'], content:'加玛帝国炼药师大会在帝都举办，由炼药师公会会长法犸主持。大会汇集帝国最优秀的年轻炼药师角逐排名。萧炎以化名"岩枭"参赛，一路以惊人控火术和成丹率碾压对手夺得冠军，名震帝都。' }),
-    createLorebookEntry({ keys:['陨落心炎暴动'], content:'迦南学院内院焚天练气塔中的陨落心炎每隔数年爆发一次心火暴动，塔中学员需紧急撤离。萧炎在最近一次暴动中深入塔底收服陨落心炎，彻底解决了学院千年的心火隐患。但也因此与学院的利益冲突一度剑拔弩张。' }),
-    createLorebookEntry({ keys:['萧家遭袭'], content:'云岚宗大长老云棱违背三年之约，率宗内强者夜袭乌坦城萧家。萧家族人死伤惨重，萧战被魂殿趁机掳走。萧炎归来时只见残垣断壁和族人尸首，怒发冲冠杀上云岚宗。这一夜彻底改变了萧炎与云岚宗的恩怨性质——从私人约定升级为灭门血仇。' }),
-    createLorebookEntry({ keys:['药老复活'], content:'萧炎以生骨融血丹为根基，以多种天材地宝为辅，历时数年在星陨阁中为药老炼制新的肉身。新肉身融合了药老生前的本源精血和多种远古药材精华。药老复活后实力恢复至半圣境界，星陨阁重新有了明面掌舵人。' }),
-    createLorebookEntry({ keys:['炎帝破空'], content:'双帝之战后，萧炎以炎帝之名在大陆停留三年。安頓亲人旧友，将萧家安置妥当，为薰儿、美杜莎、女儿萧潇留下斗帝血脉护佑。三年后以帝炎之力撕开位面壁障，独自破空前往大千世界。离别时彩鳞含泪、薰儿沉默、萧潇哭喊着追向天空。' })
-
-  ];
-
-  // ========== 智能分类：蓝/绿灯 + 插入位置 ==========
-  // 蓝灯 = 始终注入（仅核心修炼体系，不随场景变化）
-  // 绿灯 = 关键词触发（人物/地点/事件/物品/功法，提到才注入）
-  // 位置 0 = 角色定义前，位置 1 = 角色定义后，位置 6+ = D4+深度
-  book.entries.forEach(function(entry) {
-    var allKeys = (entry.keys || []).join(',').toLowerCase();
-    var content = (entry.content || '').toLowerCase();
-
-    // === 蓝灯：仅核心修炼体系（任何场景都需要的底层规则）===
-    // 注意：用 includes 精确匹配单个 key，避免子串误伤（如"炼药师公会"误匹配"炼药师"）
-    var keysArr = entry.keys || [];
-    var hasKey = function(w) { return keysArr.indexOf(w) >= 0; };
-    var isBlue = (
-      (hasKey('修炼') || hasKey('斗气')) && hasKey('境界') ||
-      hasKey('功法') && hasKey('功法等级') ||
-      hasKey('斗技') && hasKey('斗技等级') ||
-      hasKey('炼药师') && hasKey('丹药') ||
-      hasKey('灵魂力') ||
-      hasKey('丹药种类') ||
-      hasKey('异火榜') // 异火总纲
-    );
-
-    if (isBlue) {
-      // 蓝灯：始终发送，位置在角色定义前（底层规则，不抢角色注意力）
-      entry.constant = true;
-      entry.position = 0;
-      entry.selective = true;
-      entry.noRecurse = true;
-    } else {
-      // === 绿灯：关键词触发 ===
-      entry.constant = false;
-      // 位置判断
-      if (allKeys.indexOf('魔兽') >= 0 && allKeys.indexOf('阶位') >= 0) {
-        entry.position = 0; // 魔兽阶位：定义前
-      } else if (allKeys.indexOf('异火') >= 0 && allKeys.indexOf('榜') < 0) {
-        entry.position = 0; // 单种异火：定义前
-      } else if (allKeys.indexOf('远古八族') >= 0 && allKeys.indexOf('八族') >= 0) {
-        entry.position = 1; // 远古八族总纲：定义后
-      } else if (allKeys.indexOf('三年之约') >= 0 || allKeys.indexOf('双帝之战') >= 0 || allKeys.indexOf('云岚宗覆灭') >= 0 || allKeys.indexOf('古帝洞府开启') >= 0 || allKeys.indexOf('魂族灭族') >= 0) {
-        entry.position = 6; // 重大事件：D4 深度
-      } else if (allKeys.indexOf('斗帝') >= 0 && allKeys.indexOf('斗帝之路') >= 0) {
-        entry.position = 6; // 斗帝秘辛：D4
-      } else if (allKeys.indexOf('炎帝') >= 0 && allKeys.indexOf('破空') < 0) {
-        entry.position = 6; // 炎帝称号：D4
-      } else if (allKeys.indexOf('大千世界') >= 0) {
-        entry.position = 6; // 大千世界：D4
-      } else if (allKeys.indexOf('炎帝破空') >= 0) {
-        entry.position = 6; // 炎帝破空：D4
-      } else if (allKeys.indexOf('焚决') >= 0 && allKeys.indexOf('焚决功法') >= 0) {
-        entry.position = 1; // 焚决总纲：定义后（重要功法）
-      } else if (allKeys.indexOf('佛怒火莲') >= 0) {
-        entry.position = 1; // 核心自创斗技：定义后
-      } else {
-        entry.position = 0; // 默认：角色定义前
-      }
-      entry.selective = true;   // 不可递归：不被其他条目误触发
-      entry.noRecurse = true;   // 防止进一步递归：不连带触发其他条目
-    }
-  });
-
-  return book;
+  return LoreCatalog.create(createLorebook,createLorebookEntry);
 }
 
 function createDefaultCharacterCard() {
@@ -5698,7 +5018,8 @@ function buildCharacterProfileDOM(content) {
 // Helper: build a single assistant message as a DOM fragment
 function buildAssistantMessageDOM(msg) {
   var frag = document.createDocumentFragment();
-  var parsed = parseGameModeOutput(applyRegexScripts(msg.content, 0));
+  var displayContent=typeof StoryQuests!=='undefined'?StoryQuests.extract(msg.content).cleaned:msg.content;
+  var parsed = parseGameModeOutput(applyRegexScripts(displayContent, 0));
 
   if (parsed.thinking) {
     var det = document.createElement('details');
@@ -5854,6 +5175,8 @@ function setTavernSendingUI(sending) {
 }
 
 async function runTavernTurn(content, regenerate) {
+  if(typeof SaveManager!=='undefined'&&SaveManager.isBusy()){showToast('正在恢复存档，请稍后推演','info');return;}
+  if(typeof BeautyRoster!=='undefined'&&BeautyRoster.isBusy()){showToast('人物档案正在保存，请稍后推演','info');return;}
   if(typeof WorldMapBridge!=='undefined'&&WorldMapBridge.isMoving()){showToast('角色正在行走，停步后再开始推演','info');return;}
 
   if (tavernState.isSending) return;
@@ -5888,7 +5211,7 @@ async function runTavernTurn(content, regenerate) {
       renderTavernMessages();
     }
     ensureCurrent();
-    var prepared = prepareTavernRequest(working,content,working.messages.slice(0,-1),false);
+    var prepared = prepareTavernRequest(working,content,working.messages.slice(0,-1),false,before.player);
     var preset = prepared.selection.preset, result = prepared.result;
     tavernState.lastRequestInspection = prepared;
     // Summary metrics are persisted separately; request inspection remains memory-only.
@@ -5896,7 +5219,7 @@ async function runTavernTurn(content, regenerate) {
     var msgs = document.getElementById('tavern-messages');
     if (msgs) { var typing = document.createElement('div'); typing.id = 'tavern-typing'; typing.className = 'msg-maintext typing'; typing.textContent = '正在推演…'; msgs.appendChild(typing); }
     var parser = StreamParser();
-    parser.onTag(function(tag, text) { if (tag !== 'maintext') return; ensureCurrent(); var el = document.getElementById('tavern-typing'); if (el) el.textContent = text; });
+    parser.onTag(function(tag, text) { if (tag !== 'maintext') return; ensureCurrent(); var el = document.getElementById('tavern-typing'); if (el) el.textContent = typeof StoryQuests!=='undefined'?StoryQuests.visible(text):text; });
     var sampling = preset.settings || {};
     var opts = {model:sampling.openai_model || undefined, temperature:sampling.temp_openai,
       max_tokens:sampling.openai_max_tokens, top_p:sampling.top_p_openai,
@@ -5914,6 +5237,12 @@ async function runTavernTurn(content, regenerate) {
     var legacy = extractVariables(upstore.cleaned);
     variables = mergeVariables(variables, legacy.updates);
     var player = TavernCore.clone(before.player), processed = legacy.cleanedText.replace(/<world_action>[\s\S]*?<\/world_action>/gi,'').trim();
+    if(typeof StoryQuests!=='undefined'){
+      var questOutput=StoryQuests.extract(processed);processed=questOutput.cleaned;
+      var questResult=StoryQuests.apply(player.storyQuests,questOutput.updates,working.id);
+      if(questResult.changes.length)player.storyQuests=questResult.ledger;
+      if(questOutput.errors.length)showToast('任务块未能解析，本轮正文已保留','info');
+    }
     if(regenerate&&GameState.player.exploration){
       ['exploration','inventory','location','history'].forEach(function(key){if(GameState.player[key]!==undefined)player[key]=TavernCore.clone(GameState.player[key]);});
     }
@@ -5926,6 +5255,11 @@ async function runTavernTurn(content, regenerate) {
       player.desirePleasure = Math.max(0,player.desirePleasure - 40);
       variables.desirePleasure = player.desirePleasure;
       if (player.desireLust < 100) { player.desireLust = Math.max(0,(player.desireLust || 0) - 10); variables.desireLust = player.desireLust; }
+    }
+    if(typeof BeautyChronicle!=='undefined'){
+      player.beautyChronicle=await BeautyChronicle.update(before.player.beautyChronicle,processed,TavernCore.clone(GameState.settings.beautyApi),controller.signal,request.id);
+      ensureCurrent();
+      if(player.beautyChronicle.error)showToast(player.beautyChronicle.error,'info');
     }
     if (JSON.stringify(GameState.player) !== playerAtDispatch) throw new Error('推演期间角色状态发生变化，请重演本轮以避免覆盖进度');
     var assistant = createChatMessage('assistant', processed);
@@ -6091,35 +5425,7 @@ function openTavernLorebookModal() {
 }
 
 function openLorebookEditor(bookId) {
-  var book = tavernState.lorebooks.find(function(b) { return b.id === bookId; });
-  if (!book) return;
-  var html = '<h3 style="margin-bottom:16px;">编辑：' + escapeHtml(book.name) + '</h3>' +
-    '<div class="form-group"><label class="form-label">世界书名称</label><input type="text" id="lb-name" class="form-input" value="' + escapeHtml(book.name) + '"></div>' +
-    '<h4 style="color:var(--text-primary);margin:12px 0;">条目（' + book.entries.length + '）</h4>' +
-    '<div id="lb-entries" style="max-height:300px;overflow-y:auto;">';
-  book.entries.forEach(function(entry, idx) {
-    var isBlue = entry.constant === true;
-    var pos = entry.position || 0;
-    var posLabel = pos === 0 ? '前' : pos === 1 ? '后' : 'D' + (pos - 2);
-    var dotColor = isBlue ? '#4488ff' : '#88cc88';
-    var dotGlow = isBlue ? '#4488ff' : '#88cc88';
-    var lightLabel = isBlue ? '蓝' : '绿';
-    html += '<div class="entry-row">' +
-      '<span style="width:10px;height:10px;border-radius:50%;background:' + dotColor + ';box-shadow:0 0 6px ' + dotGlow + ';flex-shrink:0;" title="' + (isBlue ? '蓝灯·始终发送' : '绿灯·关键词触发') + '"></span>' +
-      '<span class="entry-key" style="color:var(--accent-blue);min-width:80px;">' + escapeHtml(entry.keys.join(',') || (isBlue ? '(始终发送)' : '无关键词')) + '</span>' +
-      '<span style="font-size:10px;color:var(--text-muted);min-width:28px;">' + posLabel + '</span>' +
-      '<span class="entry-content" style="flex:1;">' + escapeHtml(entry.comment || entry.content.substring(0, 40)) + '</span>' +
-      '<button class="text-btn" onclick="editLorebookEntry(' + TavernCore.handlerArg(bookId) + ',' + idx + ')">✎</button>' +
-      '<button class="text-btn danger" onclick="removeLorebookEntry(' + TavernCore.handlerArg(bookId) + ',' + idx + ')">✕</button>' +
-    '</div>';
-  });
-  html += '</div>' +
-    '<button class="add-api-btn" onclick="addLorebookEntry(' + TavernCore.handlerArg(bookId) + ')">+ 添加条目</button>' +
-    '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">' +
-      '<button class="text-btn" onclick="openTavernLorebookModal()">返回</button>' +
-      '<button class="summary-action-btn" onclick="saveLorebookEditor(' + TavernCore.handlerArg(bookId) + ')">保存</button>' +
-    '</div>';
-  showModal(html);
+  return LoreCatalogUI.editor(bookId);
 }
 
 async function addNewLorebook() {
@@ -6169,6 +5475,7 @@ function removeLorebookEntry(bookId, idx) {
 function editLorebookEntry(bookId, idx) {
   var book = tavernState.lorebooks.find(function(b) { return b.id === bookId; });
   if (!book) return;
+  if(typeof LoreCatalogUI!=='undefined')LoreCatalogUI.clear();
   var entry = TavernCore.clone(book.entries[idx]);
   entry = Object.assign({},entry,{keys:(entry.keys || []).slice()});
   var isConstant = entry.constant === true;
@@ -6478,23 +5785,6 @@ function removeRegexScript(id) {
   saveToLocalStorage();
 }
 
-// -- 2. Depth Prompt Engine --
-var depthPrompts = {
-  depth_0: '【表层性格】初次接触，礼貌疏离。保持警惕，话语中带有试探。遵循修仙世界的基本礼节，不轻易暴露自身实力与底牌。',
-  depth_1: '【浅层性格】略有了解后，开始展现部分真实性格。话语间多了一份从容，可开适当玩笑，但仍保持一定距离。',
-  depth_2: '【中层性格】信任渐深，愿意分享一些个人经历与看法。开始展露独特的处事风格，对认可之人展现关心。',
-  depth_3: '【深层性格】亲密关系，敞开心扉。展现内心真正的想法、恐惧与渴望。言语间充满温度，不再刻意设防。',
-  depth_4: '【核心秘密】完全信任，愿意托付生命。揭示最深层的秘密、过去的伤疤、真实的野心。唯有生死之交方能触及。'
-};
-
-function getDepthPrompt(affinity) {
-  if (!affinity || affinity < 20) return depthPrompts.depth_0;
-  if (affinity < 40) return depthPrompts.depth_1;
-  if (affinity < 60) return depthPrompts.depth_2;
-  if (affinity < 80) return depthPrompts.depth_3;
-  return depthPrompts.depth_4;
-}
-
 // -- 3. Branch Options (<branches> parser) --
 function parseBranchOptions(text) {
   var re = /<branches>([\s\S]*?)<\/branches>/i;
@@ -6672,12 +5962,6 @@ function getStyleGuide() {
     : DEFAULT_STYLE_GUIDE;
 }
 
-// -- 10. Expanded Character Card (depth prompts) --
-function updateCharacterCardDepth(depthKey, value) {
-  depthPrompts[depthKey] = value;
-  saveToLocalStorage();
-}
-
 // -- Settings Tabs Registration --
 var ALL_SETTINGS_TABS = ['core','lorebook','presets','tavern','regex','depth'];
 
@@ -6694,35 +5978,43 @@ function saveRegexScript(id) {
 }
 
 function renderSettingsDepth(body) {
-  var html = '<div class="settings-section-title">深度性格</div>';
-  html += '<p style="font-size:11px;color:var(--text-muted);margin-bottom:16px;line-height:1.5;">五层性格深度，按 NPC 好感度自动切换。AI 回应时根据关系亲密度选择对应深度。</p>';
-  var depths = [
-    { key:'depth_0', label:'表层', sub:'好感 < 20', color:'#888', border:'rgba(136,136,136,0.2)' },
-    { key:'depth_1', label:'浅层', sub:'好感 20–39', color:'#88cc88', border:'rgba(136,204,136,0.2)' },
-    { key:'depth_2', label:'中层', sub:'好感 40–59', color:'#4488ff', border:'rgba(68,136,255,0.2)' },
-    { key:'depth_3', label:'深层', sub:'好感 60–79', color:'#c084fc', border:'rgba(192,132,252,0.2)' },
-    { key:'depth_4', label:'核心', sub:'好感 ≥ 80', color:'#ff6b35', border:'rgba(255,107,53,0.2)' }
+  var extras = GameState.settings.gameplayExtras || {};
+  var groups = [
+    {key:'clear',name:'清水',config:extras.clear},
+    {key:'shushan',name:'蜀山',config:extras.shushan},
+    {key:'intense',name:'重口',config:extras.intense},
+    {key:'',name:'自定义',config:GameState.settings.gameplayPrompt}
   ];
-  depths.forEach(function(d) {
-    html += '<div class="settings-card" style="border-left:3px solid ' + d.color + ';margin-bottom:10px;">' +
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">' +
-        '<span style="color:' + d.color + ';font-family:var(--font-serif);font-size:13px;font-weight:600;">' + d.label + '</span>' +
-        '<span style="font-size:10px;color:var(--text-muted);">' + d.sub + '</span>' +
-      '</div>' +
-      '<textarea id="depth-' + d.key + '" class="settings-form-input settings-textarea" rows="2" style="min-height:60px;border-color:' + d.border + ';">' + (depthPrompts[d.key]||'') + '</textarea>' +
-    '</div>';
+  var html = '<div class="settings-section-title">玩法</div><p class="wiring-help">四组提示词独立启用，按下列顺序发送。保存后每轮聊天自动附带，不插入正文或历史消息；空白内容不发送。</p>';
+  groups.forEach(function(group) {
+    var config = group.config || {enabled:group.key === 'clear',text:''};
+    var suffix = group.key ? '-' + group.key : '';
+    html += '<div class="settings-card gameplay-card"><div class="gameplay-heading"><h4>' + group.name + '提示词' + (group.key === 'clear' ? '（不用关）' : '') + '</h4>' +
+      '<label class="gameplay-switch"><input id="gameplay-enabled' + suffix + '" type="checkbox" ' + (config.enabled === true ? 'checked' : '') + '>启用' + group.name + '</label></div>' +
+      '<label for="gameplay-prompt' + suffix + '" class="form-label">提示词内容</label>' +
+      '<textarea id="gameplay-prompt' + suffix + '" class="settings-form-input settings-textarea gameplay-text" maxlength="12000" rows="5" placeholder="Inject System prompt">' + escapeHtml(config.text || '') + '</textarea></div>';
   });
-  html += '<button class="settings-action-btn" onclick="saveAllDepthPrompts()">保存深度性格</button>';
-  body.innerHTML = html;
+  body.innerHTML = html + '<p class="wiring-help">每组最多 12,000 字符。实际发送内容可在世界书页的请求预览中查看。</p><button class="settings-action-btn" onclick="saveGameplayPrompt()">保存全部玩法设置</button>';
 }
 
-function saveAllDepthPrompts() {
-  ['depth_0','depth_1','depth_2','depth_3','depth_4'].forEach(function(k) {
-    var el = document.getElementById('depth-' + k);
-    if (el) depthPrompts[k] = el.value;
-  });
-  saveToLocalStorage();
-  showToast('深度性格已保存');
+function saveGameplayPrompt() {
+  var previous = GameState.settings.gameplayPrompt;
+  var previousExtras = GameState.settings.gameplayExtras;
+  function read(suffix) {
+    return {enabled:!!document.getElementById('gameplay-enabled' + suffix).checked,
+      text:String(document.getElementById('gameplay-prompt' + suffix).value || '').slice(0,12000)};
+  }
+  GameState.settings.gameplayPrompt = read('');
+  GameState.settings.gameplayExtras = {clear:read('-clear'),shushan:read('-shushan'),intense:read('-intense')};
+  if (!saveToLocalStorage()) {
+    if (previous === undefined) delete GameState.settings.gameplayPrompt;
+    else GameState.settings.gameplayPrompt = previous;
+    if (previousExtras === undefined) delete GameState.settings.gameplayExtras;
+    else GameState.settings.gameplayExtras = previousExtras;
+    showToast('玩法设置未保存，请重试', 'error');
+    return;
+  }
+  showToast('全部玩法设置已保存');
 }
 
 // Extend the settings tab system
@@ -6743,7 +6035,8 @@ document.addEventListener('DOMContentLoaded', function() {
   initTitleCover();
   // Initialize Tavern database (async, non-blocking)
   initTavernDB().catch(function(e) { console.warn('Tavern DB init:', e); });
-  var hasData = loadFromLocalStorage() || getSaves().length > 0;
+  var hasData = loadFromLocalStorage();
+  if(!hasData){try{hasData=getSaves().some(function(s){return s&&!s.deletedAt&&s.player&&typeof s.id==='string';});}catch(e){showToast('存档库数据异常，请在存档管理中检查；原数据未被覆盖','error');}}
   var continueBtn = document.getElementById('btn-continue');
   if (continueBtn && hasData) {
     continueBtn.classList.add('primary');
@@ -6780,5 +6073,6 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="assets/js/creation-ui.js"></script>
 <script src="assets/js/journal-panels.js"></script>
 <script src="assets/js/tavern-inspector.js"></script>
+<script src="assets/js/lore-catalog-ui.js"></script>
 </body>
 </html>
