@@ -1,9 +1,9 @@
 /* Shared, framework-free chat logic. Also importable by the Node regression suite. */
 (function(root, factory) {
-  var api = factory();
+  var api = factory(typeof module === 'object' && module.exports ? require('./preset-core.js') : root.PresetCore);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.TavernCore = api;
-})(typeof globalThis !== 'undefined' ? globalThis : this, function() {
+})(typeof globalThis !== 'undefined' ? globalThis : this, function(PresetCore) {
   'use strict';
   var blocked = new Set(['__proto__', 'prototype', 'constructor']);
   var secrets = /^(api_?key|key|authorization|access_?token|refresh_?token|token|password|secret|discordWebhook|discordAuthCode)$/i;
@@ -113,6 +113,8 @@
 
   function promptPlan(options) {
     var preset = options.preset || {}, card = options.characterCard || {}, groups = {before:[], after:[], depth:[]};
+    var ps=PresetCore ? PresetCore.settings(preset) : {}, generationType=options.generationType||'normal';
+    function format(template,text,key){return text?String(template??key).split(key).join(text):'';}
     (options.lorebookMatches || []).forEach(function(m) {
       var p = Number(m.position) || 0;
       if (p < 2) groups[p === 0 ? 'before' : 'after'].push('[' + m.bookName + '] ' + m.entry.content);
@@ -126,26 +128,36 @@
       charDescription:card.description || '', charPersonality:card.personality || '', scenario:card.scenario || '',
       personaDescription:options.persona || '', dialogueExamples:card.mes_example || '', chatHistory:null, userInput:null
     };
+    dynamic.worldInfoBefore=format(ps.wi_format,dynamic.worldInfoBefore,'{0}');
+    dynamic.worldInfoAfter=format(ps.wi_format,dynamic.worldInfoAfter,'{0}');
+    dynamic.worldInfo=format(ps.wi_format,dynamic.worldInfo,'{0}');
+    dynamic.scenario=format(ps.scenario_format,dynamic.scenario,'{{scenario}}');
+    dynamic.charPersonality=format(ps.personality_format,dynamic.charPersonality,'{{personality}}');
     var prompts = (preset.prompts || []).map(function(p) { return Object.assign({}, p, {identifier:id(p.identifier)}); });
     var configured = preset.prompt_order || [];
     if (configured.some(function(p) { return Array.isArray(p.order); })) {
-      var group = configured.find(function(p) { return String(p.character_id) === String(options.characterId || 100000); });
-      configured = (group || configured.find(function(p) { return p.order && p.order.length; }) || {}).order || [];
+      var group = PresetCore.orderGroup(preset, options.characterId);
+      configured = (group || {}).order || [];
     }
-    if (!configured.length) configured = (preset.promptOrder || []).map(function(p) { return {identifier:id(p.id), enabled:p.enabled}; });
-    if (!configured.length) configured = prompts.map(function(p) { return {identifier:p.identifier, enabled:p.enabled}; });
-    if (!configured.length) configured = Object.keys(dynamic).filter(function(k) { return k !== 'worldInfo'; }).map(function(k) { return {identifier:k}; });
+    if (!configured.length && !preset.st_fields && !preset.explicitOrder) configured = (preset.promptOrder || []).map(function(p) { return {identifier:id(p.id), enabled:p.enabled}; });
+    if (!configured.length && !preset.st_fields && !preset.explicitOrder) configured = prompts.map(function(p) { return {identifier:p.identifier, enabled:p.enabled}; });
+    if (!configured.length && !preset.st_fields && !preset.explicitOrder) configured = Object.keys(dynamic).filter(function(k) { return k !== 'worldInfo'; }).map(function(k) { return {identifier:k}; });
     var has = new Set(), blocks = [], depth = groups.depth.slice();
     function add(config) {
       var identifier = id(config.identifier || config.id), p = prompts.find(function(v) { return v.identifier === identifier; });
       if (has.has(identifier)) return;
       has.add(identifier);
-      if (config.enabled === false || (p && p.enabled === false)) return;
+      if (config.enabled === false || (config.enabled == null && p && p.enabled === false)) return;
       p = p || {};
+      if(p.injection_position!=null&&![0,1,6].includes(Number(p.injection_position)))return;
+      if(Array.isArray(p.injection_trigger)&&p.injection_trigger.length&&!p.injection_trigger.includes(generationType))return;
       if (identifier === 'chatHistory' || identifier === 'userInput') { blocks.push({marker:identifier}); return; }
       var content = Object.prototype.hasOwnProperty.call(dynamic, identifier) ? dynamic[identifier] : p.content;
       if ((identifier === 'main' || identifier === 'nsfw' || identifier === 'jailbreak') && p.content) content = p.content;
+      if(!p.forbid_overrides&&identifier==='main'&&card.system_prompt)content=card.system_prompt;
+      if(!p.forbid_overrides&&identifier==='jailbreak'&&card.post_history_instructions)content=card.post_history_instructions;
       if (!content) return;
+      if(identifier==='dialogueExamples'&&ps.new_example_chat_prompt)content=ps.new_example_chat_prompt+'\n'+content;
       var replacements = {user:options.userName || '玩家', char:card.name || '角色', scenario:card.scenario || '', personality:card.personality || '', description:card.description || '', location:options.location || ''};
       content = String(content).replace(/\{\{(user|char|scenario|personality|description|location)\}\}/g, function(_, key) { return replacements[key]; });
       var block = {role:['system','user','assistant'].includes(p.role) ? p.role : 'system', content:content};
@@ -154,16 +166,17 @@
     }
     configured.forEach(add);
     // Newly added editor blocks absent from an old order still remain usable.
-    prompts.forEach(function(p) { if (!has.has(p.identifier)) add(p); });
+    if(!preset.st_fields&&!preset.explicitOrder)prompts.forEach(function(p) { if (!has.has(p.identifier)) add(p); });
     ['charDescription','charPersonality','scenario','worldInfoBefore','worldInfoAfter'].forEach(function(k) {
-      if (!has.has(k) && !(k.startsWith('worldInfo') && has.has('worldInfo'))) add({identifier:k});
+      if (!preset.st_fields && !preset.explicitOrder && !has.has(k) && !(k.startsWith('worldInfo') && has.has('worldInfo'))) add({identifier:k});
     });
     // History/input cannot be silently disabled: they define the turn itself.
-    if (!blocks.some(function(b) { return b.marker === 'chatHistory'; })) blocks.push({marker:'chatHistory'});
+    if (!has.has('chatHistory') && !blocks.some(function(b) { return b.marker === 'chatHistory'; })) blocks.push({marker:'chatHistory'});
     if (!blocks.some(function(b) { return b.marker === 'userInput'; })) blocks.push({marker:'userInput'});
     // Depth-injected lore uses the same macros as ordinary preset blocks.
     depth.forEach(function(d){d.content=String(d.content||'').replace(/\{\{(user|char|location)\}\}/g,function(_,key){return key==='user'?(options.userName||'玩家'):key==='char'?(card.name||'角色'):(options.location||'');});});
-    return {blocks:blocks, depth:depth};
+    if(ps.new_chat_prompt)blocks.splice(Math.max(0,blocks.findIndex(function(b){return b.marker==='chatHistory';})),0,{role:'system',content:String(ps.new_chat_prompt).replace(/\{\{(user|char)\}\}/g,function(_,k){return k==='user'?(options.userName||'玩家'):(card.name||'角色');})});
+    return {blocks:blocks, depth:depth, settings:ps,generationType:generationType,strictDepth:!!(preset.st_fields||preset.explicitOrder)};
   }
   function composePrompt(options) {
     var plan = options.plan, history = (options.history || []).map(function(m) { return {role:m.role, content:String(m.content || '')}; });
@@ -171,17 +184,18 @@
     var limit = maxContext - reserve;
     if (limit <= 0) throw new Error('最大回复长度必须小于上下文容量');
     function build() {
-      var inserted = history.map(function() { return []; }); inserted.push([]);
+      var inserted = history.map(function() { return []; }); inserted.push([]);var tail=[];
       plan.depth.slice().sort(function(a,b) { return a.order - b.order; }).forEach(function(d) {
-        inserted[Math.max(0, history.length - d.depth)].push({role:d.role, content:d.content});
+        if(plan.strictDepth && d.depth===0)tail.push({role:d.role,content:d.content});else inserted[Math.max(0, history.length - d.depth+(plan.strictDepth&&options.userInput?1:0))].push({role:d.role, content:d.content});
       });
       history.forEach(function(m, i) { inserted[i].push(m); });
       var result = options.system ? [{role:'system', content:options.system}] : [];
       plan.blocks.forEach(function(b) {
         if (b.marker === 'chatHistory') inserted.forEach(function(items) { result.push.apply(result, items); });
-        else if (b.marker === 'userInput') { if (options.userInput) result.push({role:'user', content:options.userInput}); }
+        else if (b.marker === 'userInput') { if (options.userInput) result.push({role:plan.generationType==='continue'&&plan.settings.continue_prefill?'assistant':'user', content:options.userInput});tail.forEach(function(m){result.push(m);}); }
         else result.push({role:b.role, content:b.content});
       });
+      if(plan.settings && (plan.settings.squash_system_messages || plan.settings.custom_prompt_post_processing==='merge'))result=result.reduce(function(out,m){var last=out[out.length-1];if(last&&last.role==='system'&&m.role==='system')last.content+='\n\n'+m.content;else out.push(Object.assign({},m));return out;},[]);
       return result;
     }
     var messages = build(), removed = 0;
@@ -212,7 +226,9 @@
     if(options.max_tokens!==undefined)config.maxOutputTokens=options.max_tokens;
     if(options.temperature!==undefined)config.temperature=options.temperature;
     if(options.top_p!==undefined)config.topP=options.top_p;
+    if(PresetCore)Object.assign(config,PresetCore.sampling(options,'gemini').sent);
     var thinking=options.thinkingLevel||api.thinkingLevel;
+    if(options.reasoning_effort&&options.reasoning_effort!=='auto')thinking=({min:'minimal',max:'high'}[options.reasoning_effort]||options.reasoning_effort);
     if(thinking&&thinking!=='default'){
       if(!['minimal','low','medium','high'].includes(thinking))throw new Error('Gemini 思考级别无效');
       var model=String(options.model||api.model||'');
@@ -221,7 +237,7 @@
       config.thinkingConfig={thinkingLevel:thinking};
     }
     if(options.jsonMode)config.responseMimeType='application/json';
-    var body={contents:contents,generationConfig:config};if(system.length)body.systemInstruction={parts:system};return body;
+    var body={contents:contents,generationConfig:config};if(system.length){if(options.use_sysprompt===false){if(body.contents[0]?.role==='user')body.contents[0].parts=system.concat(body.contents[0].parts);else body.contents.unshift({role:'user',parts:system});}else body.systemInstruction={parts:system};}return body;
   }
   function geminiReply(data){
     if(data.error)throw new Error('Gemini 返回错误，请检查模型和接口配置');
@@ -231,6 +247,29 @@
     if(c.finishReason&&c.finishReason!=='STOP')throw new Error(c.finishReason==='MAX_TOKENS'?'Gemini 输出达到 token 上限，本轮未提交；请增加预设输出额度或降低思考级别':'Gemini 回复未正常完成，本轮未提交');
     return {text:((c.content&&c.content.parts)||[]).filter(function(p){return !p.thought&&typeof p.text==='string';}).map(function(p){return p.text;}).join(''),finish:c.finishReason};
   }
+  // Display-only filtering: keep raw replies intact for option parsing and persistence.
+  function visibleBranches(value, streaming) {
+    var text = String(value || '').replace(/<branches>[\s\S]*?(?:<\/branches>|$)/gi, '');
+    if (streaming) {
+      var start = text.lastIndexOf('<');
+      if (start >= 0) {
+        var tail = text.slice(start).toLowerCase();
+        if ('<branches>'.startsWith(tail)) text = text.slice(0, start);
+      }
+    }
+    return text;
+  }
+
+  // Filter only the preview; parseUpstore still receives the complete raw reply.
+  function visibleUpstore(value, streaming) {
+    var text = String(value || '').replace(/<upstore>[\s\S]*?(?:<\/upstore>|$)/gi, '');
+    if (streaming) {
+      var start = text.lastIndexOf('<');
+      if (start >= 0 && '<upstore>'.startsWith(text.slice(start).toLowerCase())) text = text.slice(0, start);
+    }
+    return text;
+  }
+
   function streamParser() {
     var text = '', listeners = [];
     function emit() {
@@ -288,22 +327,23 @@
     } finally { if(signal)signal.removeEventListener('abort',onAbort);try { await reader.cancel(); } catch (_) {} reader.releaseLock(); }
   }
 
+  function requestBody(api,messages,options,stream) {
+    options=options||{};var backend=api.backend||'openai',body;
+    if(backend==='gemini')return geminiBody(messages,options,api);
+    var sampling=PresetCore?PresetCore.sampling(options,backend).sent:{};
+    if(backend==='ollama')return {model:options.model||api.model,messages:messages,stream:!!stream,options:Object.assign(options.parameter_enabled?{}:{temperature:options.temperature??.7,num_predict:options.max_tokens??1024,top_p:options.top_p??1},sampling)};
+    if(backend==='kobold')return Object.assign({prompt:messages.map(function(m){return m.role+': '+m.content;}).join('\n\n')+'\nassistant:'},options.parameter_enabled?{}:{temperature:options.temperature??.7,max_length:options.max_tokens??1024,top_p:options.top_p??1},sampling);
+    body={model:options.model||api.model,messages:messages,stream:!!stream};
+    ['temperature','max_tokens','top_p','frequency_penalty','presence_penalty'].forEach(function(k){if(options[k]!==undefined)body[k]=options[k];});
+    return Object.assign(body,sampling);
+  }
   async function request(api, messages, options, onChunk, fetcher) {
     options = options || {}; checkAbort(options.signal);
-    var backend = api.backend || 'openai', stream = !!onChunk, body, headers = {'Content-Type':'application/json'};
+    var backend = api.backend || 'openai', stream = !!onChunk, body=requestBody(api,messages,options,stream), headers = {'Content-Type':'application/json'};
     if(backend==='gemini'){
       if(!options.model&&!api.model)throw new Error('请填写 Gemini 模型标识');
-      body=geminiBody(messages,options,api);if(api.apiKey||api.key)headers['x-goog-api-key']=api.apiKey||api.key;
-    }
-    else if (backend === 'ollama') body = {model:options.model || api.model, messages:messages, stream:stream, options:{temperature:options.temperature ?? 0.7, num_predict:options.max_tokens ?? 1024, top_p:options.top_p ?? 1}};
-    else if (backend === 'kobold') {
-      // The standard generate endpoint returns JSON; do not mistake that JSON for token text.
-      body = {prompt:messages.map(function(m) { return m.role + ': ' + m.content; }).join('\n\n') + '\nassistant:', temperature:options.temperature ?? 0.7, max_length:options.max_tokens ?? 1024, top_p:options.top_p ?? 1};
-    } else {
-      body = {model:options.model || api.model, messages:messages, stream:stream};
-      ['temperature','max_tokens','top_p','frequency_penalty','presence_penalty'].forEach(function(k) { if (options[k] !== undefined) body[k] = options[k]; });
-      if (api.apiKey || api.key) headers.Authorization = 'Bearer ' + (api.apiKey || api.key);
-    }
+      if(api.apiKey||api.key)headers['x-goog-api-key']=api.apiKey||api.key;
+    } else if(backend!=='ollama'&&backend!=='kobold'&&(api.apiKey||api.key))headers.Authorization='Bearer '+(api.apiKey||api.key);
     var response = await (fetcher || fetch)(transportURL(api,endpoint(api.url, backend,options.model||api.model,stream)), {method:'POST', headers:headers, body:JSON.stringify(body), signal:options.signal});
     checkAbort(options.signal);
     if (!response.ok) { var error = new Error('模型请求失败（HTTP ' + response.status + '）'); error.status = response.status; throw error; }
@@ -376,5 +416,5 @@
     ['personality','scenario','firstMessage'].forEach(function(k) { if (card[k] != null && typeof card[k] !== 'string') throw new Error('角色卡字段类型错误：' + k); });
     return card;
   }
-  return {clone:clone, redact:function(v) { return clone(v,true); }, escapeHtml:escapeHtml, handlerArg:handlerArg, estimateTokens:estimateTokens, endpoint:endpoint, transportURL:transportURL, abortError:abortError, checkAbort:checkAbort, matchLorebooks:matchLorebooks, promptPlan:promptPlan, composePrompt:composePrompt, streamParser:streamParser, request:request, readStream:readStream, applyOperations:applyOperations, regeneration:regeneration, parseJSON:parseJSON, importCard:importCard};
+  return {presetOptions:function(p){return PresetCore.options(p);}, presetReport:function(p,b){return PresetCore.report(p,b);}, requestBody:requestBody, clone:clone, redact:function(v) { return clone(v,true); }, escapeHtml:escapeHtml, handlerArg:handlerArg, estimateTokens:estimateTokens, endpoint:endpoint, transportURL:transportURL, abortError:abortError, checkAbort:checkAbort, matchLorebooks:matchLorebooks, promptPlan:promptPlan, composePrompt:composePrompt, streamParser:streamParser, visibleBranches:visibleBranches, visibleUpstore:visibleUpstore, request:request, readStream:readStream, applyOperations:applyOperations, regeneration:regeneration, parseJSON:parseJSON, importCard:importCard};
 });

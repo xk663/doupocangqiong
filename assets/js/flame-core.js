@@ -29,7 +29,7 @@
    next.records[f.rank]={stage,holder,events:old.events.concat(event).slice(-20)};changes.push(f.rank);
   }return {state:next,changes,errors};
  }
- function context(value,catalog=[]){const s=state(value);for(const r of Object.values(s.records))r.events=r.events.slice(-3);return '【本次人生异火档案】仅为已记录事实，不自动授予火种或战力；未知持有者不得按原著补齐。\n名录：'+JSON.stringify(catalog.map(f=>({rank:f.rank,name:f.name,source:f.sourceType==='user-supplement'?'项目补充':'原著'})))+'\n'+JSON.stringify(s);}
+ function context(value,catalog=[]){const s=state(value);for(const r of Object.values(s.records))r.events=r.events.slice(-3);return '【本次人生异火档案】仅为已记录事实，不自动授予火种或战力；未知持有者不得按原著补齐。\n名录：'+JSON.stringify(catalog.map(f=>({rank:f.rank,name:f.name})))+'\n'+JSON.stringify(s);}
  const protocol='【异火事件记录】正文实际提及异火发现、争夺、接触、炼化、失败、失去、融合或情报时，可末尾追加 <flame_updates>JSON数组</flame_updates>，最多8项。格式 {"rank":19,"stage":"heard","kind":"clue","source":"rumor","evidence":"含异火全名的逐字正文原句","holder":"仅正文明确的持有者，可省略","place":"原句中的地点，可省略","nodeId":"仅地图已知节点ID，可省略","time":"正文日期，可省略"}。stage可为heard/traced/contact/attempt/owned/lost/failed；kind可为clue/discovery/contest/refine/failure/loss/fusion/relation；source可为rumor/told/seen/confirmed/refuted。传闻、人物告知不得证明收服；owned仅在正文明确成功收服或炼化时记录。不同本体、子火和火种应在证据说明，不把曾经持有写成现在持有。不改地图、资源、能力、实力；失败也记经过。没有发生则不输出。';
  return {stages,sources,state,visible,extract,apply,context,protocol};
 });

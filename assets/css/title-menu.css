@@ -2,7 +2,7 @@
 #view-title::before{background:linear-gradient(90deg,#081e27db 0%,#0d2931b5 24%,#19343a30 47%,transparent 65%)}
 /* Reserve the original composition height so new menu details cannot move the title. */
 #view-title .landing-copy{height:calc(305.4px + min(480px,calc(270px + 13vw - 32px))/3);flex-shrink:0}
-#view-title .landing-kicker{width:270px;max-width:100%;justify-content:center;gap:12px;color:#dcc696;letter-spacing:3px;line-height:1.6}
+#view-title .landing-kicker{width:270px;max-width:100%;justify-content:center;gap:12px;color:#dcc696;font-size:16px;letter-spacing:3px;line-height:17.6px}
 #view-title .landing-kicker::before,#view-title .landing-kicker::after{content:'';display:block;width:26px;height:1px;background:linear-gradient(90deg,transparent,#bfaa7e);flex-shrink:0}
 #view-title .landing-kicker::after{transform:rotate(180deg)}
 #view-title .landing-description{margin-bottom:24px;line-height:2.1}
@@ -50,3 +50,7 @@
  #view-title .landing-body{align-items:flex-start;min-height:600px}
  #view-title .landing-copy{height:auto;padding-top:20px;padding-bottom:35px}
 }
+
+/* Accents remain within the existing kicker dimensions. */
+#view-title .landing-kicker{text-shadow:0 1px 6px #061e24,0 0 12px #d6bd7726}
+#view-title .landing-kicker::before,#view-title .landing-kicker::after{background:linear-gradient(90deg,transparent,#789e9b80 18%,#dac58c 72%,#f2dfaa);box-shadow:0 2px 0 #91b7ad16,0 0 6px #d6bd7730;border-right:3px solid #dfcf9e;box-sizing:border-box}

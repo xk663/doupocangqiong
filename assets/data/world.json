@@ -2475,7 +2475,7 @@
       "night": "shimo-supply",
       "shop": true,
       "quest": "herbs",
-      "topic": "沙漠里水和干粮都重要。风怒龙炎是移动火焰风眼的项目补充线索，不是固定宝箱。",
+      "topic": "沙漠里水和干粮都重要。风怒龙炎随火焰风眼游移，线索并不指向固定地点。",
       "rumor": "shimo-oasis"
     },
     {

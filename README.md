@@ -1,86 +1,116 @@
 # 斗破苍穹 · 修炼模拟
 
-> 基于《斗破苍穹》世界观的 AI 修炼模拟游戏 — 原生 HTML/CSS/JS 静态前端
+基于《斗破苍穹》世界观的独立 LLM 聊天与角色扮演前端，使用原生 HTML、CSS 和 JavaScript，无需构建即可部署。
 
-[![GitHub Pages](https://img.shields.io/badge/在线体验-GitHub%20Pages-brightgreen)](https://xk663.github.io/doupocangqiong/)
-![License](https://img.shields.io/badge/license-MIT-blue)
-![Version](https://img.shields.io/badge/version-v2.0-gold)
+[![在线体验](https://img.shields.io/badge/在线体验-GitHub%20Pages-brightgreen)](https://xk663.github.io/doupocangqiong/)
+![Version](https://img.shields.io/badge/version-v1.0-gold)
 
----
+## 当前功能
 
-## 特性
+| 模块 | 已实现内容 |
+| --- | --- |
+| 主界面 | 古族场景背景、两组透明书法字标、可暂停动态；继续人生提示读取浏览器中的当前进度 |
+| 角色创建 | 六步流程：落笔、血脉、出身、根基、天赋、启程；出发地点和行囊进入开局，不再设置数列答题门槛 |
+| LLM 聊天 | OpenAI 兼容、Gemini 原生、Ollama、Kobold；流式与非流式、停止、重演、回合状态事务和历史回溯 |
+| 预设工作台 | 采样与开关、提示词编排、请求与兼容报告；酒馆 Chat Completion JSON 导入导出、复制、草稿保存、角色与插入深度 |
+| 世界书 | 默认校订目录 202 条、10 类；别名、关键词、常驻、次关键词与有界递归扫描；命中、预算和实际插入可预览 |
+| 交互大地图 | 大陆与乌坦城、青山镇、石漠城插画；平移缩放、道路寻路、动态角色、徒步／骑乘／化翼、镜头跟随与中途停步 |
+| 地图互动 | 地点发现、距离约束、日夜人物、交易、委托、补给和行旅记录；深度街区互动目前集中于三个出发地 |
+| 驻地 | 乌坦城、青山镇、石漠城实景图、设施交互与居所登记；休整、静修、备药、研习等先写入聊天草稿，按正文核对结果 |
+| 排行榜 · 异火榜 | 23 种异火独立意象图、搜索筛选、线索可信度、持有记录、调查与融合草稿；阅览资料不会授予火种 |
+| 排行榜 · 美人榜 | 10 位人物立绘及全屏查看；随正文时间更新档案，可新增原创人物、排序、隐藏、纠错和锁定字段；支持独立人物 API |
+| 玩家概要 | 处境、近期变化、任务与自定目标、真实资源、人物牵连和历程；有证据的正文更新及带原因的手动纠错 |
+| 任务 | 正文情景任务与地图委托；天地玄黄分级，区分进行、完成与失败，状态更新需正文依据 |
+| 存档 | 搜索排序、置顶备注、上一版恢复、回收站、读档恢复点、完整导入导出、本地备份与可选 Discord Webhook 备份 |
 
-| 模块 | 说明 |
-|------|------|
-| **AI 对话** | 酒馆式 LLM 聊天框架，支持多 API/多模型/流式输出 |
-| **角色创建** | 5 步创角流程，11 族选择，50 天赋词条，斗气属性抽取 |
-| **修炼系统** | 闭关修炼、炼药、武技研习、境界突破、修为结算卡 |
-| **大世界地图** | Canvas 古风羊皮纸地图，拼图式多边形，滚轮缩放拖拽 |
-| **世界书** | 261 条目，关键词匹配，递归触发，蓝灯/绿灯机制 |
-| **存档管理** | 搜索排序、置顶备注、上一版恢复、回收站、读档恢复点、导入导出与云备份 |
-| **时空回溯** | 回合快照，变量回滚，一键回溯到任意历史回合 |
-| **异火榜** | 23 种天地奇火完整排名与描述 |
-| **美人榜** | 10 位红颜含隐秘描述 |
-| **酒馆预设** | 提示词编辑、prompt_order 排序、采样参数配置 |
-| **协议系统** | 5 大协议：状态栏、语义渲染、结算卡、战斗触发、自动推演 |
+## 本地运行
 
-## 快速开始
+安装 Node.js 20 或更高版本，在仓库目录执行：
 
-使用 AI Studio 本机反代时，推荐在项目目录运行 `node tools/serve.cjs`，打开 `http://127.0.0.1:8090/`。接口类型选择 **Gemini 原生 / AI Studio 反代**，地址填 `http://localhost:8080`，填写模型和自己的 Key；反代不支持跨域时勾选 **本机反代同源通道**。主聊天和美人榜独立接口均可配置。详见 [Gemini 原生接入](docs/gemini-native.md)。
+```powershell
+node tools/serve.cjs
+```
 
-1. 打开 `index.html`（需要 HTTP 服务器 — 直接用 `python -m http.server 8080` 或部署到 GitHub Pages）
-2. 配置 API：标题页 → 设置 → 核心 → API 配置（支持 OpenAI / DeepSeek / Anthropic 等兼容接口）
-3. 开启新人生或继续存档
+浏览器打开 [http://127.0.0.1:8090/](http://127.0.0.1:8090/)。不要使用 file:// 直接打开页面。也可通过其他 HTTP 静态服务器运行；浏览器存档按协议、域名和端口隔离，切换 localhost／127.0.0.1 或端口前建议先导出备份。
+
+1. 首页 → 偏好设置 → 核心：添加并启用自己的 API，填写接口地址、模型和 Key。
+2. 设置 → 预设：编辑默认预设或导入酒馆对话补全 JSON，选择接口与模型，检查兼容报告后保存、启用。
+3. 设置 → 世界书：启用所需世界书；可先用“预览当前请求”检查命中、插入位置与参数。
+4. 开启新人生，或继续浏览器内已保存的进度。
+
+### Gemini / AI Studio 本机反代
+
+接口类型选择 **Gemini 原生 / AI Studio 反代**，地址填写自己的本机服务（例如 http://localhost:8080），密钥仅在本机设置中输入。需要解决浏览器跨域时，使用本项目服务器并勾选“本机反代同源通道”。该通道固定转发至 localhost:8080 的 Gemini 原生路径，不是任意目标代理。GitHub Pages 等纯静态托管没有此通道。详见 [Gemini 原生接入](docs/gemini-native.md)。
+
+## 预设兼容范围
+
+- 对齐酒馆 Chat Completion 的主要采样字段、prompts、prompt_order、System／User／Assistant 角色、相对位置、绝对深度、注入顺序和 normal／regenerate／continue 触发类型。
+- 温度、Top P、Top K、Min P、惩罚、上下文与输出容量、Seed、停止词、推理强度及高级采样均有设置入口；每种接口按其能力映射。扩展采样需要服务端明确支持，不能认为所有兼容接口都接受所有字段。
+- 预览由实际请求的同一组装函数生成，可查看发送参数与消息；Token 用量是估算，预览不生成本轮随机骰池。
+- 未接入的联网、工具调用、媒体输入和图片输出开关会说明原因并保留导入值；未知扩展字段保留供再次导出，不执行第三方脚本。不能把支持 JSON 预设等同于完整运行酒馆及其所有插件。
+- 游戏续写仍为独立、可回溯的叙事回合；多候选回复、真正的 Assistant 预填充和原回复拼接功能尚未接入。
+
+操作、参数映射和边界见 [预设工作台说明](docs/preset-workbench.md)。
+
+## 存储与隐私
+
+存档保存在当前浏览器的 IndexedDB 与 localStorage，真实玩家进度不会写入仓库。自动进度与手动存档独立管理；删除手动存档不会自动清空当前人生。完整备份包含聊天、角色、世界状态、预设、世界书和模块记录，并剔除 API 密钥、认证字段及 Webhook。
+
+LLM 请求会把组装后的聊天和启用资料发送至你选择的模型服务。Discord 备份仅在主动点击时上传至自己的 Webhook。密钥只保留在本机配置，不要提交到源码。截图、生图素材和隔离测试中的合成数据属于项目资源，不是玩家存档。
 
 ## 项目结构
 
-```
+```text
 doupocangqiong/
-├── index.html          # 主游戏页面
-├── map.html            # 大地图独立页面
-├── game.html           # 旧版游戏页面（备份）
+├── index.html                 # 主入口与回合控制
+├── map.html                   # 地图独立演示入口
 ├── assets/
-│   ├── js/
-│   │   ├── tavern-core.js      # 独立聊天内核：提示词、世界书、流式、导入与安全工具
-│   │   ├── map-data.js         # 地图区域数据
-│   │   ├── map-engine.js       # Canvas 地图引擎
-│   │   ├── map-controls.js     # 地图交互控件
-│   │   └── engine/MapEngine.js # 模块化地图引擎
-│   ├── cover-a.png             # 封面图 A
-│   ├── cover-b.png             # 封面图 B
-│   └── cover-video.mp4         # 封面视频
-├── demo/pipeline-demo.html     # 渲染管线演示
-└── docs/superpowers/           # 设计规格文档
+│   ├── css/                   # 标题、地图、驻地、排行榜、概要、预设等样式
+│   ├── images/                # 书法字标、场景、角色图集、异火和人物美术
+│   ├── data/                  # 地图与图集配置
+│   └── js/
+│       ├── tavern-core.js     # 提示词、上下文预算、请求与流式解析
+│       ├── preset-core.js     # 预设导入导出、字段校验与采样映射
+│       ├── preset-ui.js       # 预设草稿工作台
+│       ├── tavern-wiring.js   # 世界书、预设和会话选择
+│       ├── world-*.js         # 地图规则、渲染、动态移动与主游戏衔接
+│       ├── residence-*.js     # 驻地与实景设施交互
+│       ├── beauty-*.js        # 人物档案、互动、独立 API 与立绘
+│       ├── flame-*.js         # 异火事实档案、界面与意象图
+│       ├── summary-*.js       # 玩家概要与纠错
+│       └── save-manager.js    # 存档管理
+├── tools/serve.cjs             # 静态服务器与固定本机 Gemini 通道
+├── tests/                     # Node 回归测试与隔离浏览器页面
+└── docs/                      # 架构、操作、美术来源和兼容范围
 ```
 
-## 技术栈
+地图优先使用本地 PixiJS 渲染，兼顾轻量模式。原生前端、IndexedDB（Dexie）与 localStorage 构成当前技术栈。game.html、sillytavern.html 等为历史入口，当前功能以 index.html 为准。
 
-- **前端**: 纯 HTML/CSS/JS（无框架依赖）
-- **数据库**: IndexedDB（Dexie.js）+ localStorage 双写持久化
-- **AI**: OpenAI 兼容 API 接口，流式 SSE 解析，自定义标签输出
-- **地图**: Canvas 2D，粒子效果，古风羊皮纸渲染管线
-- **字体**: Google Fonts（Noto Sans SC / Noto Serif SC / ZCOOL KuaiLe）
+## 部署与验证
 
-## 部署
+GitHub Pages：仓库 Settings → Pages，选择 **master 分支、根目录**。也可将静态资源完整部署至其他 HTTP 托管。模型服务需要允许相应浏览器来源；本机同源通道仅随 tools/serve.cjs 提供。
 
-### GitHub Pages（推荐）
-
-```bash
-# 在仓库 Settings → Pages → Source 选择 main 分支 → Save
-# 访问 https://你的用户名.github.io/doupocangqiong/
+```powershell
+node --test tests/*.test.cjs
 ```
 
-### 本地运行
+测试使用模拟模型响应和合成存档，不需要真实密钥。tests/fixtures 中的页面用于隔离界面验证，不应当作玩家存档导入。测试结果说明前端行为，不能代替具体模型服务的协议和参数兼容性验证。
 
-```bash
-cd doupocangqiong
-python -m http.server 8080
-# 打开 http://localhost:8080
-```
+## 功能文档
 
----
+| 内容 | 说明 |
+| --- | --- |
+| 预设与请求 | [预设工作台](docs/preset-workbench.md) · [世界书与请求组装](docs/tavern-request-wiring.md) |
+| 模型接口 | [Gemini 原生](docs/gemini-native.md) · [聊天内核](docs/chat-core-optimization.md) |
+| 世界与角色 | [创角](docs/character-creation-redesign.md) · [地图架构](docs/world-map.md) · [动态移动](docs/world-movement.md) |
+| 驻地 | [驻地规则](docs/residence.md) · [实景素材](docs/residence-art.md) |
+| 排行榜 | [异火榜](docs/flame-atlas.md) · [人物动态](docs/beauty-chronicle.md) · [人物立绘](docs/beauty-art.md) |
+| 玩家与保存 | [概要](docs/summary-dashboard.md) · [存档管理](docs/save-library.md) |
+| 主界面 | [动态与字标素材](docs/title-motion-art.md) |
 
-🤖 Built with [Claude Code](https://claude.com/claude-code)
+## 历史改动记录
+
+以下记录说明此前改动，当前功能与限制以本文前述内容及对应模块文档为准。
 
 ## 聊天内核优化（2026-10-24）
 

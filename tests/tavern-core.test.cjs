@@ -118,6 +118,14 @@ test('JSON and PNG tEXt character cards preserve Unicode; invalid cards fail cle
 });
 const turnFunctions=['runTavernTurn','setTavernSendingUI','stopTavernStream','regenerateLastTavern','parseUpstore','extractVariables','mergeVariables'];
 
+test('primary game turn passes complete preset options to the non-stream transport and inspection',async()=>{
+ let received;const {state}=context(turnFunctions,{callLLM:async(messages,opts)=>{received=opts;return {choices:[{message:{content:'你在院中静候。'}}]};}});
+ state.tavernState.presets[0].settings={temp_openai:0,top_p_openai:.9,top_k:30,min_p:.07,repetition_penalty:1.15,seed:0,stop:['STOP'],stream_openai:false,extended_sampling:true,parameter_enabled:{presence_penalty:false}};
+ await state.runTavernTurn('静候',false);
+ assert.equal(received.temperature,0);assert.equal(received.top_k,30);assert.equal(received.min_p,.07);assert.equal(received.repetition_penalty,1.15);assert.equal(received.seed,0);assert.equal(received.presence_penalty,undefined);assert.deepEqual(Array.from(received.stop),['STOP']);assert.ok(received.signal);
+ assert.equal(state.tavernState.lastRequestInspection.wire.top_k,30);assert.equal(state.getActiveChat().messages.at(-1).content,'你在院中静候。');
+});
+
 test('residence metadata commits with the visible reply and regeneration does not duplicate events',async()=>{
  const ResidenceCore=require('../assets/js/residence-core.js'),line='你在营帐里调息了一刻。';
  const reply=line+'<residence_updates>'+JSON.stringify([{action:'record',kind:'meditation',title:'调息一刻',evidence:line}])+'</residence_updates>';
@@ -141,6 +149,13 @@ test('failed flame turn persistence cannot advance the current life fire record'
  const FlameCore=require('../assets/js/flame-core.js'),line='向导听说青莲地心火藏在岩浆之中。';
  const {state}=context(turnFunctions,{FlameCore,HEAVENLY_FLAMES:[{rank:19,name:'青莲地心火'}],callLLMStream:async()=>line+'<flame_updates>'+JSON.stringify([{rank:19,stage:'heard',source:'told',evidence:line}])+'</flame_updates>'});
  state.db.tavernSettings.put=async()=>{throw Error('quota');};await state.runTavernTurn('打听消息',false);assert.equal(state.GameState.player.flameChronicle,undefined);
+});
+test('overview fields commit with their literal narrative evidence and regeneration stays idempotent',async()=>{
+ const SummaryCore=require('../assets/js/summary-core.js'),line='你的身体状态为轻伤，伤口尚未完全恢复。',reply=line+'<summary_updates>'+JSON.stringify([{field:'condition',value:'轻伤',evidence:line}])+'</summary_updates>';
+ const {state,records}=context(turnFunctions,{SummaryCore,callLLMStream:async()=>reply});await state.runTavernTurn('查看伤势',false);assert.equal(state.GameState.player.condition,'轻伤');assert.equal(records.get('tavernSettings:main').playerState.summaryLedger.facts.length,1);assert.ok(!state.getActiveChat().messages.at(-1).content.includes('summary_updates'));await state.runTavernTurn('',true);assert.equal(state.GameState.player.summaryLedger.facts.length,1);
+});
+test('overview field updates are not applied when turn persistence fails',async()=>{
+ const SummaryCore=require('../assets/js/summary-core.js'),line='你的身体状态为轻伤，伤口尚未完全恢复。';const {state}=context(turnFunctions,{SummaryCore,callLLMStream:async()=>line+'<summary_updates>'+JSON.stringify([{field:'condition',value:'轻伤',evidence:line}])+'</summary_updates>'});state.db.tavernSettings.put=async()=>{throw Error('quota');};await state.runTavernTurn('查看伤势',false);assert.equal(state.GameState.player.condition,undefined);
 });
 
 test('failed residence turn storage never advances the in-memory residence ledger',async()=>{
@@ -343,7 +358,7 @@ test('supplemented flame lore reaches actual assembled requests and respects dis
     const matches=core.matchLorebooks('寻找'+fire.name,[book]);
     const text=state.assembleTavernPrompt({preset:state.createPreset(),userInput:'寻找'+fire.name,lorebookMatches:matches}).messages.map(m=>m.content).join('\n');
     assert.ok(text.includes(fire.summary));
-    assert.ok(text.includes('项目补充设定'));
+    assert.ok(!text.includes('项目补充'));
     const own=book.entries.find(e=>e.keys.includes(fire.name));
     own.enabled=false;
     assert.equal(core.matchLorebooks(fire.name,[book]).some(m=>m.entry.id===own.id),false);
@@ -379,7 +394,7 @@ test('flame catalogue has unique ranks and names matching user modifications',()
   state.buildFlamesView();
   const rendered=state.document.getElementById('game-view-flames').innerHTML;
   assert.equal(rendered.includes('undefined'),false);
-  assert.equal((rendered.match(/>项目补充<\/span>/g)||[]).length,3);
+  assert.equal((rendered.match(/>项目补充<\/span>/g)||[]).length,0);
   for(const f of fires.filter(f=>f.sourceType==='user-supplement')){assert.ok(f.summary.length<65);assert.ok(rendered.includes(f.summary));assert.ok(!rendered.includes(f.desc));}
 });
 

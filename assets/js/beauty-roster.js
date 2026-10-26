@@ -35,7 +35,7 @@
  }
  function context(value){const s=state(value),rows=list(s,true).map(c=>{const r=s.records[c.name]||{};return {name:c.name,...(c.custom?{origin:'玩家原创',bio:c.bio}:{}),...Object.fromEntries(Object.keys(fields).filter(k=>r[k]!==undefined).map(k=>[k,r[k]])),locks:r.locks||{}};});return '【本次人生人物档案】以下是已记录事实与玩家设定，隐藏只影响列表展示，不使人物消失。未知值不得补为原著结局。信任、亲近、立场、恩怨与承诺各自独立，邀约可被拒绝。锁定字段须保持，除非玩家先解锁。\n'+JSON.stringify({time:s.clock?.label||'未明确',characters:rows});}
  async function commit(action){
-  if(saving||(typeof ResidenceUI!=='undefined'&&ResidenceUI.isBusy())||(typeof SaveManager!=='undefined'&&SaveManager.isBusy())||tavernState.isSending||tavernState.isLoading||(typeof WorldMapBridge!=='undefined'&&WorldMapBridge.isBusy())){showToast('请先结束移动或推演，再编辑人物','info');return false;}
+  if(saving||((typeof SummaryUI!=='undefined'&&SummaryUI.isBusy())||(typeof ResidenceUI!=='undefined'&&ResidenceUI.isBusy()))||(typeof SaveManager!=='undefined'&&SaveManager.isBusy())||tavernState.isSending||tavernState.isLoading||(typeof WorldMapBridge!=='undefined'&&WorldMapBridge.isBusy())){showToast('请先结束移动或推演，再编辑人物','info');return false;}
   saving=true;
   try{
    if(!db)throw Error('存档数据库尚未就绪');

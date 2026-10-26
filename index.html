@@ -11,11 +11,13 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700;900&family=ZCOOL+KuaiLe&display=swap&subset=chinese-simplified" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700;900&family=ZCOOL+KuaiLe&display=swap&subset=chinese-simplified"></noscript>
 <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js" defer></script>
+<script src="assets/js/preset-core.js"></script>
 <script src="assets/js/tavern-core.js"></script>
 <script src="assets/js/tavern-wiring.js"></script>
 <script src="assets/js/story-quests.js"></script>
 <script src="assets/js/residence-core.js"></script>
 <script src="assets/js/flame-core.js"></script>
+<script src="assets/js/summary-core.js"></script>
 <script src="assets/js/beauty-roster.js"></script>
 <script src="assets/js/save-manager.js"></script>
 <script src="assets/js/beauty-chronicle.js"></script>
@@ -1127,12 +1129,15 @@ input:checked + .toggle-slider::before { background:var(--text-primary);transfor
 <script src="assets/js/world-bridge.js"></script>
 <script src="assets/js/world-ui.js"></script>
 <link rel="stylesheet" href="assets/css/journal.css">
+<link rel="stylesheet" href="assets/css/summary-dashboard.css">
+<link rel="stylesheet" href="assets/css/beauty-art.css">
 <link rel="stylesheet" href="assets/css/save-manager.css">
 <link rel="stylesheet" href="assets/css/tavern-settings.css">
 <link rel="stylesheet" href="assets/css/title-motion.css">
 <link rel="stylesheet" href="assets/css/title-menu.css">
 <link rel="stylesheet" href="assets/css/residence.css">
 <link rel="stylesheet" href="assets/css/flame-atlas.css">
+<link rel="stylesheet" href="assets/css/preset-workbench.css">
 </head>
 <body>
 
@@ -1154,7 +1159,7 @@ input:checked + .toggle-slider::before { background:var(--text-primary);transfor
       </nav>
     </section>
   </main>
-  <footer class="landing-footer"><span>v2.0 · 斗气大陆</span></footer>
+  <footer class="landing-footer"><span>v1.0 · 斗气大陆</span></footer>
 </div>
 
 <!-- VIEW: Character Creation -->
@@ -1895,7 +1900,7 @@ function updatePerformanceStats() {
 var creationCurrentStep = -1;
 
 function startNewGame() {
-  if(typeof ResidenceUI!=='undefined'&&ResidenceUI.isBusy()){showToast('驻地档案正在保存，请稍后开启新人生','info');return;}
+  if((typeof SummaryUI!=='undefined'&&SummaryUI.isBusy())||(typeof ResidenceUI!=='undefined'&&ResidenceUI.isBusy())){showToast('人生档案正在保存，请稍后开启新人生','info');return;}
   GameState.phase = 'creation';
   GameState.player = {
     name: '', gender: '', age: 18, difficulty: '', points: 0, pointsSpent: 0,
@@ -2040,7 +2045,7 @@ function startGame() {
   delete p.exploration;
   if(typeof WorldMapBridge!=='undefined')WorldMapBridge.clearProposal();
   delete p.storyQuests;
-  delete p.residence; delete p.flameChronicle;
+  delete p.summaryLedger; delete p.condition; delete p.alchemyLevel; delete p.residence; delete p.flameChronicle;
   delete p.beautyChronicle;
   p.inventory=initial.inventory;p.skills=getIdentityStartingSkills(p.identity);p.relationships=initial.relationships;p.history=[];
   p.equipment={weapon:null,armor:null,accessory:null,ring:null};
@@ -2407,7 +2412,7 @@ function openCharacterDetail(name) {
 function showModal(content) {
   var container = document.getElementById('modals-container');
   var id = 'modal-' + Date.now();
-  container.innerHTML +=
+  container.insertAdjacentHTML('beforeend',
     '<div class="modal-overlay" id="' + id + '" onclick="if(event.target===this)closeModal(' + TavernCore.handlerArg(id) + ')">' +
       '<div class="modal-content">' +
         '<button class="modal-close" onclick="closeModal(' + TavernCore.handlerArg(id) + ')">' +
@@ -2415,7 +2420,7 @@ function showModal(content) {
         '</button>' +
         content +
       '</div>' +
-    '</div>';
+    '</div>');
   requestAnimationFrame(function() {
     var el = document.getElementById(id);
     if (el) el.classList.add('show');
@@ -2424,6 +2429,7 @@ function showModal(content) {
 
 function closeModal(id) {
   var el = document.getElementById(id);
+  if (typeof PresetUI !== 'undefined' && PresetUI.guardClose(el, function() { closeModal(id); })) return;
   if (el) {
     el.classList.remove('show');
     setTimeout(function() { if (el.parentNode) el.remove(); }, 250);
@@ -2778,57 +2784,7 @@ function renderSettingsLorebook(body) {
 }
 
 function renderSettingsPresets(body) {
-  try {
-    var html = '<div class="settings-section-title">预设管理</div><p class="wiring-help">预设控制提示词角色、顺序和插入深度。关闭世界书插入块会使已命中的内容不进入请求。</p><button class="text-btn" onclick="TavernInspector.inspect()">预览当前组装结果</button>';
-    html += '<div style="display:flex;gap:8px;margin-bottom:14px;">' +
-      '<button class="settings-action-btn" onclick="addNewTavernPreset()" style="flex:1;">＋ 新建预设</button>' +
-      '<button class="settings-action-btn" onclick="exportActivePreset()" style="flex:1;">📤 导出</button>' +
-      '<button class="settings-action-btn" onclick="importPresetFromFile()" style="flex:1;">📥 导入</button>' +
-    '</div>';
-    var presets = tavernState.presets || [];
-    // Lazy migration: ensure all presets have prompts array
-    for (var pi = 0; pi < presets.length; pi++) {
-      if (!presets[pi].prompts || !Array.isArray(presets[pi].prompts)) {
-        presets[pi].prompts = [];
-        if (presets[pi].prompt_main) presets[pi].prompts.push(createPresetPrompt({ identifier:'main', name:'主提示词', enabled:true, content:presets[pi].prompt_main, system_prompt:true, forbid_overrides:true }));
-        if (presets[pi].prompt_nsfw) presets[pi].prompts.push(createPresetPrompt({ identifier:'nsfw', name:'NSFW提示词', enabled:true, content:presets[pi].prompt_nsfw, system_prompt:true }));
-        if (presets[pi].jailbreak) presets[pi].prompts.push(createPresetPrompt({ identifier:'jailbreak', name:'越狱提示', enabled:true, role:'user', content:presets[pi].jailbreak, system_prompt:true }));
-      }
-    }
-    if (presets.length === 0) {
-      html += '<div style="text-align:center;padding:30px;color:var(--text-dim);">暂无预设</div>';
-    } else {
-      presets.forEach(function(p) {
-        if (!p) return;
-        var pSettings = p.settings || {};
-        var prompts = p.prompts || [];
-        var isActive = tavernState.tavernSettings && tavernState.tavernSettings.activePresetId === p.id;
-        var promptCount = prompts.filter(function(x) { return x && x.enabled; }).length;
-        html += '<div class="settings-card' + (isActive ? ' active-card' : '') + '">' +
-          '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-            '<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">' +
-              '<label class="toggle-switch" onclick="activatePresetOnly(' + TavernCore.handlerArg(p.id) + ')">' +
-                '<input type="radio" name="preset-active" ' + (isActive ? 'checked' : '') + ' style="pointer-events:none;">' +
-                '<span class="toggle-slider"></span>' +
-              '</label>' +
-              '<div style="flex:1;min-width:0;cursor:pointer;" onclick="setActiveTavernPreset(' + TavernCore.handlerArg(p.id) + ')">' +
-              '<div style="color:var(--text-primary);font-family:var(--font-serif);font-size:14px;font-weight:600;">' +
-                escapeHtml(p.name || '未命名') + '</div>' +
-              '<div style="font-size:10px;color:var(--text-muted);">' + promptCount + '/' + prompts.length + ' 提示词 · T:' + (pSettings.temp_openai || 0.8) + '</div>' +
-            '</div>' +
-            '<div style="display:flex;gap:4px;">' +
-              '<button class="text-btn" onclick="openPresetPromptEditor(' + TavernCore.handlerArg(p.id) + ')">提示词</button>' +
-              '<button class="text-btn" onclick="editTavernPreset(' + TavernCore.handlerArg(p.id) + ')">设置</button>' +
-              '<button class="text-btn danger" onclick="deleteTavernPreset(' + TavernCore.handlerArg(p.id) + ')">删除</button>' +
-            '</div>' +
-          '</div>' +
-        '</div>';
-      });
-    }
-    body.innerHTML = html;
-  } catch(e) {
-    body.innerHTML = '<div class="settings-section-title">预设管理</div><div style="color:var(--accent-fire);padding:20px;">加载失败：' + escapeHtml(e.message) + '</div>';
-  }
+  return PresetUI.list(body);
 }
 
 // === Preset Prompt Editor ===
@@ -2844,7 +2800,8 @@ async function applyActivePreset(id) {
   var chat = getActiveChat(), next = chat ? Object.assign({},chat,{presetId:id}) : null;
   await db.transaction('rw',[db.chats,db.tavernSettings],async function() {
     if (next) await db.chats.put(next);
-    await db.tavernSettings.put(settings);
+    var storedSettings = await db.tavernSettings.get(settings.id || 'main');
+    await db.tavernSettings.put(Object.assign({},storedSettings || settings,{id:settings.id || 'main',activePresetId:id}));
   });
   tavernState.tavernSettings = settings;
   if (next) tavernState.chats = tavernState.chats.map(function(c) { return c.id === next.id ? next : c; });
@@ -2852,53 +2809,7 @@ async function applyActivePreset(id) {
 }
 
 function openPresetPromptEditor(presetId) {
-  try {
-    var presets = tavernState.presets || [];
-    var preset = presets.find(function(p) { return p.id === presetId; });
-    if (!preset) return;
-    if (!preset.prompts) preset.prompts = [];
-
-    var body = document.getElementById('settings-body');
-    if (!body) return;
-
-  var html = '<div class="settings-section-title">编辑提示词：' + preset.name + '</div>';
-  html += '<div style="display:flex;gap:8px;margin-bottom:12px;">' +
-    '<button class="settings-action-btn" onclick="addPresetPrompt(' + TavernCore.handlerArg(presetId) + ')" style="flex:1;font-size:12px;">＋ 添加提示词</button>' +
-    '<button class="settings-action-btn" onclick="renderSettingsTab(\'presets\')" style="flex:1;font-size:12px;">← 返回列表</button>' +
-  '</div>';
-
-  preset.prompts.forEach(function(pr, idx) {
-    var posLabel = pr.injection_position === 0 ? '角色前' : pr.injection_position === 1 ? '角色后' : 'D' + (pr.injection_position - 2);
-    html += '<div class="settings-card' + (pr.enabled ? '' : '') + '" style="padding:10px 14px;margin-bottom:6px;' + (pr.enabled ? '' : 'opacity:0.4;') + '">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-        '<div style="flex:1;min-width:0;cursor:pointer;" onclick="editPresetPrompt(' + TavernCore.handlerArg(presetId) + ',' + idx + ')">' +
-          '<div style="display:flex;align-items:center;gap:8px;">' +
-            '<span style="width:8px;height:8px;border-radius:50%;background:' + (pr.enabled ? 'var(--accent-green)' : '#666') + ';flex-shrink:0;"></span>' +
-            '<span style="color:var(--text-primary);font-family:var(--font-serif);font-size:13px;font-weight:600;">' + escapeHtml(pr.name || '未命名') + '</span>' +
-            '<span style="font-size:9px;color:var(--text-muted);">' + posLabel + '</span>' +
-            '<span style="font-size:9px;color:var(--text-muted);">' + (pr.role === 'user' ? '👤' : '⚙️') + '</span>' +
-            (pr.system_prompt ? '<span style="font-size:8px;color:var(--accent-purple);">系统</span>' : '') +
-          '</div>' +
-          '<div style="font-size:10px;color:var(--text-muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (pr.content ? pr.content.substring(0, 60) : '(空)') + '</div>' +
-        '</div>' +
-        '<div style="display:flex;gap:2px;flex-shrink:0;margin-left:8px;">' +
-          '<button class="text-btn" onclick="movePresetPrompt(' + TavernCore.handlerArg(presetId) + ',' + idx + ',-1)" style="font-size:14px;" title="上移">↑</button>' +
-          '<button class="text-btn" onclick="movePresetPrompt(' + TavernCore.handlerArg(presetId) + ',' + idx + ',1)" style="font-size:14px;" title="下移">↓</button>' +
-          '<label class="toggle-switch" style="transform:scale(0.65);">' +
-            '<input type="checkbox" ' + (pr.enabled ? 'checked' : '') + ' onchange="togglePresetPrompt(' + TavernCore.handlerArg(presetId) + ',' + idx + ',this.checked)">' +
-            '<span class="toggle-slider"></span>' +
-          '</label>' +
-          '<button class="text-btn danger" onclick="deletePresetPrompt(' + TavernCore.handlerArg(presetId) + ',' + idx + ')">✕</button>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  });
-
-  html += '<div style="display:flex;gap:8px;margin-top:12px;">' +
-    '<button class="settings-action-btn" onclick="savePresetPrompts(' + TavernCore.handlerArg(presetId) + ')">💾 保存提示词</button>' +
-  '</div>';
-  body.innerHTML = html;
-  } catch(e) { body.innerHTML = '<div class="settings-section-title">错误</div><div style="color:var(--accent-fire);padding:20px;">' + escapeHtml(e.message) + '</div>'; }
+  return PresetUI.open(presetId,'prompts');
 }
 
 function addPresetPrompt(presetId) {
@@ -2993,126 +2904,11 @@ function savePresetPrompts(presetId) {
 
 // === Import / Export ===
 function exportActivePreset() {
-  var activeId = tavernState.tavernSettings && tavernState.tavernSettings.activePresetId;
-  var preset = activeId ? tavernState.presets.find(function(p) { return p.id === activeId; }) : tavernState.presets[0];
-  if (!preset) { showToast('没有可导出的预设', 'error'); return; }
-  var json = JSON.stringify(preset, null, 2);
-  var blob = new Blob([json], { type: 'application/json' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url; a.download = (preset.name || 'preset') + '.json';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast('预设已导出 ✓', 'success');
+  return PresetUI.exportActive();
 }
 
 function importPresetFromFile() {
-  var input = document.createElement('input');
-  input.type = 'file'; input.accept = '.json';
-  input.onchange = function(e) {
-    var file = e.target.files[0];
-    if (!file) return;
-    var reader = new FileReader();
-    reader.onload = function(ev) {
-      try {
-        var data = TavernCore.parseJSON(ev.target.result);
-        var p;
-
-        // === Detect format ===
-        // SillyTavern preset: has root .prompts array, .temperature, .prompt_order
-        if (data.prompts && Array.isArray(data.prompts) && data.temperature !== undefined) {
-          // SillyTavern format — convert to our preset
-          var presetName = (data.extensions && data.extensions.extensions && data.extensions.extensions.presetdetailnfo && data.extensions.extensions.presetdetailnfo.nameGroup) || data.name || '导入预设';
-          p = createPreset({ name: presetName });
-          p.settings.temp_openai = data.temperature ?? 1;
-          p.settings.freq_pen_openai = data.frequency_penalty || 0;
-          p.settings.pres_pen_openai = data.presence_penalty || 0;
-          p.settings.top_p_openai = data.top_p ?? 1;
-          p.settings.openai_max_tokens = data.openai_max_tokens || 1024;
-          p.settings.stream_openai = data.stream_openai !== false;
-          p.settings.top_k = data.top_k || 0;
-          p.settings.min_p = data.min_p || 0;
-          p.settings.repetition_penalty = data.repetition_penalty || 1;
-
-          // Convert prompts
-          p.prompts = data.prompts.map(function(pr) {
-            return {
-              identifier: pr.identifier || crypto.randomUUID(),
-              name: pr.name || '未命名',
-              enabled: pr.enabled !== false,
-              injection_position: pr.injection_position || 0,
-              injection_depth: pr.injection_depth || 4,
-              injection_order: pr.injection_order || 100,
-              role: pr.role || 'system',
-              content: pr.content || '',
-              system_prompt: pr.system_prompt !== false,
-              marker: pr.marker || false,
-              forbid_overrides: pr.forbid_overrides || false,
-              injection_trigger: pr.injection_trigger || []
-            };
-          });
-
-          // Import prompt_order
-          if (data.prompt_order) p.prompt_order = data.prompt_order;
-
-          // Import ChatSquash regex scripts from extensions
-          if (data.extensions && data.extensions.SPreset && data.extensions.SPreset.RegexBinding && data.extensions.SPreset.RegexBinding.regexes) {
-            data.extensions.SPreset.RegexBinding.regexes.forEach(function(r) {
-              var exists = regexScripts.some(function(rs) { return rs.scriptName === r.scriptName; });
-              if (!exists && r.scriptName !== '转义') {
-                regexScripts.push({
-                  id: 'imp-' + r.id,
-                  scriptName: r.scriptName,
-                  findRegex: r.findRegex,
-                  replaceString: r.replaceString,
-                  placement: String(Array.isArray(r.placement) ? r.placement[0] : (r.placement || '2')),
-                  disabled: r.disabled || false,
-                  promptOnly: r.promptOnly || false,
-                  runOnEdit: r.runOnEdit !== false,
-                  substituteRegex: r.substituteRegex || 0,
-                  minDepth: r.minDepth,
-                  maxDepth: r.maxDepth
-                });
-              }
-            });
-            showToast('预设 + 正则脚本已导入 ✓', 'success');
-          } else {
-            showToast('预设已导入 ✓', 'success');
-          }
-        } else if (data.prompts && Array.isArray(data.prompts) && data.id && data.settings) {
-          // Our own format — direct import
-          data.id = crypto.randomUUID();
-          p = data;
-          showToast('预设已导入 ✓', 'success');
-        } else if (data.name && (data.prompt_main || data.promptOrder)) {
-          // Old legacy format
-          p = createPreset({ name: data.name });
-          if (data.prompt_main) p.prompt_main = data.prompt_main;
-          if (data.prompt_nsfw) p.prompt_nsfw = data.prompt_nsfw;
-          if (data.jailbreak) p.jailbreak = data.jailbreak;
-          if (data.settings) {
-            for (var sk in data.settings) {
-              if (p.settings.hasOwnProperty(sk)) p.settings[sk] = data.settings[sk];
-            }
-          }
-          showToast('旧版预设已导入 ✓', 'success');
-        } else {
-          showToast('无法识别的预设格式', 'error');
-          return;
-        }
-
-        if (p) {
-          tavernState.presets.unshift(p);
-          db.presets.put(p);
-          renderSettingsTab('presets');
-        }
-      } catch(ex) {
-        showToast('导入失败：' + ex.message, 'error');
-      }
-    };
-    reader.readAsText(file);
-  };
-  input.click();
+  return PresetUI.importFile();
 }
 
 function renderSettingsTavern(body) {
@@ -3406,6 +3202,7 @@ function syncApiToCloud() {
 }
 
 function closeAllModals() {
+  if (typeof PresetUI !== 'undefined' && PresetUI.guardClose(null, closeAllModals)) return;
   document.querySelectorAll('.modal-overlay').forEach(function(m) {
     m.classList.remove('show');
     setTimeout(function() { if (m.parentNode) m.remove(); }, 250);
@@ -3487,39 +3284,10 @@ function syncTavernSettingsFromLocal() {
 // ==============================
 
 function openChangelog() {
-  showModal(
-    '<h3 style="margin-bottom:12px;">更新日志</h3>' +
-    '<div style="font-size:12px;color:var(--text-body);line-height:1.8;max-height:50vh;overflow-y:auto;">' +
-      '<div style="color:var(--text-primary);font-size:14px;margin-top:8px;">v2.0 · 大型更新</div>' +
-      '<div>· 设置面板全面改造（竖排侧栏、核心配置、协议系统）</div>' +
-      '<div>· 五大协议上线（状态栏/语义渲染/结算卡/战斗触发/自动推演）</div>' +
-      '<div>· 世界书系统（蓝绿灯/插入位置/261条目/智能分类）</div>' +
-      '<div>· 云同步（Discord Webhook + 本地双备份）</div>' +
-      '<div>· 预设系统（酒馆兼容/提示词编辑/导入导出/模型选择）</div>' +
-      '<div>· 驻地交互化（闭关修炼/炼药/武技研习/房间升级）</div>' +
-      '<div>· 异火榜（23种异火完整排名与描述）</div>' +
-      '<div>· 美人榜（10位红颜含隐秘描述）</div>' +
-      '<div>· 时空回溯（回合快照/变量回滚/一键回溯）</div>' +
-      '<div>· 任务系统（进行中/已完成/已失败/奖惩机制）</div>' +
-      '<div>· 封面视频支持、动态封面随机切换</div>' +
-      '<div style="color:var(--text-primary);font-size:14px;margin-top:12px;">v0.1.0 · 初始版本</div>' +
-      '<div>· 斗气大陆初现，大世界地图开放</div>' +
-      '<div>· 乌坦城萧家后院修炼驻地落成</div>' +
-      '<div>· 开放11族选择、50天赋词条</div>' +
-      '<div>· 修炼助手（AI）上线</div>' +
-    '</div>'
-  );
+  showModal('<h3 style="margin-bottom:12px;">更新日志</h3><div class="title-info-content"></div>');
 }
-
 function openAbout() {
-  showModal(
-    '<h3 style="margin-bottom:12px;">关于</h3>' +
-    '<div style="font-size:12px;color:var(--text-body);line-height:1.8;">' +
-      '<div style="color:var(--text-primary);font-size:15px;">斗破苍穹 · 修炼模拟</div>' +
-      '<div>基于《斗破苍穹》世界观的修炼模拟游戏</div>' +
-      '<div style="margin-top:8px;color:var(--text-muted);">前端原型 · 纯 HTML/CSS/JS</div>' +
-    '</div>'
-  );
+  showModal('<h3 style="margin-bottom:12px;">关于此卷</h3><div class="title-info-content"></div>');
 }
 
 // ==============================
@@ -3881,7 +3649,7 @@ function buildPlayerSummary() {
       '</div>' +
       // Tabs
       '<div class="summary-tabs" id="summary-tabs">' +
-        buildSummaryTab('basic','基本信息') +
+        buildSummaryTab('basic','总览') +
         (GameState.player.gender !== 'male' ? buildSummaryTab('secret','隐秘') : '') +
         buildSummaryTab('stats','属性') +
         buildSummaryTab('inventory','储物袋') +
@@ -3905,6 +3673,7 @@ function buildSummaryTab(key, label) {
 }
 
 function switchSummaryTab(key) {
+  if(typeof SummaryUI!=='undefined'&&SummaryUI.isBusy()){showToast('概要正在保存，请稍后切换','info');return;}
   summaryActiveTab = key;
   var tabs = document.querySelectorAll('#summary-tabs .summary-tab');
   tabs.forEach(function(t) {
@@ -4654,14 +4423,15 @@ function parseGameModeOutput(rawText) {
 }
 
 // -- Prompt Assembler --
-function prepareTavernRequest(chat, content, history, preview, questPlayer) {
+function prepareTavernRequest(chat, content, history, preview, questPlayer, generationType, presetOverride) {
   var selection=TavernWiring.resolve({player:GameState.player,chat:chat,settings:tavernState.tavernSettings,
     globalIds:tavernState.activeLorebookIds,books:tavernState.lorebooks,presets:tavernState.presets,
     input:content,history:history,regexes:typeof regexScripts!=='undefined'?regexScripts:[]});
+  if(presetOverride)selection.preset=presetOverride;
   var location=WorldState.location+' · '+(WorldState.specificSpot||'');
   var card=chat.characterCard||tavernState.characterCard||{};
   var result=assembleTavernPrompt({preset:selection.preset,characterCard:card,userInput:selection.input,
-    history:selection.history,variables:chat.variables||{},lorebookMatches:selection.matches,location:location,userName:selection.userName,preview:!!preview,questState:(questPlayer||GameState.player).storyQuests,beautyState:(questPlayer||GameState.player).beautyChronicle,flameState:(questPlayer||GameState.player).flameChronicle,residenceState:(questPlayer||GameState.player).residence});
+    generationType:generationType||'normal',history:selection.history,variables:chat.variables||{},lorebookMatches:selection.matches,location:location,userName:selection.userName,preview:!!preview,questState:(questPlayer||GameState.player).storyQuests,beautyState:(questPlayer||GameState.player).beautyChronicle,summaryPlayer:(questPlayer||GameState.player),flameState:(questPlayer||GameState.player).flameChronicle,residenceState:(questPlayer||GameState.player).residence});
   selection.trace.forEach(function(row){
     if(row.status!=='matched')return;
     var m=selection.matches.find(function(x){return x.bookId===row.bookId&&x.entry.id===row.entryId;});
@@ -4669,7 +4439,10 @@ function prepareTavernRequest(chat, content, history, preview, questPlayer) {
     var text=String(m.entry.content||'').replace(/\{\{(user|char|location|scenario|personality|description)\}\}/g,function(_,k){return replacements[k];});
     row.status=result.messages.some(function(msg){return text&&msg.content.includes(text);})?'included':'preset-disabled';
   });
-  return {chatId:chat.id||null,selection:selection,result:result};
+  var requestOptions=TavernCore.presetOptions(selection.preset);
+  var selectedApi=requestOptions.apiId?(GameState.settings.apis||[]).find(a=>a.id===requestOptions.apiId&&a.enabled!==false):(typeof getTavernApi==='function'?getTavernApi('primary'):(GameState.settings.apis||[]).find(a=>a.enabled!==false));
+  var wire=selectedApi?TavernCore.requestBody(selectedApi,result.messages,Object.assign({},requestOptions,{model:typeof resolveModel==='function'?resolveModel(selectedApi,requestOptions):requestOptions.model||selectedApi.model}),requestOptions.stream):null;
+  return {chatId:chat.id||null,selection:selection,result:result,requestOptions:requestOptions,wire:wire,parameterReport:TavernCore.presetReport(selection.preset,selectedApi?.backend||'openai')};
 }
 
 function assembleTavernPrompt(opts) {
@@ -4685,8 +4458,9 @@ function assembleTavernPrompt(opts) {
   var location = opts.location || '加玛帝国·乌坦城';
 
   var plan = TavernCore.promptPlan({preset:preset, characterCard:charCard, userName:userName,
-    location:location, lorebookMatches:lorebookMatches});
+    location:location, lorebookMatches:lorebookMatches,generationType:opts.generationType||'normal'});
   var systemParts = [];
+  if(typeof SummaryCore!=='undefined'){systemParts.push(SummaryCore.context(Object.hasOwn(opts,'summaryPlayer')?opts.summaryPlayer:GameState.player));systemParts.push(SummaryCore.protocol);}
   if(typeof FlameCore!=='undefined'){systemParts.push(FlameCore.protocol);systemParts.push(FlameCore.context(Object.hasOwn(opts,'flameState')?opts.flameState:GameState.player.flameChronicle,typeof HEAVENLY_FLAMES==='undefined'?[]:HEAVENLY_FLAMES));}
   if(typeof ResidenceCore!=='undefined'){systemParts.push(ResidenceCore.protocol);systemParts.push(ResidenceCore.context(Object.hasOwn(opts,'residenceState')?opts.residenceState:GameState.player.residence,WorldState,typeof ResidenceUI!=='undefined'?ResidenceUI.clock():''));}
   if(typeof BeautyRoster!=='undefined')systemParts.push(BeautyRoster.context(Object.hasOwn(opts,'beautyState')?opts.beautyState:GameState.player.beautyChronicle));
@@ -4733,12 +4507,12 @@ function assembleTavernPrompt(opts) {
   // Branch options + upstore format instruction
   var ts = tavernState.tavernSettings || {};
   if (ts.pureTextMode) {
-    // 纯文本模式 — 严禁任何 XML/HTML 标签
+    // 纯文本正文不使用 XML/HTML 标签；后台元数据仅按下述例外附加
     systemParts.push(
       '【纯文本模式 · 最高优先级】\n' +
-      '你正在以纯文本格式输出。以下规则具有最高优先级，覆盖任何其他格式指令：\n' +
-      '1. 严禁输出以 < 开头的任何标签。禁止输出 <blockquote>、<aside>、<branches>、<div>、<span>、<section>、<p>、<ui_sys>、<content>、<card>、<store>、<upstore>、<cultivation_card>、<scene_checkpoint> 或任何 <> 包裹的结构。\n' +
-      '2. 禁止输出任何 HTML 标签、XML 标签、或 Markdown 代码块中包裹的标签。\n' +
+      '可见正文使用纯文本；后台元数据仅按下述明确列出的例外附加。以下规则覆盖其他与纯文本模式冲突的格式指令：\n' +
+      '1. 可见正文禁止使用标签。除下述明确允许的后台元数据块外，整个回复禁止输出 <blockquote>、<aside>、<branches>、<div>、<span>、<section>、<p>、<ui_sys>、<content>、<card>、<store>、<upstore>、<cultivation_card>、<scene_checkpoint> 或任何 <> 包裹的结构。\n' +
+      '2. 可见正文禁止使用 HTML 或 XML 标签，也不得用 Markdown 代码块包裹标签来规避限制。后台元数据块仅按下述例外输出。\n' +
       '3. 请以纯文本自然段落格式输出正文。段落之间用空行分隔。\n' +
       '4. NPC 台词使用中文引号直接书写，如：薰儿轻声道："萧炎哥哥在想什么呢？"\n' +
       '5. 内心独白使用括号直接嵌入正文，如：（她心中暗想，萧炎哥哥今日似乎格外沉默。）\n' +
@@ -4747,10 +4521,10 @@ function assembleTavernPrompt(opts) {
       '违反以上任何一条规则都会导致输出被拒绝。请严格遵守纯文本格式。'
     );
   } else {
-    systemParts.push('【输出格式要求】\n请严格按以下XML标签分段输出：\n## maintext\n(正文叙述)\n\n## option\n- [ ] 选项1\n...\n\n在正文后必须生成<branches></branches>包裹的选项分支:\n<branches>\n[快速推进的行动]\n[最合理的行动]\n[最中立的行动]\n[最善良的行动]\n[NSFW的行动]\n</branches>\n\n同时必须紧跟<upstore></upstore>变量更新块:\n<upstore>\naddSmallSum:变量名:增量\nset:变量名:值\n</upstore>\n\n## sum\n(一句话总结)\n\n如有内心独白请放入 ## thinking 标签中。');
+    systemParts.push('【输出格式要求】\n请使用以下 Markdown 二级标题组织正文与总结，并按要求附加 XML 标签块：\n## maintext\n(正文叙述)\n\n行动选项仅使用一个 <branches></branches> 块输出，不再另写 Markdown 选项段落或重复列出同一组选项。在正文后必须生成以下选项分支:\n<branches>\n[快速推进的行动]\n[最合理的行动]\n[最中立的行动]\n[最善良的行动]\n[NSFW的行动]\n</branches>\n\n同时必须紧跟<upstore></upstore>变量更新块:\n<upstore>\naddSmallSum:变量名:增量\nset:变量名:值\n</upstore>\n\n## sum\n(一句话总结)\n\n如有内心独白请放入 ## thinking 标题对应的段落中。');
   }
 
-  if(tavernState.tavernSettings?.pureTextMode&&typeof StoryQuests!=='undefined')systemParts.push('纯文本模式例外：quest_updates、residence_updates 与 flame_updates 是可选的后台元数据，允许在正文末尾单独附加，由前端提取，不作为可见正文。其余正文仍按纯文本输出。');
+  if(tavernState.tavernSettings?.pureTextMode&&typeof StoryQuests!=='undefined')systemParts.push('纯文本模式的后台元数据例外：仅允许 <quest_updates>、<residence_updates>、<flame_updates> 与 <summary_updates> 及其对应闭合标签作为后台元数据块。这些块均为可选，须遵守各自更新协议；需要时在全部纯文本内容之后单独附加，不放入 Markdown 代码块，由前端提取，不作为可见正文。此例外不允许其他标签，可见正文仍按上述纯文本规则输出。');
   var systemMsg = systemParts.join('\n\n');
 
   var settings = preset && preset.settings || {};
@@ -4972,12 +4746,26 @@ function renderTavernMessages() {
   var msgs = document.getElementById('tavern-messages');
   if (!msgs) return;
   var chat = getActiveChat();
+  var previousTop = msgs.scrollTop;
+  var followBottom = msgs._renderedChatId !== (chat && chat.id) || msgs.scrollHeight - msgs.clientHeight - previousTop <= 48;
+  function restoreScroll() {
+    // Restore synchronously so later source-link navigation is never overridden.
+    var behavior = msgs.style.scrollBehavior;
+    msgs.style.scrollBehavior = 'auto';
+    msgs.scrollTop = followBottom ? msgs.scrollHeight : previousTop;
+    msgs.style.scrollBehavior = behavior;
+    msgs._renderedChatId = chat ? chat.id : null;
+  }
   if (!chat) {
     msgs.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim);">选择一个对话或创建新对话开始角色扮演</div>';
+    msgs._lastRenderedCount = 0;
+    restoreScroll();
     return;
   }
   if (chat.messages.length === 0) {
     msgs.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim);">发送第一条消息开始对话...</div>';
+    msgs._lastRenderedCount = 0;
+    restoreScroll();
     return;
   }
 
@@ -4990,6 +4778,7 @@ function renderTavernMessages() {
         }
         return;
       }
+      if(msg.id){var anchor=document.createElement('span');anchor.className='summary-message-anchor';anchor.dataset.summaryMessage=msg.id;frag.appendChild(anchor);}
       if (msg.role === 'user') {
         var d = document.createElement('div');
         d.className = 'msg user';
@@ -5002,8 +4791,7 @@ function renderTavernMessages() {
     msgs.textContent = '';
     msgs.appendChild(frag);
   msgs._lastRenderedCount = chat.messages.length;
-  // Deferred scroll using requestAnimationFrame
-  requestAnimationFrame(function() { msgs.scrollTop = msgs.scrollHeight; });
+  restoreScroll();
 }
 
 function buildCharacterProfileDOM(content) {
@@ -5032,7 +4820,8 @@ function buildAssistantMessageDOM(msg) {
   var displayContent=typeof StoryQuests!=='undefined'?StoryQuests.extract(msg.content).cleaned:msg.content;
   if(typeof ResidenceCore!=='undefined')displayContent=ResidenceCore.visible(displayContent);
   if(typeof FlameCore!=='undefined')displayContent=FlameCore.visible(displayContent);
-  var parsed = parseGameModeOutput(applyRegexScripts(displayContent, 0));
+  if(typeof SummaryCore!=='undefined')displayContent=SummaryCore.visible(displayContent);
+  var parsed = parseGameModeOutput(TavernCore.visibleBranches(applyRegexScripts(displayContent, 0)));
 
   if (parsed.thinking) {
     var det = document.createElement('details');
@@ -5078,7 +4867,7 @@ function buildAssistantMessageDOM(msg) {
     frag.appendChild(optDiv);
   }
 
-  // <branches> tag buttons (legacy)
+  // <branches> tag buttons; legacy ## option buttons remain supported above
   var branches = parseBranchOptions(msg.content);
   if (branches.length > 0) {
     var sep = document.createElement('div');
@@ -5110,19 +4899,19 @@ async function createNewTavernChat() {
   if (tavernState.isLoading || !db) throw new Error('聊天数据库仍在加载，请稍后重试');
   stopTavernStream();
   var settings = tavernState.tavernSettings;
-  var activeCard=(getActiveChat()||{}).characterCard || tavernState.characterCard;
-  var charName = activeCard ? activeCard.name : '角色';
+  var activeCard=TavernCore.clone((getActiveChat()||{}).characterCard || tavernState.characterCard || {});
+  var charName = activeCard.name || '角色';
   var count = tavernState.chats.filter(function(c) { return c.characterName === charName; }).length;
   var chat = createChatSession({
     name: charName + ' - 对话 ' + (count + 1),
     characterName: charName,
+    characterCard: activeCard,
     presetId: settings.activePresetId || (tavernState.presets[0] ? tavernState.presets[0].id : ''),
     lorebookIds: tavernState.activeLorebookIds.slice()
   });
   // Insert first message if character card has one
-  if (tavernState.characterCard && tavernState.characterCard.firstMessage) {
-    var parsed = parseGameModeOutput(tavernState.characterCard.firstMessage);
-    chat.messages.push(createChatMessage('assistant', tavernState.characterCard.firstMessage));
+  if (activeCard.firstMessage) {
+    chat.messages.push(createChatMessage('assistant', activeCard.firstMessage));
   }
   await db.chats.put(chat);
   tavernState.chats.unshift(chat);
@@ -5172,8 +4961,10 @@ function handleTavernKeydown(e) {
 async function sendTavernMessage() {
   if (tavernState.isSending) { stopTavernStream(); return; }
   var input = document.getElementById('tavern-input');
-  if (!input || !input.value.trim()) return;
-  var content = input.value.trim();
+  if (!input) return;
+  var resolved=TavernWiring.resolve({player:GameState.player,chat:getActiveChat()||{},presets:tavernState.presets,settings:tavernState.tavernSettings});
+  var content=input.value.trim()||PresetCore.settings(resolved.preset).send_if_empty;
+  if(!content.trim())return;
   if (!getActiveChat()) {
     try { await createNewTavernChat(); } catch(e) { showToast('无法新建对话：' + e.message, 'error'); return; }
   }
@@ -5187,8 +4978,8 @@ function setTavernSendingUI(sending) {
   if (input) input.disabled = sending;
 }
 
-async function runTavernTurn(content, regenerate) {
-  if(typeof ResidenceUI!=='undefined'&&ResidenceUI.isBusy()){showToast('驻地档案正在保存，请稍后推演','info');return;}
+async function runTavernTurn(content, regenerate, generationType) {
+  if((typeof SummaryUI!=='undefined'&&SummaryUI.isBusy())||(typeof ResidenceUI!=='undefined'&&ResidenceUI.isBusy())){showToast('人生档案正在保存，请稍后推演','info');return;}
   if(typeof SaveManager!=='undefined'&&SaveManager.isBusy()){showToast('正在恢复存档，请稍后推演','info');return;}
   if(typeof BeautyRoster!=='undefined'&&BeautyRoster.isBusy()){showToast('人物档案正在保存，请稍后推演','info');return;}
   if(typeof WorldMapBridge!=='undefined'&&WorldMapBridge.isMoving()){showToast('角色正在行走，停步后再开始推演','info');return;}
@@ -5225,7 +5016,7 @@ async function runTavernTurn(content, regenerate) {
       renderTavernMessages();
     }
     ensureCurrent();
-    var prepared = prepareTavernRequest(working,content,working.messages.slice(0,-1),false,before.player);
+    var prepared = prepareTavernRequest(working,content,working.messages.slice(0,-1),false,before.player,generationType||(regenerate?'regenerate':'normal'));
     var preset = prepared.selection.preset, result = prepared.result;
     tavernState.lastRequestInspection = prepared;
     // Summary metrics are persisted separately; request inspection remains memory-only.
@@ -5233,12 +5024,9 @@ async function runTavernTurn(content, regenerate) {
     var msgs = document.getElementById('tavern-messages');
     if (msgs) { var typing = document.createElement('div'); typing.id = 'tavern-typing'; typing.className = 'msg-maintext typing'; typing.textContent = '正在推演…'; msgs.appendChild(typing); }
     var parser = StreamParser();
-    parser.onTag(function(tag, text) { if (tag !== 'maintext') return; ensureCurrent(); var el = document.getElementById('tavern-typing'); if (el) {var visible=typeof StoryQuests!=='undefined'?StoryQuests.visible(text):text;if(typeof ResidenceCore!=='undefined')visible=ResidenceCore.visible(visible);el.textContent=typeof FlameCore!=='undefined'?FlameCore.visible(visible):visible;} });
+    parser.onTag(function(tag, text) { if (tag !== 'maintext') return; ensureCurrent(); var el = document.getElementById('tavern-typing'); if (el) {var list=el.parentElement;var followBottom=list&&list.scrollHeight-list.clientHeight-list.scrollTop<=48;var visible=typeof StoryQuests!=='undefined'?StoryQuests.visible(text):text;if(typeof ResidenceCore!=='undefined')visible=ResidenceCore.visible(visible);if(typeof FlameCore!=='undefined')visible=FlameCore.visible(visible);el.textContent=TavernCore.visibleBranches(TavernCore.visibleUpstore(typeof SummaryCore!=='undefined'?SummaryCore.visible(visible):visible,true),true);if(followBottom){var behavior=list.style.scrollBehavior;list.style.scrollBehavior='auto';list.scrollTop=list.scrollHeight;list.style.scrollBehavior=behavior;}} });
     var sampling = preset.settings || {};
-    var opts = {model:sampling.openai_model || undefined, temperature:sampling.temp_openai,
-      max_tokens:sampling.openai_max_tokens, top_p:sampling.top_p_openai,
-      frequency_penalty:sampling.freq_pen_openai, presence_penalty:sampling.pres_pen_openai,
-      purpose:'primary', apiId:sampling.apiId || '', signal:controller.signal};
+    var opts = Object.assign({},prepared.requestOptions,{purpose:'primary',signal:controller.signal});
     var full;
     if (sampling.stream_openai === false) {
       var data = await callLLM(result.messages, opts); full = data.choices[0].message.content;
@@ -5268,6 +5056,12 @@ async function runTavernTurn(content, regenerate) {
       var fireResult=FlameCore.apply(player.flameChronicle,fireOutput.updates,{body:processed,catalog:typeof HEAVENLY_FLAMES==='undefined'?[]:HEAVENLY_FLAMES,nodes:typeof DoupoWorldData==='undefined'?[]:DoupoWorldData.nodes,known:player.exploration?.discovered||[],time:typeof BeautyChronicle!=='undefined'?BeautyChronicle.clock(processed,before.player.beautyChronicle?.clock)?.label:(typeof ResidenceUI==='undefined'?'':ResidenceUI.clock()),turn:working.id+'|'+(working.messages[working.messages.length-1]?.id||content),playerName:player.name});
       if(fireResult.changes.length)player.flameChronicle=fireResult.state;
       if(fireOutput.errors.length||fireResult.errors.length)showToast('部分异火记录未通过证据检查，正文已保留','info');
+    }
+    if(typeof SummaryCore!=='undefined'){
+      var summaryOutput=SummaryCore.extract(processed);processed=summaryOutput.cleaned;
+      var summaryResult=SummaryCore.apply(player,summaryOutput.updates,{body:processed,time:typeof BeautyChronicle!=='undefined'?BeautyChronicle.clock(processed,before.player.beautyChronicle?.clock)?.label:''});
+      if(summaryResult.changes.length)player=summaryResult.player;
+      if(summaryOutput.errors.length||summaryResult.errors.length)showToast('部分概要状态缺少明确依据，正文已保留','info');
     }
     if(regenerate&&GameState.player.exploration){
       ['exploration','inventory','location','history'].forEach(function(key){if(GameState.player[key]!==undefined)player[key]=TavernCore.clone(GameState.player[key]);});
@@ -5314,7 +5108,7 @@ async function runTavernTurn(content, regenerate) {
   } finally {
     if (tavernState.activeRequest === request) {
       tavernState.activeRequest = null; tavernState.streamAbortController = null; tavernState.isSending = false;
-      var typingEl = document.getElementById('tavern-typing'); if (typingEl) typingEl.remove();
+      // Keep the preview until the renderer captures its scroll position and replaces it.
       setTavernSendingUI(false); renderTavernMessages(); updateTavernInfo();
       if(typeof WorldMapBridge!=='undefined')WorldMapBridge.refresh();
     }
@@ -5335,12 +5129,10 @@ async function regenerateLastTavern() {
 
 // 续断推演 — 在当前会话最后追加"请继续"
 async function continueTavernStream() {
-  if (tavernState.isSending) return;
-  var chat = getActiveChat();
-  if (!chat) return;
-  var input = document.getElementById('tavern-input');
-  if (input) { input.value = '（请继续）'; }
-  sendTavernMessage();
+  if(tavernState.isSending||!getActiveChat())return;
+  var selection=TavernWiring.resolve({chat:getActiveChat(),presets:tavernState.presets,settings:tavernState.tavernSettings});
+  var settings=PresetCore.settings(selection.preset);
+  await runTavernTurn(settings.continue_nudge_prompt||'（请继续）',false,'continue');
 }
 
 // 重置因缘 — 清空当前会话消息
@@ -5637,60 +5429,7 @@ function openTavernPresetModal() {
 }
 
 function editTavernPreset(id) {
-  var p = tavernState.presets.find(function(pr) { return pr.id === id; });
-  if (!p) return;
-
-  // Build API selector options
-  var apis = GameState.settings.apis || [];
-  var apiOptions = '<option value="">默认接口</option>';
-  var selectedApiId = p.settings.apiId || '';
-  apis.forEach(function(api) {
-    if (api.enabled === false) return;
-    apiOptions += '<option value="' + escapeHtmlAttr(api.id) + '"' + (selectedApiId === api.id ? ' selected' : '') + '>' + escapeHtml(api.name || api.url || api.id) + '</option>';
-  });
-
-  // Build model options for each API (stored as data attributes for JS filtering)
-  var apiModelsJson = {};
-  apis.forEach(function(api) {
-    var models = (api.models && api.models.length > 0) ? api.models : (api.model ? [api.model] : []);
-    apiModelsJson[api.id] = models;
-  });
-  var apiModelsJsonStr = escapeHtmlAttr(JSON.stringify(apiModelsJson));
-
-  // Build initial model dropdown
-  var currentModel = p.settings.openai_model || '';
-  var modelOptions = '<option value="">接口默认</option>';
-  if (selectedApiId && apiModelsJson[selectedApiId]) {
-    apiModelsJson[selectedApiId].forEach(function(m) {
-      modelOptions += '<option value="' + escapeHtmlAttr(m) + '"' + (currentModel === m ? ' selected' : '') + '>' + escapeHtmlAttr(m) + '</option>';
-    });
-  }
-  if (currentModel && modelOptions.indexOf('value="' + escapeHtmlAttr(currentModel) + '" selected') < 0) {
-    modelOptions += '<option value="' + escapeHtmlAttr(currentModel) + '" selected>' + escapeHtmlAttr(currentModel) + ' (当前)</option>';
-  }
-
-  var html = '<h3>编辑预设</h3>' +
-    '<div class="form-group"><label class="form-label">预设名称</label><input type="text" id="preset-name" class="form-input" value="' + escapeHtmlAttr(p.name) + '"></div>' +
-    '<div class="form-group"><label class="form-label">接口</label><select id="preset-api" class="form-input" onchange="updatePresetModelSelect(' + TavernCore.handlerArg(id) + ')">' + apiOptions + '</select></div>' +
-    '<div class="form-group"><label class="form-label">模型</label><select id="preset-model" class="form-input">' + modelOptions + '</select></div>' +
-    '<span style="display:none;" id="preset-api-models" data-models="' + apiModelsJsonStr + '"></span>' +
-    '<div class="form-group"><label class="form-label">Temperature (' + (p.settings.temp_openai ?? 0.8) + ')</label><input type="range" class="form-slider" id="preset-temp" min="0" max="2" step="0.05" value="' + (p.settings.temp_openai ?? 0.8) + '" oninput="document.getElementById(\'preset-temp-val\').textContent=this.value"></div>' +
-    '<div style="text-align:center;color:var(--text-primary);" id="preset-temp-val">' + (p.settings.temp_openai ?? 0.8) + '</div>' +
-    '<div class="form-group"><label class="form-label">Max Tokens</label><input type="number" id="preset-maxtok" class="form-input" value="' + (p.settings.openai_max_tokens||1024) + '"></div>' +
-    '<div class="form-group"><label class="form-label">上下文容量（Token，按模型设置；用量为估算）</label><input type="number" id="preset-context" class="form-input" min="1024" value="' + (p.settings.openai_max_context || 32768) + '"></div>' +
-    '<div class="form-group"><label class="form-label">主提示词</label><textarea id="preset-main" class="form-input" rows="3">' + escapeHtml(p.prompt_main||'') + '</textarea></div>' +
-    '<div class="form-group"><label class="form-label">越狱提示</label><textarea id="preset-jailbreak" class="form-input" rows="2">' + escapeHtml(p.jailbreak||'') + '</textarea></div>' +
-    '<h4 style="color:var(--text-primary);margin:12px 0;">Prompt 排序</h4>' +
-    '<div id="preset-order-list">' + (p.promptOrder||[]).map(function(item, idx) {
-      return '<div class="entry-row"><span style="flex:1;">' + escapeHtml(item.id) + '</span>' +
-        '<input type="checkbox" ' + (item.enabled ? 'checked' : '') + ' onchange="tavernState.presets.find(function(pr){return pr.id===' + TavernCore.handlerArg(id) + '}).promptOrder[' + idx + '].enabled=this.checked">' +
-        '</div>';
-    }).join('') + '</div>' +
-    '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">' +
-      '<button class="text-btn" onclick="closeAllModals()">取消</button>' +
-      '<button class="summary-action-btn" onclick="saveTavernPreset(' + TavernCore.handlerArg(id) + ')">保存</button>' +
-    '</div>';
-  showModal(html);
+  return PresetUI.open(id);
 }
 
 function updatePresetModelSelect(presetId) {
@@ -5734,10 +5473,7 @@ async function addNewTavernPreset() {
 }
 
 async function deleteTavernPreset(id) {
-  if (tavernState.presets.length <= 1) { showToast('至少保留一个预设'); return; }
-  await db.presets.delete(id);
-  tavernState.presets = tavernState.presets.filter(function(p) { return p.id !== id; });
-  openTavernPresetModal();
+  return PresetUI.askDelete(id);
 }
 
 async function setActiveTavernPreset(id) {
@@ -6098,7 +5834,11 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="assets/js/residence-art.js"></script>
 <script src="assets/js/residence-ui.js"></script>
 <script src="assets/js/flame-ui.js"></script>
+<script src="assets/js/beauty-art.js"></script>
+<script src="assets/js/summary-ui.js"></script>
 <script src="assets/js/journal-panels.js"></script>
+<script src="assets/js/preset-manager.js"></script>
+<script src="assets/js/preset-ui.js"></script>
 <script src="assets/js/tavern-inspector.js"></script>
 <script src="assets/js/lore-catalog-ui.js"></script>
 <script src="assets/js/title-motion.js"></script>
