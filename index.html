@@ -14,6 +14,8 @@
 <script src="assets/js/tavern-core.js"></script>
 <script src="assets/js/tavern-wiring.js"></script>
 <script src="assets/js/story-quests.js"></script>
+<script src="assets/js/residence-core.js"></script>
+<script src="assets/js/flame-core.js"></script>
 <script src="assets/js/beauty-roster.js"></script>
 <script src="assets/js/save-manager.js"></script>
 <script src="assets/js/beauty-chronicle.js"></script>
@@ -1127,27 +1129,32 @@ input:checked + .toggle-slider::before { background:var(--text-primary);transfor
 <link rel="stylesheet" href="assets/css/journal.css">
 <link rel="stylesheet" href="assets/css/save-manager.css">
 <link rel="stylesheet" href="assets/css/tavern-settings.css">
+<link rel="stylesheet" href="assets/css/title-motion.css">
+<link rel="stylesheet" href="assets/css/title-menu.css">
+<link rel="stylesheet" href="assets/css/residence.css">
+<link rel="stylesheet" href="assets/css/flame-atlas.css">
 </head>
 <body>
 
 <!-- VIEW: Title Screen -->
 <div id="view-title" class="view active">
-  <header class="landing-masthead"><div class="landing-brand"><span class="landing-seal">斗</span><span>斗气大陆 · 修行录</span></div><span class="landing-edition">THE CULTIVATION CHRONICLES</span></header>
+  <header class="landing-masthead"><div class="landing-brand"><img class="landing-logo" src="assets/images/title-calligraphy-logo.png" alt="斗气大陆 · 修行录" width="2172" height="724" onerror="this.parentNode.classList.add('logo-unavailable')"><span class="landing-brand-fallback" aria-hidden="true">斗气大陆 · 修行录</span></div><span class="landing-edition">THE CULTIVATION CHRONICLES</span></header>
   <main class="landing-body">
     <section class="landing-copy">
       <p class="landing-kicker">山河初启 · 众生录</p>
-      <h1>斗破苍穹</h1>
-      <p class="landing-description">一纸命书，万里山河。<br>从乌坦城出发，写下属于你的修行故事。</p>
+      <h1 class="landing-title-art"><img src="assets/images/title-winged-wordmark.png" alt="斗破苍穹" width="2172" height="724" onerror="this.parentNode.classList.add('logo-unavailable')"><span aria-hidden="true">斗破苍穹</span></h1>
+      <p class="landing-description"><span class="landing-verse-line">一纸命书，万里山河。</span><span class="landing-description-line">从乌坦城出发，写下属于你的修行故事。</span></p>
       <div id="title-menu">
-        <button id="btn-new-game" class="title-btn primary" onclick="startNewGame()">开启新人生<span class="title-button-arrow" aria-hidden="true">↗</span></button>
-        <button id="btn-continue" class="title-btn" onclick="continueGame()">继续人生<span class="title-button-arrow" aria-hidden="true">→</span></button>
+        <button id="btn-new-game" class="title-btn primary" onclick="startNewGame()"><span class="title-button-label">开启新人生</span><small>落笔 · 新卷</small><span class="title-button-arrow" aria-hidden="true">↗</span></button>
+        <button id="btn-continue" class="title-btn" onclick="continueGame()"><span id="title-continue-label" class="title-button-label">继续人生</span><small>接续 · 前缘</small><span class="title-button-arrow" aria-hidden="true">→</span></button>
       </div>
+      <section class="title-resume" aria-label="可继续的旅程"><span class="title-resume-mark" aria-hidden="true">卷</span><div><strong id="title-resume-name">待启新卷</strong><p id="title-resume-details">山河尚未落笔，故事由此开始。</p></div></section>
       <nav class="landing-links" aria-label="辅助功能">
-        <button id="btn-saves" onclick="openSaveManager()">存档管理</button><button id="btn-settings" onclick="openSettings()">偏好设置</button><button id="btn-changelog" onclick="openChangelog()">更新日志</button><button id="btn-about" onclick="openAbout()">关于此卷</button>
+        <button id="btn-saves" onclick="openSaveManager()"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 3h12a2 2 0 0 1 2 2v16H7a3 3 0 0 1-3-3V5a2 2 0 0 1 1-2Z"/><path d="M4 17h15M8 7h7M8 11h5"/></svg><span>存档管理</span><i aria-hidden="true">↗</i></button><button id="btn-settings" onclick="openSettings()"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 3v7m0 4v7M12 3v12m0 4v2M18 3v3m0 4v11M3 10h6m0 5h6m0-9h6"/></svg><span>偏好设置</span><i aria-hidden="true">↗</i></button><button id="btn-changelog" onclick="openChangelog()"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 8a8 8 0 1 1-1 7M4 3v5h5M12 7v5l3 2"/></svg><span>更新日志</span><i aria-hidden="true">↗</i></button><button id="btn-about" onclick="openAbout()"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="8"/><path d="M12 11v6m0-10v1"/></svg><span>关于此卷</span><i aria-hidden="true">↗</i></button>
       </nav>
     </section>
   </main>
-  <footer class="landing-footer"><span>自由探索 / 角色扮演 / 万千际遇</span><span>斗气大陆 · 众生新篇</span></footer>
+  <footer class="landing-footer"><span>v2.0 · 斗气大陆</span></footer>
 </div>
 
 <!-- VIEW: Character Creation -->
@@ -1888,6 +1895,7 @@ function updatePerformanceStats() {
 var creationCurrentStep = -1;
 
 function startNewGame() {
+  if(typeof ResidenceUI!=='undefined'&&ResidenceUI.isBusy()){showToast('驻地档案正在保存，请稍后开启新人生','info');return;}
   GameState.phase = 'creation';
   GameState.player = {
     name: '', gender: '', age: 18, difficulty: '', points: 0, pointsSpent: 0,
@@ -2032,6 +2040,7 @@ function startGame() {
   delete p.exploration;
   if(typeof WorldMapBridge!=='undefined')WorldMapBridge.clearProposal();
   delete p.storyQuests;
+  delete p.residence; delete p.flameChronicle;
   delete p.beautyChronicle;
   p.inventory=initial.inventory;p.skills=getIdentityStartingSkills(p.identity);p.relationships=initial.relationships;p.history=[];
   p.equipment={weapon:null,armor:null,accessory:null,ring:null};
@@ -4652,7 +4661,7 @@ function prepareTavernRequest(chat, content, history, preview, questPlayer) {
   var location=WorldState.location+' · '+(WorldState.specificSpot||'');
   var card=chat.characterCard||tavernState.characterCard||{};
   var result=assembleTavernPrompt({preset:selection.preset,characterCard:card,userInput:selection.input,
-    history:selection.history,variables:chat.variables||{},lorebookMatches:selection.matches,location:location,userName:selection.userName,preview:!!preview,questState:(questPlayer||GameState.player).storyQuests,beautyState:(questPlayer||GameState.player).beautyChronicle});
+    history:selection.history,variables:chat.variables||{},lorebookMatches:selection.matches,location:location,userName:selection.userName,preview:!!preview,questState:(questPlayer||GameState.player).storyQuests,beautyState:(questPlayer||GameState.player).beautyChronicle,flameState:(questPlayer||GameState.player).flameChronicle,residenceState:(questPlayer||GameState.player).residence});
   selection.trace.forEach(function(row){
     if(row.status!=='matched')return;
     var m=selection.matches.find(function(x){return x.bookId===row.bookId&&x.entry.id===row.entryId;});
@@ -4678,6 +4687,8 @@ function assembleTavernPrompt(opts) {
   var plan = TavernCore.promptPlan({preset:preset, characterCard:charCard, userName:userName,
     location:location, lorebookMatches:lorebookMatches});
   var systemParts = [];
+  if(typeof FlameCore!=='undefined'){systemParts.push(FlameCore.protocol);systemParts.push(FlameCore.context(Object.hasOwn(opts,'flameState')?opts.flameState:GameState.player.flameChronicle,typeof HEAVENLY_FLAMES==='undefined'?[]:HEAVENLY_FLAMES));}
+  if(typeof ResidenceCore!=='undefined'){systemParts.push(ResidenceCore.protocol);systemParts.push(ResidenceCore.context(Object.hasOwn(opts,'residenceState')?opts.residenceState:GameState.player.residence,WorldState,typeof ResidenceUI!=='undefined'?ResidenceUI.clock():''));}
   if(typeof BeautyRoster!=='undefined')systemParts.push(BeautyRoster.context(Object.hasOwn(opts,'beautyState')?opts.beautyState:GameState.player.beautyChronicle));
   if(typeof StoryQuests!=='undefined'){systemParts.push(StoryQuests.protocol);var questFacts=StoryQuests.context(Object.hasOwn(opts,'questState')?opts.questState:GameState.player.storyQuests);if(questFacts)systemParts.push(questFacts);}
   if(typeof WorldMapBridge!=='undefined'){
@@ -4739,7 +4750,7 @@ function assembleTavernPrompt(opts) {
     systemParts.push('【输出格式要求】\n请严格按以下XML标签分段输出：\n## maintext\n(正文叙述)\n\n## option\n- [ ] 选项1\n...\n\n在正文后必须生成<branches></branches>包裹的选项分支:\n<branches>\n[快速推进的行动]\n[最合理的行动]\n[最中立的行动]\n[最善良的行动]\n[NSFW的行动]\n</branches>\n\n同时必须紧跟<upstore></upstore>变量更新块:\n<upstore>\naddSmallSum:变量名:增量\nset:变量名:值\n</upstore>\n\n## sum\n(一句话总结)\n\n如有内心独白请放入 ## thinking 标签中。');
   }
 
-  if(tavernState.tavernSettings?.pureTextMode&&typeof StoryQuests!=='undefined')systemParts.push('纯文本模式例外：quest_updates 是可选的后台任务元数据，允许在正文末尾单独附加，由前端提取，不作为可见正文。其余正文仍按纯文本输出。');
+  if(tavernState.tavernSettings?.pureTextMode&&typeof StoryQuests!=='undefined')systemParts.push('纯文本模式例外：quest_updates、residence_updates 与 flame_updates 是可选的后台元数据，允许在正文末尾单独附加，由前端提取，不作为可见正文。其余正文仍按纯文本输出。');
   var systemMsg = systemParts.join('\n\n');
 
   var settings = preset && preset.settings || {};
@@ -5019,6 +5030,8 @@ function buildCharacterProfileDOM(content) {
 function buildAssistantMessageDOM(msg) {
   var frag = document.createDocumentFragment();
   var displayContent=typeof StoryQuests!=='undefined'?StoryQuests.extract(msg.content).cleaned:msg.content;
+  if(typeof ResidenceCore!=='undefined')displayContent=ResidenceCore.visible(displayContent);
+  if(typeof FlameCore!=='undefined')displayContent=FlameCore.visible(displayContent);
   var parsed = parseGameModeOutput(applyRegexScripts(displayContent, 0));
 
   if (parsed.thinking) {
@@ -5175,6 +5188,7 @@ function setTavernSendingUI(sending) {
 }
 
 async function runTavernTurn(content, regenerate) {
+  if(typeof ResidenceUI!=='undefined'&&ResidenceUI.isBusy()){showToast('驻地档案正在保存，请稍后推演','info');return;}
   if(typeof SaveManager!=='undefined'&&SaveManager.isBusy()){showToast('正在恢复存档，请稍后推演','info');return;}
   if(typeof BeautyRoster!=='undefined'&&BeautyRoster.isBusy()){showToast('人物档案正在保存，请稍后推演','info');return;}
   if(typeof WorldMapBridge!=='undefined'&&WorldMapBridge.isMoving()){showToast('角色正在行走，停步后再开始推演','info');return;}
@@ -5219,7 +5233,7 @@ async function runTavernTurn(content, regenerate) {
     var msgs = document.getElementById('tavern-messages');
     if (msgs) { var typing = document.createElement('div'); typing.id = 'tavern-typing'; typing.className = 'msg-maintext typing'; typing.textContent = '正在推演…'; msgs.appendChild(typing); }
     var parser = StreamParser();
-    parser.onTag(function(tag, text) { if (tag !== 'maintext') return; ensureCurrent(); var el = document.getElementById('tavern-typing'); if (el) el.textContent = typeof StoryQuests!=='undefined'?StoryQuests.visible(text):text; });
+    parser.onTag(function(tag, text) { if (tag !== 'maintext') return; ensureCurrent(); var el = document.getElementById('tavern-typing'); if (el) {var visible=typeof StoryQuests!=='undefined'?StoryQuests.visible(text):text;if(typeof ResidenceCore!=='undefined')visible=ResidenceCore.visible(visible);el.textContent=typeof FlameCore!=='undefined'?FlameCore.visible(visible):visible;} });
     var sampling = preset.settings || {};
     var opts = {model:sampling.openai_model || undefined, temperature:sampling.temp_openai,
       max_tokens:sampling.openai_max_tokens, top_p:sampling.top_p_openai,
@@ -5242,6 +5256,18 @@ async function runTavernTurn(content, regenerate) {
       var questResult=StoryQuests.apply(player.storyQuests,questOutput.updates,working.id);
       if(questResult.changes.length)player.storyQuests=questResult.ledger;
       if(questOutput.errors.length)showToast('任务块未能解析，本轮正文已保留','info');
+    }
+    if(typeof ResidenceCore!=='undefined'){
+      var residenceOutput=ResidenceCore.extract(processed);processed=residenceOutput.cleaned;
+      var residenceResult=ResidenceCore.apply(player.residence,residenceOutput.updates,{body:processed,world:WorldState,time:typeof ResidenceUI!=='undefined'?ResidenceUI.clock():'故事日期未明确',source:working.id+'|'+(working.messages[working.messages.length-1]?.id||content)});
+      if(residenceResult.changes.length)player.residence=residenceResult.state;
+      if(residenceOutput.errors.length||residenceResult.errors.length)showToast('部分驻地记录未通过证据检查，正文已保留','info');
+    }
+    if(typeof FlameCore!=='undefined'){
+      var fireOutput=FlameCore.extract(processed);processed=fireOutput.cleaned;
+      var fireResult=FlameCore.apply(player.flameChronicle,fireOutput.updates,{body:processed,catalog:typeof HEAVENLY_FLAMES==='undefined'?[]:HEAVENLY_FLAMES,nodes:typeof DoupoWorldData==='undefined'?[]:DoupoWorldData.nodes,known:player.exploration?.discovered||[],time:typeof BeautyChronicle!=='undefined'?BeautyChronicle.clock(processed,before.player.beautyChronicle?.clock)?.label:(typeof ResidenceUI==='undefined'?'':ResidenceUI.clock()),turn:working.id+'|'+(working.messages[working.messages.length-1]?.id||content),playerName:player.name});
+      if(fireResult.changes.length)player.flameChronicle=fireResult.state;
+      if(fireOutput.errors.length||fireResult.errors.length)showToast('部分异火记录未通过证据检查，正文已保留','info');
     }
     if(regenerate&&GameState.player.exploration){
       ['exploration','inventory','location','history'].forEach(function(key){if(GameState.player[key]!==undefined)player[key]=TavernCore.clone(GameState.player[key]);});
@@ -6031,8 +6057,6 @@ function renderSettingsTabExt(key, body) {
 // ==============================
 
 document.addEventListener('DOMContentLoaded', function() {
-  initTitleParticles();
-  initTitleCover();
   // Initialize Tavern database (async, non-blocking)
   initTavernDB().catch(function(e) { console.warn('Tavern DB init:', e); });
   var hasData = loadFromLocalStorage();
@@ -6071,8 +6095,13 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script src="assets/js/creation-ui.js"></script>
+<script src="assets/js/residence-art.js"></script>
+<script src="assets/js/residence-ui.js"></script>
+<script src="assets/js/flame-ui.js"></script>
 <script src="assets/js/journal-panels.js"></script>
 <script src="assets/js/tavern-inspector.js"></script>
 <script src="assets/js/lore-catalog-ui.js"></script>
+<script src="assets/js/title-motion.js"></script>
+<script src="assets/js/title-menu.js"></script>
 </body>
 </html>

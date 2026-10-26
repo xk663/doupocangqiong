@@ -108,5 +108,6 @@ var WorldMapUI=(function(){
   }
   destroy(){this.queued=null;this.renderer?.stopWalking();WorldMapBridge.cancelMovement();this.unsubscribe?.();this.renderer?.destroy();instances.delete(this.host);}
  }
- return {async mount(host){if(!host)return;const existing=instances.get(host);if(existing){existing.update();existing.renderer?.resize();return existing;}const view=new MapView(host);instances.set(host,view);await view.init();return view;}};
+ async function mount(host){if(!host)return;const existing=instances.get(host);if(existing){existing.update();existing.renderer?.resize();return existing;}const view=new MapView(host);instances.set(host,view);await view.init();return view;}
+ return {mount,async focus(host,id){const view=await mount(host);if(!view)throw Error('地图容器不存在');const ctx=view.ctx(),node=view.data.nodes.find(n=>n.id===id);if(!node||!ctx.state.discovered.includes(id))throw Error('地点尚未发现');view.scene=node.scene||'world';view.selected=id;view.query='';view.filter='all';view.update();view.renderer?.reset();view.host.querySelector('.world-directory').open=true;view.status('已查看线索地点，尚未开始旅行。');return true;}};
 })();

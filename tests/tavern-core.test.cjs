@@ -118,6 +118,39 @@ test('JSON and PNG tEXt character cards preserve Unicode; invalid cards fail cle
 });
 const turnFunctions=['runTavernTurn','setTavernSendingUI','stopTavernStream','regenerateLastTavern','parseUpstore','extractVariables','mergeVariables'];
 
+test('residence metadata commits with the visible reply and regeneration does not duplicate events',async()=>{
+ const ResidenceCore=require('../assets/js/residence-core.js'),line='你在营帐里调息了一刻。';
+ const reply=line+'<residence_updates>'+JSON.stringify([{action:'record',kind:'meditation',title:'调息一刻',evidence:line}])+'</residence_updates>';
+ const {state,records}=context(turnFunctions,{ResidenceCore,callLLMStream:async()=>reply});
+ state.WorldState={location:'石漠城',specificSpot:'向导营地'};
+ await state.runTavernTurn('在驻地调息',false);
+ assert.equal(state.GameState.player.residence.events.length,1);
+ assert.ok(!state.getActiveChat().messages.at(-1).content.includes('residence_updates'));
+ assert.equal(records.get('tavernSettings:main').playerState.residence.events.length,1);
+ await state.runTavernTurn('',true);assert.equal(state.GameState.player.residence.events.length,1);
+});
+test('flame events persist atomically with narrative, hide metadata and survive regeneration without duplicates',async()=>{
+ const FlameCore=require('../assets/js/flame-core.js'),line='向导听说青莲地心火藏在岩浆之中。';
+ const reply=line+'<flame_updates>'+JSON.stringify([{rank:19,stage:'heard',source:'told',evidence:line}])+'</flame_updates>';
+ const {state,records}=context(turnFunctions,{FlameCore,HEAVENLY_FLAMES:[{rank:19,name:'青莲地心火'}],callLLMStream:async()=>reply});
+ await state.runTavernTurn('询问异火线索',false);
+ assert.equal(state.GameState.player.flameChronicle.records[19].stage,'heard');assert.equal(records.get('tavernSettings:main').playerState.flameChronicle.records[19].events.length,1);assert.ok(!state.getActiveChat().messages.at(-1).content.includes('flame_updates'));
+ await state.runTavernTurn('',true);assert.equal(state.GameState.player.flameChronicle.records[19].events.length,1);
+});
+test('failed flame turn persistence cannot advance the current life fire record',async()=>{
+ const FlameCore=require('../assets/js/flame-core.js'),line='向导听说青莲地心火藏在岩浆之中。';
+ const {state}=context(turnFunctions,{FlameCore,HEAVENLY_FLAMES:[{rank:19,name:'青莲地心火'}],callLLMStream:async()=>line+'<flame_updates>'+JSON.stringify([{rank:19,stage:'heard',source:'told',evidence:line}])+'</flame_updates>'});
+ state.db.tavernSettings.put=async()=>{throw Error('quota');};await state.runTavernTurn('打听消息',false);assert.equal(state.GameState.player.flameChronicle,undefined);
+});
+
+test('failed residence turn storage never advances the in-memory residence ledger',async()=>{
+ const ResidenceCore=require('../assets/js/residence-core.js'),line='杜青禾在门前向你问好。';
+ const {state}=context(turnFunctions,{ResidenceCore,callLLMStream:async()=>line+'<residence_updates>'+JSON.stringify([{action:'record',kind:'visit',title:'故人来访',evidence:line}])+'</residence_updates>'});
+ state.WorldState={location:'青山镇',specificSpot:'客栈'};
+ state.db.tavernSettings.put=async()=>{throw Error('quota');};
+ await state.runTavernTurn('等候故人',false);assert.equal(state.GameState.player.residence,undefined);
+});
+
 function installWorldBridge(state){
   state.WorldCore=require('../assets/js/world-core.js');state.DoupoWorldData=require('../assets/js/world-data.js');
   state.Economy={gold:40};state.GameTime={era:'斗气历',year:1,month:1,day:1,hour:8,minute:0,totalHours:0};state.WorldState={location:'乌坦城'};
@@ -233,11 +266,11 @@ test('the actual application assembler includes defaults alongside custom preset
 test('actual outbound chat request includes global lore, prompt regex and player name once',async()=>{
   let outbound;
   const {state}=context([...turnFunctions,'assembleTavernPrompt'],{regexScripts:[{findRegex:'原词',replaceString:'青莲',placement:1}],callLLMStream:async(messages)=>{outbound=messages;return '回复';}});
-  state.GameState.player.name='林见山';state.getActiveChat().userName='玩家';
+  state.GameState.player.name='测试旅人';state.getActiveChat().userName='玩家';
   state.tavernState.activeLorebookIds=['global'];
   state.tavernState.lorebooks=[{id:'global',name:'已启用',entries:[entry('l',['青莲'],'{{user}}的 UNIQUE_GLOBAL_LORE')]}];
   await state.runTavernTurn('原词',false);
-  assert.ok(outbound);const all=outbound.map(m=>m.content).join('\n');assert.ok(all.includes('林见山的 UNIQUE_GLOBAL_LORE'));
+  assert.ok(outbound);const all=outbound.map(m=>m.content).join('\n');assert.ok(all.includes('测试旅人的 UNIQUE_GLOBAL_LORE'));
   assert.equal(outbound.filter(m=>m.role==='user'&&m.content==='青莲').length,1);
   assert.equal(state.getActiveChat().messages[0].content,'原词');
   assert.equal(state.tavernState.lastRequestInspection.selection.trace[0].status,'included');
