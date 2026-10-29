@@ -3,7 +3,7 @@ const data=require('../assets/js/world-data.js'),nav=require('../assets/js/world
 function fresh(){const state=core.initial(data,'wutan','movement-test');return {state,player:{name:'自定义玩家',gender:'male',realm:'斗之气·三段',inventory:[],exploration:state},economy:{gold:40},gameTime:{year:1,month:1,day:1,hour:8,minute:0,totalHours:0},worldState:{location:'乌坦城'},questSystem:{quests:[],completed:[],failed:[]}};}
 test('gender chooses Xiao Yan or Xun Er without renaming the player',()=>{
  assert.equal(nav.avatar('male').id,'xiaoyan');assert.equal(nav.avatar('female').id,'xuner');assert.equal(nav.avatar('女').id,'xuner');assert.equal(nav.avatar('futa').id,'xiaoyan');const c=fresh();nav.avatar(c.player.gender);assert.equal(c.player.name,'自定义玩家');
- for(const gender of ['male','female']){const b=fs.readFileSync(require('path').join(__dirname,'..',nav.avatar(gender).image));assert.equal(b.readUInt32BE(16),1536);assert.equal(b.readUInt32BE(20),1024);assert.equal(b[25],6);}
+ for(const gender of ['male','female']){const info=require('./webp-info.cjs')(fs.readFileSync(require('path').join(__dirname,'..',nav.avatar(gender).image)));assert.equal(info.width,1536);assert.equal(info.height,1024);assert.equal(info.alpha,true);}
 });
 test('local roads connect every authored anchor and reject remote scene and terrain clicks',()=>{
  for(const sceneId of Object.keys(nav.roads)){const start=nav.position(data,core.initial(data,sceneId));for(const n of data.nodes.filter(n=>n.scene===sceneId)){const route=nav.route(data,sceneId,start,n);assert.ok(route.ok,sceneId+': '+n.id);assert.ok(route.points.every(p=>p.x>=0&&p.y>=0&&p.x<=100&&p.y<=100));}}

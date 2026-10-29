@@ -10,7 +10,8 @@ var WorldMapBridge=(function(){
   ctx.player.exploration=ctx.state;
   return ctx;
  }
- function generating(){return custom?!!custom.isBusy?.():(typeof SaveManager!=='undefined'&&SaveManager.isBusy())||((typeof SummaryUI!=='undefined'&&SummaryUI.isBusy())||(typeof ResidenceUI!=='undefined'&&ResidenceUI.isBusy()))||(typeof BeautyRoster!=='undefined'&&BeautyRoster.isBusy())||(typeof tavernState!=='undefined'&&tavernState.isSending);}
+ function generating(){
+  if(typeof BattleBridge!=='undefined'&&BattleBridge.isBusy())return true;return custom?!!custom.isBusy?.():(typeof SaveManager!=='undefined'&&SaveManager.isBusy())||((typeof SummaryUI!=='undefined'&&SummaryUI.isBusy())||(typeof ResidenceUI!=='undefined'&&ResidenceUI.isBusy()))||(typeof BeautyRoster!=='undefined'&&BeautyRoster.isBusy())||(typeof tavernState!=='undefined'&&(tavernState.isSending||tavernState.isEditingMemory));}
  function isBusy(){return !!movement||generating();}
  function revision(ctx){return JSON.stringify([ctx.player,ctx.economy,ctx.gameTime,ctx.worldState,ctx.questSystem]);}
  function beginMovement(){if(isBusy())return null;movement={id:++movementId,revision:revision(getContext())};changed();return movement.id;}

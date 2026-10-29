@@ -1,0 +1,30 @@
+/* ====== 响应式设计断点统一定义 ====== */
+/* 集中管理所有断点，便于维护和调整 */
+
+:root {
+  /* ===== 设备分类 ===== */
+  /* 手机竖屏: 小型设备 */
+  --bp-phone-sm: 375px;         /* iPhone SE/8 */
+  --bp-phone-md: 414px;         /* iPhone 11 */
+  --bp-phone-lg: 430px;         /* iPhone 14+ */
+  
+  /* 手机横屏: 高度约束严格 */
+  --bp-phone-land-sm: 500px;    /* 高度 ~300px */
+  --bp-phone-land-md: 600px;    /* 高度 ~400px */
+  
+  /* 平板竖屏 */
+  --bp-tablet-sm: 600px;        /* 小平板 */
+  --bp-tablet-md: 768px;        /* iPad竖屏 */
+  
+  /* 平板/桌面横屏 */
+  --bp-tablet-lg: 1024px;       /* iPad横屏 */
+  
+  /* 桌面 */
+  --bp-desktop-sm: 1280px;      /* 小屏笔记本 */
+  --bp-desktop-md: 1440px;      /* 标准笔记本 */
+  --bp-desktop-lg: 1920px;      /* 大屏显示器 */
+  
+  /* 高度特定约束 */
+  --height-phone-land-min: 300px;
+  --height-phone-land-max: 500px;
+}

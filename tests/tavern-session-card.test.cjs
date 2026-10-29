@@ -13,7 +13,7 @@ function setup(sessionCard,globalCard){
   const state={crypto:webcrypto,TavernCore:core,TavernWiring:wiring,
     GameState:{player:{name:'旅人'},settings:{}},WorldState:{location:'乌坦城'},
     tavernState:{chats:[original],activeChatId:'old',presets:[],lorebooks:[],activeLorebookIds:[],tavernSettings:{},characterCard:globalCard},
-    db:{chats:{put:async chat=>saved.set(chat.id,structuredClone(chat))},tavernSettings:{put:async()=>{}}},
+    db:{transaction:async(mode,tables,fn)=>fn(),chats:{put:async chat=>saved.set(chat.id,structuredClone(chat))},tavernSettings:{put:async()=>{}}},
     stopTavernStream(){},renderTavernSessionList(){},renderTavernMessages(){},updateTavernInfo(){},
     createChatMessage:(role,content)=>({role,content}),
     assembleTavernPrompt(opts){requestCard=opts.characterCard;return {messages:[]};}};
@@ -56,4 +56,16 @@ test('missing cards create an empty independent session without rewriting old ch
   const {state,original}=setup(null,null);await state.createNewTavernChat();
   assert.equal(state.getActiveChat().characterName,'角色');assert.equal(state.getActiveChat().messages.length,0);
   assert.equal(JSON.stringify(state.getActiveChat().characterCard),'{}');assert.equal(original.characterCard,undefined);
+});
+
+test('explicit selected-card chat uses imported B while preserving old A session',async()=>{
+ const {state,original,saved}=setup({name:'角色A',description:'A设定',firstMessage:'A开场'},{name:'旧全局'});
+ state.db.characterCard={put:async()=>{}};state.openTavernCharacterModal=()=>{};state.showToast=()=>{};
+ vm.runInContext(html.match(/async function importCharacterCard\([^]*?\n\}/)[0],state);
+ await state.importCharacterCard({target:{files:[{name:'b.json',size:100,text:async()=>JSON.stringify({name:'角色B',description:'B设定',first_mes:'B开场'})}]}});
+ await state.createNewTavernChat(true);const chat=state.getActiveChat();assert.equal(chat.characterName,'角色B');assert.equal(chat.messages[0].content,'B开场');assert.equal(original.characterCard.name,'角色A');assert.equal(saved.get(chat.id).characterCard.description,'B设定');
+});
+test('failed new-chat transaction does not activate a phantom session',async()=>{
+ const {state}=setup({name:'角色A'},{name:'角色B'});state.db.transaction=async()=>{throw Error('quota');};
+ await assert.rejects(state.createNewTavernChat(true),/quota/);assert.equal(state.tavernState.activeChatId,'old');assert.equal(state.tavernState.chats.length,1);
 });

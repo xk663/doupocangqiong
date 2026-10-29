@@ -104,3 +104,11 @@ test('novel corrections preserve custom edits, IDs and disabled flags',()=>{
  const old=corrections.find(c=>c.keys[0]==='天墓');const e={id:'old',keys:old.keys,content:old.content,enabled:false,position:2};const book={name:'斗破苍穹世界观',entries:[e,{...e,id:'edited',content:'我的天墓'}]};
  assert.equal(canon.migrateBook(book),true);assert.match(e.content,/三层/);assert.equal(e.enabled,false);assert.equal(e.position,2);assert.equal(e.id,'old');assert.equal(book.entries[1].content,'我的天墓');assert.equal(canon.migrateBook(book),false);
 });
+
+test('new life honors selected preset instead of the first imported preset',async()=>{
+ const {s,p}=harness();p.name='预设验证';p.realm='斗之气·三段';p.soulRealm='凡境';p.inventory=[];
+ s.objects.GameState.phase='game';s.tavernState.isLoading=false;s.tavernState.presets=[{id:'first'},{id:'selected'}];s.tavernState.tavernSettings={activePresetId:'selected'};
+ const records=[];s.db={chats:{async put(chat){records.push(core.clone(chat));}},tavernSettings:{async put(){}}};s.getTavernApi=()=>null;s.renderTavernSessionList=()=>{};s.renderTavernMessages=()=>{};
+ await s.generateOpeningScene();assert.equal(records.at(-1).presetId,'selected');
+ s.tavernState.tavernSettings.activePresetId='deleted';await s.generateOpeningScene();assert.equal(records.at(-1).presetId,'first');
+});

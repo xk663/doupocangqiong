@@ -7,7 +7,19 @@ Thumbs.db
 # Personal files
 *.txt
 *.docx
-*.json
+# Personal exports in the repository root; application JSON in subdirectories is visible.
+/*.json
+!/package.json
+!/package-lock.json
+*.local.json
+.env
+.env.*
+secrets/
+dist/
+# Explicitly kept local by the owner.
+assets/images/xiaoyan-xuner/
+docs/xiaoyan-xuner-art.md
+docs/*-prompts.json
 *.xml
 *.xml-prev
 *.log
@@ -67,6 +79,7 @@ Untitled*.ipynb
 # Versioned map catalogue, art provenance and regression reports
 !assets/data/world.json
 !assets/vendor/PIXI-LICENSE.txt
+!assets/vendor/DEXIE-LICENSE.txt
 !docs/world-map-art.json
 !docs/world-map-verification.json
 !docs/creation-verification.json

@@ -1,0 +1,22 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>状态与技能保存验证</title>
+<style>body{max-width:880px;margin:40px auto;padding:0 24px;background:#f5f1e8;color:#263a35;font:17px/1.7 system-ui}button{padding:10px 16px;margin:6px;border:1px solid #63877c;border-radius:8px;background:white;color:#263a35;font:inherit}article,pre{padding:20px;background:white;border-radius:12px;white-space:pre-wrap}#notice{min-height:2em;color:#97501e}</style>
+<h1>状态与技能保存验证</h1><p>隔离测试数据 · 独立 IndexedDB · 不调用模型 API</p>
+<button id="rebuild">整理正文摘录</button><button id="skills">从正文核对技能</button><button id="failure">模拟保存失败：关闭</button><button id="fact">保存测试事实</button>
+<p id="notice" role="status"></p><article id="summary-body"></article><pre id="records"></pre>
+<script src="../../assets/vendor/dexie-3.2.4.min.js"></script><script src="../../assets/js/tavern-core.js"></script><script src="../../assets/js/memory-core.js"></script><script src="../../assets/js/battle-rules.js"></script><script src="../../assets/js/battle-engine.js"></script><script src="../../assets/js/battle-core.js"></script>
+<script>
+var db=new Dexie('doupo-structure-fixture-v1');db.version(1).stores({chats:'id',tavernSettings:'id'});
+var GameState={player:{name:'测试旅人',lifeId:'isolated',realm:'斗者一星',skills:[{name:'震山掌'}]},settings:{}},tavernState={chats:[],activeChatId:'sample',tavernSettings:{},isLoading:true,isSending:false};
+var fail=false;
+db.chats.hook('updating',function(){if(fail)throw Error('模拟数据库写入失败');});
+function getActiveChat(){return tavernState.chats.find(c=>c.id===tavernState.activeChatId);}
+function showToast(text){document.getElementById('notice').textContent=text;}
+function saveToLocalStorage(){return true;}
+function renderMemoryTable(){var c=getActiveChat(),m=MemoryCore.normalize(c?.memoryTable);document.getElementById('summary-body').textContent='已收录技能：'+((GameState.player.battleSkills||[]).map(x=>x.name+'（来源 '+x.messageId+'）').join('、')||'无')+'\n待核对技能：'+((c?.pendingBattleSkills||[]).map(x=>x.name+'：'+x.reason).join('、')||'无')+'\n正文摘录：'+m.small.length+' 组\n确认事实：'+m.facts.map(x=>x.text).join('、');document.getElementById('records').textContent=(c?.messages||[]).map(x=>x.id+' · '+x.content).join('\n');}
+</script><script src="../../assets/js/memory-ui.js"></script><script src="../../assets/js/battle-bridge.js"></script>
+<script>
+(async function(){let c=await db.chats.get('sample');if(!c){c={id:'sample',lifeId:'isolated',messages:[{id:'正文1',role:'assistant',content:'你已掌握黄阶斗技《震山掌》，命中可以打断对手蓄力。'},{id:'正文2',role:'assistant',content:'你已学会《游云步》，脚下灵动。'}],variables:{}};await db.chats.put(c);}const settings=await db.tavernSettings.get('main');if(settings?.playerState)GameState.player=settings.playerState;tavernState.tavernSettings=settings||{};tavernState.chats=[c];tavernState.isLoading=false;renderMemoryTable();})();
+document.getElementById('rebuild').onclick=()=>MemoryUI.rebuild();document.getElementById('skills').onclick=()=>BattleBridge.auditSkills();
+document.getElementById('failure').onclick=()=>{fail=!fail;document.getElementById('failure').textContent='模拟保存失败：'+(fail?'开启':'关闭');};
+document.getElementById('fact').onclick=async()=>{if(await MemoryUI.update(chat=>({chat:{...chat,memoryTable:MemoryCore.addFact(chat.memoryTable,'验证事实：已抵达山门')}})))showToast('事实已保存');};
+</script></html>

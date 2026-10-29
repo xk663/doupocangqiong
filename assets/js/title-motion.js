@@ -7,7 +7,7 @@
     var scene = document.createElement('div');
     scene.className = 'title-motion-scene';
     scene.setAttribute('aria-hidden', 'true');
-    scene.innerHTML = '<img class="title-motion-art" src="assets/images/title-gu-reunion.png?v=7" alt=""><canvas class="title-motion-render"></canvas><div class="title-motion-sun"></div><div class="title-motion-mist far"></div><div class="title-motion-mist"></div><canvas class="title-motion-petals"></canvas>';
+    scene.innerHTML = '<img class="title-motion-art" src="assets/images/title-gu-reunion.webp?v=7" alt=""><canvas class="title-motion-render"></canvas><div class="title-motion-sun"></div><div class="title-motion-mist far"></div><div class="title-motion-mist"></div><canvas class="title-motion-petals"></canvas>';
     root.prepend(scene);
     var toggle = document.createElement('button');
     toggle.type = 'button';

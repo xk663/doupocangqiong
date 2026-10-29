@@ -10,14 +10,23 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700;900&family=ZCOOL+KuaiLe&display=swap&subset=chinese-simplified" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700;900&family=ZCOOL+KuaiLe&display=swap&subset=chinese-simplified"></noscript>
-<script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js" defer></script>
+<script src="assets/vendor/dexie-3.2.4.min.js" defer></script>
 <script src="assets/js/preset-core.js"></script>
 <script src="assets/js/tavern-core.js"></script>
+<script src="assets/js/replay-guard.js"></script>
+<script src="assets/js/open-world-runtime.js"></script>
 <script src="assets/js/tavern-wiring.js"></script>
 <script src="assets/js/story-quests.js"></script>
 <script src="assets/js/residence-core.js"></script>
 <script src="assets/js/flame-core.js"></script>
 <script src="assets/js/summary-core.js"></script>
+<script src="assets/js/battle-rules.js"></script>
+<script src="assets/js/battle-engine.js"></script>
+<script src="assets/js/battle-core.js"></script>
+<script src="assets/js/battle-bridge.js"></script>
+<link rel="stylesheet" href="assets/css/battle.css">
+<script src="assets/js/memory-core.js"></script>
+<script src="assets/js/memory-ui.js"></script>
 <script src="assets/js/beauty-roster.js"></script>
 <script src="assets/js/save-manager.js"></script>
 <script src="assets/js/beauty-chronicle.js"></script>
@@ -1121,6 +1130,8 @@ input:checked + .toggle-slider::before { background:var(--text-primary);transfor
 .import-zone:hover { background:rgba(212,168,75,0.03);border-color:var(--text-primary); }
 .import-zone input { display:none; }
 </style>
+<link rel="stylesheet" href="assets/css/_breakpoints.css">
+<link rel="stylesheet" href="assets/css/responsive-core.css">
 <link rel="stylesheet" href="assets/css/atelier.css">
 <link rel="stylesheet" href="assets/css/creation.css">
 <link rel="stylesheet" href="assets/css/world-map.css">
@@ -1138,16 +1149,19 @@ input:checked + .toggle-slider::before { background:var(--text-primary);transfor
 <link rel="stylesheet" href="assets/css/residence.css">
 <link rel="stylesheet" href="assets/css/flame-atlas.css">
 <link rel="stylesheet" href="assets/css/preset-workbench.css">
+<link rel="stylesheet" href="assets/css/background-settings.css">
+<script src="assets/js/background-settings.js" defer></script>
+<script src="assets/js/responsive-keyboard.js" defer></script>
 </head>
 <body>
 
 <!-- VIEW: Title Screen -->
 <div id="view-title" class="view active">
-  <header class="landing-masthead"><div class="landing-brand"><img class="landing-logo" src="assets/images/title-calligraphy-logo.png" alt="斗气大陆 · 修行录" width="2172" height="724" onerror="this.parentNode.classList.add('logo-unavailable')"><span class="landing-brand-fallback" aria-hidden="true">斗气大陆 · 修行录</span></div><span class="landing-edition">THE CULTIVATION CHRONICLES</span></header>
+  <header class="landing-masthead"><div class="landing-brand"><img class="landing-logo" src="assets/images/title-calligraphy-logo.webp" alt="斗气大陆 · 修行录" width="2172" height="724" onerror="this.parentNode.classList.add('logo-unavailable')"><span class="landing-brand-fallback" aria-hidden="true">斗气大陆 · 修行录</span></div><span class="landing-edition">THE CULTIVATION CHRONICLES</span></header>
   <main class="landing-body">
     <section class="landing-copy">
       <p class="landing-kicker">山河初启 · 众生录</p>
-      <h1 class="landing-title-art"><img src="assets/images/title-winged-wordmark.png" alt="斗破苍穹" width="2172" height="724" onerror="this.parentNode.classList.add('logo-unavailable')"><span aria-hidden="true">斗破苍穹</span></h1>
+      <h1 class="landing-title-art"><img src="assets/images/title-winged-wordmark.webp" alt="斗破苍穹" width="2172" height="724" onerror="this.parentNode.classList.add('logo-unavailable')"><span aria-hidden="true">斗破苍穹</span></h1>
       <p class="landing-description"><span class="landing-verse-line">一纸命书，万里山河。</span><span class="landing-description-line">从乌坦城出发，写下属于你的修行故事。</span></p>
       <div id="title-menu">
         <button id="btn-new-game" class="title-btn primary" onclick="startNewGame()"><span class="title-button-label">开启新人生</span><small>落笔 · 新卷</small><span class="title-button-arrow" aria-hidden="true">↗</span></button>
@@ -1520,26 +1534,33 @@ var TimeRewind = {
   snapshots: [],
   maxSnapshots: 20
 };
-function takeSnapshot(chatMessages, variables) {
+function takeSnapshot(chatMessages, variables, battleOverride) {
   TimeRewind.snapshots.push({id:crypto.randomUUID(), chatId:tavernState.activeChatId, time:new Date().toLocaleString(),
-    messages:TavernCore.clone(chatMessages || []), variables:TavernCore.clone(variables || {}),
+    messages:TavernCore.clone(chatMessages || []), variables:TavernCore.clone(variables || {}), battle:arguments.length>2?TavernCore.clone(battleOverride):getActiveChat()?.battle?TavernCore.clone(getActiveChat().battle):null,
     player:TavernCore.clone(GameState.player), gameTime:TavernCore.clone(GameTime), worldState:TavernCore.clone(WorldState),
+    memoryTable:TavernCore.clone(getActiveChat()?.memoryTable||{}), pendingBattleSkills:TavernCore.clone(getActiveChat()?.pendingBattleSkills||[]), openWorldState:TavernCore.clone(GameState.openWorldState||{}),
     economy:typeof Economy !== 'undefined' ? TavernCore.clone(Economy) : null, studioState:typeof StudioState !== 'undefined' ? TavernCore.clone(StudioState) : null, questSystem:typeof QuestSystem !== 'undefined' ? TavernCore.clone(QuestSystem) : null});
   if (TimeRewind.snapshots.length > TimeRewind.maxSnapshots) TimeRewind.snapshots.shift();
 }
 async function rewindToSnapshot(sid) {
+  if(tavernState.isEditingMemory){showToast('记忆正在保存，请稍后操作','info');return;}
+  if(typeof BattleBridge!=='undefined'&&BattleBridge.isSaving())return;
+  if(typeof BattleBridge!=='undefined')BattleBridge.close();
   var snap = TimeRewind.snapshots.find(function(s) { return s.id === sid; });
   var active = getActiveChat();
-  if (!snap || !active || snap.chatId !== active.id) { showToast('此快照不属于当前会话', 'error'); return; }
+  if (!snap || !active || snap.chatId !== active.id || (snap.player?.lifeId&&GameState.player.lifeId&&snap.player.lifeId!==GameState.player.lifeId)) { showToast('此快照不属于当前会话', 'error'); return; }
   stopTavernStream();
   try {
-    var restored = TavernCore.clone(active); restored.messages = TavernCore.clone(snap.messages); restored.variables = TavernCore.clone(snap.variables); restored.updatedAt = Date.now();
+    var restored = TavernCore.clone(active); restored.messages = TavernCore.clone(snap.messages); restored.variables = TavernCore.clone(snap.variables); restored.updatedAt = Date.now();restored.battle=snap.battle?TavernCore.clone(snap.battle):null;
+    restored.playerState=TavernCore.clone(snap.player);if(!restored.playerState.lifeId&&GameState.player.lifeId)restored.playerState.lifeId=GameState.player.lifeId;
+    restored.memoryTable=TavernCore.clone(snap.memoryTable||{});restored.pendingBattleSkills=TavernCore.clone(snap.pendingBattleSkills||[]);
+    restored.openWorldState=TavernCore.clone(snap.openWorldState||{});
     await db.transaction('rw',[db.chats,db.tavernSettings],async function() {
       await db.chats.put(restored);
-      await db.tavernSettings.put(Object.assign({},tavernState.tavernSettings || {},{id:'main',activeChatId:restored.id,playerState:snap.player,playerStateAt:Date.now()}));
+      await db.tavernSettings.put(Object.assign({},tavernState.tavernSettings || {},{id:'main',activeChatId:restored.id,playerState:restored.playerState,playerStateAt:Date.now(),openWorldState:snap.openWorldState||{},runtimeState:{gameTime:snap.gameTime,worldState:snap.worldState,economy:snap.economy,studioState:snap.studioState,questSystem:snap.questSystem,openWorldState:snap.openWorldState||{}},runtimeStateAt:Date.now()}));
     });
     tavernState.chats = tavernState.chats.map(function(c) { return c.id === restored.id ? restored : c; });
-    GameState.player = TavernCore.clone(snap.player);
+    GameState.player = TavernCore.clone(restored.playerState);GameState.openWorldState=TavernCore.clone(snap.openWorldState||{});
     if (snap.gameTime) Object.assign(GameTime,TavernCore.clone(snap.gameTime));
     if (snap.economy && typeof Economy !== 'undefined') Object.assign(Economy,TavernCore.clone(snap.economy));
     if (snap.studioState && typeof StudioState !== 'undefined') Object.assign(StudioState,TavernCore.clone(snap.studioState));
@@ -1547,7 +1568,7 @@ async function rewindToSnapshot(sid) {
     if (snap.worldState) Object.assign(WorldState,TavernCore.clone(snap.worldState));
     TimeRewind.snapshots = TimeRewind.snapshots.slice(0,TimeRewind.snapshots.indexOf(snap) + 1);
     if(typeof WorldMapBridge!=='undefined')WorldMapBridge.clearProposal();
-    saveToLocalStorage(); renderTavernMessages(); showToast('时空回溯完成：' + snap.time,'success');
+    var localSaved=saveToLocalStorage(); renderTavernMessages();if(typeof BattleBridge!=='undefined')BattleBridge.refresh(); showToast(localSaved?'时空回溯完成：'+snap.time:'回溯已存入数据库，本地备份失败',localSaved?'success':'info');
   } catch(e) { showToast('回溯失败：' + e.message,'error'); }
 }
 
@@ -1622,7 +1643,9 @@ var WorldState = {
   location: '加玛帝国 · 乌坦城',
   specificSpot: '萧家后院',
   weather: '晴 · 微风',
-  environment: '庭院幽静，远处偶闻坊市喧声与魔兽低吼'
+  environment: '庭院幽静，远处偶闻坊市喧声与魔兽低吼',
+  spaceLayer: '地表 · 斗气大陆',
+  timeline: '当前独立时间线'
 };
 
 function getTimeFormatRule() {
@@ -1771,6 +1794,8 @@ function getIdentityStartingFunds(identityId) {
 
 const GameState = {
   phase: 'title', // 'title' | 'creation' | 'game'
+  // Open-world runtime: structured memory with flexible, non-linear events.
+  openWorldState: {version:1,mode:'character',facts:[],events:[],knowledge:[],changes:[],focus:[]},
   player: {
     name: '', gender: '', age: 18,
     difficulty: '', points: 0, pointsSpent: 0,
@@ -1900,6 +1925,7 @@ function updatePerformanceStats() {
 var creationCurrentStep = -1;
 
 function startNewGame() {
+  if(tavernState.isEditingMemory){showToast('记忆正在保存，请稍后操作','info');return;}
   if((typeof SummaryUI!=='undefined'&&SummaryUI.isBusy())||(typeof ResidenceUI!=='undefined'&&ResidenceUI.isBusy())){showToast('人生档案正在保存，请稍后开启新人生','info');return;}
   GameState.phase = 'creation';
   GameState.player = {
@@ -2035,9 +2061,10 @@ function confirmCreation() {
 }
 
 function startGame() {
+  if(tavernState.isEditingMemory){showToast('记忆正在保存，请稍后操作','info');return;}
   var p=GameState.player;
   var initial=CreationRules.initialState(p);
-  GameState.phase='game';p.name=p.name.trim();p.realm=initial.realm;p.soulRealm=initial.soulRealm;
+  GameState.phase='game';p.lifeId=crypto.randomUUID();GameState.openWorldState={version:1,facts:[],events:[],knowledge:[],changes:[],focus:[]};p.name=p.name.trim();p.realm=initial.realm;p.soulRealm=initial.soulRealm;
   GameTime=initial.time;WorldState=initial.world;
   var funds=getIdentityStartingFunds(p.identity);
   Economy={gold:funds.gold,silver:0,copper:0,spiritStones:CreationRules.isFree(p)?funds.spiritStones:0};
@@ -2085,7 +2112,8 @@ async function generateOpeningScene() {
   if (tavernState.isLoading || !db) { showToast('聊天数据库仍在加载，请稍后重试', 'error'); return; }
   if (tavernState.isSending) return;
   var openingPlayer=GameState.player;
-  var intro = buildCharacterIntro(), preset = tavernState.presets[0];
+  var intro = buildCharacterIntro(), selectedPresetId=tavernState.tavernSettings?.activePresetId||GameState.settings.tavernActivePresetId;
+  var preset=tavernState.presets.find(p=>p.id===selectedPresetId)||tavernState.presets[0];
   var chat = createChatSession({name:(GameState.player.name || '修炼者') + ' - 新人生',characterName:'斗破苍穹',presetId:preset ? preset.id : '',lorebookIds:tavernState.activeLorebookIds.slice()});
   chat.characterCard={name:'斗气大陆',description:'你是斗气大陆的叙事者，围绕玩家的独立角色、当前地点和已发生事实推进故事。',personality:'人物有各自目标与知情范围，尊重玩家选择，追踪条件和代价。',scenario:'玩家自行创角，原著人物并非预设同伴。实际状态以角色档案和后续事实为准。',firstMessage:''};
   chat.messages.push(createChatMessage('system',intro));
@@ -2444,14 +2472,16 @@ var settingsActiveTab = 'core';
 var settingsTabLabels = {
   'core': '核心配置',
   'lorebook': '世界书管理', 'presets': '预设管理', 'tavern': '酒馆设置',
-  'regex': '正则引擎', 'depth': '玩法'
+  'regex': '正则引擎', 'depth': '玩法', 'battle':'战斗', 'background':'背景'
 };
 var settingsTabShortLabels = {
   'core': '核心',
   'lorebook': '世界书', 'presets': '预设', 'tavern': '酒馆',
-  'regex': '正则', 'depth': '玩法'
+  'regex': '正则', 'depth': '玩法', 'battle':'战斗', 'background':'背景'
 };
 var settingsTabIcons = {
+  background:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="2"/><path d="m3 18 6-6 4 4 3-3 5 5"/></svg>',
+  battle:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 3 17 17m0-17L4 20M3 15l6 6m6-18 6 6M3 3l1 5 4-4-5-1Z"/></svg>',
   'core': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.2 4.2l2.8 2.8m10 10l2.8 2.8M1 12h4m14 0h4"/></svg>',
   'lorebook': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>',
   'presets': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>',
@@ -2466,7 +2496,7 @@ function openSettings() {
   if (existing) existing.remove();
 
   var tabsHtml = '';
-  ['core','lorebook','presets','tavern','regex','depth'].forEach(function(key) {
+  ['core','lorebook','presets','tavern','regex','depth','battle','background'].forEach(function(key) {
     var cls = key === settingsActiveTab ? ' active' : '';
     tabsHtml += '<button class="settings-tab-btn' + cls + '" onclick="switchSettingsTab(\'' + key + '\')" title="' + settingsTabLabels[key] + '">' +
       (settingsTabIcons[key] || '') +
@@ -2534,6 +2564,8 @@ function renderSettingsTab(key) {
     case 'tavern': renderSettingsTavern(body); break;
     case 'regex': renderSettingsRegex(body); break;
     case 'depth': renderSettingsDepth(body); break;
+    case 'battle': BattleBridge.settingsUI(body); break;
+    case 'background': BackgroundSettings.render(body); break;
     case 'discord': renderSettingsDiscord(body); break;
   }
 }
@@ -2543,34 +2575,34 @@ function renderSettingsTab(key) {
 // ==============================
 var PROTOCOL_DEFAULTS = {
   statusBar: {
-    name: '正文开头状态栏协议',
-    desc: '每轮正文最开头注入时间地点状态栏，约束输出的硬性顺序与格式',
+    name: '时空状态栏',
+    desc: '记录场景时空与跨场景跳转，保持正文中的时间地点连续',
     alwaysOn: true,
-    content: '【Mortal 正文状态栏协议】\n本协议由运行时注入，约束每轮正文开头的时间地点状态栏与正文内时间/地点跨越标记，优先级高于正文预设中的任何旧有状态栏或环境描述规则。\n\n⸻ 运行时时空基准\n当前时间：${current_time}\n当前地点：${current_location}\n当前季节：${season}\n当前天气：${weather}\n\n⸻ 一、输出顺序（无例外）\n每轮可见输出第一段必须是唯一的 <ui_sys> 状态栏，位于 <content> 之前且不得出现在 <content> 内部。顺序按场景分派：\n· 普通回合：<ui_sys> → <content> → <branches>\n· 战斗回合：<ui_sys> → <content> → <battle> 或战斗结算块\n· 双修回合：<ui_sys> → <content> → <dual_cultivation>\n<ui_sys> 之前禁止出现任何文字，包括解释、标题、Markdown、思维链、剧情注释或空白行。\n\n⸻ 二、状态栏格式\n直接输出 HTML，禁止用 Markdown 代码块包裹。\n${time_format_rule}\n时间后只允许直接换行 <br>，禁止追加"（十分钟后）""（半炷香后）"等相对时间括号。\n<ui_sys> 只表开场时空，不提前透露本轮结束时的最终时间。\n本轮最终时间：正文内无跨越 → 取开头 <ui_sys>；有跨越 → 取最后一个有效 <scene_checkpoint>。\n\n固定模板：\n<ui_sys><ti>⏳</ti> ${time_format_example}<br><li>📍</li> {Location} · {Specific Spot}<br><we>🌤️</we> {Weather description}<br><ei>👁️</ei> <env>{Environment description}</env><warn>⚠️ 预警：{仅剧情已进入明确危险阶段时显示此行，日常/温馨/NSFW 场景中隐藏}</warn></ui_sys>\n\n⸻ 三、scene_checkpoint 时间地点跨越\n<scene_checkpoint> 仅允许出现在 <content> 内部，是时间地点同步锚点而非装饰分隔线。\n触发条件：新绝对时间 / 跨地点 / 闭关结束 / 入夜天明 / 抵达新场景 / 等待结束。\n属性约束：\n· data-time：必须与 <ui_sys> 使用相同的绝对时间格式（${time_format_example}）\n· data-location：跨越后的当前地点（仅变时间也须重复地点）\n· data-weather：可选，仅天气明确变化时书写\n正文标签：优先非数值标签（"招式初成""抵达坊市""闭关结束"），禁止手写 data-delta 或计算括号。Mortal 按相邻锚点自动附加"X分钟后""X日后"等耗时。\n若标签中出现相对时长（"十五分钟后"等），必须等于从上一锚点（<ui_sys> 或上一 <scene_checkpoint>）到当前的总耗时；不确定时改写为非数值标签。\n多段耗时须各自输出独立 checkpoint。例如 08:20 开场，08:35 修炼结束，08:50 飞行抵达，必须先输出 08:35 checkpoint 再输出 08:50 checkpoint，不可省略中间锚点。\n以下不算时间锚点：<div class="mortal-prose-break">（仅视觉转场）、<cultivation_card>、段落内"三日后"等散落文字。最终时空取最后一个有效 checkpoint。\n\n模板：\n<scene_checkpoint data-time="${time_format_example}" data-location="{Location} · {Specific Spot}" data-weather="{Weather description}">抵达坊市</scene_checkpoint>'
+    content: '【Mortal 时空状态栏规则】\n本规则由运行时注入，约束每轮正文开头的时间地点状态栏与正文内时间/地点跨越标记，优先级高于正文预设中的任何旧有状态栏或环境描述规则。\n\n⸻ 运行时时空基准\n当前时间：${current_time}\n当前地点：${current_location}\n当前季节：${season}\n当前天气：${weather}\n当前空间层级：${space_layer}\n当前时间线：${timeline}\n\n信息边界：状态栏只显示当前视角能够确认的时空与环境事实；隐匿强者、未发现势力、远处战斗和未证实传闻不得提前显示。\n\n⸻ 一、状态栏出现条件与顺序\n场景开始、时间地点变化、空间层级变化或重要状态变化时，输出唯一的 <ui_sys> 状态栏；同一场景的短回应可沿用已知状态，不重复完整状态栏。若本轮输出状态栏，它必须位于 <content> 之前且不得出现在 <content> 内部。顺序按场景分派：\n· 普通回合：<ui_sys> → <content> → <branches>\n· 战斗回合：<ui_sys> → <content> → <battle> 或战斗结算块\n· 双修回合：<ui_sys> → <content> → <dual_cultivation>\n<ui_sys> 之前禁止出现任何文字，包括解释、标题、Markdown、思维链、剧情注释或空白行。\n\n⸻ 二、状态栏格式\n直接输出 HTML，禁止用 Markdown 代码块包裹。\n${time_format_rule}\n时间后只允许直接换行 <br>，禁止追加"（十分钟后）""（半炷香后）"等相对时间括号。\n<ui_sys> 只表开场时空，不提前透露本轮结束时的最终时间。\n本轮最终时间：正文内无跨越 → 取开头 <ui_sys>；有跨越 → 取最后一个有效 <scene_checkpoint>。\n\n固定模板：\n<ui_sys><ti>⏳</ti> ${time_format_example}<br><li>📍</li> {Location} · {Specific Spot}<br><sl>🌀</sl> {Space layer}<br><tl>🧭</tl> {Timeline}<br><we>🌤️</we> {Weather description}<br><ei>👁️</ei> <env>{Environment description}</env><warn>⚠️ 预警：{仅剧情已进入明确危险阶段时显示此行，日常/温馨/NSFW 场景中隐藏}</warn></ui_sys>\n\n⸻ 三、scene_checkpoint 时间地点跨越\n<scene_checkpoint> 仅允许出现在 <content> 内部，是时间地点同步锚点而非装饰分隔线。\n触发条件：新绝对时间 / 跨地点 / 闭关结束 / 入夜天明 / 抵达新场景 / 等待结束。\n属性约束：\n· data-time：必须与 <ui_sys> 使用相同的绝对时间格式（${time_format_example}）\n· data-location：跨越后的当前地点（仅变时间也须重复地点）\n· data-weather：可选，仅天气明确变化时书写\n正文标签：优先非数值标签（"招式初成""抵达坊市""闭关结束"），禁止手写 data-delta 或计算括号。Mortal 按相邻锚点自动附加"X分钟后""X日后"等耗时。\n若标签中出现相对时长（"十五分钟后"等），必须等于从上一锚点（<ui_sys> 或上一 <scene_checkpoint>）到当前的总耗时；不确定时改写为非数值标签。\n多段耗时须各自输出独立 checkpoint。例如 08:20 开场，08:35 修炼结束，08:50 飞行抵达，必须先输出 08:35 checkpoint 再输出 08:50 checkpoint，不可省略中间锚点。\n以下不算时间锚点：<div class="mortal-prose-break">（仅视觉转场）、<cultivation_card>、段落内"三日后"等散落文字。最终时空取最后一个有效 checkpoint。\n\n模板：\n<scene_checkpoint data-time="${time_format_example}" data-location="{Location} · {Specific Spot}" data-weather="{Weather description}">抵达坊市</scene_checkpoint>'
   },
   semantic: {
-    name: '灵动正文语义渲染协议',
-    desc: 'AI 回复中的叙述性文字自动适配斗破苍穹世界观风格',
+    name: '灵动正文呈现',
+    desc: '让叙述中的人物、功法、斗技与重要名物保持清晰呈现',
     alwaysOn: false,
-    content: '## 灵动正文·语义渲染版\n\n直接在正文中输出可渲染 HTML。禁止用 Markdown 代码块包裹。\n\n本条目的目标不是给文字随意上色，而是用少量语义 HTML 帮前端识别正文结构；最终颜色、纹理、昼夜模式、字体层级全部由前端 `.mortal-prose-*` 样式控制。\n\n若外层格式要求正文包在 `<content>...</content>` 内，本条仍然生效：所有语义 HTML 都写在 `<content>` 内。`<branches>`、`<battle>`、`<dual_cultivation>`、状态栏 `<ui_sys>` 和修炼结算占位符 `<cultivation_card>` 不使用灵动正文语义标签。\n\n### 总体审美\n- 风格必须清雅、克制、沉浸，有玉简批注、竹简留痕、卷轴正文之感。\n- 不要锐利、黑暗、戏剧化、霓虹、重阴影、强闪光。\n- 普通叙事仍以自然段为主，不要把每句话都包装成视觉块。\n- 语义标签服务叙事节奏，不服务炫技。\n\n### 角色与说话人锁定规则\n这是最高优先级规则，用于防止玩家台词被 NPC 抢走。\n- `B1` 固定代表玩家角色/user/第二人称"你"，不是 NPC。\n- `C1`、`C2`、`C13` 等 `C*` 固定代表 NPC。\n- `<user>` 输入、玩家选择、玩家行动、玩家台词、B1 发言，全部归属于 B1/"你"。\n- 不得把 B1/user 的台词、动作、心理改写成任何 NPC 的行为。\n- 模型不得为了满足 NPC 对话块规则，把玩家发言改派给 NPC。\n- NPC 台词规则只适用于 `C*` 或明确为 NPC 的角色，不适用于 B1/user。\n- 如果玩家台词需要写入正文，默认使用普通段落：`<p>你低声道："我好饿。"</p>`。\n- 一旦原始输入已指定说话者 ID，输出时必须保留说话归属；可以润色语气，但不得更换说话人。\n- `data-character-id` 必须与说话人一致：B1 的话不能写 `data-character-id="C1"`，C1 的话不能写 `data-character-id="B1"`。\n\n### 强制生效规则\n- 本条启用后，长正文不能全篇只有普通 `<p>`。\n- 正文超过 600 字时，至少输出 3 个 `mortal-prose-*` 语义钩子；正文超过 1500 字时，至少输出 5 个。\n- 凡是 NPC 直接台词（中文引号中的 NPC 发言）都必须使用 `<blockquote class="mortal-prose-dialogue-block" data-speaker="某称呼" data-tone="calm"><p>"……"</p></blockquote>` 独立成块。\n- `mortal-prose-dialogue` 仅用于非完整台词的小型语义片段。\n- 玩家角色/第二人称"你"的动作、台词、心理不要专门加样式。\n- 玩家台词不得被转写为 NPC 台词。\n- 出现时间、地点、回忆、气氛换段等转场时，必须用 `<div class="mortal-prose-break" data-kind="time">...</div>`、`data-kind="place"` 或 `data-kind="breath"`，不要裸写装饰分隔行。\n- 重要地点、宗门、境界、功法、法器、预兆首次或关键出现时，至少选择 1-3 处使用 `mortal-prose-term`。\n- NPC 的心声、克制情绪、异常直觉、玉简式批注，用 `mortal-prose-thought` 或 `mortal-prose-aside`。\n- 每轮回复只允许一个 `<content>...</content>` 正文外壳。\n- `<cultivation_card>` 是独立运行时组件；若判定本轮适用必须按该协议原样输出。\n- 角色释放功法/斗技/神通时，关键技能名用 `<span class="mortal-prose-term" data-kind="spell">斗技名</span>` 或 `data-kind="skill"`。\n- 技能发动、禁制响应、斗气共振、判定成功等瞬间，可少量使用 `<div class="mortal-prose-focus" data-kind="spell">斗技名</div>` 或 `data-kind="omen"`（每轮最多 0-2 次）。\n- 古篆、碑文、玉简口诀等可读线索，优先使用 `<section class="mortal-prose-block" data-kind="jade"><p>……</p></section>`。\n- 获得、确认、鉴定关键物品/功法/线索时，可输出札记：`<aside class="mortal-prose-aside" data-kind="scroll"><p><span class="mortal-prose-term" data-kind="item">物品名</span>：关键信息。</p></aside>`（每轮最多 1-2 个）。\n\n### 绝对禁止\n- 禁止输出任何 inline style，例如 `style="color:red"`。\n- 禁止输出 `<style>`、`<script>`、事件属性、复杂表格、SVG、canvas。\n- 禁止写颜色、背景、阴影、边框、字号等 CSS。\n- 禁止为了装饰而包裹 user 的行动、对话、心理。\n- 禁止把 B1/user 的发言转移给 C1、C2、C13 或任何 NPC。\n- 禁止为满足 NPC 台词格式而伪造 NPC 发言。\n- NPC 人名本身不要加样式；称呼、身份、地点、法器、功法、境界可以按规则使用语义标签。\n- 不要改写、替换或包裹状态栏、推进选项、战斗标签、双修触发标签、修炼结算占位符。\n\n### 可用语义 HTML\n1. 普通正文：`<p>正文</p>`\n2. NPC 对话块：`<blockquote class="mortal-prose-dialogue-block" data-speaker="称呼" data-tone="calm"><p>"台词"</p></blockquote>`\n3. 玩家台词默认：`<p>你低声道："台词"</p>`\n4. 内联心声：`<span class="mortal-prose-thought" data-tone="observe">（……）</span>`\n5. 关键名物：`<span class="mortal-prose-term" data-kind="item">名物</span>` — data-kind: item/place/spell/skill/realm/omen/sect\n6. 技能名：`<span class="mortal-prose-term" data-kind="spell">斗技名</span>`\n7. 焦点停顿：`<div class="mortal-prose-focus" data-kind="omen">……</div>`（每轮 0-2 次）\n8. 场景块：`<section class="mortal-prose-block" data-kind="scene/jade/bamboo"><p>……</p></section>`\n9. 卷轴批注：`<aside class="mortal-prose-aside" data-kind="scroll/seal"><p>……</p></aside>`\n10. 转场：`<div class="mortal-prose-break" data-kind="time/place/breath">……</div>`\n\n### data-tone 建议\ncalm/warm/wary/austere/mist/omen/spirit/injury\n\n### 输出示例\n<content>\n<section class="mortal-prose-block" data-kind="scene"><p>雾气贴着山路缓缓流动，远处竹叶上的水珠被晨光压成一线淡金。</p></section>\n<p>你沿着石阶往上，指尖掠过一截湿冷的青苔，忽然察觉袖中那枚 <span class="mortal-prose-term" data-kind="item">残玉符</span> 微微一热。老药农抬手一引，<span class="mortal-prose-term" data-kind="spell">青木回春诀</span> 的灵光在指间一闪而过。</p>\n<section class="mortal-prose-block" data-kind="jade"><p>石壁上浮出一行古篆：水不惊蝉，蝉自渡渊。</p></section>\n<aside class="mortal-prose-aside" data-kind="scroll"><p><span class="mortal-prose-term" data-kind="item">残玉符</span>：符中残留一缕木属性斗气余韵，似可引开山雾。</p></aside>\n<div class="mortal-prose-focus" data-kind="omen">禁制认出了这枚残符</div>\n<blockquote class="mortal-prose-dialogue-block" data-speaker="老药农" data-tone="wary"><p>"这条路不好走，若真要进山，先把风向看清。"</p></blockquote>\n<aside class="mortal-prose-thought" data-tone="observe"><p>这股灵气来得太细，似有人在远处拨动了一根弦。</p></aside>\n<div class="mortal-prose-break" data-kind="place">竹林深处</div>\n</content>\n\n### 输出前自检\n- 历史正文若呈纯文本只代表为节省 token 已剥离 HTML；本轮仍必须重新生成 `<content>` 与 `mortal-prose-*` 语义标签。\n- 若正文超过 600/1500 字，语义钩子数量必须达标。\n- 若出现 NPC 完整直接台词，每一句都必须使用 `mortal-prose-dialogue-block`。\n- 若出现 B1/user/玩家台词，必须核对其仍归属于玩家/"你"，不得写成任何 `C*` 或 NPC 发言。\n\n### 对话头像语义扩展\n- `mortal-prose-dialogue-block` 可额外写入 `data-character-id="角色ID"`，用于前端匹配当前存档角色头像。\n- 只有能明确确认台词说话者对应存档角色时才写 `data-character-id`；不确定时只保留 `data-speaker`，禁止编造 ID。\n- `data-speaker` 继续写读者可见称呼或身份，`data-character-id` 只写内部角色 ID。\n- `data-character-id` 必须与说话人一致，B1 的话不能写 `data-character-id="C1"`，C1 的话不能写 `data-character-id="B1"`。\n- 玩家 B1 的台词默认不使用 NPC 对话块；如确需头像渲染，必须使用 `data-character-id="B1"` 且 `data-speaker="你"`。\n- 有明确角色 ID 的 NPC 台词推荐模板：`<blockquote class="mortal-prose-dialogue-block" data-character-id="C1" data-speaker="老药农" data-tone="wary"><p>"这条路不好走，若真要进山，先把风向看清。"</p></blockquote>`。'
+    content: '## 灵动正文·语义渲染版\n\n直接在正文中输出可渲染 HTML。禁止用 Markdown 代码块包裹。\n\n本条目的目标不是给文字随意上色，而是用少量语义 HTML 帮前端识别正文结构；最终颜色、纹理、昼夜模式、字体层级全部由前端 `.mortal-prose-*` 样式控制。\n\n若外层格式要求正文包在 `<content>...</content>` 内，本条仍然生效：所有语义 HTML 都写在 `<content>` 内。`<branches>`、`<battle>`、`<dual_cultivation>`、状态栏 `<ui_sys>` 和修炼结算占位符 `<cultivation_card>` 不使用灵动正文语义标签。\n\n### 总体审美\n- 风格必须清雅、克制、沉浸，有玉简批注、竹简留痕、卷轴正文之感。\n- 不要锐利、黑暗、戏剧化、霓虹、重阴影、强闪光。\n- 普通叙事仍以自然段为主，不要把每句话都包装成视觉块。\n- 语义标签服务叙事节奏，不服务炫技。\n\n### 角色与说话人锁定规则\n这是最高优先级规则，用于防止玩家台词被 NPC 抢走。\n- B1 是旧存档中的玩家实体 ID；新角色优先使用当前存档登记的玩家实体 ID。\n- C1、C2、C13 等 C* 仅是旧存档 NPC ID，不能据此猜测身份。\n- 语义标签只负责呈现，不负责新增世界事实、改变人物关系或授予未被正文确认的功法、斗技、异火。\n- `<user>` 输入、玩家选择、玩家行动、玩家台词、B1 发言，全部归属于 B1/"你"。\n- 不得把 B1/user 的台词、动作、心理改写成任何 NPC 的行为。\n- 模型不得为了满足 NPC 对话块规则，把玩家发言改派给 NPC。\n- NPC 台词规则只适用于 `C*` 或明确为 NPC 的角色，不适用于 B1/user。\n- 如果玩家台词需要写入正文，默认使用普通段落：`<p>你低声道："我好饿。"</p>`。\n- 一旦原始输入已指定说话者 ID，输出时必须保留说话归属；可以润色语气，但不得更换说话人。\n- `data-character-id` 必须与说话人一致：B1 的话不能写 `data-character-id="C1"`，C1 的话不能写 `data-character-id="B1"`。\n\n### 强制生效规则\n- 本条启用后，正文可以保留普通段落；仅在转场、完整台词、关键名物或需要强调的瞬间使用语义钩子。\n- 不按字数硬性凑标签数量，避免格式挤压叙事和增加无效 Token。\n- 凡是 NPC 直接台词（中文引号中的 NPC 发言）都必须使用 `<blockquote class="mortal-prose-dialogue-block" data-speaker="某称呼" data-tone="calm"><p>"……"</p></blockquote>` 独立成块。\n- `mortal-prose-dialogue` 仅用于非完整台词的小型语义片段。\n- 玩家角色/第二人称"你"的动作、台词、心理不要专门加样式。\n- 玩家台词不得被转写为 NPC 台词。\n- 出现时间、地点、回忆、气氛换段等转场时，必须用 `<div class="mortal-prose-break" data-kind="time">...</div>`、`data-kind="place"` 或 `data-kind="breath"`，不要裸写装饰分隔行。\n- 重要地点、宗门、境界、功法、法器、预兆首次或关键出现时，至少选择 1-3 处使用 `mortal-prose-term`。\n- NPC 的心声、克制情绪、异常直觉、玉简式批注，用 `mortal-prose-thought` 或 `mortal-prose-aside`。\n- 每轮回复只允许一个 `<content>...</content>` 正文外壳。\n- `<cultivation_card>` 是独立运行时组件；若判定本轮适用必须按该规则原样输出。\n- 角色释放功法/斗技/神通时，关键技能名用 `<span class="mortal-prose-term" data-kind="spell">斗技名</span>` 或 `data-kind="skill"`。\n- 技能发动、禁制响应、斗气共振、判定成功等瞬间，可少量使用 `<div class="mortal-prose-focus" data-kind="spell">斗技名</div>` 或 `data-kind="omen"`（每轮最多 0-2 次）。\n- 古篆、碑文、玉简口诀等可读线索，优先使用 `<section class="mortal-prose-block" data-kind="jade"><p>……</p></section>`。\n- 获得、确认、鉴定关键物品/功法/线索时，可输出札记：`<aside class="mortal-prose-aside" data-kind="scroll"><p><span class="mortal-prose-term" data-kind="item">物品名</span>：关键信息。</p></aside>`（每轮最多 1-2 个）。\n\n### 绝对禁止\n- 禁止输出任何 inline style，例如 `style="color:red"`。\n- 禁止输出 `<style>`、`<script>`、事件属性、复杂表格、SVG、canvas。\n- 禁止写颜色、背景、阴影、边框、字号等 CSS。\n- 禁止为了装饰而包裹 user 的行动、对话、心理。\n- 禁止把 B1/user 的发言转移给 C1、C2、C13 或任何 NPC。\n- 禁止为满足 NPC 台词格式而伪造 NPC 发言。\n- NPC 人名本身不要加样式；称呼、身份、地点、法器、功法、境界可以按规则使用语义标签。\n- 不要改写、替换或包裹状态栏、推进选项、战斗标签、双修触发标签、修炼结算占位符。\n\n### 可用语义 HTML\n1. 普通正文：`<p>正文</p>`\n2. NPC 对话块：`<blockquote class="mortal-prose-dialogue-block" data-speaker="称呼" data-tone="calm"><p>"台词"</p></blockquote>`\n3. 玩家台词默认：`<p>你低声道："台词"</p>`\n4. 内联心声：`<span class="mortal-prose-thought" data-tone="observe">（……）</span>`\n5. 关键名物：`<span class="mortal-prose-term" data-kind="item">名物</span>` — data-kind: item/place/spell/skill/realm/omen/sect\n6. 技能名：`<span class="mortal-prose-term" data-kind="spell">斗技名</span>`\n7. 焦点停顿：`<div class="mortal-prose-focus" data-kind="omen">……</div>`（每轮 0-2 次）\n8. 场景块：`<section class="mortal-prose-block" data-kind="scene/jade/bamboo"><p>……</p></section>`\n9. 卷轴批注：`<aside class="mortal-prose-aside" data-kind="scroll/seal"><p>……</p></aside>`\n10. 转场：`<div class="mortal-prose-break" data-kind="time/place/breath">……</div>`\n\n### data-tone 建议\ncalm/warm/wary/austere/mist/omen/spirit/injury\n\n### 输出示例\n<content>\n<section class="mortal-prose-block" data-kind="scene"><p>雾气贴着山路缓缓流动，远处竹叶上的水珠被晨光压成一线淡金。</p></section>\n<p>你沿着石阶往上，指尖掠过一截湿冷的青苔，忽然察觉袖中那枚 <span class="mortal-prose-term" data-kind="item">残玉符</span> 微微一热。老药农抬手一引，<span class="mortal-prose-term" data-kind="spell">青木回春诀</span> 的灵光在指间一闪而过。</p>\n<section class="mortal-prose-block" data-kind="jade"><p>石壁上浮出一行古篆：水不惊蝉，蝉自渡渊。</p></section>\n<aside class="mortal-prose-aside" data-kind="scroll"><p><span class="mortal-prose-term" data-kind="item">残玉符</span>：符中残留一缕木属性斗气余韵，似可引开山雾。</p></aside>\n<div class="mortal-prose-focus" data-kind="omen">禁制认出了这枚残符</div>\n<blockquote class="mortal-prose-dialogue-block" data-speaker="老药农" data-tone="wary"><p>"这条路不好走，若真要进山，先把风向看清。"</p></blockquote>\n<aside class="mortal-prose-thought" data-tone="observe"><p>这股灵气来得太细，似有人在远处拨动了一根弦。</p></aside>\n<div class="mortal-prose-break" data-kind="place">竹林深处</div>\n</content>\n\n### 输出前自检\n- 历史正文若呈纯文本只代表为节省 token 已剥离 HTML；本轮仍必须重新生成 `<content>` 与 `mortal-prose-*` 语义标签。\n- 只在转场、完整台词、关键名物或需要强调的瞬间使用语义钩子，不为凑数量增加标签。\n- 若出现 NPC 完整直接台词，每一句都必须使用 `mortal-prose-dialogue-block`。\n- 若出现 B1/user/玩家台词，必须核对其仍归属于玩家/"你"，不得写成任何 `C*` 或 NPC 发言。\n\n### 对话头像语义扩展\n- `mortal-prose-dialogue-block` 可额外写入 `data-character-id="角色ID"`，用于前端匹配当前存档角色头像。\n- 只有能明确确认台词说话者对应存档角色时才写 `data-character-id`；不确定时只保留 `data-speaker`，禁止编造 ID。\n- `data-speaker` 继续写读者可见称呼或身份，`data-character-id` 只写内部角色 ID。\n- `data-character-id` 必须与说话人一致，B1 的话不能写 `data-character-id="C1"`，C1 的话不能写 `data-character-id="B1"`。\n- 玩家 B1 的台词默认不使用 NPC 对话块；如确需头像渲染，必须使用 `data-character-id="B1"` 且 `data-speaker="你"`。\n- 有明确角色 ID 的 NPC 台词推荐模板：`<blockquote class="mortal-prose-dialogue-block" data-character-id="C1" data-speaker="老药农" data-tone="wary"><p>"这条路不好走，若真要进山，先把风向看清。"</p></blockquote>`。'
   },
   settlement: {
-    name: '修为结算卡协议',
-    desc: '每次修炼/战斗/事件结束后，以卡片格式结算修为变化',
+    name: '修为成长记录',
+    desc: '记录修炼、炼化、突破与跌境造成的修为变化',
     alwaysOn: false,
-    content: '【Mortal 修炼结算显示协议】\n以下规则由 Mortal 运行时注入，只约束主聊天正文里的修炼/炼化/突破可见结算卡。它高于正文预设中关于修炼结算块位置与旧 HTML 模板的描述。\n\n双修接管例外：若本轮触发手动双修面板并输出 <dual_cultivation ...></dual_cultivation>，主聊天不得输出 <cultivation_card>；双修过程与修为结算由双修面板接管。\n适用条件：仅当本轮真实发生 <user>/B1 的修为百分比变化、运行时注入的任务/战斗修为奖励落地、修为资源炼化、境界突破或跌境时输出结算卡；无修为变化时不要输出结算卡。\n强制目标限制：修为卡只允许用于 <user>/B1 的修为进度、突破或跌境结算。其他所有角色（NPC、手下、同伴、魔兽、临时角色等）的修为变化一律不得生成 <cultivation_card>，只能写入正文描述、状态栏或 <state> 指令。\n摆放位置：<ui_sys> 仍必须是最终可见输出第一段。结算卡不再固定放在正文开头；应在 <content> 内输出 <cultivation_card>...</cultivation_card> 占位符，贴近实际修炼/炼化/突破发生的位置，通常置于触发段落之后、结果承接段落之前。若本轮开场时修炼结算已经完成，后文只是承接结果，才可放在 <ui_sys> 之后、<content> 之前。\n叙事承接：占位符只写关键字段和一句短批注；详细体感、斗气威压变化、环境反馈必须在相邻正文段落里自然承接，不要塞进 note。\n关键字段语义：同境界进展可使用 realm + old/new；只要本轮发生小境界变化、连续突破或跌境，必须使用 fromRealm/old + toRealm/new。fromRealm/old 是结算前状态，toRealm/new 是本卡结算完成后 B1 应写入存档的最终境界与最终进度。\n境界字段约束：斗者至斗王阶段使用具体星级（斗者一星、斗师三星、大斗师五星、斗灵七星、斗王九星等）；不得使用初期/中期/后期或模糊表述。斗皇及以上可使用初期/中期/后期/巅峰（斗皇初期、斗宗中期、斗尊后期、斗圣巅峰等）。\n\n输出限制：不要输出结算卡 HTML，不要写 Markdown 代码块，不要输出 mortal-cultivation-* class。只输出单行 JSON 占位符；前端会解析字段并自动渲染固定 HTML 卡片。\n\n同境界修炼/炼化/双修进展固定格式：\n<cultivation_card>{"type":"progress","time":"{耗时}","efficiency":"{效率}","realm":"{当前境界}","old":{旧进度},"new":{新进度},"gain":{提升},"bottleneck":{距瓶颈},"note":"{短批注}"}</cultivation_card>\n\n跨境界/连续突破/跌境进展固定格式：\n<cultivation_card>{"type":"progress","time":"{耗时}","efficiency":"{效率}","fromRealm":"{结算前境界}","old":{结算前进度},"toRealm":"{结算后最终境界}","new":{结算后最终进度},"gain":{提升},"bottleneck":{距最终境界瓶颈},"note":"{短批注}"}</cultivation_card>\n\n突破判定固定格式：\n<cultivation_card>{"type":"breakthrough","from":"{原境界}","to":"{目标境界}","foundation":{积淀},"heartDemon":"{心魔}","material":"{辅材}","result":"{结果}","note":"{短批注}"}</cultivation_card>'
+    content: '【Mortal 修为成长记录】\n以下规则由 Mortal 运行时注入，只约束主聊天正文里的修炼/炼化/突破可见结算卡。它高于正文预设中关于修炼结算块位置与旧 HTML 模板的描述。\n\n双修接管例外：若本轮触发手动双修面板并输出 <dual_cultivation ...></dual_cultivation>，主聊天不得输出 <cultivation_card>；双修过程与修为结算由双修面板接管。\n适用条件：仅当本轮真实发生 <user>/B1 的斗气境界、星级、修炼进展、资源炼化、突破或跌境变化时输出结算卡；百分比只能作为界面显示估计，不能替代斗破世界观中的境界与瓶颈判定；无修为变化时不要输出结算卡。\n强制目标限制：修为卡只允许用于 <user>/B1 的修为进度、突破或跌境结算。其他所有角色（NPC、手下、同伴、魔兽、临时角色等）的修为变化一律不得生成 <cultivation_card>，只能写入正文描述、状态栏或 <state> 指令。\n摆放位置：<ui_sys> 仍必须是最终可见输出第一段。结算卡不再固定放在正文开头；应在 <content> 内输出 <cultivation_card>...</cultivation_card> 占位符，贴近实际修炼/炼化/突破发生的位置，通常置于触发段落之后、结果承接段落之前。若本轮开场时修炼结算已经完成，后文只是承接结果，才可放在 <ui_sys> 之后、<content> 之前。\n叙事承接：占位符只写关键字段和一句短批注；详细体感、斗气威压变化、环境反馈必须在相邻正文段落里自然承接，不要塞进 note。\n关键字段语义：同境界进展可使用 realm + old/new；只要本轮发生小境界变化、连续突破或跌境，必须使用 fromRealm/old + toRealm/new。fromRealm/old 是结算前状态，toRealm/new 是本卡结算完成后 B1 应写入存档的最终境界与最终进度。\n境界字段约束：斗者至斗王阶段使用具体星级（斗者一星、斗师三星、大斗师五星、斗灵七星、斗王九星等）；不得使用初期/中期/后期或模糊表述。斗皇及以上可使用初期/中期/后期/巅峰（斗皇初期、斗宗中期、斗尊后期、斗圣巅峰等）。\n\n状态变化记录：结算卡只负责显示，实际写回必须由运行时验证。每次变化应尽量关联 changeType、before、after、cause、evidence、sourceMessageId、reversible 和 writeBackTarget；没有正文证据时不得授予境界、功法、斗技、异火或血脉能力。\n\n输出限制：不要输出结算卡 HTML，不要写 Markdown 代码块，不要输出 mortal-cultivation-* class。只输出单行 JSON 占位符；前端会解析字段并自动渲染固定 HTML 卡片。\n\n同境界修炼/炼化/双修进展固定格式：\n<cultivation_card>{"type":"progress","time":"{耗时}","efficiency":"{效率}","realm":"{当前境界}","old":{旧进度},"new":{新进度},"gain":{提升},"bottleneck":{距瓶颈},"note":"{短批注}"}</cultivation_card>\n\n跨境界/连续突破/跌境进展固定格式：\n<cultivation_card>{"type":"progress","time":"{耗时}","efficiency":"{效率}","fromRealm":"{结算前境界}","old":{结算前进度},"toRealm":"{结算后最终境界}","new":{结算后最终进度},"gain":{提升},"bottleneck":{距最终境界瓶颈},"note":"{短批注}"}</cultivation_card>\n\n突破判定固定格式：\n<cultivation_card>{"type":"breakthrough","from":"{原境界}","to":"{目标境界}","foundation":{积淀},"heartDemon":"{心魔}","material":"{辅材}","result":"{结果}","note":"{短批注}"}</cultivation_card>'
   },
   battleTrigger: {
-    name: '战斗模式触发协议',
+    name: '战斗进入判定',
     desc: '检测到战斗意图时自动切换为回合制战斗模式',
     alwaysOn: false,
-    content: '【Mortal 战斗模式触发协议】\n以下规则由 Mortal 运行时注入，仅在战斗模式开启时约束主聊天如何触发手动战斗。它高于正文预设中关于战斗触发、战斗结尾、<battle> 标签或战斗推演的旧描述；若内置主聊天预设含有自己的战斗判定，也必须按本协议的三锁口径执行。\n\n# [战斗模式触发]\n**核心原则：战斗进入手动推演；你只负责判断是否触发并输出 <battle></battle> 标签。严禁输出任何战斗结果或伤害结算。**\n\n## 触发条件：三锁同时成立，但锁的判定按"卷入战斗"而非"已经打完前一招"理解\n\n**锁一 · 玩家卷入锁**\n<user> 已被卷入战斗冲突：主动攻击/封印/镇压/偷袭/搜魂/追杀/切磋/对战练习；救援、解围、支援正在战斗的角色；拦截、阻挡、阻止正在攻击的敌人；冲入或实际介入已有战斗场景；明确约战、示意对方出手、要求对练。若 NPC 已经攻击、追杀、拦截或强行逼战 <user>，也视为 <user> 已被卷入，不要求 <user> 先出手。\n以下情况不成立：只是远处观望、单纯威慑或口头挑衅、询问、谈判、撤退、隐藏等待、尚在决策，且没有攻击临近、救援/拦截/介入动作，也没有明确约战或逼战。\n\n**锁二 · 冲突临界锁**\n场景已经到达战斗临界：NPC 攻击 <user>；NPC 迎击、反击、格挡并进入交锋；已有战斗正在发生且 <user> 的救援/解围/拦截会直接撞上敌方攻击；NPC 接受约战/切磋/对练并进入出手前摇；或 <user> 的行动必然/极大概率导致 NPC 立刻以战斗方式回应。这里不要求双方已经完成一次伤害交换，只要下一拍应进入手动战斗推演即可。\n以下情况不成立：双方只是对峙、口头威胁、蓄势未发、观察、退让、撤退、谈判、等待，且用户没有主动把局面推进到战斗、救援、拦截、约战或逼战。\n\n**锁三 · 具名敌方锁**\n战斗面板只接管与具名敌方的交锋：必须能在当前人物、魔兽或妖兽名单中识别出至少一个有效敌方角色 ID。环境、禁制、伤势、毒素、心魔、天劫、阵法、刑具、柱子、封印、突破、破禁、修炼或生存压力本身都不是可进入手动战斗的敌方。\n以下情况不成立：<user> 只是在与环境/禁制/伤势/封印/心魔/天劫/阵法/柱子/刑具搏斗，或只是进行突破、破禁、疗伤、挣脱束缚、承受反噬、生存挣扎，且没有可识别的具名 NPC、敌对魔兽或妖兽正在作为敌方交战。\n\n仅当锁一、锁二与锁三同时成立，且冲突涉及 <user>，才输出 <battle></battle>。NPC之间的战斗不触发；没有有效具名敌方时不得触发。\n\n## 互斥规则\n- 若三锁未同时成立，继续正常叙事并输出 <branches>，不得提前进入战斗模式。\n\n## 输出位置法则\n- <battle></battle> 必须是正文最后内容。\n- 标签前只写战前临界描写：双方气势、身体蓄势、法力将发未发、环境氛围收紧，或一方攻击彻底触碰另一方前的临界瞬间。\n- 标签后严禁追加任何内容：无叙事、无总结、无选项、无提示。\n- 禁止输出任何战斗过程、招式结果、伤害结算或胜负。\n\n正文结构：\n[剧情正文]\n[战前临界描写：对峙 / 蓄势 / 环境收紧 / 攻击触碰前一瞬]\n\n<battle></battle>\n\n## 判定模板（只在原生 reasoning 中执行，不输出）\n- 锁一：<user> 是否已经被卷入战斗冲突？证据是什么？\n- 锁二：场景是否已经到达战斗临界，或 <user> 的行动是否必然/极大概率引发 NPC 立刻战斗回应？证据是什么？\n- 锁三：当前是否存在至少一个有效具名敌方角色/魔兽/妖兽 ID？若只是环境、禁制、伤势、心魔、柱子、阵法、突破或破禁，必须判定为否。\n- 结论：三锁是否同时成立？若成立，正文以 <battle></battle> 结束；若不成立，正常输出正文与 <branches>。'
+    content: '【Mortal 战斗进入判定】\n以下规则由 Mortal 运行时注入，仅在战斗模式开启时约束主聊天如何触发手动战斗。它高于正文预设中关于战斗触发、战斗结尾、<battle> 标签或战斗推演的旧描述；若内置主聊天预设含有自己的战斗判定，也必须按本规则的三锁口径执行。\n\n# [战斗模式触发]\n**核心原则：战斗进入手动推演；你只负责判断是否触发并输出 <battle></battle> 标签。严禁输出任何战斗结果或伤害结算。**\n\n## 触发条件：三锁同时成立，但锁的判定按"卷入战斗"而非"已经打完前一招"理解\n\n**锁一 · 玩家卷入锁**\n<user> 已被卷入战斗冲突：主动攻击/封印/镇压/偷袭/搜魂/追杀/切磋/对战练习；救援、解围、支援正在战斗的角色；拦截、阻挡、阻止正在攻击的敌人；冲入或实际介入已有战斗场景；明确约战、示意对方出手、要求对练。若 NPC 已经攻击、追杀、拦截或强行逼战 <user>，也视为 <user> 已被卷入，不要求 <user> 先出手。\n以下情况不成立：只是远处观望、单纯威慑或口头挑衅、询问、谈判、撤退、隐藏等待、尚在决策，且没有攻击临近、救援/拦截/介入动作，也没有明确约战或逼战。\n\n**锁二 · 冲突临界锁**\n场景已经到达战斗临界：NPC 攻击 <user>；NPC 迎击、反击、格挡并进入交锋；已有战斗正在发生且 <user> 的救援/解围/拦截会直接撞上敌方攻击；NPC 接受约战/切磋/对练并进入出手前摇；或 <user> 的行动必然/极大概率导致 NPC 立刻以战斗方式回应。这里不要求双方已经完成一次伤害交换，只要下一拍应进入手动战斗推演即可。\n以下情况不成立：双方只是对峙、口头威胁、蓄势未发、观察、退让、撤退、谈判、等待，且用户没有主动把局面推进到战斗、救援、拦截、约战或逼战。\n\n**锁三 · 具名敌方锁**\n战斗面板只接管与具名敌方的交锋：必须能在当前人物、魔兽或妖兽名单中识别出至少一个有效敌方角色 ID。环境、禁制、伤势、毒素、心魔、天劫、阵法、刑具、柱子、封印、突破、破禁、修炼或生存压力本身都不是可进入手动战斗的敌方。\n以下情况不成立：<user> 只是在与环境/禁制/伤势/封印/心魔/天劫/阵法/柱子/刑具搏斗，或只是进行突破、破禁、疗伤、挣脱束缚、承受反噬、生存挣扎，且没有可识别的具名 NPC、敌对魔兽或妖兽正在作为敌方交战。\n\n仅当锁一、锁二与锁三同时成立，且冲突涉及 <user>，才输出 <battle></battle>。NPC之间的战斗不触发；没有有效具名敌方时不得触发。\n\n## 互斥规则\n- 若三锁未同时成立，继续正常叙事并输出 <branches>，不得提前进入战斗模式。\n\n## 输出位置法则\n- <battle></battle> 必须是正文最后内容。\n- 标签前只写战前临界描写：双方气势、身体蓄势、法力将发未发、环境氛围收紧，或一方攻击彻底触碰另一方前的临界瞬间。\n- 标签后严禁追加任何内容：无叙事、无总结、无选项、无提示。\n- 禁止输出任何战斗过程、招式结果、伤害结算或胜负。\n\n正文结构：\n[剧情正文]\n[战前临界描写：对峙 / 蓄势 / 环境收紧 / 攻击触碰前一瞬]\n\n<battle></battle>\n\n## 判定模板（只在原生 reasoning 中执行，不输出）\n- 锁一：<user> 是否已经被卷入战斗冲突？证据是什么？\n- 锁二：场景是否已经到达战斗临界，或 <user> 的行动是否必然/极大概率引发 NPC 立刻战斗回应？证据是什么？\n- 锁三：当前是否存在至少一个有效具名敌方角色/魔兽/妖兽 ID？若只是环境、禁制、伤势、心魔、柱子、阵法、突破或破禁，必须判定为否。\n- 结论：三锁是否同时成立？若成立，正文以 <battle></battle> 结束；若不成立，正常输出正文与 <branches>。'
   },
   autoBattle: {
-    name: '自动战斗推演协议',
-    desc: 'AI 自动推演战斗全过程，无需玩家逐回合操作',
+    name: '战斗自动推演',
+    desc: '在本地战斗未接管时，以叙事方式推演战斗结果',
     alwaysOn: false,
-    content: '【Mortal 自动战斗推演协议】\n以下规则由 Mortal 运行时注入，仅在战斗模式关闭时约束主聊天直接完成自动战斗推演。它高于正文预设中关于战斗触发、自动战斗或战斗卡片的旧描述。\n\n# [战斗推演]\n**核心原则：数值是唯一真理，剧情无条件服从数值计算结果，战斗过程和结果忠于数值，绝不为<user>制造任何优势**\n\n战斗模式触发逻辑：\n- NPC攻击, <user>主动战斗(攻击/封印/镇压/偷袭/搜魂/追杀/躲避)\n**最高优先级，必须在生成任何剧情前完成**\n\n重要规则：\n- 禁止锁血、禁止机械降神、禁止主角光环（虚高伤害/虚低承伤）\n- life_anchor_gt_0 = ["重伤", "力竭", "逃遁", "投降"]\n- life_anchor_le_0 = ["死亡", "陨落", "肉身崩毁", "灵魂逃逸"]\n- 当HP≤0时，严禁描写任何形式的存活、反击或同归于尽。\n- 严禁<user>和NPC使用不存在的斗技、功法、异火或物品。\n- 没有人会站着等待<user>技能，即使是再羸弱的对手也会使用防御或闪避斗技来弱化<user>的攻击效果\n- 除非出现大境界压制、受击方重伤、属性克制，否则不许编撰暴击，即使出现暴击也应视情况在1-2之间选取暴击系数，不能擅自夸大伤害\n\n可视化法则\n- 正文必须输出卡片\n- 卡片必须严格在正文战斗位置\n- 必须严格使用 UI_Output_Template 定义的 <xxx> 标签，严禁使用 div/span 或 markdown 代码块包裹。\n\n【固定模板】\n\n<!-- 战斗推演:\n\nStep1_数据罗列: \n- 强制读取并加载 <store> 中 B1(<user>) 及在场 NPC 的`属性`数据，罗列参战角色数据，只罗列，不计算\nCharacter_Block:\n  - Role [Name_1] : \n      · 境界: \n      · status : [HP: ??/??, MP: ??/??, 物攻/物防: ??/??, 法攻/法防: ??/??, 物穿/法穿: ??/??, 脚力: ??, 灵魂力: ??]\n      · 天赋血脉: [血脉/天赋名称及效果]\n      · 功法: [功法名称/效果]\n      · 技能: [技能名称/效果]\n      · Equipment: [武器名称/数值/特殊效果]、[护甲名称/数值/特殊效果]、[法宝名称/数值/特殊效果]\n      · Buffs: [丹药/阵法/状态加成]\n\n  - Role [Name_2]:\n...\n\nStep2 战斗回合:\n- 根据数据进行战斗推演\n- 技能倍率严格依据<万物品阶数值参考表>\n- 伤害计算公式：\nDamage = [(Atk_Base + Atk_Bonus) × 技能倍率] − [(Def_Target + Def_Bonus − Penetration) × 防御技能倍率]\n\nR1: \n{攻击方} 祭出{使用的神通/法宝/符箓}\n  - Math: [执行伤害计算公式]\n  - Status_Update: [扣除消耗] -> [更新受击方剩余HP] \nR2: \n{反击方} 祭出{使用的神通/法宝/符箓}\n  - Math: [执行伤害计算公式]\n  - Status_Update: [扣除消耗] -> [更新受击方剩余HP] \nR3: \n...\n\n-->\n\nUI_Output_Template:\n- 上述推演结束后，必须在正文战斗位置插入以下输出模板 (直接复制使用)\n\n      <card><head><atk>⚔️ {攻击方}</atk><vs>vs</vs><def>{防御方}</def><tog>展开推演</tog></head><main><pan><pa><pha>{攻击方名称}<rem>[{攻击方境界}]</rem></pha><sta><hpr><hp_l>💗 HP</hp_l><hp_v>{A血}/{A血限}</hp_v></hpr><mpr><mp_l>💧 MP</mp_l><mp_v>{A蓝}/{A蓝限}</mp_v></mpr><statl>⚔️ 攻:{A物攻}/{A法攻}</statl><statl>🛡️ 防:{A物防}/{A法防}</statl><stats>👁️{A灵魂力} 🦵{A脚力}</stats><itm>🗡️ {A武器}</itm><itm>🏺 {A宝物}</itm><itm>📖 {A功法}</itm><buf>✨Buff:[{A_Buff列表}]</buf></sta></pa><pb><phb><rem>[{防御方境界}]</rem>{防御方名称}</phb><sta><hpr><hp_v>{B血}/{B血限}</hp_v><hp_l>HP 💗</hp_l></hpr><mpr><mp_v>{B蓝}/{B蓝限}</mp_v><mp_l>MP 💧</mp_l></mpr><statr>攻:{B物攻}/{B法攻} ⚔️</statr><statr>防:{B物防}/{B法防} 🛡️</statr><stats>{B脚力}🦵 {B神识}👁️</stats><itm>{B武器} 🗡️</itm><itm>{B法宝} 🏺</itm><itm>{B功法} 📖</itm><buf>Buff:[{B_Buff列表}]✨</buf></sta></pb></pan><log><lm><gold>[R1]</gold>{攻击方} 祭出<ask>「{使用的神通/法宝技能}」</ask><cst>(耗蓝:{技能耗蓝})</cst></lm><lc>🧮 算式:((攻{A物攻}+加成)×倍率)-(防-穿)</lc><ld>💥<b>命中! -{最终伤害}</b><hprm>(敌余HP:{B当前}/{B最大})</hprm></ld></log><res><winfo><win>🏆 胜者:{胜利方}</win><rnd>(共{X}回合)</rnd></winfo><mvp>🔑 MVP:[{MVP装备/功法/Buff}]</mvp></res></main></card>'
+    content: '【Mortal 战斗自动推演】\n以下规则由 Mortal 运行时注入，仅在战斗模式关闭时约束主聊天直接完成自动战斗推演。它高于正文预设中关于战斗触发、自动战斗或战斗卡片的旧描述。\n\n# [战斗推演]\n**核心原则：本地战斗引擎优先；本规则只在本地战斗未接管时作为叙事回退。战斗结果必须服从已确认的境界、斗气、功法、斗技、异火、灵魂力、伤势、环境与敌我情报，不得为<user>凭空制造优势。**\n\n本地战斗已接管时，禁止模型自行推演回合、伤害、胜负或重复扣除资源；只续写遭遇前后和已确认的战报。回退模式也不得补造不存在的技能、装备、异火或数值。\n\n战斗模式触发逻辑：\n- NPC攻击, <user>主动战斗(攻击/封印/镇压/偷袭/搜魂/追杀/躲避)\n**最高优先级，必须在生成任何剧情前完成**\n\n重要规则：\n- 禁止锁血、禁止机械降神、禁止主角光环（虚高伤害/虚低承伤）\n- life_anchor_gt_0 = ["重伤", "力竭", "逃遁", "投降"]\n- life_anchor_le_0 = ["死亡", "陨落", "肉身崩毁", "灵魂逃逸"]\n- 当HP≤0时，严禁描写任何形式的存活、反击或同归于尽。\n- 严禁<user>和NPC使用不存在的斗技、功法、异火或物品。\n- 没有人会站着等待<user>技能，即使是再羸弱的对手也会使用防御或闪避斗技来弱化<user>的攻击效果\n- 除非出现大境界压制、受击方重伤、属性克制，否则不许编撰暴击，即使出现暴击也应视情况在1-2之间选取暴击系数，不能擅自夸大伤害\n\n可视化法则\n- 正文必须输出卡片\n- 卡片必须严格在正文战斗位置\n- 必须严格使用 UI_Output_Template 定义的 <xxx> 标签，严禁使用 div/span 或 markdown 代码块包裹。\n\n【固定模板】\n\n<!-- 战斗推演:\n\nStep1_数据罗列: \n- 强制读取并加载 <store> 中 B1(<user>) 及在场 NPC 的`属性`数据，罗列参战角色数据，只罗列，不计算\nCharacter_Block:\n  - Role [Name_1] : \n      · 境界: \n      · status : [HP: ??/??, 斗气: ??/??, 斗气攻/斗气防: ??/??, 属性攻/属性防: ??/??, 物穿/法穿: ??/??, 身法: ??, 灵魂力: ??]\n      · 天赋血脉: [血脉/天赋名称及效果]\n      · 功法: [功法名称/效果]\n      · 技能: [技能名称/效果]\n      · Equipment: [武器名称/数值/特殊效果]、[护甲名称/数值/特殊效果]、[法宝名称/数值/特殊效果]\n      · Buffs: [丹药/阵法/状态加成]\n\n  - Role [Name_2]:\n...\n\nStep2 战斗回合:\n- 根据数据进行战斗推演\n- 技能倍率严格依据<万物品阶数值参考表>\n- 伤害计算公式：\nDamage = [(Atk_Base + Atk_Bonus) × 技能倍率] − [(Def_Target + Def_Bonus − Penetration) × 防御技能倍率]\n\nR1: \n{攻击方} 祭出{使用的神通/法宝/符箓}\n  - Math: [执行伤害计算公式]\n  - Status_Update: [扣除消耗] -> [更新受击方剩余HP] \nR2: \n{反击方} 祭出{使用的神通/法宝/符箓}\n  - Math: [执行伤害计算公式]\n  - Status_Update: [扣除消耗] -> [更新受击方剩余HP] \nR3: \n...\n\n-->\n\nUI_Output_Template:\n- 上述推演结束后，必须在正文战斗位置插入以下输出模板 (直接复制使用)\n\n      <card><head><atk>⚔️ {攻击方}</atk><vs>vs</vs><def>{防御方}</def><tog>展开推演</tog></head><main><pan><pa><pha>{攻击方名称}<rem>[{攻击方境界}]</rem></pha><sta><hpr><hp_l>💗 HP</hp_l><hp_v>{A血}/{A血限}</hp_v></hpr><mpr><mp_l>💧 斗气</mp_l><mp_v>{A蓝}/{A蓝限}</mp_v></mpr><statl>⚔️ 攻:{A斗气攻}/{A属性攻}</statl><statl>🛡️ 防:{A斗气防}/{A属性防}</statl><stats>👁️{A灵魂力} 🦵{A身法}</stats><itm>🗡️ {A武器}</itm><itm>🏺 {A宝物}</itm><itm>📖 {A功法}</itm><buf>✨Buff:[{A_Buff列表}]</buf></sta></pa><pb><phb><rem>[{防御方境界}]</rem>{防御方名称}</phb><sta><hpr><hp_v>{B血}/{B血限}</hp_v><hp_l>HP 💗</hp_l></hpr><mpr><mp_v>{B蓝}/{B蓝限}</mp_v><mp_l>斗气 💧</mp_l></mpr><statr>攻:{B斗气攻}/{B属性攻} ⚔️</statr><statr>防:{B斗气防}/{B属性防} 🛡️</statr><stats>{B身法}🦵 {B灵魂感知}👁️</stats><itm>{B武器} 🗡️</itm><itm>{B法宝} 🏺</itm><itm>{B功法} 📖</itm><buf>Buff:[{B_Buff列表}]✨</buf></sta></pb></pan><log><lm><gold>[R1]</gold>{攻击方} 祭出<ask>「{使用的神通/法宝技能}」</ask><cst>(耗气:{技能耗气})</cst></lm><lc>🧮 算式:((攻{A斗气攻}+加成)×倍率)-(防-穿)</lc><ld>💥<b>命中! -{最终伤害}</b><hprm>(敌余HP:{B当前}/{B最大})</hprm></ld></log><res><winfo><win>🏆 胜者:{胜利方}</win><rnd>(共{X}回合)</rnd></winfo><mvp>🔑 MVP:[{MVP装备/功法/Buff}]</mvp></res></main></card>'
   }
 };
 
@@ -2584,12 +2616,17 @@ function getProtocolState(key) {
       content: def.content
     };
   }
+  var existing = GameState.settings.protocols[key];
+  if (existing && !existing.custom && /正文开头状态栏协议|灵动正文语义渲染协议|修为结算卡协议|自动战斗推演协议/.test(existing.content || '')) {
+    existing.content = PROTOCOL_DEFAULTS[key].content;
+  }
   return GameState.settings.protocols[key];
 }
 
 function buildProtocolCards() {
   var html = '';
   Object.keys(PROTOCOL_DEFAULTS).forEach(function(key) {
+    if(key==='battleTrigger')return;
     var def = PROTOCOL_DEFAULTS[key];
     var state = getProtocolState(key);
     var enabled = state.enabled;
@@ -2682,6 +2719,8 @@ function resolveProtocolVariables(text) {
     .replace(/\$\{current_location\}/g, WorldState.location + ' · ' + WorldState.specificSpot)
     .replace(/\$\{season\}/g, getSeason())
     .replace(/\$\{weather\}/g, WorldState.weather)
+    .replace(/\$\{space_layer\}/g, WorldState.spaceLayer || '地表 · 斗气大陆')
+    .replace(/\$\{timeline\}/g, WorldState.timeline || '当前独立时间线')
     .replace(/\$\{time_format_rule\}/g, getTimeFormatRule())
     .replace(/\$\{time_format_example\}/g, getTimeFormatExample());
 }
@@ -2689,6 +2728,7 @@ function resolveProtocolVariables(text) {
 function buildProtocolSystemPrompt() {
   var parts = [];
   Object.keys(PROTOCOL_DEFAULTS).forEach(function(key) {
+    if(key==='battleTrigger'||key==='autoBattle'&&typeof BattleCore!=='undefined'&&BattleCore.settings(GameState.settings.battle).enabled)return;
     var state = getProtocolState(key);
     if (state.enabled && state.content) {
       parts.push(resolveProtocolVariables(state.content));
@@ -3216,21 +3256,23 @@ function closeAllModals() {
 function saveToLocalStorage() {
   try {
     var stamp = Date.now(), ts = tavernState && tavernState.tavernSettings;
-    GameState.settings.playerSavedAt = stamp;
+    var nextSettings=TavernCore.clone(GameState.settings),nextTavern=ts?TavernCore.clone(ts):null;
+    nextSettings.playerSavedAt = stamp;
     if (ts) {
-      ts.playerState = TavernCore.clone(GameState.player); ts.playerStateAt = stamp;
-      GameState.settings.pureTextMode = !!ts.pureTextMode;
-      GameState.settings.customTags = ts.customTags || ['maintext','option','sum','vars','thinking','think'];
-      GameState.settings.activeSecondaryApi = ts.activeSecondaryApi || '';
-      GameState.settings.tavernCharacterName = ts.characterName || '';
-      GameState.settings.tavernUserName = ts.userName || '玩家';
-      GameState.settings.tavernActivePresetId = ts.activePresetId || '';
-      GameState.settings.tavernActiveLorebookIds = ts.activeLorebookIds || [];
+      nextTavern.playerState = TavernCore.clone(GameState.player); nextTavern.playerStateAt = stamp;nextTavern.openWorldState=TavernCore.clone(GameState.openWorldState||{});
+      nextSettings.pureTextMode = !!ts.pureTextMode;
+      nextSettings.customTags = ts.customTags || ['maintext','option','sum','vars','thinking','think'];
+      nextSettings.activeSecondaryApi = ts.activeSecondaryApi || '';
+      nextSettings.tavernCharacterName = ts.characterName || '';
+      nextSettings.tavernUserName = ts.userName || '玩家';
+      nextSettings.tavernActivePresetId = ts.activePresetId || '';
+      nextSettings.tavernActiveLorebookIds = ts.activeLorebookIds || [];
     }
     // One atomic localStorage write prevents mixed player/settings/world revisions.
-    var runtime = {version:2,settings:GameState.settings,player:GameState.player,phase:GameState.phase,
-      gameTime:GameTime,worldState:WorldState,economy:Economy,studioState:StudioState,questSystem:QuestSystem};
+    var runtime = {version:2,settings:nextSettings,player:GameState.player,phase:GameState.phase,
+      gameTime:GameTime,worldState:WorldState,openWorldState:GameState.openWorldState||{},economy:Economy,studioState:StudioState,questSystem:QuestSystem};
     localStorage.setItem('doupo_runtime',JSON.stringify(runtime));
+    Object.assign(GameState.settings,nextSettings);if(ts)Object.assign(ts,nextTavern);
     // Best-effort compatibility copies for older entry pages; v2 reads the envelope first.
     try {
       localStorage.setItem('doupo_settings',JSON.stringify(GameState.settings));
@@ -3255,6 +3297,7 @@ function loadFromLocalStorage() {
     if (GameState.settings.activeSecondaryApi === undefined) GameState.settings.activeSecondaryApi = '';
     if (player) GameState.player = player;
     if (runtime) {
+      GameState.openWorldState=TavernCore.clone(runtime.openWorldState||{});
       if (runtime.gameTime) Object.assign(GameTime,runtime.gameTime);
       if (runtime.worldState) Object.assign(WorldState,runtime.worldState);
       if (runtime.economy) Object.assign(Economy,runtime.economy);
@@ -3490,11 +3533,13 @@ function createSave() {
 }
 
 function buildGameSnapshot() {
+  if(tavernState.isEditingMemory)throw Error('记忆正在保存，请稍后操作');
+  if(typeof BattleBridge!=='undefined'&&BattleBridge.isSaving())throw Error("战斗行动正在保存，请稍后再存档");
   if (tavernState.isLoading || !db) throw new Error('聊天数据库尚未就绪，请稍后再试');
   if (tavernState.isSending) throw new Error('请先停止推演，再保存完整进度');
   if((typeof WorldMapBridge!=='undefined'&&WorldMapBridge.isMoving())||(typeof BeautyRoster!=='undefined'&&BeautyRoster.isBusy()))throw new Error('请先结束移动或人物编辑，再保存完整进度');
   return TavernCore.redact({type:'doupo-save', version:2, id:'save-' + crypto.randomUUID(), timestamp:Date.now(),
-    player:GameState.player, settings:GameState.settings, gameTime:GameTime, worldState:WorldState,
+    player:GameState.player, settings:GameState.settings, gameTime:GameTime, worldState:WorldState, openWorldState:typeof OpenWorldRuntime!=='undefined'?OpenWorldRuntime.normalize(GameState.openWorldState||{}):GameState.openWorldState||{},
     questSystem:typeof QuestSystem !== 'undefined' ? QuestSystem : null,
     economy:typeof Economy !== 'undefined' ? Economy : null, studioState:typeof StudioState !== 'undefined' ? StudioState : null,
     tavern:{chats:tavernState.chats, activeChatId:tavernState.activeChatId, lorebooks:tavernState.lorebooks,
@@ -3507,6 +3552,7 @@ function validateGameSnapshot(data) {
   if (!data || typeof data !== 'object' || !data.player || typeof data.player !== 'object' || Array.isArray(data.player)) throw new Error('存档缺少有效的玩家数据');
   if (data.version && Number(data.version) > 2) throw new Error('该存档版本高于当前支持版本');
   if (data.tavern) {
+    if(typeof BattleCore!=='undefined'&&Array.isArray(data.tavern.chats))data.tavern.chats.forEach(c=>BattleCore.validate(c?.battle));
     ['chats','lorebooks','presets'].forEach(function(k) {
       if (!Array.isArray(data.tavern[k]) || data.tavern[k].some(function(v) { return !v || typeof v.id !== 'string'; })) throw new Error('存档数据无效：' + k);
     });
@@ -3517,9 +3563,14 @@ function validateGameSnapshot(data) {
 }
 
 async function restoreGameSnapshot(input) {
+  if(tavernState.isEditingMemory)throw Error('记忆正在保存，请稍后操作');
+  if(typeof BattleBridge!=='undefined'&&BattleBridge.isSaving())throw Error("战斗行动正在保存，请稍后读档");
+  if(typeof BattleBridge!=='undefined')BattleBridge.close();
   if(tavernState.isSending||(typeof WorldMapBridge!=='undefined'&&WorldMapBridge.isMoving())||(typeof BeautyRoster!=='undefined'&&BeautyRoster.isBusy()))throw new Error('请先结束推演、移动或人物编辑，再恢复存档');
   if (tavernState.isLoading || !db) throw new Error('聊天数据库尚未就绪，请稍后重试');
   var data = validateGameSnapshot(TavernCore.redact(input));
+  if(!data.player.lifeId)data.player.lifeId=crypto.randomUUID();
+  if(data.tavern?.chats)data.tavern.chats.forEach(c=>{if(!c.lifeId)c.lifeId=data.player.lifeId;});
   stopTavernStream();
   var restoreOwner=GameState.player,restoreFingerprint=JSON.stringify(GameState.player),restoreChat=tavernState.activeChatId;
   function ensureRestoreCurrent(){if(GameState.player!==restoreOwner||JSON.stringify(GameState.player)!==restoreFingerprint||tavernState.activeChatId!==restoreChat||tavernState.isSending)throw new Error('当前角色或会话已变化，已取消过期读档');}
@@ -3546,7 +3597,7 @@ async function restoreGameSnapshot(input) {
       // Upsert restored records; keep newer unrelated sessions in the local library.
       await db.chats.bulkPut(snapshot.chats); await db.lorebooks.bulkPut(snapshot.lorebooks); await db.presets.bulkPut(snapshot.presets);
       if (snapshot.characterCard) await db.characterCard.put(Object.assign({},snapshot.characterCard,{id:'active'}));
-      await db.tavernSettings.put(Object.assign({},snapshot.settings || {},{id:'main',activeChatId:snapshot.activeChatId,playerState:data.player,playerStateAt:Date.now()}));
+      await db.tavernSettings.put(Object.assign({},snapshot.settings || {},{id:'main',activeChatId:snapshot.activeChatId,playerState:data.player,playerStateAt:Date.now(),openWorldState:data.openWorldState||{},runtimeState:{gameTime:data.gameTime,worldState:data.worldState,economy:data.economy,studioState:data.studioState,questSystem:data.questSystem,openWorldState:data.openWorldState||{}},runtimeStateAt:Date.now()}));
       ensureRestoreCurrent();
     });
     function combine(saved, current) { var ids = new Set(saved.map(function(v) { return v.id; })); return saved.concat(current.filter(function(v) { return !ids.has(v.id); })); }
@@ -3561,6 +3612,7 @@ async function restoreGameSnapshot(input) {
   GameState.player = TavernCore.clone(data.player); GameState.settings = settings;
   if (data.gameTime) Object.assign(GameTime,TavernCore.clone(data.gameTime));
   if (data.worldState) Object.assign(WorldState,TavernCore.clone(data.worldState));
+  if (typeof OpenWorldRuntime!=='undefined') GameState.openWorldState=OpenWorldRuntime.normalize(data.openWorldState||{});
   if (data.economy && typeof Economy !== 'undefined') Object.assign(Economy,TavernCore.clone(data.economy));
   if (data.studioState && typeof StudioState !== 'undefined') Object.assign(StudioState,TavernCore.clone(data.studioState));
   if (data.questSystem && typeof QuestSystem !== 'undefined') Object.assign(QuestSystem,TavernCore.clone(data.questSystem));
@@ -3658,6 +3710,7 @@ function buildPlayerSummary() {
         buildSummaryTab('relationships','关系') +
         buildSummaryTab('talents','天赋') +
         buildSummaryTab('history','经历') +
+        buildSummaryTab('memory','记忆表') +
       '</div>' +
       // Body
       '<div class="summary-body" id="summary-body"></div>' +
@@ -3696,8 +3749,22 @@ function renderSummaryTab(key) {
     case 'relationships': renderSummaryRelationships(body); break;
     case 'talents': renderSummaryTalents(body); break;
     case 'history': renderSummaryHistory(body); break;
+    case 'memory': renderMemoryTable(body); break;
   }
 }
+
+function renderMemoryTable(body) {
+  var chat=typeof getActiveChat==='function'?getActiveChat():null, memory=typeof MemoryCore!=='undefined'?MemoryCore.normalize(chat&&chat.memoryTable):{small:[],large:[],facts:[],threads:[],stats:{}};
+  var esc=typeof escapeHtml==='function'?escapeHtml:function(v){return String(v||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  var html='<div class="summary-section"><h4>内置记忆表</h4><p class="text-muted">本地提取正文首尾并保留楼层来源，不调用模型生成摘要。摘录含省略；重要事实请单独记录，记忆随当前会话保存。</p><div class="summary-kv"><span class="key">消息量</span><span class="val">'+(memory.stats.messages||0)+' · 已整理 '+(memory.stats.compressed||0)+' 组摘录</span></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;"><button class="summary-action-btn" onclick="rebuildMemoryTable()">整理正文摘录</button><button class="summary-action-btn" onclick="addMemoryFact()">新增确认事实</button><button class="summary-action-btn" onclick="addMemoryThread()">新增未完事项</button></div>';
+  html+='<div class="summary-section"><h4>历史摘录索引</h4>'+(memory.large.length?memory.large.slice().reverse().map(function(x){return '<div class="summary-kv"><span class="key">跨楼层</span><span class="val">'+esc(x.text)+'</span></div>';}).join(''):'<p class="text-muted">历史积累后生成索引。</p>')+'</div>';
+  html+='<div class="summary-section"><h4>近期正文摘录</h4>'+(memory.small.length?memory.small.slice().reverse().slice(0,8).map(function(x){return '<div class="summary-kv"><span class="key">近期楼层</span><span class="val">'+esc(x.text)+'</span></div>';}).join(''):'<p class="text-muted">尚未整理正文摘录。</p>')+'</div>';
+  html+='<div class="summary-section"><h4>待核对技能</h4>'+((chat?.pendingBattleSkills||[]).map(function(x){return '<p>'+esc(x.name)+' · '+esc(x.reason)+'<br>'+esc(x.evidence)+'</p>';}).join('')||'<p>暂无待核对技能。</p>')+'</div>';
+  html+='<div class="summary-section"><h4>确认事实与未完事项</h4>'+(memory.facts.concat(memory.threads).slice().reverse().map(function(x){return '<div class="summary-kv"><span class="key">'+(memory.facts.includes(x)?'事实':'事项')+'</span><span class="val">'+esc(x.text)+'</span></div>';}).join('')||'<p class="text-muted">暂无记录。</p>')+'</div></div>';body.innerHTML=html;
+}
+async function rebuildMemoryTable(){return MemoryUI.rebuild();}
+async function addMemoryFact(){return MemoryUI.add('fact');}
+async function addMemoryThread(){return MemoryUI.add('thread');}
 
 // -- Tab: 基本信息 --
 function renderSummaryBasic(body) {
@@ -4312,7 +4379,7 @@ function createPresetPrompt(overrides) {
   return def;
 }
 function createChatSession(overrides) {
-  var def = { id: crypto.randomUUID(), name:'', messages:[], characterName:'', userName:'玩家', presetId:'', lorebookIds:[], variables:{}, createdAt:Date.now(), updatedAt:Date.now() };
+  var def = { id: crypto.randomUUID(), lifeId:GameState.player.lifeId||null, name:'', messages:[], characterName:'', userName:'玩家', presetId:'', lorebookIds:[], variables:{}, memoryTable:{version:1,small:[],large:[],facts:[],threads:[],stats:{messages:0,compressed:0,updatedAt:0}}, playerState:null, openWorldState:null, createdAt:Date.now(), updatedAt:Date.now() };
   for (var k in overrides) { if (overrides.hasOwnProperty(k)) def[k] = overrides[k]; }
   return def;
 }
@@ -4424,14 +4491,15 @@ function parseGameModeOutput(rawText) {
 
 // -- Prompt Assembler --
 function prepareTavernRequest(chat, content, history, preview, questPlayer, generationType, presetOverride) {
+  var openWorldState=(chat&&chat.turnWorldOverride)||GameState.openWorldState||{};
   var selection=TavernWiring.resolve({player:GameState.player,chat:chat,settings:tavernState.tavernSettings,
     globalIds:tavernState.activeLorebookIds,books:tavernState.lorebooks,presets:tavernState.presets,
-    input:content,history:history,regexes:typeof regexScripts!=='undefined'?regexScripts:[]});
+    input:content,history:history,regexes:typeof regexScripts!=='undefined'?regexScripts:[],openWorldState:openWorldState});
   if(presetOverride)selection.preset=presetOverride;
   var location=WorldState.location+' · '+(WorldState.specificSpot||'');
-  var card=chat.characterCard||tavernState.characterCard||{};
+  var card=typeof OpenWorldRuntime!=='undefined'?OpenWorldRuntime.normalizeCharacterCard(chat.characterCard||tavernState.characterCard||{}):(chat.characterCard||tavernState.characterCard||{});
   var result=assembleTavernPrompt({preset:selection.preset,characterCard:card,userInput:selection.input,
-    generationType:generationType||'normal',history:selection.history,variables:chat.variables||{},lorebookMatches:selection.matches,location:location,userName:selection.userName,preview:!!preview,questState:(questPlayer||GameState.player).storyQuests,beautyState:(questPlayer||GameState.player).beautyChronicle,summaryPlayer:(questPlayer||GameState.player),flameState:(questPlayer||GameState.player).flameChronicle,residenceState:(questPlayer||GameState.player).residence});
+    generationType:generationType||'normal',history:selection.history,variables:chat.variables||{},lorebookMatches:selection.matches,location:location,userName:selection.userName,preview:!!preview,openWorldState:openWorldState,memoryTable:chat.memoryTable||{},pendingBattleSkills:chat.pendingBattleSkills||[],questState:(questPlayer||GameState.player).storyQuests,beautyState:(questPlayer||GameState.player).beautyChronicle,summaryPlayer:(questPlayer||GameState.player),flameState:(questPlayer||GameState.player).flameChronicle,residenceState:(questPlayer||GameState.player).residence});
   selection.trace.forEach(function(row){
     if(row.status!=='matched')return;
     var m=selection.matches.find(function(x){return x.bookId===row.bookId&&x.entry.id===row.entryId;});
@@ -4460,7 +4528,10 @@ function assembleTavernPrompt(opts) {
   var plan = TavernCore.promptPlan({preset:preset, characterCard:charCard, userName:userName,
     location:location, lorebookMatches:lorebookMatches,generationType:opts.generationType||'normal'});
   var systemParts = [];
+  var battleContext=typeof BattleCore!=='undefined'?BattleCore.context(opts.summaryPlayer||GameState.player,GameState.settings.battle):'';
   if(typeof SummaryCore!=='undefined'){systemParts.push(SummaryCore.context(Object.hasOwn(opts,'summaryPlayer')?opts.summaryPlayer:GameState.player));systemParts.push(SummaryCore.protocol);}
+  if(typeof MemoryCore!=='undefined'){var memoryText=MemoryCore.context(opts.memoryTable||{});if(memoryText)systemParts.push(memoryText);}
+  if(opts.pendingBattleSkills?.length)systemParts.push('【技能待核对】以下仅为历史习得原句，缺少品阶或战斗效果，不是可用战斗技能；勿为补齐格式编造设定：'+JSON.stringify(opts.pendingBattleSkills));
   if(typeof FlameCore!=='undefined'){systemParts.push(FlameCore.protocol);systemParts.push(FlameCore.context(Object.hasOwn(opts,'flameState')?opts.flameState:GameState.player.flameChronicle,typeof HEAVENLY_FLAMES==='undefined'?[]:HEAVENLY_FLAMES));}
   if(typeof ResidenceCore!=='undefined'){systemParts.push(ResidenceCore.protocol);systemParts.push(ResidenceCore.context(Object.hasOwn(opts,'residenceState')?opts.residenceState:GameState.player.residence,WorldState,typeof ResidenceUI!=='undefined'?ResidenceUI.clock():''));}
   if(typeof BeautyRoster!=='undefined')systemParts.push(BeautyRoster.context(Object.hasOwn(opts,'beautyState')?opts.beautyState:GameState.player.beautyChronicle));
@@ -4469,6 +4540,14 @@ function assembleTavernPrompt(opts) {
     var mapFacts=WorldMapBridge.promptContext();
     if(mapFacts)systemParts.push(mapFacts);
     if(!tavernState.tavernSettings?.pureTextMode)systemParts.push('地图行动可选协议：需要建议玩家行动时，可在正文外添加一个 <world_action>{"type":"travel","targetId":"已知地点ID","mode":"walk"}</world_action>，或 type 为 explore/rest/talk（talk 使用 npcId）。只使用地图已确认事实中的ID；不得自动结算、赠送物资或越过入口条件。建议由玩家在地图中确认。');
+  }
+  if(typeof OpenWorldRuntime!=='undefined'){
+    var profile=charCard.openWorldProfile||{};
+    systemParts.push('【角色卡运行档案】\n身份：'+(profile.identity||charCard.name||'角色')+'\n核心动机：'+(profile.motives||[]).join('、')+'\n行为底线：'+(profile.boundaries||[]).join('、')+'\n可变部分：'+(profile.mutable||[]).join('、')+'\n当前意图：'+(profile.currentIntent||'根据场景与对话决定'));
+    var ow=OpenWorldRuntime.context(opts.openWorldState||{}, {mode:(opts.openWorldState||{}).mode, subject:userName});
+    if(ow)systemParts.push(ow);
+    var events=OpenWorldRuntime.openEvents(opts.openWorldState||{});
+    if(events.length)systemParts.push('【开放事件机会】\n'+events.map(function(e){return '- '+e.title+'：'+e.pressure+(e.opportunities.length?'\n  可行方向：'+e.opportunities.join('、'):'');}).join('\n'));
   }
 
   // Optional player-authored creative preferences, included in the budgeted request.
@@ -4524,7 +4603,8 @@ function assembleTavernPrompt(opts) {
     systemParts.push('【输出格式要求】\n请使用以下 Markdown 二级标题组织正文与总结，并按要求附加 XML 标签块：\n## maintext\n(正文叙述)\n\n行动选项仅使用一个 <branches></branches> 块输出，不再另写 Markdown 选项段落或重复列出同一组选项。在正文后必须生成以下选项分支:\n<branches>\n[快速推进的行动]\n[最合理的行动]\n[最中立的行动]\n[最善良的行动]\n[NSFW的行动]\n</branches>\n\n同时必须紧跟<upstore></upstore>变量更新块:\n<upstore>\naddSmallSum:变量名:增量\nset:变量名:值\n</upstore>\n\n## sum\n(一句话总结)\n\n如有内心独白请放入 ## thinking 标题对应的段落中。');
   }
 
-  if(tavernState.tavernSettings?.pureTextMode&&typeof StoryQuests!=='undefined')systemParts.push('纯文本模式的后台元数据例外：仅允许 <quest_updates>、<residence_updates>、<flame_updates> 与 <summary_updates> 及其对应闭合标签作为后台元数据块。这些块均为可选，须遵守各自更新协议；需要时在全部纯文本内容之后单独附加，不放入 Markdown 代码块，由前端提取，不作为可见正文。此例外不允许其他标签，可见正文仍按上述纯文本规则输出。');
+  if(tavernState.tavernSettings?.pureTextMode&&typeof StoryQuests!=='undefined')systemParts.push('纯文本模式的后台元数据例外：仅允许 <quest_updates>、<residence_updates>、<flame_updates>、<summary_updates> 与已启用战斗模式的 <battle_updates> 及其对应闭合标签作为后台元数据块。这些块均为可选，须遵守各自更新协议；需要时在全部纯文本内容之后单独附加，不放入 Markdown 代码块，由前端提取，不作为可见正文。此例外不允许其他标签，可见正文仍按上述纯文本规则输出。');
+  if(battleContext)systemParts.push(battleContext);
   var systemMsg = systemParts.join('\n\n');
 
   var settings = preset && preset.settings || {};
@@ -4634,14 +4714,26 @@ async function initTavernDB() {
     tavernState.presets = p.length > 0 ? p : [createPreset()];
     tavernState.characterCard = card || createDefaultCharacterCard();
     tavernState.tavernSettings = s || createDefaultTavernSettings();
-    if (s && s.playerState && (s.playerStateAt || 0) > (GameState.settings.playerSavedAt || 0)) GameState.player = TavernCore.clone(s.playerState);
+    if(s?.runtimeState && s.runtimeStateAt>(GameState.settings.playerSavedAt||0)){
+      var runtime=s.runtimeState;
+      if(runtime.gameTime)Object.assign(GameTime,runtime.gameTime);if(runtime.worldState)Object.assign(WorldState,runtime.worldState);
+      if(runtime.economy)Object.assign(Economy,runtime.economy);if(runtime.studioState)Object.assign(StudioState,runtime.studioState);if(runtime.questSystem)Object.assign(QuestSystem,runtime.questSystem);
+      GameState.openWorldState=TavernCore.clone(runtime.openWorldState||{});
+    }
+    if (s && s.playerState && (s.playerStateAt || 0) > (GameState.settings.playerSavedAt || 0)){GameState.player = TavernCore.clone(s.playerState);if(s.openWorldState)GameState.openWorldState=TavernCore.clone(s.openWorldState);}
     // 迁移旧配置——补充缺少的字段
     if (tavernState.tavernSettings.pureTextMode === undefined) tavernState.tavernSettings.pureTextMode = false;
+    if(!GameState.player.lifeId)GameState.player.lifeId=c.find(chat=>chat.id===s?.activeChatId)?.lifeId||crypto.randomUUID();
+    var legacyChats=c.filter(function(chat){return !chat.lifeId;});
+    legacyChats.forEach(function(chat){chat.lifeId=GameState.player.lifeId;});
+    if(legacyChats.length)await db.chats.bulkPut(legacyChats);
     tavernState.chats = c;
-    tavernState.activeChatId = s && c.some(function(chat) { return chat.id === s.activeChatId; }) ? s.activeChatId : (c[0] ? c[0].id : null);
+    var lifeChats=c.filter(function(chat){return !chat.lifeId||chat.lifeId===GameState.player.lifeId;});
+    tavernState.activeChatId = s && lifeChats.some(function(chat) { return chat.id === s.activeChatId; }) ? s.activeChatId : (lifeChats[0] ? lifeChats[0].id : null);
     tavernState.activeLorebookIds = tavernState.tavernSettings.activeLorebookIds || [];
     // Restore tavern settings from localStorage (dual-save — takes priority over DB defaults)
     syncTavernSettingsFromLocal();
+    saveToLocalStorage();
     tavernState.isLoading = false;
 
     // Save defaults if they were created
@@ -4737,7 +4829,7 @@ function renderTavernSessionList() {
     var dateStr = date.getMonth()+1 + '/' + date.getDate() + ' ' + date.getHours() + ':' + String(date.getMinutes()).padStart(2,'0');
     return '<div class="tavern-session-item' + (active ? ' active' : '') + '" onclick="switchTavernChat(' + TavernCore.handlerArg(c.id) + ')">' +
       '<div class="sess-name">' + escapeHtml(c.name || '未命名') + '</div>' +
-      '<div class="sess-meta">' + c.messages.length + '条消息 · ' + dateStr + '</div>' +
+      '<div class="sess-meta">' + c.messages.length + '条消息 · ' + dateStr + (c.battle?.status==='active'?' · 战斗中':c.battle?.status==='report-pending'?' · 待发送战报':'') + '</div>' +
     '</div>';
   }).join('');
 }
@@ -4821,6 +4913,7 @@ function buildAssistantMessageDOM(msg) {
   if(typeof ResidenceCore!=='undefined')displayContent=ResidenceCore.visible(displayContent);
   if(typeof FlameCore!=='undefined')displayContent=FlameCore.visible(displayContent);
   if(typeof SummaryCore!=='undefined')displayContent=SummaryCore.visible(displayContent);
+  if(typeof BattleCore!=='undefined')displayContent=BattleCore.visible(displayContent);
   var parsed = parseGameModeOutput(TavernCore.visibleBranches(applyRegexScripts(displayContent, 0)));
 
   if (parsed.thinking) {
@@ -4895,11 +4988,13 @@ function escapeHtmlAttr(text) { return TavernCore.escapeHtml(text);
 }
 
 // -- Tavern Chat Actions --
-async function createNewTavernChat() {
+async function createNewTavernChat(useSelectedCard) {
+  if(tavernState.isEditingMemory){showToast('记忆正在保存，请稍后操作','info');return;}
+  if(typeof BattleBridge!=='undefined'&&BattleBridge.guard())return;
   if (tavernState.isLoading || !db) throw new Error('聊天数据库仍在加载，请稍后重试');
   stopTavernStream();
   var settings = tavernState.tavernSettings;
-  var activeCard=TavernCore.clone((getActiveChat()||{}).characterCard || tavernState.characterCard || {});
+  var activeCard=TavernCore.clone(useSelectedCard?tavernState.characterCard||{}:(getActiveChat()||{}).characterCard || tavernState.characterCard || {});
   var charName = activeCard.name || '角色';
   var count = tavernState.chats.filter(function(c) { return c.characterName === charName; }).length;
   var chat = createChatSession({
@@ -4909,21 +5004,36 @@ async function createNewTavernChat() {
     presetId: settings.activePresetId || (tavernState.presets[0] ? tavernState.presets[0].id : ''),
     lorebookIds: tavernState.activeLorebookIds.slice()
   });
+  chat.lifeId=GameState.player.lifeId||null;
+  chat.playerState = TavernCore.clone(GameState.player);
+  chat.openWorldState = TavernCore.clone(GameState.openWorldState || {});
   // Insert first message if character card has one
   if (activeCard.firstMessage) {
     chat.messages.push(createChatMessage('assistant', activeCard.firstMessage));
   }
-  await db.chats.put(chat);
+  var owner=GameState.player,sourceChat=tavernState.activeChatId,nextSettings=Object.assign({},settings,{activeChatId:chat.id});
+  async function persist(){
+    if(GameState.player!==owner||tavernState.activeChatId!==sourceChat)throw Error('当前人生或会话已变化，请重新创建对话');
+    await db.chats.put(chat);await db.tavernSettings.put(nextSettings);
+    if(GameState.player!==owner||tavernState.activeChatId!==sourceChat)throw Error('当前人生或会话已变化，请重新创建对话');
+  }
+  await db.transaction('rw',[db.chats,db.tavernSettings],persist);
   tavernState.chats.unshift(chat);
-  tavernState.activeChatId = chat.id;
-  settings.activeChatId = chat.id; await db.tavernSettings.put(settings);
+  tavernState.activeChatId = chat.id;tavernState.tavernSettings=nextSettings;
   renderTavernSessionList();
   renderTavernMessages();
   updateTavernInfo();
 }
 
 function switchTavernChat(id) {
+  if(tavernState.isEditingMemory){showToast('记忆正在保存，请稍后操作','info');return;}
+  if(id!==tavernState.activeChatId&&typeof BattleBridge!=='undefined'&&BattleBridge.guard())return;
+  if(typeof BattleBridge!=='undefined')BattleBridge.close();
   if (id !== tavernState.activeChatId) stopTavernStream();
+  var selectedChat=tavernState.chats.find(function(c){return c.id===id;});
+  if(!selectedChat)return;
+  if(selectedChat.lifeId&&GameState.player.lifeId&&selectedChat.lifeId!==GameState.player.lifeId){showToast('此会话属于另一个人生，请先读取对应存档','info');return;}
+  // Chats are narrative records within the current life; their player snapshots are historical.
   tavernState.activeChatId = id;
   if (tavernState.tavernSettings) { tavernState.tavernSettings.activeChatId = id; db.tavernSettings.put(tavernState.tavernSettings).catch(function() {}); }
   renderTavernSessionList();
@@ -4932,11 +5042,13 @@ function switchTavernChat(id) {
 }
 
 async function deleteTavernChat(id) {
+  if(tavernState.isEditingMemory){showToast('记忆正在保存，请稍后操作','info');return;}
+  if(typeof BattleBridge!=='undefined'&&BattleBridge.guard())return;
   if (id === tavernState.activeChatId) stopTavernStream();
   await db.chats.delete(id);
   tavernState.chats = tavernState.chats.filter(function(c) { return c.id !== id; });
   if (tavernState.activeChatId === id) {
-    tavernState.activeChatId = tavernState.chats.length > 0 ? tavernState.chats[0].id : null;
+    tavernState.activeChatId = tavernState.chats.find(c=>!c.lifeId||c.lifeId===GameState.player.lifeId)?.id||null;
   }
   renderTavernSessionList();
   renderTavernMessages();
@@ -4965,6 +5077,7 @@ async function sendTavernMessage() {
   var resolved=TavernWiring.resolve({player:GameState.player,chat:getActiveChat()||{},presets:tavernState.presets,settings:tavernState.tavernSettings});
   var content=input.value.trim()||PresetCore.settings(resolved.preset).send_if_empty;
   if(!content.trim())return;
+  if(typeof BattleBridge!=='undefined'&&!BattleBridge.allowed(null,false)){showToast('请先完成战斗并处理战报','info');return;}
   if (!getActiveChat()) {
     try { await createNewTavernChat(); } catch(e) { showToast('无法新建对话：' + e.message, 'error'); return; }
   }
@@ -4978,7 +5091,18 @@ function setTavernSendingUI(sending) {
   if (input) input.disabled = sending;
 }
 
-async function runTavernTurn(content, regenerate, generationType) {
+function getTavernReplayStamp(player, working, world) {
+  return ReplayGuard.stamp({player:player||GameState.player,world:world||GameState.openWorldState||{},
+    time:typeof GameTime==='undefined'?null:GameTime,place:typeof WorldState==='undefined'?null:WorldState,
+    economy:typeof Economy==='undefined'?null:Economy,quests:typeof QuestSystem==='undefined'?null:QuestSystem,
+    studio:typeof StudioState==='undefined'?null:StudioState,
+    chats:tavernState.chats.filter(c=>!c.lifeId||c.lifeId===GameState.player.lifeId).map(c=>working&&working.id===c.id?working:c).map(c=>({id:c.id,
+      messages:(c.messages||[]).map(m=>({id:m.id,role:m.role,content:m.content})),variables:c.variables||{},memory:c.memoryTable||{},pending:c.pendingBattleSkills||[],battle:c.battle||null})).sort((a,b)=>a.id.localeCompare(b.id))});
+}
+
+async function runTavernTurn(content, regenerate, generationType, turnMeta) {
+  if(tavernState.isEditingMemory){showToast('记忆正在保存，请稍后操作','info');return;}
+  if(typeof BattleBridge!=='undefined'&&!BattleBridge.allowed(turnMeta,regenerate)){showToast('请先在战斗面板完成战斗并发送战报','info');if(typeof BattleBridge!=='undefined')BattleBridge.refresh();return;}
   if((typeof SummaryUI!=='undefined'&&SummaryUI.isBusy())||(typeof ResidenceUI!=='undefined'&&ResidenceUI.isBusy())){showToast('人生档案正在保存，请稍后推演','info');return;}
   if(typeof SaveManager!=='undefined'&&SaveManager.isBusy()){showToast('正在恢复存档，请稍后推演','info');return;}
   if(typeof BeautyRoster!=='undefined'&&BeautyRoster.isBusy()){showToast('人物档案正在保存，请稍后推演','info');return;}
@@ -4987,6 +5111,7 @@ async function runTavernTurn(content, regenerate, generationType) {
   if (tavernState.isSending) return;
   var original = getActiveChat();
   if (!original || !db) return;
+  if(original.lifeId&&GameState.player.lifeId&&original.lifeId!==GameState.player.lifeId){showToast('请先读取此会话所属的人生存档','info');return;}
   if(typeof WorldMapBridge!=='undefined')WorldMapBridge.ensure();
   var working = TavernCore.clone(original), before, controller = new AbortController();
   var playerAtDispatch = JSON.stringify(GameState.player);
@@ -4997,25 +5122,33 @@ async function runTavernTurn(content, regenerate, generationType) {
   setTavernSendingUI(true);
   function ensureCurrent() {
     TavernCore.checkAbort(controller.signal);
+    if(request.stateStamp&&getTavernReplayStamp()!==request.stateStamp)throw new Error('生成期间人生进度已变化，本轮未覆盖新进度');
     if (tavernState.activeRequest !== request || tavernState.activeChatId !== request.chatId || !tavernState.chats.some(function(c) { return c.id === request.chatId; })) throw TavernCore.abortError();
   }
   try {
     if (regenerate) {
+      if(typeof ReplayGuard!=='undefined')ReplayGuard.assertCurrent(original.replayStamp,getTavernReplayStamp());
       var replay = TavernCore.regeneration(original);
       content = replay.content; working.messages = replay.messages; before = replay.before;
       working.variables = TavernCore.clone(before.variables);
+      working.battle=before.battle?TavernCore.clone(before.battle):null;
+      working.memoryTable=TavernCore.clone(before.memoryTable||{});working.pendingBattleSkills=TavernCore.clone(before.pendingBattleSkills||[]);
+      working.turnWorldOverride=TavernCore.clone(before.openWorldState||{});
+      if(working.battle&&working.messages.at(-1)?.battleReportId===working.battle.id)working.battle.reportUserId=working.messages.at(-1).id;
     } else {
-      before = {variables:TavernCore.clone(working.variables || {}), player:TavernCore.clone(GameState.player)};
+      before = {variables:TavernCore.clone(working.variables || {}), player:TavernCore.clone(GameState.player),battle:working.battle?TavernCore.clone(working.battle):null,memoryTable:TavernCore.clone(working.memoryTable||{}),pendingBattleSkills:TavernCore.clone(working.pendingBattleSkills||[]),openWorldState:TavernCore.clone(GameState.openWorldState||{})};
       var user = createChatMessage('user', content);
-      user.turnBefore = before; working.messages.push(user);
+      user.turnBefore = before; if(typeof BattleBridge!=='undefined')BattleBridge.attachReport(working,user,turnMeta); working.messages.push(user);
       working.updatedAt = Date.now();
       // Persist the user turn first so a failed request is recoverable without re-appending input.
+      if(typeof ReplayGuard!=='undefined')working.replayStamp=getTavernReplayStamp(GameState.player,working);
       await db.chats.put(working); ensureCurrent();
       tavernState.chats = tavernState.chats.map(function(c) { return c.id === working.id ? TavernCore.clone(working) : c; });
-      takeSnapshot(original.messages, before.variables);
+      takeSnapshot(original.messages, before.variables, original.battle||null);
       renderTavernMessages();
     }
     ensureCurrent();
+    if(typeof ReplayGuard!=='undefined')request.stateStamp=getTavernReplayStamp();
     var prepared = prepareTavernRequest(working,content,working.messages.slice(0,-1),false,before.player,generationType||(regenerate?'regenerate':'normal'));
     var preset = prepared.selection.preset, result = prepared.result;
     tavernState.lastRequestInspection = prepared;
@@ -5024,7 +5157,7 @@ async function runTavernTurn(content, regenerate, generationType) {
     var msgs = document.getElementById('tavern-messages');
     if (msgs) { var typing = document.createElement('div'); typing.id = 'tavern-typing'; typing.className = 'msg-maintext typing'; typing.textContent = '正在推演…'; msgs.appendChild(typing); }
     var parser = StreamParser();
-    parser.onTag(function(tag, text) { if (tag !== 'maintext') return; ensureCurrent(); var el = document.getElementById('tavern-typing'); if (el) {var list=el.parentElement;var followBottom=list&&list.scrollHeight-list.clientHeight-list.scrollTop<=48;var visible=typeof StoryQuests!=='undefined'?StoryQuests.visible(text):text;if(typeof ResidenceCore!=='undefined')visible=ResidenceCore.visible(visible);if(typeof FlameCore!=='undefined')visible=FlameCore.visible(visible);el.textContent=TavernCore.visibleBranches(TavernCore.visibleUpstore(typeof SummaryCore!=='undefined'?SummaryCore.visible(visible):visible,true),true);if(followBottom){var behavior=list.style.scrollBehavior;list.style.scrollBehavior='auto';list.scrollTop=list.scrollHeight;list.style.scrollBehavior=behavior;}} });
+    parser.onTag(function(tag, text) { if (tag !== 'maintext') return; ensureCurrent(); var el = document.getElementById('tavern-typing'); if (el) {var list=el.parentElement;var followBottom=list&&list.scrollHeight-list.clientHeight-list.scrollTop<=48;var visible=typeof StoryQuests!=='undefined'?StoryQuests.visible(text):text;if(typeof ResidenceCore!=='undefined')visible=ResidenceCore.visible(visible);if(typeof FlameCore!=='undefined')visible=FlameCore.visible(visible);if(typeof BattleCore!=='undefined')visible=BattleCore.visible(visible);el.textContent=TavernCore.visibleBranches(TavernCore.visibleUpstore(typeof SummaryCore!=='undefined'?SummaryCore.visible(visible):visible,true),true);if(followBottom){var behavior=list.style.scrollBehavior;list.style.scrollBehavior='auto';list.scrollTop=list.scrollHeight;list.style.scrollBehavior=behavior;}} });
     var sampling = preset.settings || {};
     var opts = Object.assign({},prepared.requestOptions,{purpose:'primary',signal:controller.signal});
     var full;
@@ -5038,7 +5171,7 @@ async function runTavernTurn(content, regenerate, generationType) {
     var variables = TavernCore.applyOperations(before.variables, upstore.operations);
     var legacy = extractVariables(upstore.cleaned);
     variables = mergeVariables(variables, legacy.updates);
-    var player = TavernCore.clone(before.player), processed = legacy.cleanedText.replace(/<world_action>[\s\S]*?<\/world_action>/gi,'').trim();
+    var player = TavernCore.clone(before.player);if(!player.lifeId&&GameState.player.lifeId)player.lifeId=GameState.player.lifeId;var processed = legacy.cleanedText.replace(/<world_action>[\s\S]*?<\/world_action>/gi,'').trim();
     if(typeof StoryQuests!=='undefined'){
       var questOutput=StoryQuests.extract(processed);processed=questOutput.cleaned;
       var questResult=StoryQuests.apply(player.storyQuests,questOutput.updates,working.id);
@@ -5063,6 +5196,17 @@ async function runTavernTurn(content, regenerate, generationType) {
       if(summaryResult.changes.length)player=summaryResult.player;
       if(summaryOutput.errors.length||summaryResult.errors.length)showToast('部分概要状态缺少明确依据，正文已保留','info');
     }
+    var battleOutput=typeof BattleCore!=='undefined'?BattleCore.extract(processed):{cleaned:processed,data:null,errors:[]};processed=battleOutput.cleaned;
+    var battleMessageId=crypto.randomUUID();
+    var battleResult=typeof BattleCore!=='undefined'?BattleCore.apply(player,battleOutput.data,processed,battleMessageId,BattleCore.settings(GameState.settings.battle).enabled):{player:player,errors:[]};
+    player=battleResult.player;
+    if(Array.isArray(working.pendingBattleSkills))working.pendingBattleSkills=working.pendingBattleSkills.filter(x=>!(player.battleSkills||[]).some(s=>s.name===x.name));
+    // A completed battle response must not reopen the same encounter.
+    if(working.battle?.status!=='report-pending'){
+      if(battleResult.offer)working.battle=battleResult.offer;
+      else if(working.battle?.status==='offered')working.battle.status='declined';
+    }
+    if(battleOutput.errors.length||battleResult.errors.length)showToast('部分战斗记录缺少明确正文依据，正文已保留','info');
     if(regenerate&&GameState.player.exploration){
       ['exploration','inventory','location','history'].forEach(function(key){if(GameState.player[key]!==undefined)player[key]=TavernCore.clone(GameState.player[key]);});
     }
@@ -5082,9 +5226,11 @@ async function runTavernTurn(content, regenerate, generationType) {
       if(player.beautyChronicle.error)showToast(player.beautyChronicle.error,'info');
     }
     if (JSON.stringify(GameState.player) !== playerAtDispatch) throw new Error('推演期间角色状态发生变化，请重演本轮以避免覆盖进度');
-    var assistant = createChatMessage('assistant', processed);
+    var assistant = createChatMessage('assistant', processed);assistant.id=battleMessageId;
+    if(typeof BattleBridge!=='undefined')BattleBridge.completeReport(working,assistant);
     assistant.turnBefore = before;
-    working.messages.push(assistant); working.variables = variables; working.updatedAt = Date.now();
+    working.messages.push(assistant); working.variables = variables; working.playerState = TavernCore.clone(player); working.openWorldState = TavernCore.clone(working.turnWorldOverride||GameState.openWorldState||{}); delete working.turnWorldOverride; working.updatedAt = Date.now();
+    if(typeof ReplayGuard!=='undefined')working.replayStamp=getTavernReplayStamp(player,working,working.openWorldState);
     // Abort a stale transaction rather than reviving a reset/deleted session.
     var abortTransaction;
     try {
@@ -5093,12 +5239,12 @@ async function runTavernTurn(content, regenerate, generationType) {
         abortTransaction = function() { try { tx.abort(); } catch(e) {} };
         controller.signal.addEventListener('abort', abortTransaction, {once:true});
         await db.chats.put(working);
-        await db.tavernSettings.put(Object.assign({},tavernState.tavernSettings || {},{id:'main',activeChatId:working.id,playerState:player,playerStateAt:Date.now()}));
+        await db.tavernSettings.put(Object.assign({},tavernState.tavernSettings || {},{id:'main',activeChatId:working.id,playerState:player,playerStateAt:Date.now(),openWorldState:working.openWorldState}));
         ensureCurrent();
       });
     } finally { if (abortTransaction) controller.signal.removeEventListener('abort', abortTransaction); }
     ensureCurrent();
-    GameState.player = player;
+    GameState.player = player;GameState.openWorldState=TavernCore.clone(working.openWorldState||{});
     if(typeof WorldMapBridge!=='undefined'&&!tavernState.tavernSettings?.pureTextMode)WorldMapBridge.offerProposal(full,request.chatId);
     tavernState.chats = tavernState.chats.map(function(c) { return c.id === working.id ? working : c; });
     saveToLocalStorage();
@@ -5137,20 +5283,26 @@ async function continueTavernStream() {
 
 // 重置因缘 — 清空当前会话消息
 async function resetTavernContext() {
-  var chat = getActiveChat();
+  if(tavernState.isEditingMemory){showToast('记忆正在保存，请稍后操作','info');return;}
+  if(typeof BattleBridge!=='undefined'&&BattleBridge.guard())return;
+  var source = getActiveChat(),chat=source?TavernCore.clone(source):null;
   if (!chat) return;
   if (!confirm('确定要重置因缘，清空当前会话的全部对话？')) return;
   stopTavernStream();
   chat.messages = [];
   chat.variables = {};
+  chat.battle=null;chat.memoryTable={};chat.pendingBattleSkills=[];chat.openWorldState={};
   if(typeof WorldMapBridge!=='undefined')WorldMapBridge.clearProposal();
   chat.updatedAt = Date.now();
   await db.chats.put(chat);
+  tavernState.chats=tavernState.chats.map(c=>c.id===chat.id?chat:c);
+  TimeRewind.snapshots=TimeRewind.snapshots.filter(x=>x.chatId!==chat.id);
   renderTavernMessages();
   showToast('因缘已重置，因果重新开始', 'success');
 }
 
 function updateTavernInfo() {
+  if(typeof BattleBridge!=='undefined')BattleBridge.refresh();
   var mapSuggestion=document.getElementById('tavern-map-proposal');
   if(mapSuggestion)mapSuggestion.hidden=!(typeof WorldMapBridge!=='undefined'&&WorldMapBridge.getProposal());
   var rewindButton = document.getElementById('tavern-rewind-label');
@@ -5185,26 +5337,32 @@ function openTavernCharacterModal() {
     '</div>' +
     '<div style="display:flex;gap:10px;justify-content:flex-end;">' +
       '<button class="text-btn" onclick="closeAllModals()">取消</button>' +
-      '<button class="summary-action-btn" onclick="saveCharacterCard()">保存</button>' +
+      '<button class="summary-action-btn" onclick="saveCharacterCard()">保存角色卡</button>' +
+      '<button class="summary-action-btn" onclick="startSelectedCharacterChat()">保存并用此角色新开对话</button>' +
     '</div>';
   showModal(html);
 }
 
 async function saveCharacterCard() {
-  var card = tavernState.characterCard || createDefaultCharacterCard();
+  var card = TavernCore.clone(tavernState.characterCard || createDefaultCharacterCard());
   card.name = document.getElementById('cc-name').value || '未命名';
   card.description = document.getElementById('cc-desc').value;
   card.personality = document.getElementById('cc-personality').value;
   card.scenario = document.getElementById('cc-scenario').value;
   card.firstMessage = document.getElementById('cc-firstmsg').value;
   card.createdAt = Date.now();
-  tavernState.characterCard = card;
   await db.characterCard.put(card);
+  tavernState.characterCard = card;
   closeAllModals();
   showToast('角色卡已保存');
   // Update tavern UI
   var nameEl = document.getElementById('tavern-char-name');
-  if (nameEl) nameEl.textContent = card.name;
+  if (nameEl) nameEl.textContent = getActiveChat()?.characterCard?.name||card.name;
+}
+
+async function startSelectedCharacterChat() {
+  if(tavernState.isSending||tavernState.isEditingMemory||(typeof BattleBridge!=='undefined'&&BattleBridge.guard()))return;
+  try{await saveCharacterCard();await createNewTavernChat(true);}catch(e){showToast('新对话未创建：'+e.message,'error');}
 }
 
 async function importCharacterCard(event) {
@@ -5212,8 +5370,7 @@ async function importCharacterCard(event) {
   try {
     var card = await TavernCore.importCard(file);
     await db.characterCard.put(card); tavernState.characterCard = card;
-    closeAllModals(); showToast('角色卡导入成功：' + card.name, 'success');
-    var name = document.getElementById('tavern-char-name'); if (name) name.textContent = card.name;
+    openTavernCharacterModal(); showToast('已导入：'+card.name+'。可点击“保存并用此角色新开对话”开始游玩', 'success');
   } catch(e) { showToast('导入失败：' + e.message, 'error'); }
 }
 
@@ -5701,7 +5858,9 @@ function initExpandedStats() {
 var NPC_DYNAMIC_RULES = [
   'NPC拥有独立的生活轨迹与目标，不围绕主角运转',
   'NPC修为不随主角等级浮动，体现世界真实性',
-  '高阶NPC稀少——筑基以上每层人数锐减',
+  '境界体系严格遵循斗破苍穹：斗之气九段、斗者、斗师、大斗师、斗灵、斗王、斗皇、斗宗、斗尊、半圣、斗圣、斗帝；禁止混入筑基、金丹、元婴、练气等其他体系',
+  '高阶NPC稀少，强弱分布符合所在地区、势力与身份；普通守卫不得无背景地高出玩家多个大境界',
+  '未有可靠设定依据时，不为NPC武断指定境界或星级；高阶护卫须有可信的职位或势力背景',
   'NPC之间有独立的关系网络与恩怨情仇',
   '不是所有NPC都愿意帮助主角——多数持冷漠或利益立场',
   '机缘对所有人平等开放——NPC也会争夺机缘',
@@ -5713,8 +5872,10 @@ var NPC_DYNAMIC_RULES = [
 var DEFAULT_STYLE_GUIDE =
   '史诗感: 叙事宏大，世界广阔无垠。境界突破伴随天地异象，充满史诗般的厚重。\n' +
   '现实感: 世界不为主角提供优待。"主角光环"不存在，危险对所有人平等。\n' +
+  '世界观边界: 可补写符合地点与势力层级的普通场景细节和探索机会；斗气、灵魂境界分开，斗气境界只用斗之气至斗帝的本世界体系，不混入筑基/金丹等其他体系。\n' +
+  '人物强弱: NPC实力由身份、职责、地区和已知设定决定；普通守卫不得无缘由高出玩家多个大境界，未知境界不强行报数。\n' +
   '动态世界: NPC拥有自己的目标与关系网，不会为玩家停下脚步。\n' +
-  '弱肉强食: 修仙界冷酷无情，强者为尊。实力决定一切，包括话语权。\n' +
+  '强弱逻辑: 斗气大陆以实力与势力影响处境，但地位、规矩、利益和人情同样会改变交涉结果。\n' +
   '境界压制: 高境界对低境界存在天然威压。越级挑战极为困难，需付出惨重代价。\n' +
   '严谨称谓: 严格按境界使用道友/前辈/晚辈称呼，错误称谓可能招致杀身之祸。';
 
@@ -5845,3 +6006,4 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="assets/js/title-menu.js"></script>
 </body>
 </html>
+

@@ -1,0 +1,4 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const R=require('../assets/js/battle-rules.js');
+test('realm stars affect derived stats and expose breakdown',()=>{const a=R.deriveStats({realm:'斗者一星',baseStats:{strength:5,endurance:5,agility:6,speed:4,douqi:5}}),b=R.deriveStats({realm:'斗者九星',baseStats:{strength:5,endurance:5,agility:6,speed:4,douqi:5}});assert.ok(b.maxHp>a.maxHp);assert.match(b.breakdown.speed,/境界/);});
+test('seeded RNG is reproducible from saved index',()=>{const a=R.createRng('battle-a'),v=[a(),a(),a()],b=R.createRng('battle-a'),w=[b(),b(),b()];assert.deepEqual(v,w);const c=R.createRng('battle-a',2);assert.equal(c.index,2);});
+test('enemy behavior profiles differ',()=>{assert.ok(R.profile('aggressive').chargeChance>R.profile('cautious').chargeChance);assert.ok(R.profile('agile').skillChance>R.profile('cautious').skillChance);});

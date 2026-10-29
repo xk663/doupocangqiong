@@ -1,0 +1,19 @@
+.race-lane{margin-top:22px;padding:16px 18px 10px;border:1px solid #405444;border-radius:10px;background:linear-gradient(130deg,#263b2c66,#121c1699)}
+.race-heading{display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:16px;color:#e4e9d9}.race-heading output{color:#d7b880;font-size:14px}.race-speed{font-size:13px;line-height:1.7;color:#aabda9;margin-top:4px;min-height:22px}
+.race-course{position:relative;margin:0 54px;height:146px;border-bottom:2px solid #83987966;background:linear-gradient(0deg,#a3b38710,transparent 40%)}
+.race-course:before{content:"";position:absolute;left:0;right:0;bottom:7px;height:1px;background:repeating-linear-gradient(90deg,#c4cba84d 0 8px,transparent 8px 28px)}
+.race-start,.race-finish{position:absolute;bottom:-2px;height:22px;width:2px;background:#9bae89}.race-start{left:0}.race-finish{right:0;height:32px;width:12px;background:conic-gradient(#d4c5a0 25%,#344334 0 50%,#d4c5a0 0 75%,#344334 0) 0 0/12px 12px;opacity:.85}
+.race-labels{display:flex;justify-content:space-between;color:#9aaa91;font-size:12px;margin:7px 39px 0}
+.runner{position:absolute;bottom:0;left:0;width:126px;height:128px;transform:translateX(-50%);z-index:1;pointer-events:none}
+.runner:before{content:"";position:absolute;bottom:-3px;left:35px;width:56px;height:10px;background:#020b07aa;border:1px solid #a5ba6f55;border-radius:50%}
+.runner-sprite{display:block;position:absolute;bottom:0;left:0;width:126px;height:112px;background-image:url('../images/avatar-xiaoyan-sheet.webp');background-size:400% 300%;background-position:33.333333% 0;background-repeat:no-repeat;filter:drop-shadow(0 3px 3px #0006)}
+.runner-enemy .runner-sprite{background-image:url('../images/avatar-bandit-sheet.webp');width:80px;height:160px;left:23px;bottom:-14px;background-size:300% 100%;background-position:0 0}
+.runner-callout{position:absolute;bottom:124px;left:50%;transform:translateX(-50%);font-size:12px;white-space:nowrap;color:#ead9a8;opacity:0}.runner.is-ready .runner-callout{opacity:1}.runner.is-ready:before{background:#d8b96d44;border-color:#e2c983}
+.runner.is-running .runner-sprite{animation:hero-stride var(--stride,.44s) steps(1,end) infinite}.runner-enemy.is-running .runner-sprite{animation-name:bandit-stride}
+.runner.is-slow:after{content:"";position:absolute;bottom:5px;left:33px;width:60px;height:13px;border:2px solid #8bb8d6;border-radius:50%;transform:rotate(-12deg)}
+.runner.is-haste .runner-sprite{filter:drop-shadow(-7px 0 3px #9cd8ae66)}.runner.is-wounded .runner-sprite{filter:drop-shadow(0 0 4px #bf655955)}
+@keyframes hero-stride{0%,100%{background-position-y:50%;transform:translateY(0)}50%{background-position-y:100%;transform:translateY(-2px)}}
+@keyframes bandit-stride{0%,100%{background-position-x:50%;transform:translateY(0)}50%{background-position-x:100%;transform:translateY(-2px)}}
+@media(max-width:700px){.race-lane{padding:12px 8px 10px}.race-heading{font-size:15px}.race-heading output{font-size:12px}.race-course{margin:0 44px;height:132px}.race-labels{margin:7px 29px 0}.runner{transform:translateX(-50%) scale(.86);transform-origin:center bottom}.race-speed{font-size:12px}.timeline .section-head{gap:8px}.timeline .badge{max-width:132px;text-align:center}}
+@media(prefers-reduced-motion:reduce){.runner.is-running .runner-sprite{animation:none}}
+

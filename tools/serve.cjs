@@ -1,6 +1,7 @@
 /* Local static preview plus a fixed Gemini same-origin relay. No credentials are stored. */
 'use strict';
-const http=require('node:http'),fs=require('node:fs/promises'),path=require('node:path'),{Readable}=require('node:stream');
+const http=require('node:http'),fs=require('node:fs/promises'),path=require('node:path'),zlib=require('node:zlib'),{Readable}=require('node:stream');
+const compressible=new Set(['.html','.js','.css','.json','.svg']);
 const defaultRoot=path.resolve(__dirname,'..');
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp','.svg':'image/svg+xml'};
 function createServer({root=defaultRoot,fetcher=fetch}={}){return http.createServer(async(req,res)=>{
@@ -23,7 +24,11 @@ function createServer({root=defaultRoot,fetcher=fetch}={}){return http.createSer
  if(!['GET','HEAD'].includes(req.method))return deny(405,'Method not allowed');
  let name;try{name=decodeURIComponent(url.pathname);}catch{return deny(400,'Invalid path');}
  const target=path.resolve(root,'.'+(name==='/'?'/index.html':name));if(!target.startsWith(path.resolve(root)+path.sep)||name.split(/[\\/]/).some(p=>p.startsWith('.')))return deny(403,'Path denied');
- try{const body=await fs.readFile(target);res.writeHead(200,{'Content-Type':mime[path.extname(target)]||'application/octet-stream','Cache-Control':'no-store'});res.end(req.method==='HEAD'?undefined:body);}catch{deny(404,'Not found');}
+ try{let body=await fs.readFile(target);const ext=path.extname(target),headers={'Content-Type':mime[ext]||'application/octet-stream','Cache-Control':'no-store'};
+  if(compressible.has(ext)&&body.length>=1024){headers.Vary='Accept-Encoding';const accept=String(req.headers['accept-encoding']||'');
+   if(/\bbr\b/.test(accept)){body=zlib.brotliCompressSync(body,{params:{[zlib.constants.BROTLI_PARAM_QUALITY]:5}});headers['Content-Encoding']='br';}
+   else if(/\bgzip\b/.test(accept)){body=zlib.gzipSync(body,{level:6});headers['Content-Encoding']='gzip';}}
+  headers['Content-Length']=body.length;res.writeHead(200,headers);res.end(req.method==='HEAD'?undefined:body);}catch{deny(404,'Not found');}
  });}
 if(require.main===module){const port=Number(process.env.PORT)||8090;createServer().listen(port,'127.0.0.1',()=>console.log('Doupo: http://127.0.0.1:'+port));}
 module.exports={createServer};

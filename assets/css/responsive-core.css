@@ -1,0 +1,207 @@
+/* ====== 响应式核心布局改进 ====== */
+/* 专注解决手机横屏适配问题 */
+
+/* ===== 手机横屏 - 超紧凑模式 (height ≤ 500px) ===== */
+@media (max-height: 500px) and (orientation: landscape) {
+  /* 游戏视图: 重新布局，优化高度利用 */
+  #view-game {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* 侧栏: 改为顶部横条 */
+  #game-sidebar {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-height: 52px;
+    flex-direction: row !important;
+    padding: 6px 8px !important;
+    gap: 4px !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-subtle);
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  
+  #game-sidebar > div:first-child {
+    width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+  }
+  
+  #game-sidebar > div:nth-child(3) {
+    flex-direction: row !important;
+    gap: 4px !important;
+  }
+  
+  .sidebar-btn {
+    width: 52px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 4px !important;
+    gap: 2px !important;
+  }
+  
+  .sidebar-btn svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  
+  .sidebar-label {
+    font-size: 9px !important;
+  }
+  
+  /* 主内容区: 占满剩余空间 */
+  #game-main {
+    flex: 1;
+    min-height: 0;
+  }
+  
+  /* 子视图: 紧凑布局 */
+  .game-subview {
+    font-size: 13px;
+  }
+  
+  /* 聊天消息: 紧凑显示 */
+  .msg {
+    font-size: 12px !important;
+    padding: 4px 8px !important;
+    margin-bottom: 3px !important;
+  }
+  
+  /* 输入区域: 压缩高度 */
+  .tavern-input-wrapper,
+  .tavern-footer {
+    min-height: 48px !important;
+    padding: 4px 8px !important;
+  }
+  
+  .tavern-input {
+    height: 28px !important;
+    font-size: 13px !important;
+    padding: 4px 8px !important;
+  }
+  
+  /* 工具栏按钮: 缩小 */
+  .tavern-actions button,
+  .world-actions button {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 13px !important;
+    padding: 0 !important;
+  }
+}
+
+/* ===== 手机横屏 - 紧凑模式 (500px < height ≤ 650px) ===== */
+@media (min-height: 501px) and (max-height: 650px) and (orientation: landscape) {
+  #game-sidebar {
+    width: 60px !important;
+    min-width: 60px !important;
+    padding: 12px 6px !important;
+    gap: 6px !important;
+  }
+  
+  .sidebar-btn {
+    width: 48px !important;
+    min-height: 48px !important;
+  }
+  
+  .sidebar-label {
+    font-size: 9px !important;
+  }
+  
+  .msg {
+    font-size: 13px !important;
+    padding: 5px 10px !important;
+  }
+}
+
+/* ===== 虚拟键盘激活时 ===== */
+body.keyboard-active {
+  /* 进一步隐藏非关键UI */
+}
+
+body.keyboard-active #game-sidebar {
+  max-height: 44px;
+}
+
+body.keyboard-active .sidebar-label {
+  display: none;
+}
+
+/* ===== 创角界面响应式 ===== */
+@media (max-height: 500px) and (orientation: landscape) {
+  /* 创角内容: 改为上下布局 */
+  #creation-content {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  
+  .creation-form,
+  .creation-preview {
+    max-height: 45% !important;
+    overflow-y: auto !important;
+    font-size: 12px !important;
+  }
+  
+  .step-indicator {
+    padding: 3px 6px !important;
+    gap: 2px !important;
+    font-size: 10px !important;
+  }
+  
+  .creation-masthead {
+    padding: 8px 16px !important;
+  }
+  
+  .creation-masthead h1 {
+    font-size: 18px !important;
+  }
+}
+
+/* ===== 世界地图响应式 ===== */
+@media (max-height: 550px) and (orientation: landscape) {
+  .world-heading {
+    padding: 8px 12px !important;
+    gap: 6px !important;
+  }
+  
+  .world-heading h2 {
+    font-size: 16px !important;
+    letter-spacing: 2px !important;
+  }
+  
+  .world-supplies {
+    font-size: 9px !important;
+    gap: 8px !important;
+  }
+  
+  .world-supplies strong {
+    font-size: 16px !important;
+  }
+}
+
+/* ===== 设置面板响应式 ===== */
+@media (max-height: 600px) {
+  .settings-panel {
+    height: 100vh !important;
+  }
+  
+  .settings-tab-sidebar {
+    width: 60px !important;
+    min-width: 60px !important;
+    padding: 12px 0 !important;
+  }
+  
+  .settings-tab-btn {
+    width: 50px !important;
+    height: 50px !important;
+    font-size: 10px !important;
+  }
+  
+  .settings-content-body {
+    padding: 16px 20px !important;
+    font-size: 13px !important;
+  }
+}

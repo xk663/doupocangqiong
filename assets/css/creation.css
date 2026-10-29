@@ -1,6 +1,6 @@
 /* The Book of Beginnings — warm silk, jade ink, mountain light. */
 #view-creation{--bg-deep:#f2f1e9;--bg-panel:#fffef9;--bg-card:#fffef9;--text-primary:#244e43;--text-body:#43564f;--text-muted:#78877f;--text-dim:#8a978e;--text-secondary:#687e70;--border-subtle:#dce3d8;--border-gold:#b9c8b5;--accent-green:#3f7763;background:#f2f1e9;color:#354d43;flex-direction:row;isolation:isolate}
-.creation-rail{position:relative;flex:0 0 270px;padding:28px 23px;display:flex;flex-direction:column;overflow:hidden;background:#dbe6db url('../images/creation-landscape.png') center/cover no-repeat}
+.creation-rail{position:relative;flex:0 0 270px;padding:28px 23px;display:flex;flex-direction:column;overflow:hidden;background:#dbe6db url('../images/creation-landscape.webp') center/cover no-repeat}
 .creation-rail:before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#f5f2e7ec 0%,#f1f2e859 28%,transparent 48%,#133f3caa 78%,#173a35f5 100%);z-index:0;pointer-events:none}
 .creation-rail>*{position:relative;z-index:1}
 .creation-brand{display:flex;gap:12px;align-items:center;font-family:var(--font-serif);letter-spacing:3px;font-size:19px;color:#284d42}

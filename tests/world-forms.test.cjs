@@ -33,7 +33,7 @@ test('map prompt distinguishes appearance from original character powers',()=>{
  const c=core.transition(data,fresh(),{type:'appearance',avatarId:'xiaoyixian'});const text=core.promptContext(data,c);assert.match(text,/小医仙/);assert.match(text,/仅外观/);assert.match(text,/不获得原著身份/);
 });
 test('each avatar has a complete dedicated atlas for all three forms and every new script parses',()=>{
- for(const a of nav.avatars)for(const form of ['walk','convoy','flight']){const bytes=fs.readFileSync(require('path').join(__dirname,'..',a.sheets[form]));assert.equal(bytes[25],6);assert.equal(bytes.readUInt32BE(16),1536);assert.equal(bytes.readUInt32BE(20),1024);}
+ for(const a of nav.avatars)for(const form of ['walk','convoy','flight']){const info=require('./webp-info.cjs')(fs.readFileSync(require('path').join(__dirname,'..',a.sheets[form])));assert.equal(info.alpha,true);assert.equal(info.width,1536);assert.equal(info.height,1024);}
  for(const p of ['world-navigation','world-core','world-actor','world-renderer','world-ui','world-standalone'])new vm.Script(fs.readFileSync(require('path').join(__dirname,'../assets/js/'+p+'.js'),'utf8'));
 });
 

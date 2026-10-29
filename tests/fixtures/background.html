@@ -1,0 +1,13 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="../../">
+<title>背景设置独立验证</title>
+<script src="assets/vendor/dexie-3.2.4.min.js"></script>
+<script>
+const RealDexie=window.Dexie;
+window.Dexie=class extends RealDexie{constructor(){super('DoupoBackgroundFixture');}};
+function showToast(message){document.getElementById('result').textContent=message;}
+document.addEventListener('DOMContentLoaded',()=>BackgroundSettings.render(document.getElementById('settings-body')));
+</script>
+<script src="assets/js/background-settings.js" defer></script>
+<link rel="stylesheet" href="assets/css/tavern-settings.css"><link rel="stylesheet" href="assets/css/background-settings.css">
+<style>body{margin:0;font:15px/1.8 sans-serif;background:#eef1e6;color:#34503b}header{padding:16px;background:#e7eddc}main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;padding:20px}#settings-panel{padding:20px;min-width:0}#view-title{height:200px;background:#294b3c;color:#fff;padding:20px}.tavern-container{height:200px;padding:20px;background:#eef1e6}.msg-maintext{padding:20px}#result{color:#8d4e2f}@media(max-width:700px){main{display:block}}</style>
+</head><body><header>独立验证 · 使用测试背景库，不读取角色与聊天存档。<p id="result" role="status"></p></header><main><section id="settings-panel"><div id="settings-body"></div></section><aside><div id="view-title">首页背景预览</div><div id="game-view-tavern"><div class="tavern-container"><article class="msg-maintext">正文阅读底色保持清晰。</article></div></div></aside></main></body></html>

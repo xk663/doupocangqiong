@@ -35,12 +35,12 @@
  }
  function context(value){const s=state(value),rows=list(s,true).map(c=>{const r=s.records[c.name]||{};return {name:c.name,...(c.custom?{origin:'玩家原创',bio:c.bio}:{}),...Object.fromEntries(Object.keys(fields).filter(k=>r[k]!==undefined).map(k=>[k,r[k]])),locks:r.locks||{}};});return '【本次人生人物档案】以下是已记录事实与玩家设定，隐藏只影响列表展示，不使人物消失。未知值不得补为原著结局。信任、亲近、立场、恩怨与承诺各自独立，邀约可被拒绝。锁定字段须保持，除非玩家先解锁。\n'+JSON.stringify({time:s.clock?.label||'未明确',characters:rows});}
  async function commit(action){
-  if(saving||((typeof SummaryUI!=='undefined'&&SummaryUI.isBusy())||(typeof ResidenceUI!=='undefined'&&ResidenceUI.isBusy()))||(typeof SaveManager!=='undefined'&&SaveManager.isBusy())||tavernState.isSending||tavernState.isLoading||(typeof WorldMapBridge!=='undefined'&&WorldMapBridge.isBusy())){showToast('请先结束移动或推演，再编辑人物','info');return false;}
+  if(saving||((typeof SummaryUI!=='undefined'&&SummaryUI.isBusy())||(typeof ResidenceUI!=='undefined'&&ResidenceUI.isBusy()))||(typeof SaveManager!=='undefined'&&SaveManager.isBusy())||((tavernState.isSending||tavernState.isEditingMemory)||(typeof BattleBridge!=='undefined'&&BattleBridge.isBusy()))||tavernState.isLoading||(typeof WorldMapBridge!=='undefined'&&WorldMapBridge.isBusy())){showToast('请先结束移动或推演，再编辑人物','info');return false;}
   saving=true;
   try{
    if(!db)throw Error('存档数据库尚未就绪');
    const old=GameState.player,stamp=JSON.stringify(old),chat=tavernState.activeChatId,phase=GameState.phase,next=core.clone(old);next.beautyChronicle=edit(old.beautyChronicle,action);
-   const check=()=>{if(GameState.player!==old||JSON.stringify(GameState.player)!==stamp||tavernState.activeChatId!==chat||GameState.phase!==phase||tavernState.isSending)throw Error('当前人生已变化，编辑未保存');};
+   const check=()=>{if(GameState.player!==old||JSON.stringify(GameState.player)!==stamp||tavernState.activeChatId!==chat||GameState.phase!==phase||((tavernState.isSending||tavernState.isEditingMemory)||(typeof BattleBridge!=='undefined'&&BattleBridge.isBusy())))throw Error('当前人生已变化，编辑未保存');};
    await db.transaction('rw',[db.tavernSettings],async()=>{check();await db.tavernSettings.put({...tavernState.tavernSettings,id:'main',activeChatId:chat,playerState:next,playerStateAt:Date.now()});check();});
    GameState.player=next;const local=saveToLocalStorage();refresh();showToast(local?'人物档案已保存':'人物已保存到数据库，本地备份写入失败',local?'success':'info');return true;
   }catch(e){showToast('未保存：'+e.message,'error');return false;}finally{saving=false;}
@@ -53,7 +53,7 @@
  async function correct(name,index){const values={},locks={};for(const key of Object.keys(fields)){values[key]=document.getElementById(`beauty-edit-${index}-${key}`).value;locks[key]=document.getElementById(`beauty-lock-${index}-${key}`).checked;}const bio=document.getElementById('beauty-bio-'+index);if(bio)values.bio=bio.value;await commit({type:'correct',name,values,locks,reason:document.getElementById('beauty-reason-'+index).value});}
  const actions={visit:{label:'拜访',text:'我想拜访她。先核实我是否知道她的位置、路程与见面条件；没有条件就先寻找线索。'},letter:{label:'传信',text:'我想给她传信。先核实可用的传讯渠道、耗时与费用，不默认即时送达。'},invite:{label:'邀约',text:'我想邀请她同行或见面。让她根据自己的目标、关系和处境自主回应，可以拒绝。'},learn:{label:'请教',text:'我想向她请教。先确定我想学的内容、她掌握的能力与愿意付出的条件，不直接获得功法或实力。'},trade:{label:'交易',text:'我想与她商谈交易。先核对双方实际物品、意愿和价格，达成交易后才结算。'},free:{label:'自由行动',text:'按我的具体意图展开互动，保留对方自主判断，不预设互动成功。'}};
  function draft(name,index){
-  if(saving||tavernState.isSending||(typeof WorldMapBridge!=='undefined'&&WorldMapBridge.isBusy())){showToast('请先结束移动或推演','info');return;}
+  if(saving||((tavernState.isSending||tavernState.isEditingMemory)||(typeof BattleBridge!=='undefined'&&BattleBridge.isBusy()))||(typeof WorldMapBridge!=='undefined'&&WorldMapBridge.isBusy())){showToast('请先结束移动或推演','info');return;}
   if(!list(GameState.player.beautyChronicle,true).some(c=>c.name===name))return;
   const kind=document.getElementById('beauty-action-'+index).value,intent=clean(document.getElementById('beauty-intent-'+index).value,600);if(!Object.hasOwn(actions,kind))return;if(kind==='free'&&!intent){showToast('请填写你的行动意图','info');return;}
   const text='【与'+name+'互动】\n'+actions[kind].text+(intent?'\n我的具体意图：'+intent:'');
