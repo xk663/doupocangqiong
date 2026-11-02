@@ -1,0 +1,238 @@
+{
+  "type": "map",
+  "version": "1.10",
+  "tiledversion": "1.12.2",
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tilewidth": 32,
+  "tileheight": 32,
+  "infinite": false,
+  "layers": [
+    {
+      "id": 1,
+      "name": "无字地形底图",
+      "type": "imagelayer",
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "image": "../../assets/images/regions/blackcorner-v2.webp",
+      "imagewidth": 1536,
+      "imageheight": 1024
+    },
+    {
+      "id": 2,
+      "name": "地点锚点",
+      "type": "objectgroup",
+      "objects": [
+        {
+          "id": 1,
+          "name": "黑角域",
+          "point": true,
+          "x": 768,
+          "y": 962.56,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackcorner"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackcorner"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ],
+          "type": "region"
+        },
+        {
+          "id": 2,
+          "name": "黑枫渡口",
+          "point": true,
+          "x": 215.04,
+          "y": 808.96,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackcorner-local-1"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackcorner"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 3,
+          "name": "暗盘坊街",
+          "point": true,
+          "x": 476.16,
+          "y": 593.92,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackcorner-local-2"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackcorner"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "market"
+        },
+        {
+          "id": 4,
+          "name": "荒坡集营",
+          "point": true,
+          "x": 660.48,
+          "y": 409.6,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackcorner-local-3"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackcorner"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 5,
+          "name": "巡卫石楼",
+          "point": true,
+          "x": 1075.2,
+          "y": 348.16,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackcorner-local-4"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackcorner"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 6,
+          "name": "火谷驿亭",
+          "point": true,
+          "x": 1182.72,
+          "y": 225.28,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackcorner-local-5"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackcorner"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "inn"
+        },
+        {
+          "id": 7,
+          "name": "旧市讯榜",
+          "point": true,
+          "x": 706.56,
+          "y": 194.56,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackcorner-local-6"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackcorner"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "guild"
+        }
+      ]
+    }
+  ],
+  "width": 48,
+  "height": 32,
+  "nextlayerid": 3,
+  "nextobjectid": 8
+}

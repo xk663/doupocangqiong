@@ -12,3 +12,9 @@ test('relay denies other origins, arbitrary destinations, sensitive paths and un
  const response=await fetch(base+'/__gemini_proxy/v1beta/models',{headers:{Origin:base}});assert.equal(response.status,200);assert.equal(calls,1);
 });
 test('relay preserves upstream errors without exposing extra headers and serves the real page',async t=>{const{base}=await start(t,async()=>Response.json({error:'unavailable'},{status:500,headers:{'x-private':'never-forward'}}));const response=await fetch(base+'/__gemini_proxy/v1beta/models');assert.equal(response.status,500);assert.equal(response.headers.get('x-private'),null);assert.equal((await response.json()).error,'unavailable');assert.equal((await fetch(base+'/index.html')).status,200);});
+
+test('relay forwards only the allowlisted model identity headers for frontend route checks',async t=>{
+ const {base}=await start(t,async()=>Response.json({candidates:[]},{headers:{'x-actual-model':'gemini-3.8-flash-high','x-upstream-model':'gemini-3.8-flash-high','x-model-version':'gemini-3.8-flash','authorization':'PRIVATE','x-private':'PRIVATE'}}));
+ const response=await fetch(base+'/__gemini_proxy/v1beta/models/example:generateContent',{method:'POST',headers:{'content-type':'application/json'},body:'{"contents":[]}'});
+ assert.equal(response.headers.get('x-actual-model'),'gemini-3.8-flash-high');assert.equal(response.headers.get('x-upstream-model'),'gemini-3.8-flash-high');assert.equal(response.headers.get('x-model-version'),'gemini-3.8-flash');assert.equal(response.headers.get('authorization'),null);assert.equal(response.headers.get('x-private'),null);
+});

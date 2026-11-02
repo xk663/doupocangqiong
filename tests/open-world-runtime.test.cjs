@@ -25,13 +25,15 @@ test('actual assembled model prompt receives the open-world guardrails',()=>{
   for(const phrase of ['门禁、费用','不得移植其他作品的修炼阶序','普通城镇、商铺或寻常关卡的守卫','NPC测试规则'])assert.ok(outbound.includes(phrase),phrase);
 });
 
-test('NPC and style defaults do not use unrelated realm or magic systems',()=>{
-  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
-  const npc=html.match(/var NPC_DYNAMIC_RULES = \[([\s\S]*?)\n\];/);
-  const style=html.match(/var DEFAULT_STYLE_GUIDE =([\s\S]*?)\n\nfunction getStyleGuide/);
+for(const [format,newline] of [['LF','\n'],['CRLF','\r\n']]){
+test('NPC and style defaults do not use unrelated realm or magic systems ('+format+')',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8').replace(/\r\n?/g,'\n').replace(/\n/g,newline);
+  const npc=html.match(/var NPC_DYNAMIC_RULES = \[([\s\S]*?)\r?\n\];/);
+  const style=html.match(/var DEFAULT_STYLE_GUIDE =([\s\S]*?)\r?\n\r?\nfunction getStyleGuide/);
   assert.ok(npc&&style);
   const rules=npc[0]+'\n'+style[0];
   assert.match(rules,/斗之气九段/);
   assert.match(rules,/普通守卫不得无背景地高出玩家多个大境界/);
   assert.doesNotMatch(rules,/筑基以上每层人数锐减|修仙界冷酷/);
 });
+}

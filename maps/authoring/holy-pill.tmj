@@ -1,0 +1,238 @@
+{
+  "type": "map",
+  "version": "1.10",
+  "tiledversion": "1.12.2",
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tilewidth": 32,
+  "tileheight": 32,
+  "infinite": false,
+  "layers": [
+    {
+      "id": 1,
+      "name": "无字地形底图",
+      "type": "imagelayer",
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "image": "../../assets/images/regions/holy-pill-v2.webp",
+      "imagewidth": 1536,
+      "imageheight": 1024
+    },
+    {
+      "id": 2,
+      "name": "地点锚点",
+      "type": "objectgroup",
+      "objects": [
+        {
+          "id": 1,
+          "name": "圣丹城",
+          "point": true,
+          "x": 768,
+          "y": 962.56,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "holy-pill"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "holy-pill"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ],
+          "type": "city"
+        },
+        {
+          "id": 2,
+          "name": "圣丹外关",
+          "point": true,
+          "x": 153.6,
+          "y": 747.52,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "holy-pill-local-1"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "holy-pill"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "gate"
+        },
+        {
+          "id": 3,
+          "name": "丹塔迎客广场",
+          "point": true,
+          "x": 414.72,
+          "y": 378.88,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "holy-pill-local-2"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "holy-pill"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 4,
+          "name": "丹会公讯苑",
+          "point": true,
+          "x": 660.48,
+          "y": 634.88,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "holy-pill-local-3"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "holy-pill"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "guild"
+        },
+        {
+          "id": 5,
+          "name": "百草交易环街",
+          "point": true,
+          "x": 1029.12,
+          "y": 399.36,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "holy-pill-local-4"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "holy-pill"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "market"
+        },
+        {
+          "id": 6,
+          "name": "鉴药阅册廊",
+          "point": true,
+          "x": 1290.24,
+          "y": 716.8,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "holy-pill-local-5"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "holy-pill"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 7,
+          "name": "青穹客楼",
+          "point": true,
+          "x": 798.72,
+          "y": 153.6,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "holy-pill-local-6"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "holy-pill"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "inn"
+        }
+      ]
+    }
+  ],
+  "width": 48,
+  "height": 32,
+  "nextlayerid": 3,
+  "nextobjectid": 8
+}

@@ -72,6 +72,16 @@ test('context budget reserves output capacity and prunes complete old turns',()=
   assert.equal(result.removedMessages,2);assert.ok(result.estimatedTokens<=80);assert.equal(result.messages.at(-1).content,'current');
   assert.throws(()=>core.composePrompt({plan:core.promptPlan({characterCard:{description:'x'.repeat(1000)}}),maxContext:100,maxOutput:50}),/预算/);
 });
+
+test('runtime format instructions retain an enabled preset length rule without demanding a second short maintext',()=>{
+ const {state}=context(['assembleTavernPrompt']);
+ const preset={settings:{openai_max_context:131072,openai_max_tokens:65535},prompts:[{identifier:'length',role:'system',content:'可见正文不少于1500字。'},{identifier:'format',content:'正文使用<game></game>包裹。'}],prompt_order:[{character_id:100001,order:[{identifier:'length',enabled:true},{identifier:'format',enabled:true}]}]};
+ const result=state.assembleTavernPrompt({preset,characterCard:{name:'角色'},userInput:'继续辨药。',preview:true});
+ assert.equal(result.messages.filter(m=>m.content==='可见正文不少于1500字。').length,1);
+ assert.match(result.systemMsg,/整轮只写一份完整正文/);assert.match(result.systemMsg,/字数要求统计可见正文/);
+ assert.doesNotMatch(result.systemMsg,/请使用以下 Markdown 二级标题组织正文与总结/);
+ assert.equal(core.requestBody({backend:'gemini',model:'gemini-fixture'},result.messages,core.presetOptions(preset),true).generationConfig.maxOutputTokens,65535);
+});
 test('content parsing accumulates split sections and plain text',()=>{
   let shown='';const p=core.streamParser();p.onTag((tag,text)=>{if(tag==='maintext')shown=text;});
   p.feed('## main');p.feed('text\n你好');p.feed('，世界');assert.equal(shown,'你好，世界');
@@ -117,6 +127,165 @@ test('JSON and PNG tEXt character cards preserve Unicode; invalid cards fail cle
   await assert.rejects(core.importCard({name:'bad.json',size:2,text:async()=>'{}'}),/名称和描述/);
 });
 const turnFunctions=['runTavernTurn','setTavernSendingUI','stopTavernStream','regenerateLastTavern','parseUpstore','extractVariables','mergeVariables'];
+
+function sceneGame() {
+  const requests=[];
+  let reply='待客如常。';
+  const h=context([...turnFunctions,'assembleTavernPrompt','sendTavernMessage','callLLM','callLLMStream','resolveModel','getTavernApi'],{
+    ResidenceCore:require('../assets/js/residence-core.js'),PresetCore:require('../assets/js/preset-core.js'),
+    TavernCore:{...core,request:(api,msgs,opts,chunk)=>core.request(api,msgs,opts,chunk,async(url,req)=>{
+      requests.push({url,body:JSON.parse(req.body)});
+      if(chunk)return new Response('data: '+JSON.stringify({choices:[{delta:{content:reply}}]})+'\n\ndata: [DONE]\n\n',{headers:{'content-type':'text/event-stream'}});
+      return Response.json({choices:[{message:{content:reply}}]});
+    })},switchGameView(){},ResidenceUI:{clock:()=>'年一·初一',isBusy:()=>false}
+  });
+  const s=h.state;
+  installWorldBridge(s);
+  s.WorldState.specificSpot='坊市';
+  h.el('tavern-input').focus=()=>{};
+  vm.runInContext(fs.readFileSync(path.join(__dirname,'../assets/js/scene-dialogue.js'),'utf8'),s);
+  s.GameState.settings.apis.push(...['map','residence'].map(id=>({id,url:'https://'+id+'.example/v1',model:id+'-model'})));
+  s.GameState.settings.sceneDialogue={map:'map',residence:'residence'};
+  return {...h,requests,respond(text,updates=[]){reply=text+'<residence_updates>'+JSON.stringify(updates)+'</residence_updates>';}};
+}
+
+test('map and residence drafts use their configured HTTP endpoints and resolve one evidenced visit in the main chat',async()=>{
+  const h=sceneGame(),s=h.state,input=h.el('tavern-input');
+  const before=JSON.stringify(s.GameState.player);
+  input.value='未发草稿';s.WorldMapBridge.talkIntent('su-merchant');assert.equal(input.value,'未发草稿');
+  input.value='';s.WorldMapBridge.talkIntent('su-merchant');assert.equal(input.sceneDraft.npcId,'su-merchant');
+  input.value='这几天坊市的生意如何？';s.SceneDialogue.edited(input);
+  const preview=s.prepareTavernRequest(s.getActiveChat(),input.value,[],true);
+  assert.equal(preview.requestOptions.apiId,'map');assert.equal(JSON.stringify(s.GameState.player),before);assert.equal(h.requests.length,0);
+  const line='苏掌柜答应明早来访。';
+  h.respond(line,[{action:'track',kind:'visit',subject:'苏掌柜',evidence:line},{action:'record',kind:'visit',title:'已经抵达',evidence:line}]);
+  await s.sendTavernMessage();
+  assert.equal(h.requests.length,1,JSON.stringify(h.notices));
+  assert.match(h.requests[0].url,/map\.example/);assert.equal(h.requests[0].body.model,'map-model');
+  assert.equal(h.requests[0].body.messages.filter(m=>m.role==='user').length,1);
+  const item=s.GameState.player.sceneAgenda.items[0];assert.equal(item.status,'open');assert.equal(s.GameState.player.residence,undefined);
+  assert.equal(input.value,'');assert.equal(s.GameState.player.exploration.trust['su-merchant'],0);
+  s.SceneDialogue.draft('【驻地行动 · 等候】\n在门前等候。','residence');
+  const arrived='苏掌柜推门而入。';h.respond(arrived,[{action:'resolve',id:item.id,evidence:arrived},{action:'record',title:'有人来了',kind:'visit',evidence:arrived}]);
+  s.tavernState.presets[0].settings.stream_openai=false;
+  await s.sendTavernMessage();
+  assert.match(h.requests[1].url,/residence\.example/);assert.equal(h.requests[1].body.model,'residence-model');
+  assert.ok(h.requests[1].body.messages[0].content.includes(item.id));
+  assert.equal(s.GameState.player.sceneAgenda.items[0].status,'done');
+  await s.runTavernTurn('',true);
+  assert.equal(s.GameState.player.residence.events.length,1);assert.equal(s.getActiveChat().messages.length,4);
+  assert.equal(h.records.get('tavernSettings:main').playerState.sceneAgenda.items[0].status,'done');
+  assert.doesNotMatch(JSON.stringify(s.getActiveChat()),/LOCAL-SECRET/);
+});
+
+test('stale scene draft stays editable, disabled routes never silently contact another API, failed commits leave no agenda',async()=>{
+  const h=sceneGame(),s=h.state,input=h.el('tavern-input');
+  s.WorldMapBridge.talkIntent('su-merchant');s.WorldState.specificSpot='别处';
+  await s.sendTavernMessage();assert.equal(h.requests.length,0);assert.ok(input.value);assert.equal(s.getActiveChat().messages.length,0);
+  input.value='';s.SceneDialogue.draft('【驻地行动】\n看看药炉。','residence');
+  s.GameState.settings.apis.find(a=>a.id==='residence').enabled=false;
+  await s.sendTavernMessage();assert.equal(h.requests.length,0);assert.ok(h.notices.some(n=>n.msg.includes('停用')));
+  s.GameState.settings.apis.find(a=>a.id==='residence').enabled=true;
+  const line='药炉暂时停用。';h.respond(line,[{action:'track',kind:'facility',subject:'药炉',evidence:line}]);
+  s.db.tavernSettings.put=async()=>{throw Error('quota');};
+  await s.runTavernTurn('',true);assert.equal(h.requests.length,1);assert.equal(s.GameState.player.sceneAgenda,undefined);
+  assert.equal(s.getActiveChat().messages.length,1);
+});
+
+test('scene records stay scoped to the subject and site and reject hidden, future and negated evidence',()=>{
+  const {state:s}=sceneGame(),link=s.SceneDialogue,scene=link.capture({source:'map',npcId:'su-merchant',name:'苏掌柜'});
+  const line='苏掌柜答应明日来访。',track={action:'track',kind:'visit',subject:'苏掌柜',evidence:line};
+  assert.equal(link.apply(undefined,[track],'<think>\n'+line+'\n</think>\n无事发生。',scene,'u1',[]),undefined);
+  const agenda=link.apply(undefined,[track],line,scene,'u1',[]);
+  const away={...scene,world:{location:'他城'},target:{source:'residence'}};
+  assert.equal(link.relevant(agenda,away).length,0);
+  assert.equal(link.relevant(agenda,{...scene,target:{npcId:'someone-else'}}).length,0);
+  for(const evidence of ['苏掌柜尚未到访。','苏掌柜明天来到此地。','听说苏掌柜已经到场。']){
+    const change={action:'resolve',id:agenda.items[0].id,evidence};
+    assert.equal(link.apply(agenda,[change],evidence,{...scene,target:{source:'residence'}},'u2',[]).items[0].status,'open');
+  }
+  const cancel='苏掌柜取消了约定。';
+  assert.equal(link.apply(agenda,[{action:'cancel',id:agenda.items[0].id,evidence:cancel}],cancel,{...scene,target:null},'u2',[]).items[0].status,'cancelled');
+});
+
+test('scene progress survives export/import, follows rewind and the off switch, and reads an old save without backfilling it',async()=>{
+  const h=sceneGame(),s=h.state;
+  for(const name of ['takeSnapshot','rewindToSnapshot','buildGameSnapshot','validateGameSnapshot','restoreGameSnapshot'])vm.runInContext(source(name),s);
+  const old=s.buildGameSnapshot();
+  const line='药炉暂时停用。';
+  s.SceneDialogue.draft('【驻地行动】\n看一看药炉。','residence');
+  h.respond(line,[{action:'track',kind:'facility',subject:'药炉',evidence:line}]);
+  await s.sendTavernMessage();
+  const item=s.GameState.player.sceneAgenda.items[0],save=JSON.parse(JSON.stringify(s.buildGameSnapshot()));
+  assert.ok(!JSON.stringify(save).includes('LOCAL-SECRET'));
+  const progress='药炉正在检修。';
+  h.respond(progress,[{action:'progress',id:item.id,evidence:progress}]);
+  await s.runTavernTurn('回来看看',false);
+  assert.equal(s.GameState.player.sceneAgenda.items[0].evidence,progress);
+  assert.equal(s.GameState.player.sceneAgenda.items[0].status,'open');
+  await s.rewindToSnapshot(s.TimeRewind.snapshots.at(-1).id);
+  assert.equal(s.GameState.player.sceneAgenda.items[0].evidence,line);
+  await s.restoreGameSnapshot(save);
+  assert.equal(s.GameState.player.sceneAgenda.items[0].id,item.id);
+  s.GameState.settings.sceneDialogue.enabled=false;
+  const prior=JSON.stringify(s.GameState.player.sceneAgenda);
+  await s.runTavernTurn('再查看',false);
+  assert.doesNotMatch(JSON.stringify(h.requests.at(-1).body.messages[0]),/【本轮场景联动】/);
+  assert.equal(JSON.stringify(s.GameState.player.sceneAgenda),prior);
+  await s.restoreGameSnapshot(old);
+  assert.equal(s.GameState.player.sceneAgenda,undefined);
+  delete s.GameState.player.exploration;
+  s.prepareTavernRequest(s.getActiveChat(),'普通输入',[],true);
+  assert.equal(s.GameState.player.exploration,undefined);
+});
+test('a failed streamed turn retains its response separately from story data with a persistent failure phase',async()=>{
+ const failure=require('../assets/js/tavern-failure-ui.js').create();
+ const {state}=context(turnFunctions,{TavernFailureUI:failure,callLLMStream:async(messages,opts,onChunk)=>{opts.onResponseText('已接收的片段');onChunk('已接收的片段');throw Error('模拟传输结束异常');}});
+ const before=JSON.stringify(state.GameState.player);await state.runTavernTurn('继续观察',false);
+ const entry=failure.get('chat-a');assert.equal(entry.phase,'response');assert.equal(entry.body,'已接收的片段');assert.equal(state.getActiveChat().messages.length,1);assert.equal(state.getActiveChat().messages[0].role,'user');assert.equal(JSON.stringify(state.GameState.player),before);
+});
+test('post-processing and save failures retain the full received response, and a successful replay clears the failure',async()=>{
+ for(const phase of ['process','save']){
+  const failure=require('../assets/js/tavern-failure-ui.js').create(),reply='完整正文。<upstore>addSmallSum:gold:3</upstore>';
+  const {state}=context(turnFunctions,{TavernFailureUI:failure,callLLMStream:async()=>reply});
+  let restore;
+  if(phase==='process'){const original=state.StoryQuests;state.StoryQuests={...original,extract(){throw Error('模拟处理失败');}};restore=()=>state.StoryQuests=original;}
+  else{const put=state.db.chats.put;state.db.chats.put=async chat=>{if(chat.messages.at(-1)?.role==='assistant')throw Error('模拟写入失败');return put(chat);};restore=()=>state.db.chats.put=put;}
+  await state.runTavernTurn('行动',false);assert.equal(failure.get('chat-a').phase,phase);assert.equal(failure.get('chat-a').body,reply);assert.equal(state.getActiveChat().variables.gold,10);assert.equal(state.getActiveChat().messages.length,1);
+  restore();await state.regenerateLastTavern();assert.equal(failure.get('chat-a'),null);assert.equal(state.getActiveChat().messages.length,2);assert.equal(state.getActiveChat().variables.gold,13);
+ }
+});
+
+test('route warnings appear only after the response and narrative commit, and metadata survives saving',async()=>{
+  const route=require('../assets/js/model-route-core.js').create('gemini-4-argon-high');route.observe({modelVersion:'gemini-3.8-flash-high'});const audit=route.result();let notices=0,finished=false;
+  const {state,records}=context(turnFunctions,{ModelRouteUI:{notify(value){notices++;assert.equal(value.status,'mismatch');assert.equal(finished,true);assert.equal(state.tavernState.isSending,false);assert.equal(records.get('chats:chat-a').messages.at(-1).modelAudit.status,'mismatch');}},callLLMStream:async(messages,opts,onChunk)=>{onChunk('正文');assert.equal(notices,0);opts.onModelAudit(audit);assert.equal(notices,0);finished=true;return '正文';}});
+  await state.runTavernTurn('观察',false);assert.equal(notices,1);assert.equal(state.getActiveChat().messages.at(-1).content,'正文');assert.equal(state.getActiveChat().messages.at(-1).modelAudit.requestedModel,'gemini-4-argon-high');
+});
+
+test('request target metadata shares the assistant transaction without changing narrative or secrets',async()=>{
+  const target=await require('../assets/js/model-probe-core.js').target({id:'original-api',backend:'gemini',url:'http://localhost:8080',apiKey:'DO-NOT-SAVE'},'resolved-model');
+  const {state,records}=context(turnFunctions,{callLLMStream:async(messages,opts)=>{opts.onRequestTarget(target);return '正常正文';}});
+  await state.runTavernTurn('观察',false);
+  const saved=records.get('chats:chat-a').messages.at(-1);assert.equal(saved.content,'正常正文');assert.equal(saved.modelProbeTarget.apiId,'original-api');assert.equal(saved.modelProbeTarget.model,'resolved-model');assert.doesNotMatch(JSON.stringify(saved),/DO-NOT-SAVE|apiKey/);
+  const failed=context(turnFunctions,{callLLMStream:async(messages,opts)=>{opts.onRequestTarget(target);return '未保存';}});failed.state.db.transaction=async()=>{throw Error('quota');};await failed.state.runTavernTurn('观察',false);assert.ok(!failed.state.getActiveChat().messages.some(m=>m.modelProbeTarget));
+});
+
+test('ordinary turns do not request or persist the retired text-profile analysis',async()=>{
+  const h=context(turnFunctions,{callLLMStream:async(messages,opts)=>{
+    assert.equal(opts.onResponseProfile,undefined);assert.equal(opts.profileContext,undefined);return '正常正文';
+  }});
+  await h.state.runTavernTurn('观察',false);
+  assert.equal(h.records.get('chats:chat-a').messages.at(-1).modelResponseProfile,undefined);
+});
+
+test('cancelled or failed saves cannot show a route warning for an uncommitted reply',async()=>{
+  const route=require('../assets/js/model-route-core.js').create('requested');route.observe({model:'returned'});const audit=route.result();
+  for(const mode of ['abort','storage','switch']){
+    let warned=0;const {state}=context(turnFunctions,{ModelRouteUI:{notify(){warned++;}},callLLMStream:async(messages,opts)=>{opts.onModelAudit(audit);if(mode==='abort')state.stopTavernStream();if(mode==='switch')state.tavernState.activeChatId='other';return '正文';}});
+    if(mode==='storage')state.db.transaction=async()=>{throw Error('quota');};
+    await state.runTavernTurn('观察',false);assert.equal(warned,0,mode);assert.equal(state.tavernState.chats[0].messages.filter(m=>m.role==='assistant').length,0,mode);
+  }
+});
 
 test('primary game turn passes complete preset options to the non-stream transport and inspection',async()=>{
  let received;const {state}=context(turnFunctions,{callLLM:async(messages,opts)=>{received=opts;return {choices:[{message:{content:'你在院中静候。'}}]};}});

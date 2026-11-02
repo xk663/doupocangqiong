@@ -54,3 +54,28 @@
 /* Accents remain within the existing kicker dimensions. */
 #view-title .landing-kicker{text-shadow:0 1px 6px #061e24,0 0 12px #d6bd7726}
 #view-title .landing-kicker::before,#view-title .landing-kicker::after{background:linear-gradient(90deg,transparent,#789e9b80 18%,#dac58c 72%,#f2dfaa);box-shadow:0 2px 0 #91b7ad16,0 0 6px #d6bd7730;border-right:3px solid #dfcf9e;box-sizing:border-box}
+
+/* Keep landscape controls over the scenery on the left, clear of the characters.
+   Only the content pane scrolls at very short heights, keeping the scene intact. */
+@media (orientation:landscape) and (max-height:500px) {
+ #view-title{overflow:hidden}
+ #view-title .landing-masthead{flex:0 0 auto;padding:6px 4%}
+ #view-title .landing-brand{width:108px;min-height:36px;max-width:40%}
+ #view-title .landing-edition{display:none}
+ #view-title .landing-body{flex:1;min-height:0;align-items:flex-start;padding:4px 4%;overflow-y:auto}
+ #view-title .landing-copy{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"art" "menu" "resume" "links";gap:6px;width:min(340px,40vw);max-width:100%;height:auto;min-height:0;margin:auto 0;padding:0}
+ #view-title .landing-kicker,#view-title .landing-description{display:none}
+ #view-title .landing-copy .landing-title-art{grid-area:art;align-self:center;width:100%;max-width:200px;margin:0}
+ #view-title .landing-title-art img{width:100%;transform:none}
+ #view-title .landing-title-art.logo-unavailable span{font-size:36px}
+ #view-title #title-menu{grid-area:menu;align-self:center;width:100%;max-width:none;margin:0;gap:10px}
+ #view-title #title-menu .title-btn{min-height:56px;padding:9px 12px;gap:4px}
+ #view-title .title-resume{grid-area:resume;width:100%;max-width:none;min-height:36px;margin:0}
+ #view-title #title-resume-source{display:none}
+ #view-title .title-resume p{margin-top:2px}
+ #view-title .landing-links{grid-area:links;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;max-width:none;margin:0;gap:4px}
+ #view-title .landing-links button{flex-direction:column;justify-content:center;gap:3px;min-height:44px;padding:3px 0;font-size:11px;text-align:center;letter-spacing:0}
+ #view-title .landing-links i{display:none}
+ #view-title .landing-footer{flex:0 0 auto;justify-content:flex-start;padding:4px 4% 8px;gap:16px}
+ #view-title .title-motion-toggle{min-height:44px}
+}

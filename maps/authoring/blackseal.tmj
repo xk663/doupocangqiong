@@ -1,0 +1,238 @@
+{
+  "type": "map",
+  "version": "1.10",
+  "tiledversion": "1.12.2",
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tilewidth": 32,
+  "tileheight": 32,
+  "infinite": false,
+  "layers": [
+    {
+      "id": 1,
+      "name": "无字地形底图",
+      "type": "imagelayer",
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "image": "../../assets/images/regions/blackseal-v2.webp",
+      "imagewidth": 1536,
+      "imageheight": 1024
+    },
+    {
+      "id": 2,
+      "name": "地点锚点",
+      "type": "objectgroup",
+      "objects": [
+        {
+          "id": 1,
+          "name": "黑印城",
+          "point": true,
+          "x": 768,
+          "y": 962.56,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackseal"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackseal"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ],
+          "type": "city"
+        },
+        {
+          "id": 2,
+          "name": "黑印城门",
+          "point": true,
+          "x": 184.32,
+          "y": 727.04,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackseal-local-1"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackseal"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "gate"
+        },
+        {
+          "id": 3,
+          "name": "拍场候客坪",
+          "point": true,
+          "x": 506.88,
+          "y": 440.32,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackseal-local-2"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackseal"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 4,
+          "name": "古物交易巷",
+          "point": true,
+          "x": 829.44,
+          "y": 645.12,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackseal-local-3"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackseal"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "market"
+        },
+        {
+          "id": 5,
+          "name": "暗瓦客馆",
+          "point": true,
+          "x": 1029.12,
+          "y": 409.6,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackseal-local-4"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackseal"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "inn"
+        },
+        {
+          "id": 6,
+          "name": "鉴物外廊",
+          "point": true,
+          "x": 1244.16,
+          "y": 768,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackseal-local-5"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackseal"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 7,
+          "name": "南市通行桥",
+          "point": true,
+          "x": 890.88,
+          "y": 215.04,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackseal-local-6"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackseal"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        }
+      ]
+    }
+  ],
+  "width": 48,
+  "height": 32,
+  "nextlayerid": 3,
+  "nextobjectid": 8
+}

@@ -21,7 +21,7 @@ for(const heading of ['', '## maintext\n'])test('upstore stays hidden at every n
     assert.ok(!typing.textContent.includes('<'),typing.textContent);
     assert.ok(!typing.textContent.includes('gold'),typing.textContent);
     state.parser.feed(raw.slice(split));
-    assert.equal(typing.textContent.trim(),'你抵达城门。\n\n\n守卫向你点头。');
+    assert.equal(typing.textContent.trim(),'你抵达城门。\n\n守卫向你点头。');
     const full=state.parser.flushBuffer();assert.equal(full,raw);
     const parsed=state.parseUpstore(full),before={gold:10};
     assert.deepEqual(core.applyOperations(before,parsed.operations),{gold:13,place:'城门'});

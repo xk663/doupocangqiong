@@ -1,0 +1,238 @@
+{
+  "type": "map",
+  "version": "1.10",
+  "tiledversion": "1.12.2",
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tilewidth": 32,
+  "tileheight": 32,
+  "infinite": false,
+  "layers": [
+    {
+      "id": 1,
+      "name": "无字地形底图",
+      "type": "imagelayer",
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "image": "../../assets/images/regions/bone-mountains-v2.webp",
+      "imagewidth": 1536,
+      "imageheight": 1024
+    },
+    {
+      "id": 2,
+      "name": "地点锚点",
+      "type": "objectgroup",
+      "objects": [
+        {
+          "id": 1,
+          "name": "骸骨山脉",
+          "point": true,
+          "x": 768,
+          "y": 962.56,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "bone-mountains"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "bone-mountains"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ],
+          "type": "mountain-range"
+        },
+        {
+          "id": 2,
+          "name": "骸骨山口",
+          "point": true,
+          "x": 322.56,
+          "y": 788.48,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "bone-mountains-local-1"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "bone-mountains"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "gate"
+        },
+        {
+          "id": 3,
+          "name": "白骨岩坡",
+          "point": true,
+          "x": 399.36,
+          "y": 481.28,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "bone-mountains-local-2"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "bone-mountains"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 4,
+          "name": "遗迹外望台",
+          "point": true,
+          "x": 675.84,
+          "y": 143.36,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "bone-mountains-local-3"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "bone-mountains"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 5,
+          "name": "避风骨脊营",
+          "point": true,
+          "x": 1059.84,
+          "y": 348.16,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "bone-mountains-local-4"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "bone-mountains"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 6,
+          "name": "石沟净水湾",
+          "point": true,
+          "x": 1305.6,
+          "y": 655.36,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "bone-mountains-local-5"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "bone-mountains"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 7,
+          "name": "古兽纹道",
+          "point": true,
+          "x": 752.64,
+          "y": 727.04,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "bone-mountains-local-6"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "bone-mountains"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        }
+      ]
+    }
+  ],
+  "width": 48,
+  "height": 32,
+  "nextlayerid": 3,
+  "nextobjectid": 8
+}

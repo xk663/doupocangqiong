@@ -1,0 +1,238 @@
+{
+  "type": "map",
+  "version": "1.10",
+  "tiledversion": "1.12.2",
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tilewidth": 32,
+  "tileheight": 32,
+  "infinite": false,
+  "layers": [
+    {
+      "id": 1,
+      "name": "无字地形底图",
+      "type": "imagelayer",
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "image": "../../assets/images/regions/mo-city-v2.webp",
+      "imagewidth": 1536,
+      "imageheight": 1024
+    },
+    {
+      "id": 2,
+      "name": "地点锚点",
+      "type": "objectgroup",
+      "objects": [
+        {
+          "id": 1,
+          "name": "漠城",
+          "point": true,
+          "x": 768,
+          "y": 962.56,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "mo-city"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "mo-city"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ],
+          "type": "city"
+        },
+        {
+          "id": 2,
+          "name": "风沙城门",
+          "point": true,
+          "x": 184.32,
+          "y": 737.28,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "mo-city-local-1"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "mo-city"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "gate"
+        },
+        {
+          "id": 3,
+          "name": "旧图铺巷",
+          "point": true,
+          "x": 384,
+          "y": 389.12,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "mo-city-local-2"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "mo-city"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 4,
+          "name": "砂岩交易街",
+          "point": true,
+          "x": 675.84,
+          "y": 624.64,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "mo-city-local-3"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "mo-city"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "market"
+        },
+        {
+          "id": 5,
+          "name": "驼铃歇脚院",
+          "point": true,
+          "x": 967.68,
+          "y": 317.44,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "mo-city-local-4"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "mo-city"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "inn"
+        },
+        {
+          "id": 6,
+          "name": "净水井台",
+          "point": true,
+          "x": 1259.52,
+          "y": 716.8,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "mo-city-local-5"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "mo-city"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 7,
+          "name": "西城望沙台",
+          "point": true,
+          "x": 768,
+          "y": 122.88,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "mo-city-local-6"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "mo-city"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        }
+      ]
+    }
+  ],
+  "width": 48,
+  "height": 32,
+  "nextlayerid": 3,
+  "nextobjectid": 8
+}

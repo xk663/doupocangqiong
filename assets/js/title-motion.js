@@ -7,7 +7,7 @@
     var scene = document.createElement('div');
     scene.className = 'title-motion-scene';
     scene.setAttribute('aria-hidden', 'true');
-    scene.innerHTML = '<img class="title-motion-art" src="assets/images/title-gu-reunion.webp?v=7" alt=""><canvas class="title-motion-render"></canvas><div class="title-motion-sun"></div><div class="title-motion-mist far"></div><div class="title-motion-mist"></div><canvas class="title-motion-petals"></canvas>';
+    scene.innerHTML = '<img class="title-motion-art" src="assets/images/title-gu-reunion.webp?v=8" alt=""><canvas class="title-motion-render"></canvas><div class="title-motion-sun"></div><div class="title-motion-mist far"></div><div class="title-motion-mist"></div><canvas class="title-motion-petals"></canvas>';
     root.prepend(scene);
     var toggle = document.createElement('button');
     toggle.type = 'button';
@@ -23,6 +23,9 @@
     var paused = reduced.matches, active = false, raf = null, last = null, time = 0;
     var w = 1, h = 1, targetX = 0, targetY = 0, mouseX = 0, mouseY = 0;
     var gl = null, renderer = null;
+    // Spend pixels on the source artwork, with a smaller decorative overlay.
+    // Both budgets are independent of screen DPR; animation work is capped too.
+    var maxScenePixels = 1920 * 1080, maxPetalPixels = 400000, frameInterval = 1000 / 24;
     var petals = Array.from({length:17}, function (_, i) {
       var layer = i < 10 ? 0 : i < 15 ? 1 : 2;
       return {phase:i*2.39996, offset:(i*.61803398875)%1, lane:(i*.381966)%1, layer:layer,
@@ -32,15 +35,20 @@
       var rect = root.getBoundingClientRect();
       if (!rect.width || !rect.height) return;
       w = rect.width; h = rect.height;
-      var d = Math.min(window.devicePixelRatio || 1, 1.5);
-      [canvas, surface].forEach(function (c) { c.width = Math.round(w*d); c.height = Math.round(h*d); });
-      ctx.setTransform(d,0,0,d,0,0);
+      var d = window.devicePixelRatio || 1;
+      var sceneScale = Math.min(d, Math.sqrt(maxScenePixels / (w*h)));
+      var petalScale = Math.min(d, 1, Math.sqrt(maxPetalPixels / (w*h)));
+      surface.width = Math.max(1, Math.floor(w*sceneScale));
+      surface.height = Math.max(1, Math.floor(h*sceneScale));
+      canvas.width = Math.max(1, Math.floor(w*petalScale));
+      canvas.height = Math.max(1, Math.floor(h*petalScale));
+      ctx.setTransform(canvas.width/w,0,0,canvas.height/h,0,0);
       if (gl) gl.viewport(0,0,surface.width,surface.height);
     }
     function initRenderer() {
       if (!image.naturalWidth) return;
       try {
-        gl = surface.getContext('webgl', {alpha:false, antialias:false, powerPreference:'low-power'});
+        gl = surface.getContext('webgl', {alpha:false, antialias:false, depth:false, stencil:false, powerPreference:'low-power'});
         if (!gl) return;
         function compile(type, source) {
           var shader = gl.createShader(type);
@@ -49,7 +57,11 @@
           return shader;
         }
         var vertex = compile(gl.VERTEX_SHADER, 'attribute vec2 p;varying vec2 v;void main(){v=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0.,1.);}');
-        var fragment = compile(gl.FRAGMENT_SHADER, `precision mediump float;
+        var fragment = compile(gl.FRAGMENT_SHADER, `#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
 varying vec2 v;uniform sampler2D image;uniform float t;uniform vec2 ratio;uniform vec2 mouse;
 float spot(vec2 p,vec2 mid,vec2 size){vec2 d=(p-mid)/size;return exp(-dot(d,d)*2.8);}
 void main(){vec2 uv=v;float ar=ratio.x/ratio.y;float ia=1.77665;
@@ -130,13 +142,14 @@ vec3 col=texture2D(image,clamp(uv,.001,.999)).rgb;float warm=(.5+.5*sin(t*.3))*.
     function draw(now) {
       raf=null;
       if (!active || paused) return;
+      if (last!==null && now-last<frameInterval) { raf=requestAnimationFrame(draw); return; }
       var dt=last===null?0:Math.min((now-last)/1000,.05);last=now;time+=dt;
       mouseX+=(targetX-mouseX)*Math.min(1,dt*4);mouseY+=(targetY-mouseY)*Math.min(1,dt*4);
       paintImage();paintPetals();raf=requestAnimationFrame(draw);
     }
     function refresh() {
       var wasActive=active;
-      active=root.classList.contains('active')&&!document.hidden;
+      active=root.classList.contains('active')&&!document.hidden&&!document.documentElement.classList.contains('has-user-background');
       root.classList.toggle('motion-paused',paused||!active);
       toggle.textContent=paused?'动态背景 · 关':'动态背景 · 开';toggle.setAttribute('aria-pressed',String(paused));
       toggle.setAttribute('aria-label',paused?'播放主界面动态':'暂停主界面动态');
@@ -156,6 +169,7 @@ vec3 col=texture2D(image,clamp(uv,.001,.999)).rgb;float warm=(.5+.5*sin(t*.3))*.
     document.addEventListener('visibilitychange',refresh);
     reduced.addEventListener('change',function(){paused=reduced.matches;refresh();});
     new MutationObserver(refresh).observe(root,{attributes:true,attributeFilter:['class']});
+    new MutationObserver(refresh).observe(document.documentElement,{attributes:true,attributeFilter:['class']});
     new ResizeObserver(function(){resize();if(active&&paused)paintImage();}).observe(root);
     if(image.complete&&image.naturalWidth)initRenderer();else image.addEventListener('load',initRenderer,{once:true});
     resize();refresh();

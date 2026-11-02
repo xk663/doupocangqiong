@@ -16,11 +16,13 @@
       "id": 1,
       "name": "无字地形底图",
       "type": "imagelayer",
-      "image": "../../assets/images/world-atlas.png",
+      "image": "../../assets/images/world-atlas-expanded-v4.webp",
       "opacity": 1,
       "visible": true,
       "x": 0,
-      "y": 0
+      "y": 0,
+      "imagewidth": 1536,
+      "imageheight": 1024
     },
     {
       "id": 2,
@@ -34,12 +36,11 @@
         {
           "id": 1,
           "name": "乌坦城",
-          "type": "city",
+          "point": true,
           "x": 368.64,
           "y": 440.32,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -58,17 +59,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "city"
         },
         {
           "id": 2,
           "name": "青山镇",
-          "type": "town",
+          "point": true,
           "x": 261.12,
           "y": 604.16,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -87,17 +88,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "town"
         },
         {
           "id": 3,
           "name": "魔兽山脉",
-          "type": "mountain-range",
+          "point": true,
           "x": 184.32,
           "y": 491.52,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -116,17 +117,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "mountain-range"
         },
         {
           "id": 4,
           "name": "黑岩城",
-          "type": "city",
+          "point": true,
           "x": 476.16,
           "y": 337.92,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -145,17 +146,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "city"
         },
         {
           "id": 5,
           "name": "漠城",
-          "type": "city",
+          "point": true,
           "x": 368.64,
           "y": 696.32,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -174,17 +175,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "city"
         },
         {
           "id": 6,
           "name": "塔戈尔大沙漠",
-          "type": "desert",
+          "point": true,
           "x": 276.48,
           "y": 839.68,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -203,17 +204,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "desert"
         },
         {
           "id": 7,
           "name": "石漠城",
-          "type": "city",
+          "point": true,
           "x": 460.8,
           "y": 778.24,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -232,19 +233,19 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "city"
         },
         {
           "id": 8,
           "name": "青莲相关地底岩浆洞穴",
-          "type": "cave",
+          "point": true,
           "x": 522.24,
           "y": 860.16,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
-          "visible": true,
+          "visible": false,
           "properties": [
             {
               "name": "worldId",
@@ -261,17 +262,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "cave"
         },
         {
           "id": 9,
           "name": "蛇人族沙漠中心城市与神殿",
-          "type": "settlement",
+          "point": true,
           "x": 153.6,
           "y": 901.12,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -290,17 +291,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "settlement"
         },
         {
           "id": 10,
           "name": "盐城",
-          "type": "city",
+          "point": true,
           "x": 583.68,
           "y": 645.12,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -319,17 +320,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "city"
         },
         {
           "id": 11,
           "name": "加玛帝都",
-          "type": "city",
+          "point": true,
           "x": 568.32,
           "y": 245.76,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -348,17 +349,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "city"
         },
         {
           "id": 12,
           "name": "云岚山",
-          "type": "mountain",
+          "point": true,
           "x": 522.24,
           "y": 143.36,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -377,17 +378,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "mountain"
         },
         {
           "id": 13,
           "name": "镇鬼关",
-          "type": "fortress",
+          "point": true,
           "x": 645.12,
           "y": 399.36,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -406,17 +407,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "fortress"
         },
         {
           "id": 14,
           "name": "黑山要塞",
-          "type": "fortress",
+          "point": true,
           "x": 691.2,
           "y": 276.48,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -435,17 +436,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "fortress"
         },
         {
           "id": 15,
           "name": "玄黄要塞",
-          "type": "fortress",
+          "point": true,
           "x": 629.76,
           "y": 122.88,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -464,17 +465,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "fortress"
         },
         {
           "id": 16,
           "name": "赤壁平原",
-          "type": "plain",
+          "point": true,
           "x": 752.64,
           "y": 122.88,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -493,17 +494,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "plain"
         },
         {
           "id": 17,
           "name": "黑角域",
-          "type": "region",
+          "point": true,
           "x": 706.56,
           "y": 614.4,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -522,17 +523,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "region"
         },
         {
           "id": 18,
           "name": "黑印城",
-          "type": "city",
+          "point": true,
           "x": 645.12,
           "y": 665.6,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -551,17 +552,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "city"
         },
         {
           "id": 19,
           "name": "和平镇",
-          "type": "town",
+          "point": true,
           "x": 768,
           "y": 583.68,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -580,17 +581,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "town"
         },
         {
           "id": 20,
           "name": "迦南学院外院",
-          "type": "academy",
+          "point": true,
           "x": 783.36,
           "y": 532.48,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -609,19 +610,19 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "academy"
         },
         {
           "id": 21,
           "name": "迦南学院内院",
-          "type": "academy",
+          "point": true,
           "x": 721.92,
           "y": 481.28,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
-          "visible": true,
+          "visible": false,
           "properties": [
             {
               "name": "worldId",
@@ -638,17 +639,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "academy"
         },
         {
           "id": 22,
           "name": "天焚炼气塔",
-          "type": "structure",
+          "point": true,
           "x": 768,
           "y": 450.56,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -667,19 +668,19 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "structure"
         },
         {
           "id": 23,
           "name": "学院地下岩浆世界",
-          "type": "underground-region",
+          "point": true,
           "x": 798.72,
           "y": 481.28,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
-          "visible": true,
+          "visible": false,
           "properties": [
             {
               "name": "worldId",
@@ -696,17 +697,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "underground-region"
         },
         {
           "id": 24,
           "name": "天涯城",
-          "type": "city",
+          "point": true,
           "x": 875.52,
           "y": 399.36,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -725,17 +726,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "city"
         },
         {
           "id": 25,
           "name": "天擎山脉",
-          "type": "mountain-range",
+          "point": true,
           "x": 829.44,
           "y": 327.68,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -754,17 +755,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "mountain-range"
         },
         {
           "id": 26,
           "name": "中州",
-          "type": "macro-region",
+          "point": true,
           "x": 1105.92,
           "y": 409.6,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -783,17 +784,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "macro-region"
         },
         {
           "id": 27,
           "name": "天北城",
-          "type": "city",
+          "point": true,
           "x": 983.04,
           "y": 225.28,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -812,17 +813,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "city"
         },
         {
           "id": 28,
           "name": "万蛇峡",
-          "type": "gorge",
+          "point": true,
           "x": 906.24,
           "y": 256,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -841,17 +842,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "gorge"
         },
         {
           "id": 29,
           "name": "栖凤山",
-          "type": "mountain",
+          "point": true,
           "x": 1013.76,
           "y": 143.36,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -870,17 +871,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "mountain"
         },
         {
           "id": 30,
           "name": "天目山脉",
-          "type": "mountain-range",
+          "point": true,
           "x": 1121.28,
           "y": 163.84,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -899,17 +900,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "mountain-range"
         },
         {
           "id": 31,
           "name": "天山血潭",
-          "type": "resource-site",
+          "point": true,
           "x": 1182.72,
           "y": 122.88,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -928,17 +929,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "resource-site"
         },
         {
           "id": 32,
           "name": "雷山／风雷山脉大会区域",
-          "type": "mountain",
+          "point": true,
           "x": 1228.8,
           "y": 225.28,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -957,17 +958,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "mountain"
         },
         {
           "id": 33,
           "name": "天黄城",
-          "type": "city",
+          "point": true,
           "x": 1105.92,
           "y": 501.76,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -986,17 +987,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "city"
         },
         {
           "id": 34,
           "name": "焚炎谷",
-          "type": "sect-territory",
+          "point": true,
           "x": 1213.44,
           "y": 573.44,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -1015,17 +1016,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "sect-territory"
         },
         {
           "id": 35,
           "name": "叶城",
-          "type": "city",
+          "point": true,
           "x": 1059.84,
           "y": 604.16,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -1044,17 +1045,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "city"
         },
         {
           "id": 36,
           "name": "圣丹城",
-          "type": "city",
+          "point": true,
           "x": 1167.36,
           "y": 460.8,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -1073,19 +1074,19 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "city"
         },
         {
           "id": 37,
           "name": "丹塔星域",
-          "type": "sealed-space",
+          "point": true,
           "x": 1213.44,
           "y": 419.84,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
-          "visible": true,
+          "visible": false,
           "properties": [
             {
               "name": "worldId",
@@ -1102,17 +1103,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "sealed-space"
         },
         {
           "id": 38,
           "name": "亡魂山脉",
-          "type": "mountain-range",
+          "point": true,
           "x": 952.32,
           "y": 92.16,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -1131,17 +1132,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "mountain-range"
         },
         {
           "id": 39,
           "name": "天星山脉",
-          "type": "mountain-range",
+          "point": true,
           "x": 1044.48,
           "y": 706.56,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -1160,19 +1161,19 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "mountain-range"
         },
         {
           "id": 40,
           "name": "星陨阁总部／星界",
-          "type": "hidden-space",
+          "point": true,
           "x": 998.4,
           "y": 768,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
-          "visible": true,
+          "visible": false,
           "properties": [
             {
               "name": "worldId",
@@ -1189,17 +1190,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "hidden-space"
         },
         {
           "id": 41,
           "name": "兽域",
-          "type": "region",
+          "point": true,
           "x": 1351.68,
           "y": 706.56,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -1218,17 +1219,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "region"
         },
         {
           "id": 42,
           "name": "骸骨山脉",
-          "type": "mountain-range",
+          "point": true,
           "x": 1259.52,
           "y": 798.72,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -1247,19 +1248,19 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "mountain-range"
         },
         {
           "id": 43,
           "name": "古龙岛",
-          "type": "island-space",
+          "point": true,
           "x": 1428.48,
           "y": 829.44,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
-          "visible": true,
+          "visible": false,
           "properties": [
             {
               "name": "worldId",
@@ -1276,19 +1277,19 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "island-space"
         },
         {
           "id": 44,
           "name": "虚空雷池",
-          "type": "energy-region",
+          "point": true,
           "x": 1474.56,
           "y": 911.36,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
-          "visible": true,
+          "visible": false,
           "properties": [
             {
               "name": "worldId",
@@ -1305,17 +1306,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "energy-region"
         },
         {
           "id": 45,
           "name": "古圣城",
-          "type": "city",
+          "point": true,
           "x": 1397.76,
           "y": 378.88,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -1334,19 +1335,19 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "city"
         },
         {
           "id": 46,
           "name": "古界",
-          "type": "independent-realm",
+          "point": true,
           "x": 1459.2,
           "y": 471.04,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
-          "visible": true,
+          "visible": false,
           "properties": [
             {
               "name": "worldId",
@@ -1363,19 +1364,19 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "independent-realm"
         },
         {
           "id": 47,
           "name": "天墓",
-          "type": "special-realm",
+          "point": true,
           "x": 1459.2,
           "y": 563.2,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
-          "visible": true,
+          "visible": false,
           "properties": [
             {
               "name": "worldId",
@@ -1392,17 +1393,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "special-realm"
         },
         {
           "id": 48,
           "name": "莽荒镇",
-          "type": "town",
+          "point": true,
           "x": 1367.04,
           "y": 92.16,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -1421,17 +1422,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "town"
         },
         {
           "id": 49,
           "name": "莽荒古域",
-          "type": "wild-region",
+          "point": true,
           "x": 1443.84,
           "y": 51.2,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -1450,17 +1451,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "wild-region"
         },
         {
           "id": 50,
           "name": "冥蛇地脉",
-          "type": "underground-region",
+          "point": true,
           "x": 1367.04,
           "y": 901.12,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -1479,19 +1480,19 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "underground-region"
         },
         {
           "id": 51,
           "name": "九幽黄泉",
-          "type": "lake",
+          "point": true,
           "x": 1305.6,
           "y": 952.32,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
-          "visible": true,
+          "visible": false,
           "properties": [
             {
               "name": "worldId",
@@ -1508,17 +1509,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "lake"
         },
         {
           "id": 52,
           "name": "妖火平原",
-          "type": "event-region",
+          "point": true,
           "x": 1274.88,
           "y": 81.92,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -1537,19 +1538,19 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "event-region"
         },
         {
           "id": 53,
           "name": "妖火空间",
-          "type": "sealed-realm",
+          "point": true,
           "x": 1320.96,
           "y": 30.72,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
-          "visible": true,
+          "visible": false,
           "properties": [
             {
               "name": "worldId",
@@ -1566,17 +1567,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "sealed-realm"
         },
         {
           "id": 54,
           "name": "陨落山脉",
-          "type": "mountain-range",
+          "point": true,
           "x": 936.96,
           "y": 686.08,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -1595,17 +1596,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "mountain-range"
         },
         {
           "id": 55,
           "name": "神农山脉",
-          "type": "mountain-range",
+          "point": true,
           "x": 1105.92,
           "y": 901.12,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -1624,19 +1625,19 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "mountain-range"
         },
         {
           "id": 56,
           "name": "药界",
-          "type": "independent-realm",
+          "point": true,
           "x": 1152,
           "y": 983.04,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
-          "visible": true,
+          "visible": false,
           "properties": [
             {
               "name": "worldId",
@@ -1653,17 +1654,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "independent-realm"
         },
         {
           "id": 57,
           "name": "葬天山脉",
-          "type": "mountain-range",
+          "point": true,
           "x": 875.52,
           "y": 102.4,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -1682,19 +1683,19 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "mountain-range"
         },
         {
           "id": 58,
           "name": "魂界",
-          "type": "independent-realm",
+          "point": true,
           "x": 906.24,
           "y": 30.72,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
-          "visible": true,
+          "visible": false,
           "properties": [
             {
               "name": "worldId",
@@ -1711,19 +1712,19 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "independent-realm"
         },
         {
           "id": 59,
           "name": "陀舍古帝洞府",
-          "type": "ancient-realm",
+          "point": true,
           "x": 829.44,
           "y": 552.96,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
-          "visible": true,
+          "visible": false,
           "properties": [
             {
               "name": "worldId",
@@ -1740,19 +1741,19 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "ancient-realm"
         },
         {
           "id": 60,
           "name": "异火广场",
-          "type": "structure",
+          "point": true,
           "x": 890.88,
           "y": 563.2,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
-          "visible": true,
+          "visible": false,
           "properties": [
             {
               "name": "worldId",
@@ -1769,19 +1770,19 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "structure"
         },
         {
           "id": 61,
           "name": "双帝山",
-          "type": "mountain",
+          "point": true,
           "x": 1167.36,
           "y": 348.16,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
-          "visible": true,
+          "visible": false,
           "properties": [
             {
               "name": "worldId",
@@ -1798,7 +1799,8 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "mountain"
         }
       ]
     }

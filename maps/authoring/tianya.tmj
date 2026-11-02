@@ -1,0 +1,238 @@
+{
+  "type": "map",
+  "version": "1.10",
+  "tiledversion": "1.12.2",
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tilewidth": 32,
+  "tileheight": 32,
+  "infinite": false,
+  "layers": [
+    {
+      "id": 1,
+      "name": "无字地形底图",
+      "type": "imagelayer",
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "image": "../../assets/images/regions/tianya-v2.webp",
+      "imagewidth": 1536,
+      "imageheight": 1024
+    },
+    {
+      "id": 2,
+      "name": "地点锚点",
+      "type": "objectgroup",
+      "objects": [
+        {
+          "id": 1,
+          "name": "天涯城",
+          "point": true,
+          "x": 768,
+          "y": 962.56,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "tianya"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "tianya"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ],
+          "type": "city"
+        },
+        {
+          "id": 2,
+          "name": "天涯山门",
+          "point": true,
+          "x": 261.12,
+          "y": 624.64,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "tianya-local-1"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "tianya"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "gate"
+        },
+        {
+          "id": 3,
+          "name": "虫洞候行台",
+          "point": true,
+          "x": 614.4,
+          "y": 286.72,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "tianya-local-2"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "tianya"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 4,
+          "name": "行船整备坊",
+          "point": true,
+          "x": 1029.12,
+          "y": 204.8,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "tianya-local-3"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "tianya"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 5,
+          "name": "远途补给街",
+          "point": true,
+          "x": 1198.08,
+          "y": 512,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "tianya-local-4"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "tianya"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "market"
+        },
+        {
+          "id": 6,
+          "name": "山城客楼",
+          "point": true,
+          "x": 936.96,
+          "y": 716.8,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "tianya-local-5"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "tianya"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "inn"
+        },
+        {
+          "id": 7,
+          "name": "天桥观景坪",
+          "point": true,
+          "x": 552.96,
+          "y": 808.96,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "tianya-local-6"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "tianya"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        }
+      ]
+    }
+  ],
+  "width": 48,
+  "height": 32,
+  "nextlayerid": 3,
+  "nextobjectid": 8
+}

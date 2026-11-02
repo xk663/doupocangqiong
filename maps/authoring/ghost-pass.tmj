@@ -1,0 +1,238 @@
+{
+  "type": "map",
+  "version": "1.10",
+  "tiledversion": "1.12.2",
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tilewidth": 32,
+  "tileheight": 32,
+  "infinite": false,
+  "layers": [
+    {
+      "id": 1,
+      "name": "无字地形底图",
+      "type": "imagelayer",
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "image": "../../assets/images/regions/ghost-pass-v2.webp",
+      "imagewidth": 1536,
+      "imageheight": 1024
+    },
+    {
+      "id": 2,
+      "name": "地点锚点",
+      "type": "objectgroup",
+      "objects": [
+        {
+          "id": 1,
+          "name": "镇鬼关",
+          "point": true,
+          "x": 768,
+          "y": 962.56,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "ghost-pass"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "ghost-pass"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ],
+          "type": "fortress"
+        },
+        {
+          "id": 2,
+          "name": "关外候检坡",
+          "point": true,
+          "x": 721.92,
+          "y": 768,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "ghost-pass-local-1"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "ghost-pass"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "gate"
+        },
+        {
+          "id": 3,
+          "name": "驿骑换乘棚",
+          "point": true,
+          "x": 215.04,
+          "y": 583.68,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "ghost-pass-local-2"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "ghost-pass"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 4,
+          "name": "关军告示廊",
+          "point": true,
+          "x": 430.08,
+          "y": 317.44,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "ghost-pass-local-3"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "ghost-pass"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "guild"
+        },
+        {
+          "id": 5,
+          "name": "石垛望哨",
+          "point": true,
+          "x": 737.28,
+          "y": 122.88,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "ghost-pass-local-4"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "ghost-pass"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 6,
+          "name": "行商避雨院",
+          "point": true,
+          "x": 1152,
+          "y": 245.76,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "ghost-pass-local-5"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "ghost-pass"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "inn"
+        },
+        {
+          "id": 7,
+          "name": "界河旧桥",
+          "point": true,
+          "x": 1090.56,
+          "y": 614.4,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "ghost-pass-local-6"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "ghost-pass"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        }
+      ]
+    }
+  ],
+  "width": 48,
+  "height": 32,
+  "nextlayerid": 3,
+  "nextobjectid": 8
+}

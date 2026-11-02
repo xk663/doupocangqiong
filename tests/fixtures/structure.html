@@ -3,7 +3,7 @@
 <h1>状态与技能保存验证</h1><p>隔离测试数据 · 独立 IndexedDB · 不调用模型 API</p>
 <button id="rebuild">整理正文摘录</button><button id="skills">从正文核对技能</button><button id="failure">模拟保存失败：关闭</button><button id="fact">保存测试事实</button>
 <p id="notice" role="status"></p><article id="summary-body"></article><pre id="records"></pre>
-<script src="../../assets/vendor/dexie-3.2.4.min.js"></script><script src="../../assets/js/tavern-core.js"></script><script src="../../assets/js/memory-core.js"></script><script src="../../assets/js/battle-rules.js"></script><script src="../../assets/js/battle-engine.js"></script><script src="../../assets/js/battle-core.js"></script>
+<script src="../../assets/vendor/dexie-3.2.4.min.js"></script><script src="../../assets/js/model-route-core.js"></script><script src="../../assets/js/tavern-core.js"></script><script src="../../assets/js/memory-core.js"></script><script src="../../assets/js/battle-rules.js"></script><script src="../../assets/js/battle-engine.js"></script><script src="../../assets/js/battle-core.js"></script>
 <script>
 var db=new Dexie('doupo-structure-fixture-v1');db.version(1).stores({chats:'id',tavernSettings:'id'});
 var GameState={player:{name:'测试旅人',lifeId:'isolated',realm:'斗者一星',skills:[{name:'震山掌'}]},settings:{}},tavernState={chats:[],activeChatId:'sample',tavernSettings:{},isLoading:true,isSending:false};

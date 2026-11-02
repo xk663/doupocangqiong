@@ -23,7 +23,7 @@ test('sampled movement stays on path, faces the walking direction and can stop b
  const next=core.transition(data,c,{type:'walk',sceneId:'wutan',x:partial.x,y:partial.y});assert.ok(Math.abs(next.state.pose.y-partial.y)<.01);assert.ok(next.state.vigor>100-trip.energy);assert.ok(next.gameTime.totalHours<trip.hours);
 });
 test('old saves obtain a valid pose and corrupt positions cannot teleport the character',()=>{
- const c=fresh(),old=core.clone(c.state);delete old.pose;assert.deepEqual(core.normalize(data,old,c.player,c.worldState).pose,{sceneId:'wutan',x:50,y:90,direction:0});old.pose={sceneId:'shimo',x:90,y:90};assert.equal(core.normalize(data,old,c.player,c.worldState).pose.sceneId,'wutan');old.pose={sceneId:'wutan',x:99,y:1};assert.equal(core.normalize(data,old,c.player,c.worldState).pose.x,50);
+ const c=fresh(),old=core.clone(c.state);delete old.pose;assert.deepEqual(core.normalize(data,old,c.player,c.worldState).pose,{sceneId:'wutan',x:50,y:73,direction:0});old.pose={sceneId:'shimo',x:90,y:90};assert.equal(core.normalize(data,old,c.player,c.worldState).pose.sceneId,'wutan');old.pose={sceneId:'wutan',x:99,y:1};assert.equal(core.normalize(data,old,c.player,c.worldState).pose.x,50);
 });
 function bridge(){let current=fresh(),failed=false;const s={WorldCore:core,DoupoWorldData:data,Set,console};vm.createContext(s);vm.runInContext(fs.readFileSync(require('path').join(__dirname,'../assets/js/world-bridge.js'),'utf8'),s);s.WorldMapBridge.configure({read:()=>current,isBusy:()=>false,commit(next){if(failed)throw Error('quota');current=next;},toast(){}});return {b:s.WorldMapBridge,get current(){return current;},set failed(v){failed=v;}};}
 test('movement lease prevents overlapping actions and commits once on arrival',()=>{

@@ -32,3 +32,11 @@ test('unsupported thinking modes and tool messages fail before a network request
 });
 
 test('same-origin relay routing is explicit and restricted to the configured local Gemini service',()=>{assert.equal(core.transportURL({...api,localRelay:true},core.endpoint(api.url,'gemini',api.model,true)),'/__gemini_proxy/v1beta/models/gemini-3.8-flash:streamGenerateContent?alt=sse');assert.throws(()=>core.transportURL({...api,localRelay:true},'https://example.org/v1beta/models'));assert.equal(core.transportURL(api,'https://example.org/v1beta/models'),'https://example.org/v1beta/models');});
+
+test('received prose remains recoverable when Gemini rejects a truncated response without committing or exposing thoughts',async()=>{
+ for(const streamed of [false,true]){let received='',visible='',finished=false;
+  await assert.rejects(core.request(api,[],{onResponseText:text=>received+=text,onModelAudit:()=>finished=true},streamed?text=>visible+=text:null,async()=>streamed?stream('data:'+JSON.stringify(packet('已收到但未完成的正文','MAX_TOKENS'))+'\n\n'):Response.json(packet('已收到但未完成的正文','MAX_TOKENS'))),/token 上限/);
+  assert.equal(received,'已收到但未完成的正文');assert.equal(visible,'');assert.equal(finished,false);assert.ok(!received.includes('thought'));
+ }
+ let received='';await assert.rejects(core.request(api,[],{onResponseText:text=>received+=text},()=>{},async()=>stream('data:'+JSON.stringify(packet('缺少结束标记的片段'))+'\n\n')),/未收到 STOP.*已接收/);assert.equal(received,'缺少结束标记的片段');
+});

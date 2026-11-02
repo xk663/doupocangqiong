@@ -1,0 +1,25 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const I=require('../assets/js/place-interactions.js'),P=require('../assets/js/place-scenes.js');
+test('eight pictures have distinct object positions, labels and intentions; home retains its facility actions',()=>{
+ const legacyIds=new Set(['wutan','xiao-home','wutan-market','wutan-inn','wutan-auction','wutan-herbs','wutan-guild','wutan-gate']);assert.equal(Object.keys(I.profiles).filter(id=>legacyIds.has(id)).length,8);const ids=new Set(),layouts=new Set(),prompts=new Set(),labels=new Set();
+ for(const [id,scene] of Object.entries(I.profiles).filter(([id])=>legacyIds.has(id))){assert.equal(scene.name,P.get(id).name);assert.equal(scene.points.length,4);layouts.add(JSON.stringify(scene.points.map(p=>[p.x,p.y])));for(const point of scene.points){assert.ok(point.x>=10&&point.x<=90&&point.y>=20&&point.y<=80);assert.ok(point.label&&point.description&&point.condition);ids.add(point.id);prompts.add(point.prompt);labels.add(point.label);}}
+ assert.equal(ids.size,32);assert.equal(prompts.size,32);assert.equal(labels.size,32);assert.equal(layouts.size,8);assert.equal(I.get('wutan-home'),null);
+});
+test('all scene plans preserve game data and bind to the actual location rather than a stale selection',()=>{
+ for(const [placeId,scene] of Object.entries(I.profiles)){const world={location:P.get(placeId).regionName||'乌坦城',specificSpot:scene.name},state={locationId:placeId,discovered:[placeId]},before=JSON.stringify([world,state]);for(const p of scene.points){const text=I.plan({placeId,id:p.id,world,state,minutes:p.minutes,intent:'我先询问。'});assert.ok(text.includes(scene.name));assert.ok(text.includes(p.prompt));assert.match(text,/仅为计划，不代表已经过去/);assert.match(text,/不自动交易/);}assert.equal(JSON.stringify([world,state]),before);}
+ assert.throws(()=>I.plan({placeId:'wutan-market',id:'market-herb-stall',world:{location:'乌坦城',specificSpot:'药材铺'}}),/地点已变化/);
+ assert.throws(()=>I.plan({placeId:'wutan-market',id:'rest',world:{location:'乌坦城',specificSpot:'坊市长街'}}),/交互点/);
+ assert.throws(()=>I.plan({placeId:'wutan-market',id:'market-herb-stall',world:{location:'乌坦城',specificSpot:'坊市长街'},minutes:-1}),/时长/);
+});
+function harness(){
+ const host={innerHTML:'',querySelectorAll:()=>[]},fields={'game-view-studio':host,'res-action-panel':{innerHTML:''},'res-duration':{value:'15'},'res-intent':{value:'先问清条件'},'tavern-input':{value:'',focus(){}}};let writes=0;
+ const s={PlaceScenes:P,PlaceInteractions:I,ResidenceCore:require('../assets/js/residence-core.js'),ResidenceArt:{render:()=>''},TavernCore:require('../assets/js/tavern-core.js'),GameState:{phase:'game',player:{name:'测试玩家',skills:[],inventory:[{name:'干粮',qty:3}]}},WorldState:{location:'乌坦城',specificSpot:'坊市长街'},GameTime:{hour:22,minute:0,year:1,month:1,day:1},tavernState:{activeChatId:'scene-test'},db:{tavernSettings:{put(){writes++;throw Error('unexpected write');}}},document:{getElementById:id=>fields[id]||null,querySelector:()=>null},showToast:t=>s.notice=t,switchGameView:id=>s.view=id};vm.createContext(s);vm.runInContext(fs.readFileSync('assets/js/residence-ui.js','utf8'),s);return {s,fields,host,get writes(){return writes;}};
+}
+test('the real residence UI switches every picture to its own controls and drafts the selected action without a save or request',()=>{
+ const h=harness(),{s,fields,host}=h;for(const [id,scene] of Object.entries(I.profiles)){s.WorldState.location=P.get(id).regionName||'乌坦城';s.WorldState.location=P.get(id).regionName||'乌坦城';s.WorldState.specificSpot=scene.name;s.GameState.player.exploration={locationId:id,discovered:[id]};const before=JSON.stringify([s.GameState,s.WorldState,s.GameTime]);s.ResidenceUI.render();assert.ok(host.innerHTML.includes('data-public-scene="'+id+'"'));assert.ok(host.innerHTML.includes(scene.points[0].title));assert.ok(!host.innerHTML.includes('休息调养'));assert.ok(!host.innerHTML.includes('undefined'));for(const point of scene.points){assert.ok(host.innerHTML.includes(point.label));fields['tavern-input'].value='';s.ResidenceUI.select(point.id);assert.ok(fields['res-action-panel'].innerHTML.includes(point.title));s.ResidenceUI.prepare();assert.ok(fields['tavern-input'].value.includes(point.prompt));assert.equal(s.view,'tavern');}assert.equal(JSON.stringify([s.GameState,s.WorldState,s.GameTime]),before);}assert.equal(h.writes,0);
+ s.WorldState.location='乌坦城';s.WorldState.location='乌坦城';s.WorldState.specificSpot='乌坦清居';s.ResidenceUI.render();assert.ok(!host.innerHTML.includes('data-public-scene='));assert.ok(host.innerHTML.includes('休息调养'));assert.ok(host.innerHTML.includes('ResidenceUI.select(\'alchemy\')'));
+});
+test('existing drafts survive and scene artwork stays unfiltered at night',()=>{
+ const {s,fields}=harness();s.ResidenceUI.render();fields['tavern-input'].value='原有草稿';assert.equal(s.ResidenceUI.prepare(),false);assert.equal(fields['tavern-input'].value,'原有草稿');assert.match(s.notice,/已有草稿/);
+ const css=fs.readFileSync('assets/css/residence.css','utf8');assert.ok(!css.includes('brightness('));assert.ok(css.includes('.res-scene-art,.res-scene-image{filter:none;opacity:1}'));
+});

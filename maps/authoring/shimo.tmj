@@ -10,17 +10,19 @@
   "tileheight": 32,
   "infinite": false,
   "nextlayerid": 3,
-  "nextobjectid": 7,
+  "nextobjectid": 8,
   "layers": [
     {
       "id": 1,
       "name": "无字地形底图",
       "type": "imagelayer",
-      "image": "../../assets/images/world-shimo.png",
+      "image": "../../assets/images/world-shimo.webp",
       "opacity": 1,
       "visible": true,
       "x": 0,
-      "y": 0
+      "y": 0,
+      "imagewidth": 1536,
+      "imageheight": 1024
     },
     {
       "id": 2,
@@ -34,12 +36,11 @@
         {
           "id": 1,
           "name": "石漠城",
-          "type": "city",
+          "point": true,
           "x": 768,
           "y": 921.6,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -58,17 +59,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "city"
         },
         {
           "id": 2,
           "name": "城门补给场",
-          "type": "market",
+          "point": true,
           "x": 660.48,
           "y": 706.56,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -87,17 +88,17 @@
               "type": "string",
               "value": "game-design"
             }
-          ]
+          ],
+          "type": "market"
         },
         {
           "id": 3,
           "name": "佣兵驻地外",
-          "type": "guild",
+          "point": true,
           "x": 476.16,
           "y": 501.76,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -116,17 +117,17 @@
               "type": "string",
               "value": "game-design"
             }
-          ]
+          ],
+          "type": "guild"
         },
         {
           "id": 4,
           "name": "沙漠向导营地",
-          "type": "guild",
+          "point": true,
           "x": 998.4,
           "y": 614.4,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -145,17 +146,17 @@
               "type": "string",
               "value": "game-design"
             }
-          ]
+          ],
+          "type": "guild"
         },
         {
           "id": 5,
           "name": "近郊绿洲",
-          "type": "wild",
+          "point": true,
           "x": 1198.08,
           "y": 409.6,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -174,17 +175,17 @@
               "type": "string",
               "value": "game-design"
             }
-          ]
+          ],
+          "type": "wild"
         },
         {
           "id": 6,
           "name": "风蚀瞭望台",
-          "type": "ruin",
+          "point": true,
           "x": 998.4,
           "y": 256,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -203,7 +204,37 @@
               "type": "string",
               "value": "game-design"
             }
-          ]
+          ],
+          "type": "ruin"
+        },
+        {
+          "id": 7,
+          "name": "驼队整备院",
+          "point": true,
+          "x": 1059.84,
+          "y": 788.48,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "shimo-caravan"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "shimo"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "guild"
         }
       ]
     }

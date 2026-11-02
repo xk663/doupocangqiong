@@ -12,12 +12,21 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700;900&family=ZCOOL+KuaiLe&display=swap&subset=chinese-simplified"></noscript>
 <script src="assets/vendor/dexie-3.2.4.min.js" defer></script>
 <script src="assets/js/preset-core.js"></script>
+<script src="assets/js/model-route-core.js"></script>
+<script src="assets/js/model-profile-core.js"></script>
 <script src="assets/js/tavern-core.js"></script>
+<script src="assets/js/tavern-failure-ui.js"></script>
+<link rel="stylesheet" href="assets/css/tavern-failure.css">
+<script src="assets/js/model-route-ui.js" defer></script>
+<script src="assets/js/model-probe-core.js" defer></script>
+<script src="assets/js/model-probe-ui.js" defer></script>
+<link rel="stylesheet" href="assets/css/model-route.css">
 <script src="assets/js/replay-guard.js"></script>
 <script src="assets/js/open-world-runtime.js"></script>
 <script src="assets/js/tavern-wiring.js"></script>
 <script src="assets/js/story-quests.js"></script>
 <script src="assets/js/residence-core.js"></script>
+<script src="assets/js/scene-dialogue.js"></script>
 <script src="assets/js/flame-core.js"></script>
 <script src="assets/js/summary-core.js"></script>
 <script src="assets/js/battle-rules.js"></script>
@@ -1134,14 +1143,14 @@ input:checked + .toggle-slider::before { background:var(--text-primary);transfor
 <link rel="stylesheet" href="assets/css/responsive-core.css">
 <link rel="stylesheet" href="assets/css/atelier.css">
 <link rel="stylesheet" href="assets/css/creation.css">
-<link rel="stylesheet" href="assets/css/world-map.css">
+<link rel="stylesheet" href="assets/css/world-map.css"><link rel="stylesheet" href="assets/css/world-regions.css"><link rel="stylesheet" href="assets/css/place-scenes.css">
 <script src="assets/js/world-data.js"></script>
-<script src="assets/js/world-navigation.js"></script><script src="assets/js/world-core.js"></script>
+<script src="assets/js/world-flight-frames.js"></script><script src="assets/js/world-navigation.js"></script><script src="assets/js/world-core.js"></script>
 <script src="assets/js/world-bridge.js"></script>
-<script src="assets/js/world-ui.js"></script>
+<script src="assets/js/world-regions.js"></script><script src="assets/js/place-scenes.js"></script><script src="assets/js/world-ui.js"></script>
 <link rel="stylesheet" href="assets/css/journal.css">
 <link rel="stylesheet" href="assets/css/summary-dashboard.css">
-<link rel="stylesheet" href="assets/css/beauty-art.css">
+<link rel="stylesheet" href="assets/css/beauty-art.css?v=xuner-pink-20261101">
 <link rel="stylesheet" href="assets/css/save-manager.css">
 <link rel="stylesheet" href="assets/css/tavern-settings.css">
 <link rel="stylesheet" href="assets/css/title-motion.css">
@@ -1858,12 +1867,12 @@ function showView(viewId) {
 
 function switchGameView(viewId, btn) {
   if(viewId==='beauties'){DoupoPanels.rankTab='beauties';viewId='flames';btn=document.getElementById('sidebar-flames');}
-  document.querySelectorAll('.game-subview').forEach(function(v) { v.classList.remove('active'); });
   var target = document.getElementById('game-view-' + viewId);
-  if (target) target.classList.add('active');
-  document.querySelectorAll('.sidebar-btn').forEach(function(b) { b.classList.remove('active'); });
+  if (!target) return;
+  btn = document.querySelector('#game-sidebar [data-view="' + viewId + '"]') || btn;
+  document.querySelectorAll('.game-subview').forEach(function(v) { v.classList.toggle('active', v === target); });
+  document.querySelectorAll('.sidebar-btn').forEach(function(b) { b.classList.toggle('active', b === btn); });
   document.querySelectorAll('#game-sidebar [data-view]').forEach(function(b){if(b===btn)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
-  if (btn) btn.classList.add('active');
   // Refresh time/economy on view switch
   if (viewId === 'summary') {
     renderEconomyBar();
@@ -4455,51 +4464,25 @@ function getOutputTags() {
 }
 
 function parseGameModeOutput(rawText) {
-  var result = { maintext:'', option:[], sum:'', vars:'', thinking:'', think:'' };
-  var validTags = getOutputTags();
-  var re = /##\s*(\w+)\s*\n([\s\S]*?)(?=\n##\s|\n*$)/g;
-  var match;
-  while ((match = re.exec(rawText)) !== null) {
-    var tag = match[1].toLowerCase();
-    var content = match[2].trim();
-    // Only process recognized tags (from configurable set)
-    if (validTags.indexOf(tag) < 0) continue;
-    switch(tag) {
-      case 'maintext': result.maintext = content; break;
-      case 'option':
-        var lines = content.split('\n');
-        lines.forEach(function(line) {
-          var cleaned = line.replace(/^[-*]\s*\[?\s*[x ]?\s*\]?\s*/, '').trim();
-          if (cleaned) result.option.push(cleaned);
-        });
-        break;
-      case 'sum': result.sum = content; break;
-      case 'vars': result.vars = content; break;
-      case 'thinking': result.thinking = content; break;
-      case 'think': result.think = content; break;
-      default:
-        // Custom tags: store by name in result for downstream use
-        if (content) result[tag] = content;
-        break;
-    }
-  }
-  if (!result.maintext && rawText.trim()) {
-    result.maintext = rawText.trim();
-  }
-  return result;
+  return TavernCore.parseOutput(rawText,getOutputTags());
 }
 
 // -- Prompt Assembler --
-function prepareTavernRequest(chat, content, history, preview, questPlayer, generationType, presetOverride) {
+function prepareTavernRequest(chat, content, history, preview, questPlayer, generationType, presetOverride, scene) {
+  if(preview && typeof SceneDialogue!=='undefined' && SceneDialogue.enabled()){
+    var draft=document.getElementById('tavern-input');
+    scene=SceneDialogue.capture(draft && content.trim()===draft.value.trim()?SceneDialogue.intent(content.trim()):null);
+  }
+  var turnPlace=scene?.world||WorldState;
   var openWorldState=(chat&&chat.turnWorldOverride)||GameState.openWorldState||{};
   var selection=TavernWiring.resolve({player:GameState.player,chat:chat,settings:tavernState.tavernSettings,
     globalIds:tavernState.activeLorebookIds,books:tavernState.lorebooks,presets:tavernState.presets,
     input:content,history:history,regexes:typeof regexScripts!=='undefined'?regexScripts:[],openWorldState:openWorldState});
   if(presetOverride)selection.preset=presetOverride;
-  var location=WorldState.location+' · '+(WorldState.specificSpot||'');
+  var location=turnPlace.location+' · '+(turnPlace.specificSpot||'');
   var card=typeof OpenWorldRuntime!=='undefined'?OpenWorldRuntime.normalizeCharacterCard(chat.characterCard||tavernState.characterCard||{}):(chat.characterCard||tavernState.characterCard||{});
   var result=assembleTavernPrompt({preset:selection.preset,characterCard:card,userInput:selection.input,
-    generationType:generationType||'normal',history:selection.history,variables:chat.variables||{},lorebookMatches:selection.matches,location:location,userName:selection.userName,preview:!!preview,openWorldState:openWorldState,memoryTable:chat.memoryTable||{},pendingBattleSkills:chat.pendingBattleSkills||[],questState:(questPlayer||GameState.player).storyQuests,beautyState:(questPlayer||GameState.player).beautyChronicle,summaryPlayer:(questPlayer||GameState.player),flameState:(questPlayer||GameState.player).flameChronicle,residenceState:(questPlayer||GameState.player).residence});
+    generationType:generationType||'normal',history:selection.history,variables:chat.variables||{},lorebookMatches:selection.matches,location:location,userName:selection.userName,preview:!!preview,openWorldState:openWorldState,memoryTable:chat.memoryTable||{},pendingBattleSkills:chat.pendingBattleSkills||[],questState:(questPlayer||GameState.player).storyQuests,beautyState:(questPlayer||GameState.player).beautyChronicle,summaryPlayer:(questPlayer||GameState.player),flameState:(questPlayer||GameState.player).flameChronicle,scene:scene,residenceState:(questPlayer||GameState.player).residence});
   selection.trace.forEach(function(row){
     if(row.status!=='matched')return;
     var m=selection.matches.find(function(x){return x.bookId===row.bookId&&x.entry.id===row.entryId;});
@@ -4508,6 +4491,7 @@ function prepareTavernRequest(chat, content, history, preview, questPlayer, gene
     row.status=result.messages.some(function(msg){return text&&msg.content.includes(text);})?'included':'preset-disabled';
   });
   var requestOptions=TavernCore.presetOptions(selection.preset);
+  if(scene)SceneDialogue.route(requestOptions,scene);
   var selectedApi=requestOptions.apiId?(GameState.settings.apis||[]).find(a=>a.id===requestOptions.apiId&&a.enabled!==false):(typeof getTavernApi==='function'?getTavernApi('primary'):(GameState.settings.apis||[]).find(a=>a.enabled!==false));
   var wire=selectedApi?TavernCore.requestBody(selectedApi,result.messages,Object.assign({},requestOptions,{model:typeof resolveModel==='function'?resolveModel(selectedApi,requestOptions):requestOptions.model||selectedApi.model}),requestOptions.stream):null;
   return {chatId:chat.id||null,selection:selection,result:result,requestOptions:requestOptions,wire:wire,parameterReport:TavernCore.presetReport(selection.preset,selectedApi?.backend||'openai')};
@@ -4533,11 +4517,11 @@ function assembleTavernPrompt(opts) {
   if(typeof MemoryCore!=='undefined'){var memoryText=MemoryCore.context(opts.memoryTable||{});if(memoryText)systemParts.push(memoryText);}
   if(opts.pendingBattleSkills?.length)systemParts.push('【技能待核对】以下仅为历史习得原句，缺少品阶或战斗效果，不是可用战斗技能；勿为补齐格式编造设定：'+JSON.stringify(opts.pendingBattleSkills));
   if(typeof FlameCore!=='undefined'){systemParts.push(FlameCore.protocol);systemParts.push(FlameCore.context(Object.hasOwn(opts,'flameState')?opts.flameState:GameState.player.flameChronicle,typeof HEAVENLY_FLAMES==='undefined'?[]:HEAVENLY_FLAMES));}
-  if(typeof ResidenceCore!=='undefined'){systemParts.push(ResidenceCore.protocol);systemParts.push(ResidenceCore.context(Object.hasOwn(opts,'residenceState')?opts.residenceState:GameState.player.residence,WorldState,typeof ResidenceUI!=='undefined'?ResidenceUI.clock():''));}
+  if(typeof ResidenceCore!=='undefined'){systemParts.push(ResidenceCore.protocol);systemParts.push(ResidenceCore.context(Object.hasOwn(opts,'residenceState')?opts.residenceState:GameState.player.residence,opts.scene?.world||WorldState,opts.scene?.time??(typeof ResidenceUI!=='undefined'?ResidenceUI.clock():'')));}
   if(typeof BeautyRoster!=='undefined')systemParts.push(BeautyRoster.context(Object.hasOwn(opts,'beautyState')?opts.beautyState:GameState.player.beautyChronicle));
   if(typeof StoryQuests!=='undefined'){systemParts.push(StoryQuests.protocol);var questFacts=StoryQuests.context(Object.hasOwn(opts,'questState')?opts.questState:GameState.player.storyQuests);if(questFacts)systemParts.push(questFacts);}
   if(typeof WorldMapBridge!=='undefined'){
-    var mapFacts=WorldMapBridge.promptContext();
+    var mapFacts=opts.scene?.mapFacts??WorldMapBridge.promptContext();
     if(mapFacts)systemParts.push(mapFacts);
     if(!tavernState.tavernSettings?.pureTextMode)systemParts.push('地图行动可选协议：需要建议玩家行动时，可在正文外添加一个 <world_action>{"type":"travel","targetId":"已知地点ID","mode":"walk"}</world_action>，或 type 为 explore/rest/talk（talk 使用 npcId）。只使用地图已确认事实中的ID；不得自动结算、赠送物资或越过入口条件。建议由玩家在地图中确认。');
   }
@@ -4600,7 +4584,7 @@ function assembleTavernPrompt(opts) {
       '违反以上任何一条规则都会导致输出被拒绝。请严格遵守纯文本格式。'
     );
   } else {
-    systemParts.push('【输出格式要求】\n请使用以下 Markdown 二级标题组织正文与总结，并按要求附加 XML 标签块：\n## maintext\n(正文叙述)\n\n行动选项仅使用一个 <branches></branches> 块输出，不再另写 Markdown 选项段落或重复列出同一组选项。在正文后必须生成以下选项分支:\n<branches>\n[快速推进的行动]\n[最合理的行动]\n[最中立的行动]\n[最善良的行动]\n[NSFW的行动]\n</branches>\n\n同时必须紧跟<upstore></upstore>变量更新块:\n<upstore>\naddSmallSum:变量名:增量\nset:变量名:值\n</upstore>\n\n## sum\n(一句话总结)\n\n如有内心独白请放入 ## thinking 标题对应的段落中。');
+    systemParts.push('【输出格式要求】\n正文沿用当前启用预设指定的容器：<game>、<content> 或 ## maintext 均可；预设没有指定时使用 ## maintext。正文直接输出自然、连贯的中文叙事，不要将整段中文转写成 Unicode 转义，也不要用同音字或生造词替换正常汉字；不要给普通词语附加原词重复、同义解释或纠错式括注（如目光（目光）、收藏（收藏））；直接描写笑声、动作与语气，避免无意义的拟声词加（笑）等编辑标记；人物、物品与地名保持既有写法。整轮只写一份完整正文，不要为兼容前端再输出一份缩写的 ## maintext，也不要把正文改成摘要。预设中的字数要求统计可见正文，不包括思考、总结、选项和后台元数据。\n\n行动选项仅使用一个 <branches></branches> 块输出，不再另写 Markdown 选项段落或重复列出同一组选项。在正文后必须生成以下选项分支:\n<branches>\n[快速推进的行动]\n[最合理的行动]\n[最中立的行动]\n[最善良的行动]\n[NSFW的行动]\n</branches>\n\n同时必须紧跟<upstore></upstore>变量更新块:\n<upstore>\naddSmallSum:变量名:增量\nset:变量名:值\n</upstore>\n\n## sum\n(一句话总结，不替代正文)\n\n如有内心独白请放入 ## thinking 标题对应的段落中。');
   }
 
   if(tavernState.tavernSettings?.pureTextMode&&typeof StoryQuests!=='undefined')systemParts.push('纯文本模式的后台元数据例外：仅允许 <quest_updates>、<residence_updates>、<flame_updates>、<summary_updates> 与已启用战斗模式的 <battle_updates> 及其对应闭合标签作为后台元数据块。这些块均为可选，须遵守各自更新协议；需要时在全部纯文本内容之后单独附加，不放入 Markdown 代码块，由前端提取，不作为可见正文。此例外不允许其他标签，可见正文仍按上述纯文本规则输出。');
@@ -4608,8 +4592,20 @@ function assembleTavernPrompt(opts) {
   var systemMsg = systemParts.join('\n\n');
 
   var settings = preset && preset.settings || {};
-  var composed = TavernCore.composePrompt({plan:plan, system:systemMsg, history:history, userInput:userInput,
-    maxContext:settings.openai_max_context || 32768, maxOutput:settings.openai_max_tokens || 1024});
+  var promptOptions={plan:plan,system:systemMsg,history:history,userInput:userInput,
+    maxContext:settings.openai_max_context || 32768,maxOutput:settings.openai_max_tokens || 1024};
+  var sceneText=opts.scene?SceneDialogue.context(opts.summaryPlayer?.sceneAgenda,opts.scene,history):'';
+  var composed;
+  if(sceneText){
+    try { composed=TavernCore.composePrompt({...promptOptions,system:systemMsg+'\n\n'+sceneText});systemMsg+='\n\n'+sceneText; }
+    catch(error){
+      if(!error.message.includes('超出上下文预算'))throw error;
+      var shortScene=SceneDialogue.context(opts.summaryPlayer?.sceneAgenda,opts.scene,history,true);
+      composed=TavernCore.composePrompt({...promptOptions,system:systemMsg+'\n\n'+shortScene});systemMsg+='\n\n'+shortScene;
+    }
+  }
+  if(!composed)composed=TavernCore.composePrompt(promptOptions);
+  composed.sceneIncluded=!!sceneText&&systemMsg.endsWith(sceneText);
   composed.systemMsg = systemMsg;
   return composed;
 }
@@ -4648,7 +4644,9 @@ async function callLLM(messages, opts) {
   opts = Object.assign({}, opts || {});
   var api = opts.apiId ? (GameState.settings.apis || []).find(function(a) { return a.id === opts.apiId && a.enabled !== false; }) : getTavernApi(opts.purpose || 'primary');
   if (!api) throw new Error('未配置可用 API，请在设置中添加并启用接口');
+  api = TavernCore.clone(api);
   opts.model = resolveModel(api, opts);
+  if(typeof opts.onRequestTarget==='function'&&typeof ModelProbeCore!=='undefined')opts.onRequestTarget(ModelProbeCore.target(api,opts.model));
   var text = await TavernCore.request(api, messages, opts);
   return {choices:[{message:{content:text}}]};
 }
@@ -4669,7 +4667,9 @@ async function callLLMStream(messages, opts, onChunk) {
   opts = Object.assign({}, opts || {});
   var api = opts.apiId ? (GameState.settings.apis || []).find(function(a) { return a.id === opts.apiId && a.enabled !== false; }) : getTavernApi(opts.purpose || 'primary');
   if (!api) throw new Error('未配置可用 API，请在设置中添加并启用接口');
+  api = TavernCore.clone(api);
   opts.model = resolveModel(api, opts);
+  if(typeof opts.onRequestTarget==='function'&&typeof ModelProbeCore!=='undefined')opts.onRequestTarget(ModelProbeCore.target(api,opts.model));
   return TavernCore.request(api, messages, opts, onChunk);
 }
 
@@ -4799,20 +4799,27 @@ function createDefaultTavernSettings() {
 function buildTavern() {
   var container = document.getElementById('game-view-tavern');
   if (!container) return;
+  var previousInput=document.getElementById('tavern-input');
+  var draftOwner=JSON.stringify([GameState.player.lifeId||'',tavernState.activeChatId||'']);
   container.innerHTML =
     '<div class="tavern-container">' +
       '<div class="tavern-body">' +
         '<div class="tavern-main" style="flex:1;">' +
           "<header class=\"tavern-toolbar\"><div class=\"tavern-heading\"><span class=\"tavern-heading-mark\">卷</span><div><h2>命途 · 修行录</h2><p>斗气大陆 · 你的故事正在继续</p></div></div><nav class=\"tavern-tools\" aria-label=\"对话操作\"><button class=\"tavern-tool\" onclick=\"regenerateLastTavern()\" title=\"重新生成本轮回复\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 10a8 8 0 1 1 2 8M4 4v6h6\"/></svg><span>重演</span></button><button class=\"tavern-tool\" onclick=\"continueTavernStream()\" title=\"继续当前故事\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m8 5 7 7-7 7M18 5v14\"/></svg><span>续写</span></button><span class=\"tavern-tools-divider\" aria-hidden=\"true\"></span><button id=\"tavern-rewind-btn\" class=\"tavern-tool\" onclick=\"openTimeRewind()\" title=\"恢复当前会话的历史快照\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3 11a9 9 0 1 1 3 8M3 5v6h6M12 7v5l3 2\"/></svg><span id=\"tavern-rewind-label\">回溯 · 0</span></button><button id=\"tavern-map-proposal\" class=\"tavern-tool\" hidden onclick=\"switchGameView('worldmap',document.getElementById('sidebar-worldmap'))\" title=\"查看并确认模型提出的地图行动\"><span>地图建议</span></button><button class=\"tavern-tool danger\" onclick=\"resetTavernContext()\" title=\"清空当前会话，会再次确认\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5m4-5v5\"/></svg><span>重置</span></button></nav></header>" +
           '<div class="tavern-messages" id="tavern-messages"></div>' +
+          '<div id="scene-draft-label" class="composer-caption" hidden><span></span> <button type="button" class="text-btn" onclick="SceneDialogue.detach()">解除场景关联</button></div>' +
           '<div class="tavern-input-bar">' +
-            '<textarea class="tavern-input" id="tavern-input" rows="2" aria-label="书写你的行动" placeholder="此刻，你想做些什么？" onkeydown="handleTavernKeydown(event)"></textarea>' +
+            '<textarea class="tavern-input" id="tavern-input" rows="2" aria-label="书写你的行动" placeholder="此刻，你想做些什么？" oninput="SceneDialogue.edited(this)" onkeydown="handleTavernKeydown(event)"></textarea>' +
             '<button class="tavern-send-btn" id="tavern-send-btn" onclick="sendTavernMessage()">推演</button>' +
           '</div>' +
           '<p class="composer-caption">Enter 落笔 · Shift + Enter 换行　/　故事由你决定</p>' +
         '</div>' +
       '</div>' +
     '</div>';
+  var nextInput=document.getElementById('tavern-input');
+  nextInput.draftOwner=draftOwner;
+  if(previousInput?.draftOwner===draftOwner){nextInput.value=previousInput.value;nextInput.sceneDraft=previousInput.sceneDraft;}
+  if(typeof SceneDialogue!=='undefined')SceneDialogue.showBinding();
   renderTavernMessages();
 }
 
@@ -4835,6 +4842,7 @@ function renderTavernSessionList() {
 }
 
 function renderTavernMessages() {
+  if(typeof ModelProbeUI!=='undefined')ModelProbeUI.sync();
   var msgs = document.getElementById('tavern-messages');
   if (!msgs) return;
   var chat = getActiveChat();
@@ -4856,6 +4864,7 @@ function renderTavernMessages() {
   }
   if (chat.messages.length === 0) {
     msgs.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim);">发送第一条消息开始对话...</div>';
+    if(typeof TavernFailureUI!=='undefined'){var emptyFailure=TavernFailureUI.render(chat.id);if(emptyFailure)msgs.appendChild(emptyFailure);}
     msgs._lastRenderedCount = 0;
     restoreScroll();
     return;
@@ -4880,6 +4889,7 @@ function renderTavernMessages() {
         frag.appendChild(buildAssistantMessageDOM(msg));
       }
     });
+    if(typeof TavernFailureUI!=='undefined'){var failureCard=TavernFailureUI.render(chat.id);if(failureCard)frag.appendChild(failureCard);}
     msgs.textContent = '';
     msgs.appendChild(frag);
   msgs._lastRenderedCount = chat.messages.length;
@@ -4943,8 +4953,9 @@ function buildAssistantMessageDOM(msg) {
   // Main text
   var mt = document.createElement('div');
   mt.className = 'msg-maintext';
-  mt.textContent = parsed.maintext;
+  mt.textContent = TavernCore.proseText(parsed.maintext);
   frag.appendChild(mt);
+  if(msg.modelAudit&&typeof ModelProbeUI!=='undefined')frag.appendChild(ModelProbeUI.button(msg));
 
   // ## option tag buttons
   if (parsed.option.length > 0) {
@@ -5078,11 +5089,13 @@ async function sendTavernMessage() {
   var content=input.value.trim()||PresetCore.settings(resolved.preset).send_if_empty;
   if(!content.trim())return;
   if(typeof BattleBridge!=='undefined'&&!BattleBridge.allowed(null,false)){showToast('请先完成战斗并处理战报','info');return;}
+  var sceneTarget=null;
+  try{if(typeof SceneDialogue!=='undefined')sceneTarget=SceneDialogue.intent(content);}
+  catch(e){SceneDialogue.detach();showToast(e.message,'info');return;}
   if (!getActiveChat()) {
     try { await createNewTavernChat(); } catch(e) { showToast('无法新建对话：' + e.message, 'error'); return; }
   }
-  input.value = '';
-  await runTavernTurn(content, false);
+  await runTavernTurn(content, false, undefined, {sceneTarget,composer:input});
 }
 
 function setTavernSendingUI(sending) {
@@ -5111,11 +5124,12 @@ async function runTavernTurn(content, regenerate, generationType, turnMeta) {
   if (tavernState.isSending) return;
   var original = getActiveChat();
   if (!original || !db) return;
+  if(typeof ModelProbeUI!=='undefined')ModelProbeUI.cancel();
   if(original.lifeId&&GameState.player.lifeId&&original.lifeId!==GameState.player.lifeId){showToast('请先读取此会话所属的人生存档','info');return;}
   if(typeof WorldMapBridge!=='undefined')WorldMapBridge.ensure();
   var working = TavernCore.clone(original), before, controller = new AbortController();
   var playerAtDispatch = JSON.stringify(GameState.player);
-  var request = {id:crypto.randomUUID(), chatId:original.id, controller:controller};
+  var request = {id:crypto.randomUUID(), chatId:original.id, controller:controller, phase:'prepare'};
   tavernState.activeRequest = request;
   tavernState.streamAbortController = controller;
   tavernState.isSending = true;
@@ -5137,6 +5151,16 @@ async function runTavernTurn(content, regenerate, generationType, turnMeta) {
       if(working.battle&&working.messages.at(-1)?.battleReportId===working.battle.id)working.battle.reportUserId=working.messages.at(-1).id;
     } else {
       before = {variables:TavernCore.clone(working.variables || {}), player:TavernCore.clone(GameState.player),battle:working.battle?TavernCore.clone(working.battle):null,memoryTable:TavernCore.clone(working.memoryTable||{}),pendingBattleSkills:TavernCore.clone(working.pendingBattleSkills||[]),openWorldState:TavernCore.clone(GameState.openWorldState||{})};
+      if(typeof SceneDialogue!=='undefined' && SceneDialogue.enabled()){
+        var sceneTarget=turnMeta?.sceneTarget;
+        if(sceneTarget){
+          var editor=document.getElementById('tavern-input');
+          if(!editor?.sceneDraft || editor.value.trim()!==content)throw Error('场景草稿已变化，请重新发送');
+          if(!editor.sceneDraft.chatId)editor.sceneDraft.chatId=original.id;
+          sceneTarget=SceneDialogue.intent(content);
+        }
+        before.scene=SceneDialogue.capture(sceneTarget||null);
+      }
       var user = createChatMessage('user', content);
       user.turnBefore = before; if(typeof BattleBridge!=='undefined')BattleBridge.attachReport(working,user,turnMeta); working.messages.push(user);
       working.updatedAt = Date.now();
@@ -5144,12 +5168,17 @@ async function runTavernTurn(content, regenerate, generationType, turnMeta) {
       if(typeof ReplayGuard!=='undefined')working.replayStamp=getTavernReplayStamp(GameState.player,working);
       await db.chats.put(working); ensureCurrent();
       tavernState.chats = tavernState.chats.map(function(c) { return c.id === working.id ? TavernCore.clone(working) : c; });
+      var sentInput=document.getElementById('tavern-input');
+      if(turnMeta?.composer && sentInput && (sentInput===turnMeta.composer || (sentInput.draftOwner===turnMeta.composer.draftOwner && sentInput.value===turnMeta.composer.value))){
+        sentInput.value='';delete sentInput.sceneDraft;
+        if(typeof SceneDialogue!=='undefined')SceneDialogue.showBinding();
+      }
       takeSnapshot(original.messages, before.variables, original.battle||null);
       renderTavernMessages();
     }
     ensureCurrent();
     if(typeof ReplayGuard!=='undefined')request.stateStamp=getTavernReplayStamp();
-    var prepared = prepareTavernRequest(working,content,working.messages.slice(0,-1),false,before.player,generationType||(regenerate?'regenerate':'normal'));
+    var prepared = prepareTavernRequest(working,content,working.messages.slice(0,-1),false,before.player,generationType||(regenerate?'regenerate':'normal'),undefined,typeof SceneDialogue!=='undefined'&&SceneDialogue.enabled()?before.scene:undefined);
     var preset = prepared.selection.preset, result = prepared.result;
     tavernState.lastRequestInspection = prepared;
     // Summary metrics are persisted separately; request inspection remains memory-only.
@@ -5157,13 +5186,16 @@ async function runTavernTurn(content, regenerate, generationType, turnMeta) {
     var msgs = document.getElementById('tavern-messages');
     if (msgs) { var typing = document.createElement('div'); typing.id = 'tavern-typing'; typing.className = 'msg-maintext typing'; typing.textContent = '正在推演…'; msgs.appendChild(typing); }
     var parser = StreamParser();
-    parser.onTag(function(tag, text) { if (tag !== 'maintext') return; ensureCurrent(); var el = document.getElementById('tavern-typing'); if (el) {var list=el.parentElement;var followBottom=list&&list.scrollHeight-list.clientHeight-list.scrollTop<=48;var visible=typeof StoryQuests!=='undefined'?StoryQuests.visible(text):text;if(typeof ResidenceCore!=='undefined')visible=ResidenceCore.visible(visible);if(typeof FlameCore!=='undefined')visible=FlameCore.visible(visible);if(typeof BattleCore!=='undefined')visible=BattleCore.visible(visible);el.textContent=TavernCore.visibleBranches(TavernCore.visibleUpstore(typeof SummaryCore!=='undefined'?SummaryCore.visible(visible):visible,true),true);if(followBottom){var behavior=list.style.scrollBehavior;list.style.scrollBehavior='auto';list.scrollTop=list.scrollHeight;list.style.scrollBehavior=behavior;}} });
+    parser.onTag(function(tag, text) { if (tag !== 'maintext') return; ensureCurrent(); var el = document.getElementById('tavern-typing'); if (el) {var list=el.parentElement;var followBottom=list&&list.scrollHeight-list.clientHeight-list.scrollTop<=48;var visible=typeof StoryQuests!=='undefined'?StoryQuests.visible(text):text;if(typeof ResidenceCore!=='undefined')visible=ResidenceCore.visible(visible);if(typeof FlameCore!=='undefined')visible=FlameCore.visible(visible);if(typeof BattleCore!=='undefined')visible=BattleCore.visible(visible);el.textContent=TavernCore.proseText(TavernCore.visibleBranches(TavernCore.visibleUpstore(typeof SummaryCore!=='undefined'?SummaryCore.visible(visible):visible,true),true),true);if(followBottom){var behavior=list.style.scrollBehavior;list.style.scrollBehavior='auto';list.scrollTop=list.scrollHeight;list.style.scrollBehavior=behavior;}} });
     var sampling = preset.settings || {};
-    var opts = Object.assign({},prepared.requestOptions,{purpose:'primary',signal:controller.signal});
+    var opts = Object.assign({},prepared.requestOptions,{purpose:'primary',signal:controller.signal,onResponseText:function(text){if(typeof TavernFailureUI!=='undefined')TavernFailureUI.capture(request,text);},onRequestTarget:function(target){ensureCurrent();request.modelProbeTarget=target;},onModelAudit:function(audit){ensureCurrent();request.modelAudit=TavernCore.clone(audit);prepared.modelAudit=TavernCore.clone(audit);}});
     var full;
+    request.phase='response';
     if (sampling.stream_openai === false) {
       var data = await callLLM(result.messages, opts); full = data.choices[0].message.content;
     } else full = await callLLMStream(result.messages, opts, function(chunk) { ensureCurrent(); parser.feed(chunk); });
+    if(typeof TavernFailureUI!=='undefined')TavernFailureUI.complete(request,full);
+    request.phase='process';
     ensureCurrent();
     if (!full || !full.trim()) throw new Error('模型返回空回复，未更新本轮状态');
     parser.flushBuffer();
@@ -5180,7 +5212,14 @@ async function runTavernTurn(content, regenerate, generationType, turnMeta) {
     }
     if(typeof ResidenceCore!=='undefined'){
       var residenceOutput=ResidenceCore.extract(processed);processed=residenceOutput.cleaned;
-      var residenceResult=ResidenceCore.apply(player.residence,residenceOutput.updates,{body:processed,world:WorldState,time:typeof ResidenceUI!=='undefined'?ResidenceUI.clock():'故事日期未明确',source:working.id+'|'+(working.messages[working.messages.length-1]?.id||content)});
+      var updates=residenceOutput.updates;
+      if(result.sceneIncluded){
+        var turnId=working.messages.at(-1).id;
+        var agenda=SceneDialogue.apply(player.sceneAgenda,updates,processed,before.scene,turnId,ResidenceCore.state(before.player.residence).places);
+        if(agenda!==player.sceneAgenda)player.sceneAgenda=agenda;
+        updates=SceneDialogue.residenceUpdates(updates,agenda,processed,turnId);
+      }
+      var residenceResult=ResidenceCore.apply(player.residence,updates,{body:processed,world:before.scene?.world||WorldState,time:before.scene?.time??(typeof ResidenceUI!=='undefined'?ResidenceUI.clock():'故事日期未明确'),source:working.id+'|'+(working.messages[working.messages.length-1]?.id||content)});
       if(residenceResult.changes.length)player.residence=residenceResult.state;
       if(residenceOutput.errors.length||residenceResult.errors.length)showToast('部分驻地记录未通过证据检查，正文已保留','info');
     }
@@ -5227,11 +5266,14 @@ async function runTavernTurn(content, regenerate, generationType, turnMeta) {
     }
     if (JSON.stringify(GameState.player) !== playerAtDispatch) throw new Error('推演期间角色状态发生变化，请重演本轮以避免覆盖进度');
     var assistant = createChatMessage('assistant', processed);assistant.id=battleMessageId;
+    if(request.modelAudit)assistant.modelAudit=TavernCore.clone(request.modelAudit);
+    if(request.modelProbeTarget)assistant.modelProbeTarget=TavernCore.clone(request.modelProbeTarget);
     if(typeof BattleBridge!=='undefined')BattleBridge.completeReport(working,assistant);
     assistant.turnBefore = before;
     working.messages.push(assistant); working.variables = variables; working.playerState = TavernCore.clone(player); working.openWorldState = TavernCore.clone(working.turnWorldOverride||GameState.openWorldState||{}); delete working.turnWorldOverride; working.updatedAt = Date.now();
     if(typeof ReplayGuard!=='undefined')working.replayStamp=getTavernReplayStamp(player,working,working.openWorldState);
     // Abort a stale transaction rather than reviving a reset/deleted session.
+    request.phase='save';
     var abortTransaction;
     try {
       await db.transaction('rw', [db.chats, db.tavernSettings], async function(tx) {
@@ -5248,14 +5290,21 @@ async function runTavernTurn(content, regenerate, generationType, turnMeta) {
     if(typeof WorldMapBridge!=='undefined'&&!tavernState.tavernSettings?.pureTextMode)WorldMapBridge.offerProposal(full,request.chatId);
     tavernState.chats = tavernState.chats.map(function(c) { return c.id === working.id ? working : c; });
     saveToLocalStorage();
+    request.committed=true;
+    if(typeof TavernFailureUI!=='undefined')TavernFailureUI.clear(request.chatId);
   } catch(e) {
     if (e.name === 'AbortError' || controller.signal.aborted) showToast('推演已阻断，可用重演天机重试本轮', 'info');
-    else showToast('推演失败：' + e.message, 'error');
+    else {
+      var failure;
+      if(typeof TavernFailureUI!=='undefined'&&tavernState.activeRequest===request&&tavernState.activeChatId===request.chatId)failure=TavernFailureUI.record(request,e);
+      showToast('推演失败：' + (failure?failure.message:e.message), 'error');
+    }
   } finally {
     if (tavernState.activeRequest === request) {
       tavernState.activeRequest = null; tavernState.streamAbortController = null; tavernState.isSending = false;
       // Keep the preview until the renderer captures its scroll position and replaces it.
       setTavernSendingUI(false); renderTavernMessages(); updateTavernInfo();
+      if(request.committed&&['conflict','mismatch'].includes(request.modelAudit?.status)&&request.chatId===tavernState.activeChatId&&typeof ModelRouteUI!=='undefined')ModelRouteUI.notify(request.modelAudit);
       if(typeof WorldMapBridge!=='undefined')WorldMapBridge.refresh();
     }
   }
@@ -5295,6 +5344,7 @@ async function resetTavernContext() {
   if(typeof WorldMapBridge!=='undefined')WorldMapBridge.clearProposal();
   chat.updatedAt = Date.now();
   await db.chats.put(chat);
+  if(typeof TavernFailureUI!=='undefined')TavernFailureUI.clear(chat.id);
   tavernState.chats=tavernState.chats.map(c=>c.id===chat.id?chat:c);
   TimeRewind.snapshots=TimeRewind.snapshots.filter(x=>x.chatId!==chat.id);
   renderTavernMessages();
@@ -5917,7 +5967,7 @@ function renderSettingsDepth(body) {
       '<label for="gameplay-prompt' + suffix + '" class="form-label">提示词内容</label>' +
       '<textarea id="gameplay-prompt' + suffix + '" class="settings-form-input settings-textarea gameplay-text" maxlength="12000" rows="5" placeholder="Inject System prompt">' + escapeHtml(config.text || '') + '</textarea></div>';
   });
-  body.innerHTML = html + '<p class="wiring-help">每组最多 12,000 字符。实际发送内容可在世界书页的请求预览中查看。</p><button class="settings-action-btn" onclick="saveGameplayPrompt()">保存全部玩法设置</button>';
+  body.innerHTML = (typeof SceneDialogue!=='undefined'?SceneDialogue.settingsHTML():'') + html + '<p class="wiring-help">每组最多 12,000 字符。实际发送内容可在世界书页的请求预览中查看。</p><button class="settings-action-btn" onclick="saveGameplayPrompt()">保存全部玩法设置</button>';
 }
 
 function saveGameplayPrompt() {
@@ -5993,11 +6043,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script src="assets/js/creation-ui.js"></script>
 <script src="assets/js/residence-art.js"></script>
-<script src="assets/js/residence-ui.js"></script>
+<script src="assets/js/place-interactions.js"></script><script src="assets/js/residence-ui.js"></script>
 <script src="assets/js/flame-ui.js"></script>
-<script src="assets/js/beauty-art.js"></script>
+<script src="assets/js/beauty-art.js?v=cailin-queen-20261102"></script>
 <script src="assets/js/summary-ui.js"></script>
-<script src="assets/js/journal-panels.js"></script>
+<link rel="stylesheet" href="assets/css/personnel.css"><script src="assets/js/personnel-ui.js"></script><script src="assets/js/journal-panels.js"></script>
 <script src="assets/js/preset-manager.js"></script>
 <script src="assets/js/preset-ui.js"></script>
 <script src="assets/js/tavern-inspector.js"></script>

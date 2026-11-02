@@ -1,7 +1,17 @@
 /* Device-local appearance, deliberately independent of characters and story saves. */
 (function () {
   'use strict';
-  const TEMPLATE = 'assets/images/backgrounds/flame-duet.webp';
+  const TEMPLATES = [
+    { id: 'original-title', name: '初见 · 原始主界面', src: 'assets/images/title-gu-reunion.webp', original: true },
+    { id: 'flame-duet', name: '异火相映 · 萧炎与薰儿', src: 'assets/images/backgrounds/flame-duet.webp' },
+    { id: 'cloud-dawn', name: '云海晨曦 · 萧炎与薰儿', src: 'assets/images/backgrounds/cloud-dawn.png' },
+    { id: 'herb-valley', name: '药谷清溪 · 萧炎与小医仙', src: 'assets/images/backgrounds/herb-valley.png' },
+    { id: 'wutan-lanterns', name: '乌坦灯夜 · 萧炎与薰儿', src: 'assets/images/backgrounds/wutan-lanterns.png' },
+    { id: 'snow-pass', name: '雪岭同行 · 萧炎与小医仙', src: 'assets/images/backgrounds/snow-pass.png' },
+    { id: 'magma-ruins', name: '地宫异火 · 萧炎与美杜莎', src: 'assets/images/backgrounds/magma-ruins.png' },
+    { id: 'moon-lake', name: '月下湖畔 · 萧炎与薰儿', src: 'assets/images/backgrounds/moon-lake.png' },
+    { id: 'poison-gorge', name: '幽谷毒雾 · 萧炎与小医仙', src: 'assets/images/backgrounds/poison-gorge.png' }
+  ];
   const DEFAULT = { mode: 'default', dim: 25, position: 50, custom: null, name: '' };
   let state = { ...DEFAULT }, database, ready, activeURL = '', busy = false, loadError = '';
 
@@ -10,6 +20,7 @@
     const number = (n, fallback) => Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : fallback;
     return {
       mode: ['default', 'template', 'custom'].includes(v.mode) ? v.mode : 'default',
+      templateId: TEMPLATES.some(t => t.id === v.templateId) ? v.templateId : 'flame-duet',
       dim: number(v.dim, 25), position: number(v.position, 50),
       custom: v.custom instanceof Blob && ['image/png', 'image/jpeg', 'image/webp'].includes(v.custom.type) ? v.custom : null,
       name: typeof v.name === 'string' ? v.name.slice(0, 180) : ''
@@ -24,7 +35,8 @@
     });
   }
   async function prepare(value) {
-    const url = value.mode === 'template' ? TEMPLATE : value.mode === 'custom' && value.custom ? URL.createObjectURL(value.custom) : '';
+    const template = TEMPLATES.find(t => t.id === value.templateId) || TEMPLATES.find(t => t.id === 'flame-duet');
+    const url = value.mode === 'template' ? template.src : value.mode === 'custom' && value.custom ? URL.createObjectURL(value.custom) : '';
     if (value.mode === 'custom' && !url) throw new Error('请先上传自定义背景。');
     try { if (url) await imageLoaded(url); return url; }
     catch (error) { if (url.startsWith('blob:')) URL.revokeObjectURL(url); throw error; }
@@ -111,6 +123,41 @@
     if (text !== undefined) el.textContent = text;
     return el;
   }
+  function viewImage(title, source) {
+    let ownsFullscreen = false;
+    const blobURL = source instanceof Blob ? URL.createObjectURL(source) : '';
+    const dialog = element('dialog', 'background-lightbox');
+    dialog.setAttribute('aria-label', title + ' · 全屏预览');
+    const toolbar = element('div', 'background-lightbox-toolbar');
+    const caption = element('h3', '', title);
+    const close = element('button', '', '关闭 ×'); close.type = 'button';
+    const img = element('img'); img.src = blobURL || source; img.alt = title;
+    toolbar.append(caption, close); dialog.append(toolbar, img); document.body.append(dialog);
+    dialog.addEventListener('close', () => {
+      if (ownsFullscreen && document.fullscreenElement === document.documentElement) document.exitFullscreen().catch(() => {});
+      dialog.remove(); if (blobURL) URL.revokeObjectURL(blobURL);
+    }, { once: true });
+    close.onclick = () => dialog.close();
+    dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+    dialog.showModal(); close.focus();
+    // Some embedded browsers disallow native fullscreen; the viewport-sized dialog remains usable.
+    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().then(() => {
+        ownsFullscreen = true;
+        if (!dialog.open) document.exitFullscreen().catch(() => {});
+      }).catch(() => {});
+    }
+  }
+  function media(title, source) {
+    const wrap = element('div', 'background-card-media');
+    const blobURL = source instanceof Blob ? URL.createObjectURL(source) : '';
+    const img = element('img'); img.src = blobURL || source; img.alt = title; img.loading = 'lazy';
+    if (blobURL) img.onload = img.onerror = () => URL.revokeObjectURL(blobURL);
+    const enlarge = element('button', 'background-enlarge', '⛶'); enlarge.type = 'button';
+    enlarge.title = '全屏查看'; enlarge.setAttribute('aria-label', '全屏查看：' + title);
+    enlarge.onclick = () => viewImage(title, source);
+    wrap.append(img, enlarge); return wrap;
+  }
   async function render(body) {
     const panel = element('div', 'background-settings');
     body.replaceChildren(panel); panel.textContent = '正在读取背景…';
@@ -119,25 +166,25 @@
     panel.replaceChildren();
     panel.append(element('p', 'background-help', '默认保留原有背景，模板仅供选择，点击“使用”后才会更换首页和聊天页背景。图片铺满显示，正文保留阅读底色。'));
     if (loadError) { const warning = element('p', 'background-error', loadError); warning.setAttribute('role', 'alert'); panel.append(warning); }
-    const status = element('p', 'background-status', '当前：' + ({ default: '默认背景', template: '模板 · 异火相映', custom: '自定义 · ' + state.name }[state.mode]));
+    const selectedTemplate = TEMPLATES.find(t => t.id === state.templateId) || TEMPLATES[0];
+    const status = element('p', 'background-status', '当前：' + ({ default: '默认背景', template: '模板 · ' + selectedTemplate.name, custom: '自定义 · ' + state.name }[state.mode]));
     status.setAttribute('role', 'status'); panel.append(status);
     const grid = element('div', 'background-options'); panel.append(grid);
-    function card(title, src, mode, action, label) {
+    function card(title, src, mode, action, label, templateId) {
       const box = element('section', 'background-card');
-      if (src) { const img = element('img'); img.src = src; img.alt = title; img.loading = 'lazy'; box.append(img); }
+      if (src) box.append(media(title, src));
       else box.append(element('div', 'background-placeholder', '选择你的风景'));
       box.append(element('h4', '', title));
       const button = element('button', 'settings-action-btn', label);
-      button.type = 'button'; button.setAttribute('aria-pressed', String(state.mode === mode)); button.addEventListener('click', action);
+      button.type = 'button'; button.setAttribute('aria-pressed', String(state.mode === mode && (mode !== 'template' || state.templateId === templateId))); button.addEventListener('click', action);
       box.append(button); grid.append(box); return box;
     }
-    card('异火相映 · 萧炎与薰儿', TEMPLATE, 'template', () => change(s => ({ ...s, mode: 'template' })), '使用此模板');
+    TEMPLATES.forEach(template => {
+      card(template.name, template.src, template.original ? 'default' : 'template', () => change(s => ({ ...s, mode: template.original ? 'default' : 'template', templateId: template.id, ...(template.original ? { dim: 25, position: 50 } : {}) })), '使用此模板', template.id);
+    });
     const custom = card('自定义背景', '', 'custom', () => input.click(), state.custom ? '上传替换图片' : '上传图片');
-    // Thumbnail URLs belong to this panel and are revoked after decoding.
     if (state.custom) {
-      const thumbURL = URL.createObjectURL(state.custom), img = element('img');
-      img.alt = '已保存的自定义背景'; img.onload = img.onerror = () => URL.revokeObjectURL(thumbURL); img.src = thumbURL;
-      custom.firstChild.replaceWith(img);
+      custom.firstChild.replaceWith(media('自定义背景 · ' + state.name, state.custom));
       const name = element('p', 'background-help', state.name); custom.append(name);
       const use = element('button', 'settings-action-btn', '使用已上传图片'); use.type = 'button';
       use.onclick = () => change(s => ({ ...s, mode: 'custom' })); custom.append(use);

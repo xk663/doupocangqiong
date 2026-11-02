@@ -2,16 +2,17 @@ var WorldMapBridge=(function(){
  'use strict';
  let custom=null,proposal=null,movement=null,movementId=0;const listeners=new Set();
  const data=()=>DoupoWorldData;
- function getContext(){
-  const ctx=custom?custom.read():{player:GameState.player,economy:Economy,gameTime:GameTime,worldState:WorldState,questSystem:QuestSystem};
+ function getContext(sync=true){
+  // Map resource costs are temporarily paused; this is runtime policy, not save data.
+  const ctx={...(custom?custom.read():{player:GameState.player,economy:Economy,gameTime:GameTime,worldState:WorldState,questSystem:QuestSystem}),travelResourcesEnabled:false};
   const old=ctx.player.exploration;
   ctx.state=WorldCore.normalize(data(),old,ctx.player,ctx.worldState);
   ctx.state.minutes=Math.max(ctx.state.minutes,Math.round((Number(ctx.gameTime.totalHours)||0)*60));
-  ctx.player.exploration=ctx.state;
+  if(sync)ctx.player.exploration=ctx.state;
   return ctx;
  }
  function generating(){
-  if(typeof BattleBridge!=='undefined'&&BattleBridge.isBusy())return true;return custom?!!custom.isBusy?.():(typeof SaveManager!=='undefined'&&SaveManager.isBusy())||((typeof SummaryUI!=='undefined'&&SummaryUI.isBusy())||(typeof ResidenceUI!=='undefined'&&ResidenceUI.isBusy()))||(typeof BeautyRoster!=='undefined'&&BeautyRoster.isBusy())||(typeof tavernState!=='undefined'&&(tavernState.isSending||tavernState.isEditingMemory));}
+  if((typeof PersonnelUI!=='undefined'&&PersonnelUI.isBusy())||(typeof BattleBridge!=='undefined'&&BattleBridge.isBusy()))return true;return custom?!!custom.isBusy?.():(typeof SaveManager!=='undefined'&&SaveManager.isBusy())||((typeof SummaryUI!=='undefined'&&SummaryUI.isBusy())||(typeof ResidenceUI!=='undefined'&&ResidenceUI.isBusy()))||(typeof BeautyRoster!=='undefined'&&BeautyRoster.isBusy())||(typeof tavernState!=='undefined'&&(tavernState.isSending||tavernState.isEditingMemory));}
  function isBusy(){return !!movement||generating();}
  function revision(ctx){return JSON.stringify([ctx.player,ctx.economy,ctx.gameTime,ctx.worldState,ctx.questSystem]);}
  function beginMovement(){if(isBusy())return null;movement={id:++movementId,revision:revision(getContext())};changed();return movement.id;}
@@ -41,20 +42,22 @@ var WorldMapBridge=(function(){
   }catch(e){notify(e.message,'error');return null;}
  }
  function talkIntent(npcId){
-  const ctx=getContext(),npc=WorldCore.nearbyNpcs(data(),ctx).find(n=>n.id===npcId&&n.available);if(!npc){notify('请先到达人物附近','info');return;}
+  if(isBusy()){notify('请先停步或等当前操作完成','info');return;}
+  const ctx=getContext(false),npc=WorldCore.nearbyNpcs(data(),ctx).find(n=>n.id===npcId&&n.available);if(!npc){notify('请先到达人物附近','info');return;}
   const text='我在'+WorldCore.node(data(),ctx.state.locationId).name+'向'+npc.name+'（'+npc.role+'）交谈，询问眼下的生活、委托或路况。请按现有关系与已知事实回应，不自动结算旅行或交易。';
   if(custom?.onTalk){custom.onTalk(text,npc);return;}
+  if(typeof SceneDialogue!=='undefined')return SceneDialogue.draft(text,'map',npc);
   const btn=document.getElementById('sidebar-tavern');switchGameView('tavern',btn);
   const input=document.getElementById('tavern-input');if(input){input.value=text;input.focus();}
   notify('对话已写入输入框；发送后才调用你配置的模型','info');
  }
  function promptContext(){
-  try{return WorldCore.promptContext(data(),getContext());}catch{return '';}
+  try{return WorldCore.promptContext(data(),getContext(false));}catch{return '';}
  }
  function offerProposal(text,chatId){
   if(!custom&&chatId!==tavernState.activeChatId)return false;
   const ctx=getContext(),action=WorldCore.proposal(data(),ctx,text);if(!action)return false;
-  proposal={action,seed:ctx.state.seed,turn:ctx.state.turn,chatId};changed();notify('收到地图行动建议，可在地图中查看成本并确认','info');return true;
+  proposal={action,seed:ctx.state.seed,turn:ctx.state.turn,chatId};changed();notify('收到地图行动建议，可在地图中查看并确认','info');return true;
  }
  function getProposal(){if(!proposal)return null;const ctx=getContext();if(ctx.state.seed!==proposal.seed||ctx.state.turn!==proposal.turn||!custom&&tavernState.activeChatId!==proposal.chatId){proposal=null;return null;}return proposal.action;}
  return {data,getContext,ensure:getContext,isBusy,isMoving:()=>!!movement,beginMovement,finishMovement,cancelMovement,execute,talkIntent,promptContext,offerProposal,getProposal,clearProposal(){proposal=null;changed();},configure(adapter){custom=adapter;proposal=null;movement=null;},subscribe(cb){listeners.add(cb);return()=>listeners.delete(cb);},refresh:changed};

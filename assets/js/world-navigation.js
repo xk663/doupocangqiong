@@ -1,8 +1,8 @@
-(function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory();else root.WorldNavigation=factory();})(typeof globalThis!=='undefined'?globalThis:this,function(){
+(function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory(require('./world-flight-frames.js'));else root.WorldNavigation=factory(root.WorldFlightFrames);})(typeof globalThis!=='undefined'?globalThis:this,function(Flight){
  'use strict';
  // Hand-authored road centre lines. Width is a gameplay corridor, not image segmentation.
  const roads={
-  wutan:[[[50,90],[50,79],[49,65],[48,50],[50,34],[50,12]],[[18,50],[32,48],[48,50],[64,48],[79,51]],[[32,65],[42,65],[49,65],[65,60],[75,75]],[[32,48],[30,30],[50,34]],[[64,48],[69,35]]],
+  wutan:[[[50,90],[50,79],[49,65],[48,50],[50,34],[50,12]],[[18,50],[32,48],[48,50],[64,48],[79,51]],[[32,65],[42,65],[49,65],[65,60],[75,75]],[[32,48],[30,30],[50,34]],[[64,48],[69,35]],[[50,79],[42,75]],[[50,79],[57,73]],[[30,30],[23,25],[16,21],[10,13]]],
   qingshan:[[[50,90],[55,75],[48,66],[40,58],[48,48],[55,38],[66,36],[77,35]],[[30,73],[40,68],[48,66]],[[48,48],[38,37],[25,26]]],
   shimo:[[[50,90],[43,69],[49,59],[65,60],[72,50],[78,40],[65,25]],[[43,69],[36,60],[31,49],[35,32],[50,23]]]
  };
@@ -12,7 +12,7 @@
  function project(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/(dx*dx+dy*dy||1)));return {x:a.x+t*dx,y:a.y+t*dy,t};}
  function geometry(data,sceneId){
   if(networks.get(data)?.[sceneId])return networks.get(data)[sceneId];
-  const lines=(Object.hasOwn(roads,sceneId)?roads[sceneId]:[]).map(line=>line.map(point));if(!lines.length)return null;
+  const lines=(data.scenes.find(s=>s.id===sceneId)?.roads||(Object.hasOwn(roads,sceneId)?roads[sceneId]:[])).map(line=>line.map(point));if(!lines.length)return null;
   const segments=[];for(const line of lines)for(let i=1;i<line.length;i++)segments.push({a:line[i-1],b:line[i]});
   // Landmarks connect to the nearest authored road, allowing future anchors to be edited in Tiled.
   for(const n of data.nodes.filter(n=>n.scene===sceneId||n.id===sceneId)){const p=point(n.id===sceneId?n.localPosition:[n.x,n.y]);const closest=nearest(segments,p);if(closest&&closest.distance>.01)segments.push({a:p,b:closest.point});}
@@ -32,13 +32,19 @@
   let current=b,points=[point(vertices[b])];while(current!==a){current=prev.get(current);points.unshift(point(vertices[current]));}if(distance(start,points[0])>.01)points.unshift(point(start));
   const length=points.slice(1).reduce((sum,p,i)=>sum+distance(p,points[i]),0);return {ok:true,points,length,target:point(to.point),sceneId};
  }
- function position(data,state){const root=data.nodes.find(n=>n.id===state.locationId)?.root||state.locationId;const sceneId=roads[root]?root:'world';if(state.pose?.sceneId===sceneId)return {...state.pose};const n=data.nodes.find(n=>n.id===(sceneId==='world'?root:state.locationId));const p=sceneId===root&&n?.id===root?n.localPosition:[n?.x||50,n?.y||50];return {sceneId,x:p[0],y:p[1],direction:0};}
- function arrival(data,state,sceneId,p){return data.nodes.filter(n=>(n.scene===sceneId||n.id===sceneId)&&state.discovered.includes(n.id)&&!n.lateOnly).map(n=>({n,d:distance(p,point(n.id===sceneId?n.localPosition:[n.x,n.y]))})).filter(x=>x.d<=4).sort((a,b)=>a.d-b.d)[0]?.n;}
+ function position(data,state){const root=data.nodes.find(n=>n.id===state.locationId)?.root||state.locationId;const sceneId=state.scene==='world'?'world':data.scenes.some(s=>s.id===root)?root:'world';if(state.pose?.sceneId===sceneId)return {...state.pose};const n=data.nodes.find(n=>n.id===(sceneId==='world'?root:state.locationId));const p=sceneId===root&&n?.id===root?n.localPosition||[50,94]:[n?.x??50,n?.y??50];return {sceneId,x:p[0],y:p[1],direction:0};}
+ function worldPosition(data,state){const pose=position(data,state);if(pose.sceneId==='world')return pose;const root=data.nodes.find(n=>n.id===(data.nodes.find(n=>n.id===state.locationId)?.root||state.locationId));return {sceneId:'world',x:root?.x??50,y:root?.y??50,direction:pose.direction||0};}
+ function publicLandmark(n){return n.scene==='world'&&!n.secret&&!n.lateOnly&&['surface','surface-and-underground'].includes(n.layer);}
+ function arrival(data,state,sceneId,p){return data.nodes.filter(n=>(n.scene===sceneId||n.id===sceneId)&&state.discovered.includes(n.id)&&!n.lateOnly&&(sceneId!=='world'||publicLandmark(n))).map(n=>({n,d:distance(p,point(n.id===sceneId?n.localPosition:[n.x,n.y]))})).filter(x=>x.d<=4).sort((a,b)=>a.d-b.d)[0]?.n;}
  const avatars=[{id:'xiaoyan',name:'萧炎',subtitle:'黑衣 · 玄重尺',image:'assets/images/avatar-xiaoyan-sheet.webp',tint:0x8de1cb},{id:'xuner',name:'薰儿',subtitle:'青玉 · 长发',image:'assets/images/avatar-xuner-sheet.webp',tint:0xffdc94},{id:'xiaoyixian',name:'小医仙',subtitle:'银发 · 紫花',image:'assets/images/avatar-xiaoyixian-sheet.webp',tint:0xcbb2ff},{id:'medusa',name:'美杜莎',subtitle:'彩鳞 · 蛇人女王',image:'assets/images/avatar-medusa-sheet.webp',tint:0xdca0f2}];
+ // Visible silhouette calibration: include transparent atlas padding; never resize the source art.
+ const visible={xiaoyan:[.9785,.9814,.8818],xuner:[.9434,.9785,.9199],xiaoyixian:[.9785,.9844,.8760],medusa:[.9727,.9580,.9727]};
+ for(const a of avatars)a.visualScale=Object.fromEntries(['walk','convoy','flight'].map((form,i)=>[form,.95/visible[a.id][i]*(a.id==='xiaoyixian'?.9:1)]));
  for(const a of avatars)a.sheets={walk:a.image,convoy:'assets/images/avatar-'+a.id+'-convoy-sheet.webp',flight:'assets/images/avatar-'+a.id+'-flight-sheet.webp'};
- const forms={walk:{id:'walk',name:'徒步',speed:11,label:'沿路步行',description:'四向步行 · 街巷寻路'},convoy:{id:'convoy',name:'随商队',speed:16,label:'随队骑乘',description:'骑乘赶路 · 另付乘行费用'},flight:{id:'flight',name:'化翼飞行',speed:26,label:'化翼御空',description:'斗王解锁 · 区域内直线飞行'}};
+ if(Flight)for(const a of avatars){const meta=Flight[a.id];if(meta){a.sheets.flight=meta.image;a.flightFrames=meta;a.visualScale.flight=.95/meta.visibleHeight*(a.id==='xiaoyixian'?.9:1);}}
+ const forms={walk:{id:'walk',name:'徒步',speed:11,label:'沿路步行',description:'四向步行 · 街巷寻路'},convoy:{id:'convoy',name:'随商队',speed:16,label:'随队骑乘',description:'骑乘赶路 · 随队穿行'},flight:{id:'flight',name:'化翼飞行',speed:26,label:'化翼御空',description:'斗王解锁 · 区域内直线飞行'}};
  function avatar(gender,id){return avatars.find(a=>a.id===id)||avatars[gender==='female'||gender==='女'?1:0];}
  function direction(a,b){const dx=b.x-a.x,dy=b.y-a.y;return Math.abs(dx)>Math.abs(dy)?dx>=0?1:3:dy>=0?0:2;}
  function sample(points,progress){const lengths=points.slice(1).map((p,i)=>distance(p,points[i])),total=lengths.reduce((a,b)=>a+b,0);let rest=total*Math.max(0,Math.min(1,progress)),index=0;while(index<lengths.length-1&&rest>lengths[index])rest-=lengths[index++];const a=points[index],b=points[index+1]||a,t=Math.min(1,rest/(lengths[index]||1));return {x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t,direction:direction(a,b)};}
- return {roads,avatars,forms,distance,geometry,nearest,route,position,arrival,avatar,direction,sample};
+ return {roads,avatars,forms,distance,geometry,nearest,route,position,worldPosition,publicLandmark,arrival,avatar,direction,sample};
 });

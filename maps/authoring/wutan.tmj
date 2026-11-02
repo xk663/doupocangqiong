@@ -10,17 +10,19 @@
   "tileheight": 32,
   "infinite": false,
   "nextlayerid": 3,
-  "nextobjectid": 9,
+  "nextobjectid": 11,
   "layers": [
     {
       "id": 1,
       "name": "无字地形底图",
       "type": "imagelayer",
-      "image": "../../assets/images/world-wutan.png",
+      "image": "../../assets/images/world-wutan.webp",
       "opacity": 1,
       "visible": true,
       "x": 0,
-      "y": 0
+      "y": 0,
+      "imagewidth": 1536,
+      "imageheight": 1024
     },
     {
       "id": 2,
@@ -33,13 +35,12 @@
       "objects": [
         {
           "id": 1,
-          "name": "乌坦城",
-          "type": "city",
+          "name": "乌坦城门",
+          "point": true,
           "x": 768,
-          "y": 921.6,
+          "y": 747.52,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -58,17 +59,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "city"
         },
         {
           "id": 2,
           "name": "萧家宅邸",
-          "type": "compound",
+          "point": true,
           "x": 460.8,
           "y": 307.2,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -87,17 +88,17 @@
               "type": "string",
               "value": "novel-evidence"
             }
-          ]
+          ],
+          "type": "compound"
         },
         {
           "id": 3,
           "name": "坊市长街",
-          "type": "market",
+          "point": true,
           "x": 737.28,
           "y": 512,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -116,17 +117,17 @@
               "type": "string",
               "value": "game-design"
             }
-          ]
+          ],
+          "type": "market"
         },
         {
           "id": 4,
           "name": "临街客栈",
-          "type": "inn",
+          "point": true,
           "x": 491.52,
           "y": 665.6,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -145,17 +146,17 @@
               "type": "string",
               "value": "game-design"
             }
-          ]
+          ],
+          "type": "inn"
         },
         {
           "id": 5,
           "name": "拍卖场外",
-          "type": "auction",
+          "point": true,
           "x": 1059.84,
           "y": 358.4,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -174,17 +175,17 @@
               "type": "string",
               "value": "game-design"
             }
-          ]
+          ],
+          "type": "auction"
         },
         {
           "id": 6,
           "name": "药材铺",
-          "type": "shop",
+          "point": true,
           "x": 998.4,
           "y": 614.4,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -203,17 +204,17 @@
               "type": "string",
               "value": "game-design"
             }
-          ]
+          ],
+          "type": "shop"
         },
         {
           "id": 7,
           "name": "佣兵告示处",
-          "type": "guild",
+          "point": true,
           "x": 1152,
           "y": 768,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -232,17 +233,17 @@
               "type": "string",
               "value": "game-design"
             }
-          ]
+          ],
+          "type": "guild"
         },
         {
           "id": 8,
           "name": "城门驿道",
-          "type": "gate",
-          "x": 768,
-          "y": 901.12,
+          "point": true,
+          "x": 875.52,
+          "y": 747.52,
           "width": 0,
           "height": 0,
-          "point": true,
           "rotation": 0,
           "visible": true,
           "properties": [
@@ -250,6 +251,65 @@
               "name": "worldId",
               "type": "string",
               "value": "wutan-gate"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "wutan"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "gate"
+        },
+        {
+          "id": 9,
+          "name": "乌坦清居",
+          "point": true,
+          "x": 153.6,
+          "y": 133.12,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "wutan-home"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "wutan"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "residence"
+        },
+        {
+          "id": 10,
+          "name": "乌坦城",
+          "type": "city",
+          "point": true,
+          "x": 675.84,
+          "y": 808.96,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "wutan-overview"
             },
             {
               "name": "sceneId",

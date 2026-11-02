@@ -1,0 +1,21 @@
+/* A taller atlas can be read by scrolling the page, without cropping the southern terrain. */
+.world-map-root{overflow:auto!important;scrollbar-gutter:stable}
+.world-atlas{height:auto;min-height:100%}
+.world-feedback{padding:12px 22px;border-top:1px solid #d6d9c6;background:#edf1e4;color:#355e49;font-size:16px;line-height:1.6;overflow-wrap:anywhere}
+.world-feedback[data-tone=warning]{background:#fff1d8;color:#794a1d;border-color:#d9bb87}
+.world-location-title{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.world-location-title button{min-height:44px;font-size:16px;padding:8px 12px}
+.world-workspace{flex:none;align-items:start}
+.world-stage{height:auto;min-height:0;align-self:start;overflow:auto}
+.world-canvas{aspect-ratio:3/2;min-height:540px}
+.world-side{height:auto;max-height:calc(100dvh - 32px);position:sticky;top:0;align-self:start}
+.world-navigation-bar{position:sticky;top:0;z-index:8;border-bottom:1px solid #cad3b9;box-shadow:0 3px 10px #27453212}
+.world-label-leader{position:absolute;display:block;left:12px;top:12px;height:1px;background:#365945aa;transform-origin:left center;pointer-events:none}
+.world-label-leader[hidden]{display:none!important}
+.world-pin-label{padding:1px 3px;border-radius:3px;background:#fff9e448;z-index:2}
+.world-place-list button{min-height:44px;font-size:16px;padding:8px 12px}
+.world-place-list small{font-size:14px}
+.world-navigation-bar [data-map-action^="sheet-"]{display:none}
+@media(max-width:700px){.world-form-options .world-form-icon{display:none}.world-form-options button{justify-content:center}.world-form-options button>span:last-child{white-space:nowrap}}
+@media(max-width:1000px){.world-workspace{grid-template-columns:minmax(0,1fr) 280px}.world-canvas{min-height:520px}}
+@media(max-width:700px){.world-navigation-bar{position:static}.world-workspace{display:flex;flex-direction:column}.world-stage{width:100%;flex:none}.world-canvas{width:780px;min-width:780px;min-height:520px}.world-side{position:static;width:100%;max-height:none;overflow:visible}.world-stage .world-map-legend{position:sticky;left:0;width:min(100vw,100%)}.world-supplies{width:100%}.world-footer{position:static}.world-navigation-bar [data-map-action^="sheet-"]{display:inline-flex;align-items:center;justify-content:center;min-height:44px}}

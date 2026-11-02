@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="../../"><title>模型列表与选择 · 隔离验证</title><link rel="stylesheet" href="assets/css/tavern-settings.css">
+<style>*{box-sizing:border-box}body{margin:0;background:#f4f3eb;color:#355b42;font:16px/1.7 system-ui}main{max-width:1040px;margin:28px auto;padding:0 20px}h1{font-size:26px}.fixture-controls{display:flex;gap:14px;flex-wrap:wrap;margin:20px 0}.fixture-controls select,.fixture-controls button{padding:10px;min-height:44px;font:inherit}#fixture-result{white-space:pre-wrap}#settings-panel{position:static;display:block;padding:0;background:none}.fixture-note{padding:24px;background:#fffdf7;border:1px solid #d8dfcc;border-radius:14px}.text-btn{cursor:pointer}input,select,button{font:inherit}</style>
+<script src="assets/js/preset-core.js"></script><script src="assets/js/model-route-core.js"></script><script src="assets/js/tavern-core.js"></script></head><body><main>
+<h1>模型查询与选择 · 隔离验证</h1><p>只使用合成模型列表；不调用真实 API，不读取或修改玩家配置。</p>
+<div class="fixture-controls"><label>模拟响应 <select id="fixture-response"><option value="success">查询成功</option><option value="empty">空列表</option><option value="auth">认证失败</option><option value="invalid">无效 JSON</option><option value="network">网络失败</option></select></label><button id="fixture-fail-save">保存失败：关闭</button></div>
+<div id="settings-panel"><div class="core-settings-grid"><section><div id="api-cards-container"></div></section><section class="fixture-note"><h2>验证结果</h2><p id="fixture-result" role="status"></p><p id="fixture-toast" role="status"></p><p>刷新页面后保留隔离配置。查询结果应以原生下拉框显示；卡片保持展开，选中的标识同步到手填框。</p></section></div></div>
+<script>
+const fixtureKey='doupo_api_picker_fixture_v1';let saved;try{saved=JSON.parse(sessionStorage.getItem(fixtureKey));}catch{}
+var GameState={settings:saved||{apis:[{id:'fixture',name:'隔离测试接口',url:'https://fixture.invalid/v1',apiKey:'',model:'',backend:'openai',models:[],enabled:true}],activeApi:'fixture'}};
+let calls=0,failSave=false;
+function report(){document.getElementById('fixture-result').textContent='模拟模型列表请求：'+calls+' 次\n聊天请求：0 次\n当前模型：'+(GameState.settings.apis[0].model||'未选择');}
+function saveToLocalStorage(){if(failSave)return false;sessionStorage.setItem(fixtureKey,JSON.stringify(GameState.settings));report();return true;}
+function showToast(text){document.getElementById('fixture-toast').textContent=text;}
+window.fetch=async function(url,options){
+ calls++;report();if(options.method!=='GET')throw Error('Only list queries are allowed');await new Promise(resolve=>setTimeout(resolve,350));
+ const mode=document.getElementById('fixture-response').value;
+ if(mode==='auth')return new Response('',{status:401});if(mode==='invalid')return new Response('not-json');if(mode==='network')throw new TypeError('Fixture network failure');
+ if(mode==='empty')return Response.json({data:[]});
+ const backend=GameState.settings.apis[0].backend;
+ if(backend==='gemini')return Response.json({models:[{name:'models/gemini-fixture-pro',supportedGenerationMethods:['generateContent']},{name:'models/gemini-fixture-flash',supportedGenerationMethods:['generateContent']},{name:'models/embedding-fixture',supportedGenerationMethods:['embedContent']}]});
+ if(backend==='ollama')return Response.json({models:[{name:'llama-fixture'},{name:'qwen-fixture'}]});
+ if(backend==='kobold')return Response.json({result:'kobold-fixture'});
+ return Response.json({data:[{id:'chat-fixture-pro'},{id:'chat-fixture-fast'},{id:'chat-fixture-long'}]});
+};
+document.getElementById('fixture-fail-save').onclick=function(){failSave=!failSave;this.textContent='保存失败：'+(failSave?'开启':'关闭');};
+</script><script src="assets/js/api-settings.js"></script><script>ApiSettings.render('fixture');report();</script></main></body></html>

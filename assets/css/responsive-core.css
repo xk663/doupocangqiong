@@ -3,8 +3,8 @@
 
 /* ===== 手机横屏 - 超紧凑模式 (height ≤ 500px) ===== */
 @media (max-height: 500px) and (orientation: landscape) {
-  /* 游戏视图: 重新布局，优化高度利用 */
-  #view-game {
+  /* 仅调整已激活的游戏视图，保留 .view 的隐藏规则。 */
+  #view-game.active {
     display: flex;
     flex-direction: column;
   }
@@ -121,12 +121,9 @@ body.keyboard-active {
   /* 进一步隐藏非关键UI */
 }
 
-body.keyboard-active #game-sidebar {
-  max-height: 44px;
-}
-
-body.keyboard-active .sidebar-label {
-  display: none;
+@media (max-height: 500px) and (orientation: landscape) and (any-pointer: coarse) {
+  body.keyboard-active #game-sidebar { max-height: 44px; }
+  body.keyboard-active .sidebar-label { display: none; }
 }
 
 /* ===== 创角界面响应式 ===== */

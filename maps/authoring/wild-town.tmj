@@ -1,0 +1,238 @@
+{
+  "type": "map",
+  "version": "1.10",
+  "tiledversion": "1.12.2",
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tilewidth": 32,
+  "tileheight": 32,
+  "infinite": false,
+  "layers": [
+    {
+      "id": 1,
+      "name": "无字地形底图",
+      "type": "imagelayer",
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "image": "../../assets/images/regions/wild-town-v2.webp",
+      "imagewidth": 1536,
+      "imageheight": 1024
+    },
+    {
+      "id": 2,
+      "name": "地点锚点",
+      "type": "objectgroup",
+      "objects": [
+        {
+          "id": 1,
+          "name": "莽荒镇",
+          "point": true,
+          "x": 768,
+          "y": 962.56,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "wild-town"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "wild-town"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ],
+          "type": "town"
+        },
+        {
+          "id": 2,
+          "name": "莽荒镇口",
+          "point": true,
+          "x": 721.92,
+          "y": 849.92,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "wild-town-local-1"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "wild-town"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "gate"
+        },
+        {
+          "id": 3,
+          "name": "猎队公榜棚",
+          "point": true,
+          "x": 353.28,
+          "y": 604.16,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "wild-town-local-2"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "wild-town"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "guild"
+        },
+        {
+          "id": 4,
+          "name": "荒材交易场",
+          "point": true,
+          "x": 291.84,
+          "y": 235.52,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "wild-town-local-3"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "wild-town"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "market"
+        },
+        {
+          "id": 5,
+          "name": "竹篱客舍",
+          "point": true,
+          "x": 737.28,
+          "y": 122.88,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "wild-town-local-4"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "wild-town"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "inn"
+        },
+        {
+          "id": 6,
+          "name": "林缘备行营",
+          "point": true,
+          "x": 1182.72,
+          "y": 286.72,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "wild-town-local-5"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "wild-town"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 7,
+          "name": "雨河木渡",
+          "point": true,
+          "x": 1182.72,
+          "y": 675.84,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "wild-town-local-6"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "wild-town"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        }
+      ]
+    }
+  ],
+  "width": 48,
+  "height": 32,
+  "nextlayerid": 3,
+  "nextobjectid": 8
+}

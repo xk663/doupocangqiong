@@ -34,3 +34,16 @@
 .core-settings-grid{display:grid;grid-template-columns:minmax(280px,380px) minmax(0,1fr);gap:28px}.core-settings-grid>section{min-width:0}.api-config-card>summary,.backup-card>summary{display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:12px;font-size:13px;color:#3b5940}.api-config-card summary span,.backup-card summary span{font-size:10px;color:#889474}.api-config-card[open]>summary,.backup-card[open]>summary{margin-bottom:18px}.api-field{display:block;font-size:11px;color:#6d7e62;line-height:1.8;margin:12px 0}.api-field input,.api-field select{display:block;width:100%;padding:10px;border:1px solid #d0dac3;border-radius:7px;background:#fffef9;color:#3c563e;font-size:12px;box-sizing:border-box}.api-actions{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}.api-actions .text-btn{border:1px solid #d0dac3;padding:8px 10px;border-radius:6px;font-size:11px;cursor:pointer}.backup-card{margin-top:22px}.backup-card h4{font:16px var(--font-serif);color:#506d49;margin:25px 0 8px}.backup-card>details{margin-top:22px;border-top:1px solid #d5dec9;padding-top:14px}.backup-card summary{color:#4d6c48}.core-settings-grid .protocol-card textarea{max-height:120px}.core-settings-grid .settings-card .text-btn{white-space:normal}
 @media(max-width:1000px){.core-settings-grid{grid-template-columns:1fr}.core-settings-grid>section:first-child{max-width:none}}
 @media(max-width:700px){.world-avatar-options{flex-wrap:wrap}.ranking-tabs button{padding:10px 17px}}
+/* Model discovery uses a visible native selector, with the manual identifier retained. */
+.api-model-controls{display:flex;align-items:flex-end;flex-wrap:wrap;gap:10px;margin-top:16px}
+.api-model-controls .api-field{flex:1 1 170px;min-width:0;margin:0}
+#settings-panel .api-config-card>summary{font-size:18px;line-height:1.6}
+#settings-panel .api-config-card>summary span{font-size:16px}
+#settings-panel .api-config-card .api-field,#settings-panel .api-config-card .wiring-help,#settings-panel .api-config-card .api-enabled{font-size:16px;line-height:1.7}
+#settings-panel .api-config-card .api-field input,#settings-panel .api-config-card .api-field select{font:inherit;font-size:16px;min-height:46px;padding:10px 12px;min-width:0}
+#settings-panel .api-config-card .text-btn{font-size:16px;line-height:1.5;min-height:44px;padding:10px 14px;border:1px solid #cbd7bf;border-radius:8px;background:#f6f8f0;color:#355d47}
+#settings-panel .api-config-card button:disabled,#settings-panel .api-config-card select:disabled{cursor:not-allowed;opacity:.65}
+#settings-panel .api-config-card .api-actions{gap:10px}
+#settings-panel .api-config-card .api-enabled{display:inline-flex;align-items:center;gap:8px;margin-right:16px}
+#settings-panel .api-config-card .api-enabled input{width:18px;height:18px}
+#settings-panel .api-config-card .danger{color:#9e4640}

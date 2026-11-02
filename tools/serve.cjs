@@ -4,12 +4,18 @@ const http=require('node:http'),fs=require('node:fs/promises'),path=require('nod
 const compressible=new Set(['.html','.js','.css','.json','.svg']);
 const defaultRoot=path.resolve(__dirname,'..');
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp','.svg':'image/svg+xml'};
-function createServer({root=defaultRoot,fetcher=fetch}={}){return http.createServer(async(req,res)=>{
+function createServer({root=defaultRoot,fetcher=fetch,gate,publicOrigin,enableRelay=true}={}){
+ const trusted=publicOrigin?new URL(publicOrigin):null;
+ return http.createServer(async(req,res)=>{
  const deny=(status,message)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify({error:message}));};
- const host=req.headers.host||'';if(!/^(localhost|127\.0\.0\.1):\d+$/.test(host))return deny(403,'Local access only');
- if(req.headers.origin&&!['http://'+host,'http://localhost:'+host.split(':')[1],'http://127.0.0.1:'+host.split(':')[1]].includes(req.headers.origin))return deny(403,'Origin denied');
- let url;try{url=new URL(req.url,'http://'+host);}catch{return deny(400,'Invalid URL');}
+ const host=req.headers.host||'';if(trusted?host!==trusted.host:!/^(localhost|127\.0\.0\.1):\d+$/.test(host))return deny(403,'Host denied');
+ const origins=trusted?[trusted.origin]:['http://'+host,'http://localhost:'+host.split(':')[1],'http://127.0.0.1:'+host.split(':')[1]];
+ if(req.headers.origin&&!origins.includes(req.headers.origin))return deny(403,'Origin denied');
+ let url;try{url=new URL(req.url,trusted?.origin||'http://'+host);}catch{return deny(400,'Invalid URL');}
+ if(trusted&&url.origin!==trusted.origin)return deny(400,'Invalid URL');
+ if(gate){try{if(await gate(req,res,url))return;}catch{return deny(503,'Authorization unavailable');}}
  if(url.pathname.startsWith('/__gemini_proxy')){
+  if(!enableRelay)return deny(404,'Relay disabled');
   const route=url.pathname.slice('/__gemini_proxy'.length),listing=/^\/v1beta\/models(?:\/[A-Za-z0-9._-]+)?$/.test(route),generation=/^\/v1beta\/models\/[A-Za-z0-9._-]+:(?:generateContent|streamGenerateContent)$/.test(route);
   if(!((req.method==='GET'&&listing)||(req.method==='POST'&&generation))||[...url.searchParams.keys()].some(k=>k!=='alt')||(url.search&&url.searchParams.get('alt')!=='sse'))return deny(400,'Unsupported relay route');
   const ctl=new AbortController();res.on('close',()=>{if(!res.writableEnded)ctl.abort();});const timer=setTimeout(()=>ctl.abort(),120000);
@@ -17,12 +23,16 @@ function createServer({root=defaultRoot,fetcher=fetch}={}){return http.createSer
    let body,bytes=0;if(req.method==='POST'){const chunks=[];for await(const chunk of req){bytes+=chunk.length;if(bytes>2*1024*1024)return deny(413,'Request too large');chunks.push(chunk);}body=Buffer.concat(chunks);}
    const headers={Accept:req.headers.accept||'*/*'};if(req.headers['content-type'])headers['Content-Type']=req.headers['content-type'];if(req.headers['x-goog-api-key'])headers['x-goog-api-key']=req.headers['x-goog-api-key'];
    const upstream=await fetcher('http://localhost:8080'+route+url.search,{method:req.method,headers,body,signal:ctl.signal,redirect:'error'});
-   res.writeHead(upstream.status,{'Content-Type':upstream.headers.get('content-type')||'application/json','Cache-Control':'no-store'});res.flushHeaders();
+   const responseHeaders={'Content-Type':upstream.headers.get('content-type')||'application/json','Cache-Control':'no-store'};
+   for(const name of ['x-actual-model','x-upstream-model','x-model-version']){const value=upstream.headers.get(name);if(value&&value.length<=200)responseHeaders[name]=value;}
+   res.writeHead(upstream.status,responseHeaders);res.flushHeaders();
    if(!upstream.body){res.end();return;}const stream=Readable.fromWeb(upstream.body);stream.on('error',()=>res.destroy());stream.pipe(res);await new Promise(resolve=>{res.once('finish',resolve);res.once('close',resolve);});
   }catch(e){if(!res.headersSent)deny(ctl.signal.aborted?504:502,'Local Gemini relay unavailable');else res.destroy();}finally{clearTimeout(timer);}return;
  }
  if(!['GET','HEAD'].includes(req.method))return deny(405,'Method not allowed');
  let name;try{name=decodeURIComponent(url.pathname);}catch{return deny(400,'Invalid path');}
+ // A gated publication never serves development tools, backups, tests or source reports.
+ if(gate&&!(/^(?:\/|\/(?:index|game|map|sillytavern)\.html)$/.test(name)||/^\/(?:assets|maps)\//.test(name)))return deny(403,'Path denied');
  const target=path.resolve(root,'.'+(name==='/'?'/index.html':name));if(!target.startsWith(path.resolve(root)+path.sep)||name.split(/[\\/]/).some(p=>p.startsWith('.')))return deny(403,'Path denied');
  try{let body=await fs.readFile(target);const ext=path.extname(target),headers={'Content-Type':mime[ext]||'application/octet-stream','Cache-Control':'no-store'};
   if(compressible.has(ext)&&body.length>=1024){headers.Vary='Accept-Encoding';const accept=String(req.headers['accept-encoding']||'');

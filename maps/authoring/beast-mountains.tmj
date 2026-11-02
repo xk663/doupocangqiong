@@ -1,0 +1,238 @@
+{
+  "type": "map",
+  "version": "1.10",
+  "tiledversion": "1.12.2",
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tilewidth": 32,
+  "tileheight": 32,
+  "infinite": false,
+  "layers": [
+    {
+      "id": 1,
+      "name": "无字地形底图",
+      "type": "imagelayer",
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "image": "../../assets/images/regions/beast-mountains-v2.webp",
+      "imagewidth": 1536,
+      "imageheight": 1024
+    },
+    {
+      "id": 2,
+      "name": "地点锚点",
+      "type": "objectgroup",
+      "objects": [
+        {
+          "id": 1,
+          "name": "魔兽山脉",
+          "point": true,
+          "x": 768,
+          "y": 962.56,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "beast-mountains"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "beast-mountains"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ],
+          "type": "mountain-range"
+        },
+        {
+          "id": 2,
+          "name": "林缘驿棚",
+          "point": true,
+          "x": 322.56,
+          "y": 870.4,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "beast-mountains-local-1"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "beast-mountains"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 3,
+          "name": "溪涧石桥",
+          "point": true,
+          "x": 399.36,
+          "y": 593.92,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "beast-mountains-local-2"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "beast-mountains"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 4,
+          "name": "断崖观兽台",
+          "point": true,
+          "x": 768,
+          "y": 481.28,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "beast-mountains-local-3"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "beast-mountains"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 5,
+          "name": "药草坡",
+          "point": true,
+          "x": 1090.56,
+          "y": 409.6,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "beast-mountains-local-4"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "beast-mountains"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "shop"
+        },
+        {
+          "id": 6,
+          "name": "老猎人歇脚坪",
+          "point": true,
+          "x": 1152,
+          "y": 163.84,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "beast-mountains-local-5"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "beast-mountains"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "inn"
+        },
+        {
+          "id": 7,
+          "name": "云瀑栈道",
+          "point": true,
+          "x": 691.2,
+          "y": 184.32,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "beast-mountains-local-6"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "beast-mountains"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        }
+      ]
+    }
+  ],
+  "width": 48,
+  "height": 32,
+  "nextlayerid": 3,
+  "nextobjectid": 8
+}

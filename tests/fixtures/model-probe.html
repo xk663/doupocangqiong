@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="../../"><title>模型路由检测 · 模拟渠道</title>
+<link rel="stylesheet" href="assets/css/model-route.css">
+<script src="assets/js/preset-core.js"></script><script src="assets/js/model-route-core.js"></script><script src="assets/js/model-profile-core.js"></script><script src="assets/js/tavern-core.js"></script><script src="assets/js/model-route-ui.js"></script><script src="assets/js/model-probe-core.js"></script><script src="assets/js/model-probe-ui.js"></script></head>
+<body><main><h1>模型路由检测</h1><p>本页模拟已完成的聊天回复和测试接口，所有请求均在页内处理。</p><div id="record"></div><p id="count">模拟测试 0 次</p></main>
+<script>
+const api = {id:'fixture',name:'模拟渠道',backend:'gemini',url:'https://example.invalid',model:'gemini-test'};
+const GameState = {settings:{apis:[api]}}, tavernState = {isSending:false};
+const observer = ModelRouteCore.create(api.model,'gemini');
+observer.observe({response:{modelVersion:'gemini-other'}});
+const message = {id:'m',content:'模拟回复',modelAudit:observer.result(),modelProbeTarget:ModelProbeCore.target(api,api.model)};
+const getActiveChat = () => ({id:'c',messages:[message]});
+let calls = 0;
+window.fetch = async function(url,init) {
+  document.getElementById('count').textContent = '模拟测试 '+(++calls)+' 次';
+  const prompt = JSON.parse(init.body).contents[0].parts[0].text;
+  const [,a,op,b] = prompt.match(/Q: (\d+) ([+-]) (\d+) = \?\nA:$/);
+  const text = String(op === '+' ? +a + +b : +a - +b);
+  return Response.json({modelVersion:api.model,candidates:[{content:{parts:[{text}]}}]});
+};
+document.getElementById('record').appendChild(ModelProbeUI.button(message));
+</script></body></html>

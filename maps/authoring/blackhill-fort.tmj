@@ -1,0 +1,238 @@
+{
+  "type": "map",
+  "version": "1.10",
+  "tiledversion": "1.12.2",
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tilewidth": 32,
+  "tileheight": 32,
+  "infinite": false,
+  "layers": [
+    {
+      "id": 1,
+      "name": "无字地形底图",
+      "type": "imagelayer",
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "image": "../../assets/images/regions/blackhill-fort-v2.webp",
+      "imagewidth": 1536,
+      "imageheight": 1024
+    },
+    {
+      "id": 2,
+      "name": "地点锚点",
+      "type": "objectgroup",
+      "objects": [
+        {
+          "id": 1,
+          "name": "黑山要塞",
+          "point": true,
+          "x": 768,
+          "y": 962.56,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackhill-fort"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackhill-fort"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ],
+          "type": "fortress"
+        },
+        {
+          "id": 2,
+          "name": "黑山前垒",
+          "point": true,
+          "x": 215.04,
+          "y": 788.48,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackhill-fort-local-1"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackhill-fort"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "gate"
+        },
+        {
+          "id": 3,
+          "name": "军需外市",
+          "point": true,
+          "x": 522.24,
+          "y": 675.84,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackhill-fort-local-2"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackhill-fort"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "market"
+        },
+        {
+          "id": 4,
+          "name": "修械火棚",
+          "point": true,
+          "x": 737.28,
+          "y": 409.6,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackhill-fort-local-3"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackhill-fort"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 5,
+          "name": "山脊烽火台",
+          "point": true,
+          "x": 1105.92,
+          "y": 378.88,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackhill-fort-local-4"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackhill-fort"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 6,
+          "name": "驿兵候命坪",
+          "point": true,
+          "x": 1121.28,
+          "y": 112.64,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackhill-fort-local-5"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackhill-fort"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "guild"
+        },
+        {
+          "id": 7,
+          "name": "北风歇脚所",
+          "point": true,
+          "x": 721.92,
+          "y": 143.36,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "blackhill-fort-local-6"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "blackhill-fort"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "inn"
+        }
+      ]
+    }
+  ],
+  "width": 48,
+  "height": 32,
+  "nextlayerid": 3,
+  "nextobjectid": 8
+}

@@ -4,7 +4,7 @@ function fresh(id='wutan'){const state=core.initial(data,id,'regression');if(id=
 const step=(c,type,extra={})=>core.transition(data,c,{type,...extra});
 function approach(c,npcId){const npc=core.nearbyNpcs(data,c).find(n=>n.id===npcId),n=core.node(data,npc.locationId);return step(c,'walk',{sceneId:npc.scene,x:n.x,y:n.y});}
 test('catalogue: unique IDs, valid routes, connected playable nodes and real local assets',()=>{
- assert.equal(data.nodes.length,79);assert.equal(new Set(data.nodes.map(n=>n.id)).size,79);assert.equal(data.scenes.length,4);
+ assert.equal(data.nodes.length,323);assert.equal(new Set(data.nodes.map(n=>n.id)).size,323);assert.equal(data.scenes.length,44);
  let reachable=new Set(['wutan']);for(let i=0;i<data.nodes.length;i++)for(const e of data.edges){assert.ok(core.node(data,e.a));assert.ok(core.node(data,e.b));assert.ok(e.hours>0&&e.gold>=0);if(reachable.has(e.a)||reachable.has(e.b)){reachable.add(e.a);reachable.add(e.b);}}
  for(const n of data.nodes){assert.ok(n.x>=0&&n.x<=100&&n.y>=0&&n.y<=100);assert.ok(n.lateOnly||reachable.has(n.id),n.id);if(n.sourceType==='novel-evidence')assert.ok(n.sources.length);}
  for(const scene of data.scenes)assert.ok(fs.statSync(require('path').join(__dirname,'..',scene.art)).size>10000);
@@ -56,5 +56,5 @@ test('bridge blocks map mutation during an LLM turn and retains state after save
 });
 test('all map scripts parse and Tiled anchors match the runtime positions',()=>{
  for(const file of ['world-core','world-bridge','world-ui','world-renderer','world-standalone'])new vm.Script(fs.readFileSync(require('path').join(__dirname,'../assets/js/'+file+'.js'),'utf8'));
- for(const scene of data.scenes){const map=JSON.parse(fs.readFileSync(require('path').join(__dirname,'../maps/authoring/'+scene.id+'.tmj'),'utf8'));for(const obj of map.layers[1].objects){const props=Object.fromEntries(obj.properties.map(p=>[p.name,p.value]));const n=core.node(data,props.worldId),pos=n.id===scene.id?n.localPosition:[n.x,n.y];assert.ok(Math.abs(obj.x-pos[0]*data.worldWidth/100)<.001);assert.ok(Math.abs(obj.y-pos[1]*data.worldHeight/100)<.001);}}
+ for(const scene of data.scenes){const map=JSON.parse(fs.readFileSync(require('path').join(__dirname,'../maps/authoring/'+scene.id+'.tmj'),'utf8'));for(const obj of map.layers[1].objects){const props=Object.fromEntries(obj.properties.map(p=>[p.name,p.value]));const n=core.node(data,props.worldId),pos=n.id===scene.id?n.localPosition:[n.x,n.y];assert.ok(Math.abs(obj.x-pos[0]*(scene.width||data.worldWidth)/100)<.001);assert.ok(Math.abs(obj.y-pos[1]*(scene.height||data.worldHeight)/100)<.001);}}
 });

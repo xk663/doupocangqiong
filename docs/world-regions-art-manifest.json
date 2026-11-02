@@ -1,0 +1,2097 @@
+{
+  "scope": "43 mainland public regions, at least six public branches per region",
+  "regions": 43,
+  "branches": 261,
+  "artwork": 293,
+  "method": "Built-in imagegen, one asset per request; technical WebP encoding; individual regional review sheets.",
+  "refinedPlaces": [
+    "forest-grotto",
+    "tager-local-5",
+    "bloodpool-local-5"
+  ],
+  "entries": [
+    {
+      "id": "place-qingshan-herbs",
+      "regionId": "qingshan",
+      "target": "assets/images/places/qingshan-herbs-v2.webp",
+      "sha256": "ab325c0169981f46f73ad262e3d9e6c5e1bece4e055b35fedeacfdef258e5280",
+      "bytes": 381194
+    },
+    {
+      "id": "place-qingshan-inn",
+      "regionId": "qingshan",
+      "target": "assets/images/places/qingshan-inn-v2.webp",
+      "sha256": "d45c9908877dd437268909317d942fd52317d94cda1fd29782da14d8045ad126",
+      "bytes": 375484
+    },
+    {
+      "id": "place-qingshan-camp",
+      "regionId": "qingshan",
+      "target": "assets/images/places/qingshan-camp-v2.webp",
+      "sha256": "2fffe63ae9fcbe6deb29f34717157a1485d963e31193ffee178bcea40e57d619",
+      "bytes": 416278
+    },
+    {
+      "id": "place-forest-trail",
+      "regionId": "qingshan",
+      "target": "assets/images/places/forest-trail-v2.webp",
+      "sha256": "13b9597fc0d00081d460688a26d6bc9464e59918a416c7d966c658ac503e0b8b",
+      "bytes": 430622
+    },
+    {
+      "id": "place-forest-waterfall",
+      "regionId": "qingshan",
+      "target": "assets/images/places/forest-waterfall-v2.webp",
+      "sha256": "debd9705a101d5923fa7f668a1799ec933dd00816ab9650096aa4eca308302ef",
+      "bytes": 404786
+    },
+    {
+      "id": "place-forest-grotto",
+      "regionId": "qingshan",
+      "target": "assets/images/places/forest-grotto-v3.webp",
+      "sha256": "a63a7f26f11ffcbec8a15533988369c4e6e17a923b6bc8ca49312c52e2dd933c",
+      "bytes": 349308
+    },
+    {
+      "id": "place-qingshan-spring",
+      "regionId": "qingshan",
+      "target": "assets/images/places/qingshan-spring-v2.webp",
+      "sha256": "1cdb59f7922409bbf7997ca906ae83b5660e83e22800b8c1515a36438786c94d",
+      "bytes": 422612
+    },
+    {
+      "id": "map-beast-mountains",
+      "regionId": "beast-mountains",
+      "target": "assets/images/regions/beast-mountains-v2.webp",
+      "sha256": "71a73db1541516b18cedf5029b0c6b10ef7fa701800f92beee71561b966aa692",
+      "bytes": 716996
+    },
+    {
+      "id": "place-beast-mountains-local-1",
+      "regionId": "beast-mountains",
+      "target": "assets/images/places/beast-mountains-local-1-v2.webp",
+      "sha256": "2a90e61b00036549bc7907f88b1a543074d28db894fbff0c03097e99633f9b68",
+      "bytes": 417444
+    },
+    {
+      "id": "place-beast-mountains-local-2",
+      "regionId": "beast-mountains",
+      "target": "assets/images/places/beast-mountains-local-2-v2.webp",
+      "sha256": "11004156510f251fad70174d68ace08b811a667fed05671feb9d18f164c5b219",
+      "bytes": 375324
+    },
+    {
+      "id": "place-beast-mountains-local-3",
+      "regionId": "beast-mountains",
+      "target": "assets/images/places/beast-mountains-local-3-v2.webp",
+      "sha256": "5a4cb79c00e25f558a3f4696bb69017a09ef2f9d0495b384173930184937630d",
+      "bytes": 363292
+    },
+    {
+      "id": "place-beast-mountains-local-4",
+      "regionId": "beast-mountains",
+      "target": "assets/images/places/beast-mountains-local-4-v2.webp",
+      "sha256": "dd8cd93a1c39355a66ba24eda03a8496b28da9f33f7367f9026296612efb0ab3",
+      "bytes": 399440
+    },
+    {
+      "id": "place-beast-mountains-local-5",
+      "regionId": "beast-mountains",
+      "target": "assets/images/places/beast-mountains-local-5-v2.webp",
+      "sha256": "c36c2ead14371b0e2c717e2f28801cc0da7ef4f8464334846110deb69693820d",
+      "bytes": 349644
+    },
+    {
+      "id": "place-beast-mountains-local-6",
+      "regionId": "beast-mountains",
+      "target": "assets/images/places/beast-mountains-local-6-v2.webp",
+      "sha256": "06a54f6a4e6e956520a9d6f364878df1473e744faba4e92f781d0cbfe6cc227b",
+      "bytes": 395474
+    },
+    {
+      "id": "map-blackrock",
+      "regionId": "blackrock",
+      "target": "assets/images/regions/blackrock-v2.webp",
+      "sha256": "905a105eb1148b11558a35d24175364f57c478c765f4786aa170bfa5b7b7e426",
+      "bytes": 647976
+    },
+    {
+      "id": "place-blackrock-local-1",
+      "regionId": "blackrock",
+      "target": "assets/images/places/blackrock-local-1-v2.webp",
+      "sha256": "55f96d5d029763f00e559490553a559d093665ce309b8b48d4d24411433cbe2b",
+      "bytes": 323722
+    },
+    {
+      "id": "place-blackrock-local-2",
+      "regionId": "blackrock",
+      "target": "assets/images/places/blackrock-local-2-v2.webp",
+      "sha256": "af1b52997e965f9a61fa59a2272e7434bc7d6fa6c461f92a8ac205435c871047",
+      "bytes": 349738
+    },
+    {
+      "id": "place-blackrock-local-3",
+      "regionId": "blackrock",
+      "target": "assets/images/places/blackrock-local-3-v2.webp",
+      "sha256": "4ac73967aa0a5e17ffca3c4e89b6db6afe1b756a6515e75750babe4b8e641772",
+      "bytes": 361708
+    },
+    {
+      "id": "place-blackrock-local-4",
+      "regionId": "blackrock",
+      "target": "assets/images/places/blackrock-local-4-v2.webp",
+      "sha256": "95ae8177e256b0173d8d2b70ebbfdd78843a0f6fe3ed2d21d0f9693ad18caa1b",
+      "bytes": 323030
+    },
+    {
+      "id": "place-blackrock-local-5",
+      "regionId": "blackrock",
+      "target": "assets/images/places/blackrock-local-5-v2.webp",
+      "sha256": "2b2e5abbafb0d2ae8a9fa6b052bb8dd40acd40bba4e354cc4c36b9877f502946",
+      "bytes": 368700
+    },
+    {
+      "id": "place-blackrock-local-6",
+      "regionId": "blackrock",
+      "target": "assets/images/places/blackrock-local-6-v2.webp",
+      "sha256": "a9953e4bca9cb5aa38034c151147dbb5fe7c8290008a0effdc1df0e0b26309de",
+      "bytes": 334134
+    },
+    {
+      "id": "map-mo-city",
+      "regionId": "mo-city",
+      "target": "assets/images/regions/mo-city-v2.webp",
+      "sha256": "db00c72c2901d86ceddc498779928e5997efcdeb3cb40bb4c55b41e6d1dcac0e",
+      "bytes": 588440
+    },
+    {
+      "id": "place-mo-city-local-1",
+      "regionId": "mo-city",
+      "target": "assets/images/places/mo-city-local-1-v2.webp",
+      "sha256": "f8cbd0514e13e0be6170e2a1468df25807d5b0944921573a6ab9cfb9d28986cf",
+      "bytes": 330354
+    },
+    {
+      "id": "place-mo-city-local-2",
+      "regionId": "mo-city",
+      "target": "assets/images/places/mo-city-local-2-v2.webp",
+      "sha256": "b11c1666a1058f009f2bedd5850dfb88e9ec2f4138ec453956579b52e7f69a8a",
+      "bytes": 322954
+    },
+    {
+      "id": "place-mo-city-local-3",
+      "regionId": "mo-city",
+      "target": "assets/images/places/mo-city-local-3-v2.webp",
+      "sha256": "37188141391734a3d22f06f6b7a589a33f90bffb39e003fc8e2663a7d67aa2f5",
+      "bytes": 334752
+    },
+    {
+      "id": "place-mo-city-local-4",
+      "regionId": "mo-city",
+      "target": "assets/images/places/mo-city-local-4-v2.webp",
+      "sha256": "68e43b87fcc254421af65a3f2aa8c24980f6fc3a8030e197773976afd649042b",
+      "bytes": 334394
+    },
+    {
+      "id": "place-mo-city-local-5",
+      "regionId": "mo-city",
+      "target": "assets/images/places/mo-city-local-5-v2.webp",
+      "sha256": "b33d88c165c93434c8fbeda0391ae2c95d8291ce57bf960f89f70f20ffeb0336",
+      "bytes": 335510
+    },
+    {
+      "id": "place-mo-city-local-6",
+      "regionId": "mo-city",
+      "target": "assets/images/places/mo-city-local-6-v2.webp",
+      "sha256": "66288b127231a5b3362548cd58517c96a1be3897cb11991d37bb0373fc21f8ee",
+      "bytes": 303856
+    },
+    {
+      "id": "map-tager",
+      "regionId": "tager",
+      "target": "assets/images/regions/tager-v2.webp",
+      "sha256": "7c45b741cff857141a84b3e180812d4f0a0084d46ad13ce68b247ea10fa89f18",
+      "bytes": 500208
+    },
+    {
+      "id": "place-tager-local-1",
+      "regionId": "tager",
+      "target": "assets/images/places/tager-local-1-v2.webp",
+      "sha256": "4249e49e522528de9d1fea7081473ae95e0e681015037cadc4c4a0a9c6ab4dd7",
+      "bytes": 322108
+    },
+    {
+      "id": "place-tager-local-2",
+      "regionId": "tager",
+      "target": "assets/images/places/tager-local-2-v2.webp",
+      "sha256": "090fe9dd2bbe5abaa862251aa0bc3bb2e37e5e05096b8e413bac480aca9c91bd",
+      "bytes": 356736
+    },
+    {
+      "id": "place-tager-local-3",
+      "regionId": "tager",
+      "target": "assets/images/places/tager-local-3-v2.webp",
+      "sha256": "589b9bd5d53093a906792a27c179cbe3d7c8a36b7cbf763cd082f5645a416ff0",
+      "bytes": 309926
+    },
+    {
+      "id": "place-tager-local-4",
+      "regionId": "tager",
+      "target": "assets/images/places/tager-local-4-v2.webp",
+      "sha256": "54283308e5a0d692ba9feaf17760165549f40489d012a1858e197eb79ac77490",
+      "bytes": 332960
+    },
+    {
+      "id": "place-tager-local-5",
+      "regionId": "tager",
+      "target": "assets/images/places/tager-local-5-v3.webp",
+      "sha256": "21dcb6c04b3594441566424f6ef1e8179f752b788cc136f64d4b01be5a5ee83b",
+      "bytes": 273696
+    },
+    {
+      "id": "place-tager-local-6",
+      "regionId": "tager",
+      "target": "assets/images/places/tager-local-6-v2.webp",
+      "sha256": "88c3571f46a0e951f6fda8f29595a76f1ecb255979b93199e901138ef377dc9d",
+      "bytes": 330292
+    },
+    {
+      "id": "place-shimo-supply",
+      "regionId": "shimo",
+      "target": "assets/images/places/shimo-supply-v2.webp",
+      "sha256": "5603193aaf4c101da66752dbe53ad1b2e654745856e38fd20b2084cd7f52034d",
+      "bytes": 318268
+    },
+    {
+      "id": "place-shimo-camp",
+      "regionId": "shimo",
+      "target": "assets/images/places/shimo-camp-v2.webp",
+      "sha256": "c9d1eaf0869737a1bf231a1329c972abad25c3b94c114d82f5e8cd5f0c0f21fb",
+      "bytes": 298458
+    },
+    {
+      "id": "place-shimo-guide",
+      "regionId": "shimo",
+      "target": "assets/images/places/shimo-guide-v2.webp",
+      "sha256": "bb7f5f9f9b148094e9da9f3fc078dd7f7803a00a0f85893ebf010db47c6693b9",
+      "bytes": 298340
+    },
+    {
+      "id": "place-shimo-oasis",
+      "regionId": "shimo",
+      "target": "assets/images/places/shimo-oasis-v2.webp",
+      "sha256": "1fb7e883cc394f1fb75506b8b4e5d1e76b81b85e314aab79c5707b5fc175cf18",
+      "bytes": 413380
+    },
+    {
+      "id": "place-shimo-watch",
+      "regionId": "shimo",
+      "target": "assets/images/places/shimo-watch-v2.webp",
+      "sha256": "d4f0d4999abd131d92e8be70faa20cfd351f8e9eb81a10bfed38180bc47ffac1",
+      "bytes": 287892
+    },
+    {
+      "id": "place-shimo-caravan",
+      "regionId": "shimo",
+      "target": "assets/images/places/shimo-caravan-v2.webp",
+      "sha256": "1ecbc5cba27df5c690a5aab4c9ec0bb51ab2c2d219a20255e05f71f83021083a",
+      "bytes": 338010
+    },
+    {
+      "id": "map-snake-center",
+      "regionId": "snake-center",
+      "target": "assets/images/regions/snake-center-v2.webp",
+      "sha256": "e3f13ef7c059bfb513803ee032b291e9846768c3d54c5e09810ae251ea1b5166",
+      "bytes": 637580
+    },
+    {
+      "id": "place-snake-center-local-1",
+      "regionId": "snake-center",
+      "target": "assets/images/places/snake-center-local-1-v2.webp",
+      "sha256": "158d6265dd96acf0bf400ba8e133620b6e7511b5d2b67e53af8438afe65a425b",
+      "bytes": 303972
+    },
+    {
+      "id": "place-snake-center-local-2",
+      "regionId": "snake-center",
+      "target": "assets/images/places/snake-center-local-2-v2.webp",
+      "sha256": "f8b37adaf0255b6a28d9ea16f8353c40008aec52f73d28f78314ece0f5706d58",
+      "bytes": 338836
+    },
+    {
+      "id": "place-snake-center-local-3",
+      "regionId": "snake-center",
+      "target": "assets/images/places/snake-center-local-3-v2.webp",
+      "sha256": "c4bbb970c16e70c57b318945599bfc72a809b9ff30ac11e4428e24f146f0724d",
+      "bytes": 337008
+    },
+    {
+      "id": "place-snake-center-local-4",
+      "regionId": "snake-center",
+      "target": "assets/images/places/snake-center-local-4-v2.webp",
+      "sha256": "a5b2786004cece305a611fb247761b499bfca70b23cdbb7b9e29074908039200",
+      "bytes": 374546
+    },
+    {
+      "id": "place-snake-center-local-5",
+      "regionId": "snake-center",
+      "target": "assets/images/places/snake-center-local-5-v2.webp",
+      "sha256": "7c3c55f81fc9ec76ed2c80508f9a4c8c103ae14450796ab95e4f89970670c9c6",
+      "bytes": 355208
+    },
+    {
+      "id": "place-snake-center-local-6",
+      "regionId": "snake-center",
+      "target": "assets/images/places/snake-center-local-6-v2.webp",
+      "sha256": "f098258090230718e92ca6a8b1a694fcbe0b54df0f5aba147e800e330b71a184",
+      "bytes": 320016
+    },
+    {
+      "id": "map-salt-city",
+      "regionId": "salt-city",
+      "target": "assets/images/regions/salt-city-v2.webp",
+      "sha256": "237cd0245d6cdfc5891bf09b5239e7115e5e49f816970e02dc43da6c7f47ad89",
+      "bytes": 655202
+    },
+    {
+      "id": "place-salt-city-local-1",
+      "regionId": "salt-city",
+      "target": "assets/images/places/salt-city-local-1-v2.webp",
+      "sha256": "2e76d3bc1458d9593ca88909c6e5c355d2430b51db52c813a2094b7beaa82ccb",
+      "bytes": 378010
+    },
+    {
+      "id": "place-salt-city-local-2",
+      "regionId": "salt-city",
+      "target": "assets/images/places/salt-city-local-2-v2.webp",
+      "sha256": "436242cb1c21e222b6ee3a07b5d531151e0be7897beba175cd1734bd1aec2d1e",
+      "bytes": 329734
+    },
+    {
+      "id": "place-salt-city-local-3",
+      "regionId": "salt-city",
+      "target": "assets/images/places/salt-city-local-3-v2.webp",
+      "sha256": "14cdfe59bb6c5e9d92a2abd86172f989be88c963276af469b7bcccc213c6cdbf",
+      "bytes": 329200
+    },
+    {
+      "id": "place-salt-city-local-4",
+      "regionId": "salt-city",
+      "target": "assets/images/places/salt-city-local-4-v2.webp",
+      "sha256": "04388c9da1ac8048c084e9685bf39f222809c716f713147cdf82e2e2806c21ec",
+      "bytes": 335394
+    },
+    {
+      "id": "place-salt-city-local-5",
+      "regionId": "salt-city",
+      "target": "assets/images/places/salt-city-local-5-v2.webp",
+      "sha256": "71bf5f73b52977fef4facb8c8521ed2654abc5124447c28d462bc2e2ad7e5202",
+      "bytes": 342960
+    },
+    {
+      "id": "place-salt-city-local-6",
+      "regionId": "salt-city",
+      "target": "assets/images/places/salt-city-local-6-v2.webp",
+      "sha256": "2321dab9a6d3d3d801fddf302d3ba311e2a32983ae54df29fea8cedb54f71bc5",
+      "bytes": 321954
+    },
+    {
+      "id": "map-capital",
+      "regionId": "capital",
+      "target": "assets/images/regions/capital-v2.webp",
+      "sha256": "f79941ebff5753683e1ec0e6f9f5607e44f2a8b6e1d95ec54eb265a5330fa6c9",
+      "bytes": 644646
+    },
+    {
+      "id": "place-capital-local-1",
+      "regionId": "capital",
+      "target": "assets/images/places/capital-local-1-v2.webp",
+      "sha256": "ec8db0f72caea7807f124ed7e4f15a5694e7e2a46c6c326a4c39d838864c9b3b",
+      "bytes": 349232
+    },
+    {
+      "id": "place-capital-local-2",
+      "regionId": "capital",
+      "target": "assets/images/places/capital-local-2-v2.webp",
+      "sha256": "f584edf21565d2adbdb8e3a14a8ac82dc43eaa4b6ccc448bf58e457707ebb235",
+      "bytes": 351422
+    },
+    {
+      "id": "place-capital-local-3",
+      "regionId": "capital",
+      "target": "assets/images/places/capital-local-3-v2.webp",
+      "sha256": "2e1d1120f02fa4cce4e78666eb869565a22a45c197af5fc377904b0d3b70a01f",
+      "bytes": 364590
+    },
+    {
+      "id": "place-capital-local-4",
+      "regionId": "capital",
+      "target": "assets/images/places/capital-local-4-v2.webp",
+      "sha256": "5cbca3204ea07d34abdc7464b0ee0989e8eee01f6a151eda4d2b0a664c902718",
+      "bytes": 330928
+    },
+    {
+      "id": "place-capital-local-5",
+      "regionId": "capital",
+      "target": "assets/images/places/capital-local-5-v2.webp",
+      "sha256": "c5cfe6d82c3738c298ea159acbbb2886c2b54fd1cb52ff3edf140949dfab8404",
+      "bytes": 366858
+    },
+    {
+      "id": "place-capital-local-6",
+      "regionId": "capital",
+      "target": "assets/images/places/capital-local-6-v2.webp",
+      "sha256": "b91103af7b8f3691edaa651906191a1916ca39fe7695db816107880612b5597c",
+      "bytes": 319730
+    },
+    {
+      "id": "map-yunlan",
+      "regionId": "yunlan",
+      "target": "assets/images/regions/yunlan-v2.webp",
+      "sha256": "74d059a34bae785d809af846325b7d11522858c3c14ff9c18482370160ca2a50",
+      "bytes": 574128
+    },
+    {
+      "id": "place-yunlan-local-1",
+      "regionId": "yunlan",
+      "target": "assets/images/places/yunlan-local-1-v2.webp",
+      "sha256": "d66cbb28ae7c7b86296afa257e63cecd03b3cb55a6b46db3200402901bb3c92d",
+      "bytes": 326344
+    },
+    {
+      "id": "place-yunlan-local-2",
+      "regionId": "yunlan",
+      "target": "assets/images/places/yunlan-local-2-v2.webp",
+      "sha256": "e990106113c2084b2c8b4f34783495a19ed7c71675f86a8c480751ba3e438587",
+      "bytes": 369162
+    },
+    {
+      "id": "place-yunlan-local-3",
+      "regionId": "yunlan",
+      "target": "assets/images/places/yunlan-local-3-v2.webp",
+      "sha256": "2c9af75f2d23290a2ef722cfca0011afb2b40c5e4fe28e9ae2f133fdd3129c34",
+      "bytes": 345086
+    },
+    {
+      "id": "place-yunlan-local-4",
+      "regionId": "yunlan",
+      "target": "assets/images/places/yunlan-local-4-v2.webp",
+      "sha256": "23c27a342f7308ffa8d92abb0c3a9824e7fd02ab12f9f10c0b3b6c230e967ed0",
+      "bytes": 315378
+    },
+    {
+      "id": "place-yunlan-local-5",
+      "regionId": "yunlan",
+      "target": "assets/images/places/yunlan-local-5-v2.webp",
+      "sha256": "a888fe85749224c9f84d1415ada752f930c5230e336ba71db546ea03e5c6d68b",
+      "bytes": 336984
+    },
+    {
+      "id": "place-yunlan-local-6",
+      "regionId": "yunlan",
+      "target": "assets/images/places/yunlan-local-6-v2.webp",
+      "sha256": "6573c690ab3655aabe03891e9eb39220d7b18ec13772a9451c294c64153be73a",
+      "bytes": 338598
+    },
+    {
+      "id": "map-ghost-pass",
+      "regionId": "ghost-pass",
+      "target": "assets/images/regions/ghost-pass-v2.webp",
+      "sha256": "1ae1d06e5d2ca2ce45254e8f6731f3028c5e40b0c94942a845899b23115cf5a1",
+      "bytes": 607674
+    },
+    {
+      "id": "place-ghost-pass-local-1",
+      "regionId": "ghost-pass",
+      "target": "assets/images/places/ghost-pass-local-1-v2.webp",
+      "sha256": "23cc055e18be6fffbf8d3fe1b0cf2e36ba05e9ea4cce5542aeac830a9f63dbee",
+      "bytes": 306840
+    },
+    {
+      "id": "place-ghost-pass-local-2",
+      "regionId": "ghost-pass",
+      "target": "assets/images/places/ghost-pass-local-2-v2.webp",
+      "sha256": "d8d454fc6b97ca7a924dd9313a286258c19425ed3a6be2fbe0006af6221e0231",
+      "bytes": 299514
+    },
+    {
+      "id": "place-ghost-pass-local-3",
+      "regionId": "ghost-pass",
+      "target": "assets/images/places/ghost-pass-local-3-v2.webp",
+      "sha256": "b135eb40ba81af3ea0c22e8a0870f81252bd5fdd983e056db227fb6b819b0993",
+      "bytes": 326444
+    },
+    {
+      "id": "place-ghost-pass-local-4",
+      "regionId": "ghost-pass",
+      "target": "assets/images/places/ghost-pass-local-4-v2.webp",
+      "sha256": "5580fcf42fdf7355002a60d7a76530e5d39f16f0b1bec93e2db54f5b515513a5",
+      "bytes": 330684
+    },
+    {
+      "id": "place-ghost-pass-local-5",
+      "regionId": "ghost-pass",
+      "target": "assets/images/places/ghost-pass-local-5-v2.webp",
+      "sha256": "c6a72fb6931b114bbedada9317714843c92a13e354bed89bf16e0df75b69eb4e",
+      "bytes": 320104
+    },
+    {
+      "id": "place-ghost-pass-local-6",
+      "regionId": "ghost-pass",
+      "target": "assets/images/places/ghost-pass-local-6-v2.webp",
+      "sha256": "dec175f93d2ed9e5eca6790c5fd11a5fd9445113915bbb91b88e7f21b3d02f52",
+      "bytes": 342018
+    },
+    {
+      "id": "map-blackhill-fort",
+      "regionId": "blackhill-fort",
+      "target": "assets/images/regions/blackhill-fort-v2.webp",
+      "sha256": "19e2650828aeaf7c3957656597960afd2c61ccf8529d862ee42514a8cb22113e",
+      "bytes": 603026
+    },
+    {
+      "id": "place-blackhill-fort-local-1",
+      "regionId": "blackhill-fort",
+      "target": "assets/images/places/blackhill-fort-local-1-v2.webp",
+      "sha256": "2bc86e7d5753b394ec78760e3a14614239a946db176c4878b53c79bdc0dae4c3",
+      "bytes": 304054
+    },
+    {
+      "id": "place-blackhill-fort-local-2",
+      "regionId": "blackhill-fort",
+      "target": "assets/images/places/blackhill-fort-local-2-v2.webp",
+      "sha256": "35eb35a36f42009a8867278741889ba91d06e9e31bbdfb42d31f0d5acdf9f9fb",
+      "bytes": 324328
+    },
+    {
+      "id": "place-blackhill-fort-local-3",
+      "regionId": "blackhill-fort",
+      "target": "assets/images/places/blackhill-fort-local-3-v2.webp",
+      "sha256": "451658a5f52a73cb108bc2eea655e3058cf0831b62cf8e3039333ec87b3159aa",
+      "bytes": 294686
+    },
+    {
+      "id": "place-blackhill-fort-local-4",
+      "regionId": "blackhill-fort",
+      "target": "assets/images/places/blackhill-fort-local-4-v2.webp",
+      "sha256": "78c6dcfe946a89903729931faf83b7944e3ac95b4af38da8d2d66ef40786514a",
+      "bytes": 273734
+    },
+    {
+      "id": "place-blackhill-fort-local-5",
+      "regionId": "blackhill-fort",
+      "target": "assets/images/places/blackhill-fort-local-5-v2.webp",
+      "sha256": "5ca8d6a7cd0207485ed995ed645a4a64a53732b4230ad50d95ae6b3b5caa0dd7",
+      "bytes": 327020
+    },
+    {
+      "id": "place-blackhill-fort-local-6",
+      "regionId": "blackhill-fort",
+      "target": "assets/images/places/blackhill-fort-local-6-v2.webp",
+      "sha256": "5ca24d70fcddb3120021e54a7bdb764224f8e6fb3a6545641a9ca4da2a5486b9",
+      "bytes": 342668
+    },
+    {
+      "id": "map-xuanhuang-fort",
+      "regionId": "xuanhuang-fort",
+      "target": "assets/images/regions/xuanhuang-fort-v2.webp",
+      "sha256": "63507726c2c2e457748bcdf07cc4815513ed1f4a75306c98d1016957b95d1253",
+      "bytes": 656368
+    },
+    {
+      "id": "place-xuanhuang-fort-local-1",
+      "regionId": "xuanhuang-fort",
+      "target": "assets/images/places/xuanhuang-fort-local-1-v2.webp",
+      "sha256": "6f8e233490863d3ab56a3c5df6c4f729f3faaa2ee8caf9d3b7faf099a66e5a76",
+      "bytes": 334564
+    },
+    {
+      "id": "place-xuanhuang-fort-local-2",
+      "regionId": "xuanhuang-fort",
+      "target": "assets/images/places/xuanhuang-fort-local-2-v2.webp",
+      "sha256": "f1f3cfbebbdae4516238f5377dc104f4df7bc10a7b0e22936cea0376f83931c9",
+      "bytes": 352464
+    },
+    {
+      "id": "place-xuanhuang-fort-local-3",
+      "regionId": "xuanhuang-fort",
+      "target": "assets/images/places/xuanhuang-fort-local-3-v2.webp",
+      "sha256": "281d959cf0f74ab90658c6c6a6e1965b68a29f7f6c04ab5db5ac1b10c70b3b1e",
+      "bytes": 322804
+    },
+    {
+      "id": "place-xuanhuang-fort-local-4",
+      "regionId": "xuanhuang-fort",
+      "target": "assets/images/places/xuanhuang-fort-local-4-v2.webp",
+      "sha256": "4e99faacbbd1ea46bb1268b1807ed012f7329b5b74c76e8a6f4c429fa03fa728",
+      "bytes": 304262
+    },
+    {
+      "id": "place-xuanhuang-fort-local-5",
+      "regionId": "xuanhuang-fort",
+      "target": "assets/images/places/xuanhuang-fort-local-5-v2.webp",
+      "sha256": "075c51c98d167779f406eb3e994414fdab16738879260645ddd60b30dc4da2b0",
+      "bytes": 302598
+    },
+    {
+      "id": "place-xuanhuang-fort-local-6",
+      "regionId": "xuanhuang-fort",
+      "target": "assets/images/places/xuanhuang-fort-local-6-v2.webp",
+      "sha256": "6bece95ddad5a05f7120d5f291fa3c505855d90e183950bc8a6c4fd0c35823ae",
+      "bytes": 339164
+    },
+    {
+      "id": "map-redplain",
+      "regionId": "redplain",
+      "target": "assets/images/regions/redplain-v2.webp",
+      "sha256": "9e702857ce82a471a20c4259e2bb4883cbd2f87b412c2c0429911307ddf55c27",
+      "bytes": 637174
+    },
+    {
+      "id": "place-redplain-local-1",
+      "regionId": "redplain",
+      "target": "assets/images/places/redplain-local-1-v2.webp",
+      "sha256": "ab800e403cfd76574774db98ac7993dc1c7f0bf656fce9de15cb5e3df67e45ee",
+      "bytes": 395522
+    },
+    {
+      "id": "place-redplain-local-2",
+      "regionId": "redplain",
+      "target": "assets/images/places/redplain-local-2-v2.webp",
+      "sha256": "66f2f63c2b75e2d44a6f327441bb55a59e14d8fbccab8e52d38c96648904516f",
+      "bytes": 309480
+    },
+    {
+      "id": "place-redplain-local-3",
+      "regionId": "redplain",
+      "target": "assets/images/places/redplain-local-3-v2.webp",
+      "sha256": "de60552e0edc9fef87e51270248e77724995a07e7c4e25833d16703c5005a54e",
+      "bytes": 360062
+    },
+    {
+      "id": "place-redplain-local-4",
+      "regionId": "redplain",
+      "target": "assets/images/places/redplain-local-4-v2.webp",
+      "sha256": "1b6bb3e6a8250160534d07f11dfd427b715cd209293f32c69457971887238b46",
+      "bytes": 335402
+    },
+    {
+      "id": "place-redplain-local-5",
+      "regionId": "redplain",
+      "target": "assets/images/places/redplain-local-5-v2.webp",
+      "sha256": "6030b1efe7d71e8da9544138ffb0acb989cba6c81e36ab9b9dfe2f95d3f085fc",
+      "bytes": 323292
+    },
+    {
+      "id": "place-redplain-local-6",
+      "regionId": "redplain",
+      "target": "assets/images/places/redplain-local-6-v2.webp",
+      "sha256": "f69888d1f0c21f3c718be3411745a26fa6b7c947f30606e3886e7fb9d5817ca9",
+      "bytes": 420608
+    },
+    {
+      "id": "map-blackcorner",
+      "regionId": "blackcorner",
+      "target": "assets/images/regions/blackcorner-v2.webp",
+      "sha256": "425663e3f218a626f2708019782eea3b06800efe94d4bede717909696c9cf3e3",
+      "bytes": 628316
+    },
+    {
+      "id": "place-blackcorner-local-1",
+      "regionId": "blackcorner",
+      "target": "assets/images/places/blackcorner-local-1-v2.webp",
+      "sha256": "ce69e9d28b36a1d69b2644e31cc390f2c793e429ea04d65fd5a9862fe31abbe8",
+      "bytes": 281548
+    },
+    {
+      "id": "place-blackcorner-local-2",
+      "regionId": "blackcorner",
+      "target": "assets/images/places/blackcorner-local-2-v2.webp",
+      "sha256": "3c582fce84f621913b6fa9ae39e47ee0150dda4896c9a31cfcf94a01dd328618",
+      "bytes": 336806
+    },
+    {
+      "id": "place-blackcorner-local-3",
+      "regionId": "blackcorner",
+      "target": "assets/images/places/blackcorner-local-3-v2.webp",
+      "sha256": "06afc16797ec6cee90b2de0d802455d3f92da5428eb82dbf68593c53740b1d7b",
+      "bytes": 332204
+    },
+    {
+      "id": "place-blackcorner-local-4",
+      "regionId": "blackcorner",
+      "target": "assets/images/places/blackcorner-local-4-v2.webp",
+      "sha256": "f22b209898bec56fb587cec67d27edb145704006ddbb3095af425b439aef82c3",
+      "bytes": 300524
+    },
+    {
+      "id": "place-blackcorner-local-5",
+      "regionId": "blackcorner",
+      "target": "assets/images/places/blackcorner-local-5-v2.webp",
+      "sha256": "daea80b438b9b5d262b50d0916291b1296be0109b21bb4a876dda9368479b4ca",
+      "bytes": 330884
+    },
+    {
+      "id": "place-blackcorner-local-6",
+      "regionId": "blackcorner",
+      "target": "assets/images/places/blackcorner-local-6-v2.webp",
+      "sha256": "a195d0f5f955abbde3a3ca1275b93f02d3716baf11a321b9aaba77ef47992696",
+      "bytes": 320240
+    },
+    {
+      "id": "map-blackseal",
+      "regionId": "blackseal",
+      "target": "assets/images/regions/blackseal-v2.webp",
+      "sha256": "573f056782c07256ffd3f9872c5b233a66c4e588ce335c288e72fbbe26cda4c0",
+      "bytes": 644974
+    },
+    {
+      "id": "place-blackseal-local-1",
+      "regionId": "blackseal",
+      "target": "assets/images/places/blackseal-local-1-v2.webp",
+      "sha256": "b33cbf14d8c55a275b93c34d49a229664674782a36d07d9f0b568ccfa2320ecc",
+      "bytes": 319562
+    },
+    {
+      "id": "place-blackseal-local-2",
+      "regionId": "blackseal",
+      "target": "assets/images/places/blackseal-local-2-v2.webp",
+      "sha256": "2919b5f978235fc7a7cdcae23ca330fffdbfe8e0a8e904a9dcce6cf58b9a1548",
+      "bytes": 301236
+    },
+    {
+      "id": "place-blackseal-local-3",
+      "regionId": "blackseal",
+      "target": "assets/images/places/blackseal-local-3-v2.webp",
+      "sha256": "a3f461475d64c6e3e422f7399dcd5c7454abd4c83a31edb2a24f28dec0d6b346",
+      "bytes": 343190
+    },
+    {
+      "id": "place-blackseal-local-4",
+      "regionId": "blackseal",
+      "target": "assets/images/places/blackseal-local-4-v2.webp",
+      "sha256": "e6e126607373a89b44a9dbc68245061720d87a428fa3e5afdf63c492cf2c82a4",
+      "bytes": 281830
+    },
+    {
+      "id": "place-blackseal-local-5",
+      "regionId": "blackseal",
+      "target": "assets/images/places/blackseal-local-5-v2.webp",
+      "sha256": "feda0697d595e62c034c964e7e02ff4e1db76df745b747cae277317172a30c09",
+      "bytes": 289064
+    },
+    {
+      "id": "place-blackseal-local-6",
+      "regionId": "blackseal",
+      "target": "assets/images/places/blackseal-local-6-v2.webp",
+      "sha256": "83a3971298c80ce09b663c9f13130833e0870fc05c08f48da032d8eb19ac2174",
+      "bytes": 318162
+    },
+    {
+      "id": "map-peace",
+      "regionId": "peace",
+      "target": "assets/images/regions/peace-v2.webp",
+      "sha256": "384447e03917b26884c3fbfe44061d21036d0be4170bf2afd082d1a69fd86734",
+      "bytes": 659352
+    },
+    {
+      "id": "place-peace-local-1",
+      "regionId": "peace",
+      "target": "assets/images/places/peace-local-1-v2.webp",
+      "sha256": "fe987f5c9d567ebe2aa378cacddebc146eba1d15518c9f7fbfcfe4acf68abaf1",
+      "bytes": 324354
+    },
+    {
+      "id": "place-peace-local-2",
+      "regionId": "peace",
+      "target": "assets/images/places/peace-local-2-v2.webp",
+      "sha256": "b5fc9dfa1bee8c303def465e27ae976df7f273789433d998f632a27dca90f616",
+      "bytes": 346102
+    },
+    {
+      "id": "place-peace-local-3",
+      "regionId": "peace",
+      "target": "assets/images/places/peace-local-3-v2.webp",
+      "sha256": "ca8c1d36b75d3dd44b8dee27b5501e3cfc91244e92efe43befe43614e8f0aac8",
+      "bytes": 345812
+    },
+    {
+      "id": "place-peace-local-4",
+      "regionId": "peace",
+      "target": "assets/images/places/peace-local-4-v2.webp",
+      "sha256": "d5f338fdd2f6da3d5f3c3582a68ad7538a6a0574e071588a36ef8f3a7b80a7cf",
+      "bytes": 327818
+    },
+    {
+      "id": "place-peace-local-5",
+      "regionId": "peace",
+      "target": "assets/images/places/peace-local-5-v2.webp",
+      "sha256": "b4aaf231f0a834fd75e98d3d6070f319dd08527e72069a4982453ad677382b83",
+      "bytes": 330176
+    },
+    {
+      "id": "place-peace-local-6",
+      "regionId": "peace",
+      "target": "assets/images/places/peace-local-6-v2.webp",
+      "sha256": "3ec5bce62733af8c423eb9430e57de7c3bfe8cfcedf715627caa1d17fb18a7a5",
+      "bytes": 362274
+    },
+    {
+      "id": "map-outer",
+      "regionId": "outer",
+      "target": "assets/images/regions/outer-v2.webp",
+      "sha256": "a38d7f5313b018bbc4c7f4623df900b85c26eadfab3677be8382becce9d59a7c",
+      "bytes": 709728
+    },
+    {
+      "id": "place-outer-local-1",
+      "regionId": "outer",
+      "target": "assets/images/places/outer-local-1-v2.webp",
+      "sha256": "f4d8342f780d4e88ac2067f80f9bf4398b6a2b39a3cf1019ef246c004bc27157",
+      "bytes": 361102
+    },
+    {
+      "id": "place-outer-local-2",
+      "regionId": "outer",
+      "target": "assets/images/places/outer-local-2-v2.webp",
+      "sha256": "2755e33718b81bc21eafc8833c573e9dbfded2e36d57fa4521dc1ebdd642b704",
+      "bytes": 375718
+    },
+    {
+      "id": "place-outer-local-3",
+      "regionId": "outer",
+      "target": "assets/images/places/outer-local-3-v2.webp",
+      "sha256": "5ae6cf2d6ed556bbf4ceaf968c4926ac39f039973fc1febe908d64d7105026b1",
+      "bytes": 337626
+    },
+    {
+      "id": "place-outer-local-4",
+      "regionId": "outer",
+      "target": "assets/images/places/outer-local-4-v2.webp",
+      "sha256": "3fb8bf2b2207713b0b6803c3e17d4f86b7cf8b4c3fa1f7c20c05cdcd2469de01",
+      "bytes": 336106
+    },
+    {
+      "id": "place-outer-local-5",
+      "regionId": "outer",
+      "target": "assets/images/places/outer-local-5-v2.webp",
+      "sha256": "8876c5b2a8c7451ea80c5de0869209f539fef88565e4d6dc24d55a8f586859dd",
+      "bytes": 306102
+    },
+    {
+      "id": "place-outer-local-6",
+      "regionId": "outer",
+      "target": "assets/images/places/outer-local-6-v2.webp",
+      "sha256": "0db5f7554f12ebfb2d26268c6812d64cc2ce6c99f358d2aea195c3464529a514",
+      "bytes": 342050
+    },
+    {
+      "id": "map-tianya",
+      "regionId": "tianya",
+      "target": "assets/images/regions/tianya-v2.webp",
+      "sha256": "e6a51b2883144fdbe5a3e5812b3036bccfda7181c149935dba65b27b66c81763",
+      "bytes": 599418
+    },
+    {
+      "id": "place-tianya-local-1",
+      "regionId": "tianya",
+      "target": "assets/images/places/tianya-local-1-v2.webp",
+      "sha256": "c30ce3ae8cb7d0cb2899168d6ef4e6934770cb79f8b8f814c5732c6708c3783a",
+      "bytes": 341796
+    },
+    {
+      "id": "place-tianya-local-2",
+      "regionId": "tianya",
+      "target": "assets/images/places/tianya-local-2-v2.webp",
+      "sha256": "5440eb43a2c50c4f1c9dc8855561b3db0fd75f33d05f06c8181b89889d63ea91",
+      "bytes": 337732
+    },
+    {
+      "id": "place-tianya-local-3",
+      "regionId": "tianya",
+      "target": "assets/images/places/tianya-local-3-v2.webp",
+      "sha256": "9ef9b93b4c1e4126c167a2d589d0c3b333ffee3b2b8af46890d67cf8c8592387",
+      "bytes": 334720
+    },
+    {
+      "id": "place-tianya-local-4",
+      "regionId": "tianya",
+      "target": "assets/images/places/tianya-local-4-v2.webp",
+      "sha256": "2b6a4ea858d1b45c395def20222a8977d697b1ad1dd09ce74782f9455669e7b3",
+      "bytes": 358772
+    },
+    {
+      "id": "place-tianya-local-5",
+      "regionId": "tianya",
+      "target": "assets/images/places/tianya-local-5-v2.webp",
+      "sha256": "a0c1bcee10498fc87ddf59a237bc73d84d64016fc56798cd103afdd2ce8b6e91",
+      "bytes": 322050
+    },
+    {
+      "id": "place-tianya-local-6",
+      "regionId": "tianya",
+      "target": "assets/images/places/tianya-local-6-v2.webp",
+      "sha256": "343b2c1f47b4c905f3b02c49345226f86b8b129ab161cf0d9af6b1b7603b1b6e",
+      "bytes": 358658
+    },
+    {
+      "id": "map-tianqing",
+      "regionId": "tianqing",
+      "target": "assets/images/regions/tianqing-v2.webp",
+      "sha256": "8247bb56a7a0030a16ffb1b42ec0979b6fb2ec7a2996011fe6649fc1788d9f51",
+      "bytes": 582570
+    },
+    {
+      "id": "place-tianqing-local-1",
+      "regionId": "tianqing",
+      "target": "assets/images/places/tianqing-local-1-v2.webp",
+      "sha256": "eb000b73b076f0e4ad9a81039e3d9f2bb4c6ba8246f1cb3deed895d14a9ee846",
+      "bytes": 346532
+    },
+    {
+      "id": "place-tianqing-local-2",
+      "regionId": "tianqing",
+      "target": "assets/images/places/tianqing-local-2-v2.webp",
+      "sha256": "e1f02c2ed2e0b9b09145fd9bb6ab62a2c237c11f6f7a9cef9a5d7e01b50ad783",
+      "bytes": 361262
+    },
+    {
+      "id": "place-tianqing-local-3",
+      "regionId": "tianqing",
+      "target": "assets/images/places/tianqing-local-3-v2.webp",
+      "sha256": "ec6943dd8597d8c463c8c0c5a410f480d4abcc184a0cc8040fa919a3271978e3",
+      "bytes": 375522
+    },
+    {
+      "id": "place-tianqing-local-4",
+      "regionId": "tianqing",
+      "target": "assets/images/places/tianqing-local-4-v2.webp",
+      "sha256": "4fce2f064e23c38efce3045ba17f9ee5ffa25edf2a4f69f3f0ddf8b084b49881",
+      "bytes": 390978
+    },
+    {
+      "id": "place-tianqing-local-5",
+      "regionId": "tianqing",
+      "target": "assets/images/places/tianqing-local-5-v2.webp",
+      "sha256": "7296b893c3a4d35f9dff89866296029a62d7f1f93bc6a79c1cff8b9bcc144b27",
+      "bytes": 405678
+    },
+    {
+      "id": "place-tianqing-local-6",
+      "regionId": "tianqing",
+      "target": "assets/images/places/tianqing-local-6-v2.webp",
+      "sha256": "06afd4d78dd642da23c102e1ec5de15c11921ba95dcf862586e01779687aa0e6",
+      "bytes": 368658
+    },
+    {
+      "id": "map-zhongzhou",
+      "regionId": "zhongzhou",
+      "target": "assets/images/regions/zhongzhou-v2.webp",
+      "sha256": "a01cb5b74a6d1d078a97240b559893e76c64ca0c37cfc3d5914f94f2cdf2becc",
+      "bytes": 600472
+    },
+    {
+      "id": "place-zhongzhou-local-1",
+      "regionId": "zhongzhou",
+      "target": "assets/images/places/zhongzhou-local-1-v2.webp",
+      "sha256": "644bd669b8164ccb600e2b137140cd41cba986960ffab558dc9f0e094fc5b228",
+      "bytes": 335720
+    },
+    {
+      "id": "place-zhongzhou-local-2",
+      "regionId": "zhongzhou",
+      "target": "assets/images/places/zhongzhou-local-2-v2.webp",
+      "sha256": "cacf154d671049dceac8865598e7ee7dff69b252c6440b83556007f693be1c6d",
+      "bytes": 327362
+    },
+    {
+      "id": "place-zhongzhou-local-3",
+      "regionId": "zhongzhou",
+      "target": "assets/images/places/zhongzhou-local-3-v2.webp",
+      "sha256": "cc5f2935e33cd772273004fde0460954b9d5c46d5b328744170658df608720ba",
+      "bytes": 323194
+    },
+    {
+      "id": "place-zhongzhou-local-4",
+      "regionId": "zhongzhou",
+      "target": "assets/images/places/zhongzhou-local-4-v2.webp",
+      "sha256": "5698d363aa79fd62a99559dcadfe90f3424b1bfab7df4d09b4f5d16846e017f3",
+      "bytes": 308558
+    },
+    {
+      "id": "place-zhongzhou-local-5",
+      "regionId": "zhongzhou",
+      "target": "assets/images/places/zhongzhou-local-5-v2.webp",
+      "sha256": "76a570d5ab25164a79e075050aa77e3f82da0e9cc16831ec530cf4b7adaef506",
+      "bytes": 342112
+    },
+    {
+      "id": "place-zhongzhou-local-6",
+      "regionId": "zhongzhou",
+      "target": "assets/images/places/zhongzhou-local-6-v2.webp",
+      "sha256": "f4b9aa0df0c963aa5296944b6bf461abe09d16559824aead0c5a38211f48544f",
+      "bytes": 330334
+    },
+    {
+      "id": "map-tianbei",
+      "regionId": "tianbei",
+      "target": "assets/images/regions/tianbei-v2.webp",
+      "sha256": "a764f8ab3633b30b51179d8b36493a2c0715b0c4c6b0b911d1e8c2ff04463a29",
+      "bytes": 665040
+    },
+    {
+      "id": "place-tianbei-local-1",
+      "regionId": "tianbei",
+      "target": "assets/images/places/tianbei-local-1-v2.webp",
+      "sha256": "d7d83c84ed40ca51691de8bcbdb9055cb9d6bcf80b406a2d800bf18def0cf28a",
+      "bytes": 331092
+    },
+    {
+      "id": "place-tianbei-local-2",
+      "regionId": "tianbei",
+      "target": "assets/images/places/tianbei-local-2-v2.webp",
+      "sha256": "3fa569f6a15556d46128d2562c56ae47916139aa2ad23da790647145cd1128ce",
+      "bytes": 332858
+    },
+    {
+      "id": "place-tianbei-local-3",
+      "regionId": "tianbei",
+      "target": "assets/images/places/tianbei-local-3-v2.webp",
+      "sha256": "c1888aecc4c95ba4ffd81ec557e2feaa0cea3966b53e5da4ee7aa0b4e630d152",
+      "bytes": 356262
+    },
+    {
+      "id": "place-tianbei-local-4",
+      "regionId": "tianbei",
+      "target": "assets/images/places/tianbei-local-4-v2.webp",
+      "sha256": "e3eb03f69ef9b6b526806632e4c08212f8197b8fd137bb8af382c69fe0a38349",
+      "bytes": 348552
+    },
+    {
+      "id": "place-tianbei-local-5",
+      "regionId": "tianbei",
+      "target": "assets/images/places/tianbei-local-5-v2.webp",
+      "sha256": "6c381bede9ac6269fcf2331bbcab1520fd9713dd178a90c8e9da6ea3b1206479",
+      "bytes": 375928
+    },
+    {
+      "id": "place-tianbei-local-6",
+      "regionId": "tianbei",
+      "target": "assets/images/places/tianbei-local-6-v2.webp",
+      "sha256": "21ce6f9fb34edc62fbfac4716151f5f388004ec149a525639f4af96f0fb166de",
+      "bytes": 340274
+    },
+    {
+      "id": "map-wanshe",
+      "regionId": "wanshe",
+      "target": "assets/images/regions/wanshe-v2.webp",
+      "sha256": "1b2779daced08f38c29bc88578f8bedfddd6bf6869382c6bfc6490fece6a80fe",
+      "bytes": 639402
+    },
+    {
+      "id": "place-wanshe-local-1",
+      "regionId": "wanshe",
+      "target": "assets/images/places/wanshe-local-1-v2.webp",
+      "sha256": "87fbe09e6bc82783fbfb9e1beed8707d6cea60ff2e201957f680e1d0d06b3434",
+      "bytes": 395282
+    },
+    {
+      "id": "place-wanshe-local-2",
+      "regionId": "wanshe",
+      "target": "assets/images/places/wanshe-local-2-v2.webp",
+      "sha256": "a704fea205b8e3fb69b1168bf515dace90da83ef6f4bcead7ebbc47039980c51",
+      "bytes": 373644
+    },
+    {
+      "id": "place-wanshe-local-3",
+      "regionId": "wanshe",
+      "target": "assets/images/places/wanshe-local-3-v2.webp",
+      "sha256": "36611efab1c5f49b28e15320b4624fe2fff134861828e936b82e30d4ac3e13d8",
+      "bytes": 354552
+    },
+    {
+      "id": "place-wanshe-local-4",
+      "regionId": "wanshe",
+      "target": "assets/images/places/wanshe-local-4-v2.webp",
+      "sha256": "ca1c731595350131514b4832b86505a1f588c6fc6faf11400f2f77db1aa39b40",
+      "bytes": 416508
+    },
+    {
+      "id": "place-wanshe-local-5",
+      "regionId": "wanshe",
+      "target": "assets/images/places/wanshe-local-5-v2.webp",
+      "sha256": "bd7abe571e107a45951652603b237f86e0dc016329413663953a1b15e674323c",
+      "bytes": 371672
+    },
+    {
+      "id": "place-wanshe-local-6",
+      "regionId": "wanshe",
+      "target": "assets/images/places/wanshe-local-6-v2.webp",
+      "sha256": "44c08de4d6f4a11ee54ef2da9dc092ff7f37f6cc3bbd747c118228b5581fca30",
+      "bytes": 421614
+    },
+    {
+      "id": "map-qifeng",
+      "regionId": "qifeng",
+      "target": "assets/images/regions/qifeng-v2.webp",
+      "sha256": "5ade09cf0184de89515b0f19040d59c5014de8f24b744688b7e1d6ad44341500",
+      "bytes": 563418
+    },
+    {
+      "id": "place-qifeng-local-1",
+      "regionId": "qifeng",
+      "target": "assets/images/places/qifeng-local-1-v2.webp",
+      "sha256": "b011f98b6c01714da1dd3a29c0b4883ee35d9a18799387fdfe1f8670a98e2ca1",
+      "bytes": 348598
+    },
+    {
+      "id": "place-qifeng-local-2",
+      "regionId": "qifeng",
+      "target": "assets/images/places/qifeng-local-2-v2.webp",
+      "sha256": "8b40938a8d8a22d895ace68db8f3e2141e2f4ffee06f3c7c2982e878675765ba",
+      "bytes": 408818
+    },
+    {
+      "id": "place-qifeng-local-3",
+      "regionId": "qifeng",
+      "target": "assets/images/places/qifeng-local-3-v2.webp",
+      "sha256": "d2da0da66d4b3fead22d157595649d7e813211a63719cb998dc9ea1a932d4d16",
+      "bytes": 309730
+    },
+    {
+      "id": "place-qifeng-local-4",
+      "regionId": "qifeng",
+      "target": "assets/images/places/qifeng-local-4-v2.webp",
+      "sha256": "30e887cfa086b7b8037a36762c16e7726556af3859af5f6d90bac0f52af523cc",
+      "bytes": 324468
+    },
+    {
+      "id": "place-qifeng-local-5",
+      "regionId": "qifeng",
+      "target": "assets/images/places/qifeng-local-5-v2.webp",
+      "sha256": "69cd86904225cbb933249cfb0ab6c819ff841e7a6ab3415c2860ce4260ee927c",
+      "bytes": 331186
+    },
+    {
+      "id": "place-qifeng-local-6",
+      "regionId": "qifeng",
+      "target": "assets/images/places/qifeng-local-6-v2.webp",
+      "sha256": "82ed30582c84e084dc4a207dd69a2d32972e08c5da91c34a73b4152898708250",
+      "bytes": 410632
+    },
+    {
+      "id": "map-tianmu",
+      "regionId": "tianmu",
+      "target": "assets/images/regions/tianmu-v2.webp",
+      "sha256": "942830340ffef6bab1f0a04f1fa419f597a26b1094e162fd89fedb136eeaf923",
+      "bytes": 572540
+    },
+    {
+      "id": "place-tianmu-local-1",
+      "regionId": "tianmu",
+      "target": "assets/images/places/tianmu-local-1-v2.webp",
+      "sha256": "b3c7f6299f6bb7c2d6597838c7bd56f204a1a7b1f7f39203d785d987e555b1c2",
+      "bytes": 354144
+    },
+    {
+      "id": "place-tianmu-local-2",
+      "regionId": "tianmu",
+      "target": "assets/images/places/tianmu-local-2-v2.webp",
+      "sha256": "554be10e52c3ea1cb9b116fe0f15638fcd4c5f1b77c273dcbfd5ada1c2501531",
+      "bytes": 421084
+    },
+    {
+      "id": "place-tianmu-local-3",
+      "regionId": "tianmu",
+      "target": "assets/images/places/tianmu-local-3-v2.webp",
+      "sha256": "fb469b894d71c4a05dae623f2716b63669a150e84bcc9c6881428b8c90d5586e",
+      "bytes": 365832
+    },
+    {
+      "id": "place-tianmu-local-4",
+      "regionId": "tianmu",
+      "target": "assets/images/places/tianmu-local-4-v2.webp",
+      "sha256": "c94375baea26197e41d099e5c2a93323580dec636016ac284c728328de106380",
+      "bytes": 348000
+    },
+    {
+      "id": "place-tianmu-local-5",
+      "regionId": "tianmu",
+      "target": "assets/images/places/tianmu-local-5-v2.webp",
+      "sha256": "70a0de4d34c0b87149f10df566c8e562e43cef24bb71282e6b961e53b2db6732",
+      "bytes": 369360
+    },
+    {
+      "id": "place-tianmu-local-6",
+      "regionId": "tianmu",
+      "target": "assets/images/places/tianmu-local-6-v2.webp",
+      "sha256": "e9c68b4a4de99bda84ea81c17524479333ae47875ef9b6eeb948dfb11de40724",
+      "bytes": 418950
+    },
+    {
+      "id": "map-bloodpool",
+      "regionId": "bloodpool",
+      "target": "assets/images/regions/bloodpool-v2.webp",
+      "sha256": "173b5fb73324b4d2dd988ae89b797c15a4a0bd5c217a3d1ad94b53eb4d7ecf03",
+      "bytes": 561066
+    },
+    {
+      "id": "place-bloodpool-local-1",
+      "regionId": "bloodpool",
+      "target": "assets/images/places/bloodpool-local-1-v2.webp",
+      "sha256": "9c8de770f5a5b9184d719ed53d3d91fcf1f6f2f1a75fb6e3715d890d70309a76",
+      "bytes": 343308
+    },
+    {
+      "id": "place-bloodpool-local-2",
+      "regionId": "bloodpool",
+      "target": "assets/images/places/bloodpool-local-2-v2.webp",
+      "sha256": "46afd8e3d500dc9178063a4ae6f45da1b8e9139fba2fc868281dd514d59037e0",
+      "bytes": 366002
+    },
+    {
+      "id": "place-bloodpool-local-3",
+      "regionId": "bloodpool",
+      "target": "assets/images/places/bloodpool-local-3-v2.webp",
+      "sha256": "ade0e86f60f9cab69ebcc35877e784d4928a89c76bf2b191cf285d3a2dd67e33",
+      "bytes": 328108
+    },
+    {
+      "id": "place-bloodpool-local-4",
+      "regionId": "bloodpool",
+      "target": "assets/images/places/bloodpool-local-4-v2.webp",
+      "sha256": "046e13bf9a90810f8f19a1df71bce5c3e018d83c8650643d3592cd82499dfc25",
+      "bytes": 361812
+    },
+    {
+      "id": "place-bloodpool-local-5",
+      "regionId": "bloodpool",
+      "target": "assets/images/places/bloodpool-local-5-v3.webp",
+      "sha256": "9832978d5f4e18efff2b3d64ce1d9797b47c4763840623cf59a5614d657d7806",
+      "bytes": 391778
+    },
+    {
+      "id": "place-bloodpool-local-6",
+      "regionId": "bloodpool",
+      "target": "assets/images/places/bloodpool-local-6-v2.webp",
+      "sha256": "dd782e3a107e43a358aed75f60eddd1a912207a7f94906d5dd87453858b28970",
+      "bytes": 346962
+    },
+    {
+      "id": "map-leishan",
+      "regionId": "leishan",
+      "target": "assets/images/regions/leishan-v2.webp",
+      "sha256": "a8abd3b1a0a3d9f2ec2158a42702c4a397cce6d2f52957159aff47708b7dc9fd",
+      "bytes": 593776
+    },
+    {
+      "id": "place-leishan-local-1",
+      "regionId": "leishan",
+      "target": "assets/images/places/leishan-local-1-v2.webp",
+      "sha256": "83a6778f9b3ef088a4b7a29b0354a9ab8e6039baa676148158da61da36c067a3",
+      "bytes": 351976
+    },
+    {
+      "id": "place-leishan-local-2",
+      "regionId": "leishan",
+      "target": "assets/images/places/leishan-local-2-v2.webp",
+      "sha256": "8a8c24e7553ddc35ab6d93b14e15991652d79a17c8d2633e8352e8dd4f8aa49b",
+      "bytes": 352462
+    },
+    {
+      "id": "place-leishan-local-3",
+      "regionId": "leishan",
+      "target": "assets/images/places/leishan-local-3-v2.webp",
+      "sha256": "057e6e6353b152e8518b43cbb998aae3f1c96c1e829448f150847be33551624d",
+      "bytes": 326562
+    },
+    {
+      "id": "place-leishan-local-4",
+      "regionId": "leishan",
+      "target": "assets/images/places/leishan-local-4-v2.webp",
+      "sha256": "1d728a43b29e0c7070a5647aeeadbdde155de4539a19bd93c3b5bcd5cbd15752",
+      "bytes": 348796
+    },
+    {
+      "id": "place-leishan-local-5",
+      "regionId": "leishan",
+      "target": "assets/images/places/leishan-local-5-v2.webp",
+      "sha256": "9b346ade3b91250b591d80def7d939831cebece7e52610ba1a96e522af573fa3",
+      "bytes": 339774
+    },
+    {
+      "id": "place-leishan-local-6",
+      "regionId": "leishan",
+      "target": "assets/images/places/leishan-local-6-v2.webp",
+      "sha256": "cfe9b0eb5b6e1625cdcf5abaa25edc3134358163c56b95c8cf36b0c37b316727",
+      "bytes": 367394
+    },
+    {
+      "id": "map-tianhuang",
+      "regionId": "tianhuang",
+      "target": "assets/images/regions/tianhuang-v2.webp",
+      "sha256": "21cb01304a064df3d1e71541f37518fc0602916d7f2d639e543da9e402d71040",
+      "bytes": 643746
+    },
+    {
+      "id": "place-tianhuang-local-1",
+      "regionId": "tianhuang",
+      "target": "assets/images/places/tianhuang-local-1-v2.webp",
+      "sha256": "49cc4c4a0bac0885ca576b007cfe2504b34ddefaf010776180d3dacfb6c23d01",
+      "bytes": 335838
+    },
+    {
+      "id": "place-tianhuang-local-2",
+      "regionId": "tianhuang",
+      "target": "assets/images/places/tianhuang-local-2-v2.webp",
+      "sha256": "5daa55ee71b17c5d03b0c9f4018dacc71fd82bfae6563078993815b5843f9cee",
+      "bytes": 363134
+    },
+    {
+      "id": "place-tianhuang-local-3",
+      "regionId": "tianhuang",
+      "target": "assets/images/places/tianhuang-local-3-v2.webp",
+      "sha256": "1d821df013a11c7e72fdb60d0eeab5c19cc4a14fff19c0cd379504603b7d60f5",
+      "bytes": 373986
+    },
+    {
+      "id": "place-tianhuang-local-4",
+      "regionId": "tianhuang",
+      "target": "assets/images/places/tianhuang-local-4-v2.webp",
+      "sha256": "933b035443013a5d440a1e2b84f7e858211dbb98526199a672278d0d401498e1",
+      "bytes": 343576
+    },
+    {
+      "id": "place-tianhuang-local-5",
+      "regionId": "tianhuang",
+      "target": "assets/images/places/tianhuang-local-5-v2.webp",
+      "sha256": "b78539a6f36692051a8f26f3c08b7f2da6d8b60d552e53baadd174403ff03d31",
+      "bytes": 327388
+    },
+    {
+      "id": "place-tianhuang-local-6",
+      "regionId": "tianhuang",
+      "target": "assets/images/places/tianhuang-local-6-v2.webp",
+      "sha256": "ab4851e567567da4942a8a520ce245cf5073c8cdee685f9e58b21f3d6c92a721",
+      "bytes": 345306
+    },
+    {
+      "id": "map-burning-valley",
+      "regionId": "burning-valley",
+      "target": "assets/images/regions/burning-valley-v2.webp",
+      "sha256": "36e130b11c433db31a79443e8dd836c2fee10f316c5255e133f9586742ed521e",
+      "bytes": 540584
+    },
+    {
+      "id": "place-burning-valley-local-1",
+      "regionId": "burning-valley",
+      "target": "assets/images/places/burning-valley-local-1-v2.webp",
+      "sha256": "ac9912f53a5192a5b7eb9dd786c8c8ad829e598e72f2b8fb0fa4443841306f9e",
+      "bytes": 342924
+    },
+    {
+      "id": "place-burning-valley-local-2",
+      "regionId": "burning-valley",
+      "target": "assets/images/places/burning-valley-local-2-v2.webp",
+      "sha256": "abc74b8d2b772e7714cd7730137c62c9f40218ecbd567a1a139e3db5eefab3fc",
+      "bytes": 307492
+    },
+    {
+      "id": "place-burning-valley-local-3",
+      "regionId": "burning-valley",
+      "target": "assets/images/places/burning-valley-local-3-v2.webp",
+      "sha256": "132e75a521b2d8ea2be7d94ab96078d274b69de1b9c4b99d97d83294fd9f7ebd",
+      "bytes": 305674
+    },
+    {
+      "id": "place-burning-valley-local-4",
+      "regionId": "burning-valley",
+      "target": "assets/images/places/burning-valley-local-4-v2.webp",
+      "sha256": "deb41aa206a5cb2590b2f35714f75a784153ab6b4fc4ae2789234bac072c75f0",
+      "bytes": 338458
+    },
+    {
+      "id": "place-burning-valley-local-5",
+      "regionId": "burning-valley",
+      "target": "assets/images/places/burning-valley-local-5-v2.webp",
+      "sha256": "672cc158dd17a2dc6b7ed88a66011ee94bab2401db583ec9a94242172033d9d7",
+      "bytes": 344684
+    },
+    {
+      "id": "place-burning-valley-local-6",
+      "regionId": "burning-valley",
+      "target": "assets/images/places/burning-valley-local-6-v2.webp",
+      "sha256": "ca53b06c7e5db24e0c4c0d50c9ee91bd99d75035308481e422e4c9436246215b",
+      "bytes": 339630
+    },
+    {
+      "id": "map-ye-city",
+      "regionId": "ye-city",
+      "target": "assets/images/regions/ye-city-v2.webp",
+      "sha256": "429000b32348fbffedc471cea0381fa968714739a90f381f306daf55eaad72fb",
+      "bytes": 724490
+    },
+    {
+      "id": "place-ye-city-local-1",
+      "regionId": "ye-city",
+      "target": "assets/images/places/ye-city-local-1-v2.webp",
+      "sha256": "b017c5e34da97498fd8c48ac200bbf53dc208542749d18073faab2f6a5119274",
+      "bytes": 328850
+    },
+    {
+      "id": "place-ye-city-local-2",
+      "regionId": "ye-city",
+      "target": "assets/images/places/ye-city-local-2-v2.webp",
+      "sha256": "4c70775d3832687cc53fa99dddc463aae01adffb58755ba6b283778c7a8fb9df",
+      "bytes": 337484
+    },
+    {
+      "id": "place-ye-city-local-3",
+      "regionId": "ye-city",
+      "target": "assets/images/places/ye-city-local-3-v2.webp",
+      "sha256": "a9023f53ad0c633d4f885624aadf741d8890310ea613c6ccbe505e7a082417c2",
+      "bytes": 342722
+    },
+    {
+      "id": "place-ye-city-local-4",
+      "regionId": "ye-city",
+      "target": "assets/images/places/ye-city-local-4-v2.webp",
+      "sha256": "0976a17c4d53ab904f391aad84589b76bc7343216b116a7295058c097eb233f3",
+      "bytes": 334008
+    },
+    {
+      "id": "place-ye-city-local-5",
+      "regionId": "ye-city",
+      "target": "assets/images/places/ye-city-local-5-v2.webp",
+      "sha256": "ff8f997f9da9e949372c54e050c9e8910321743927977f7cd3491aef8c2686d0",
+      "bytes": 346382
+    },
+    {
+      "id": "place-ye-city-local-6",
+      "regionId": "ye-city",
+      "target": "assets/images/places/ye-city-local-6-v2.webp",
+      "sha256": "89d2a9ba218252e05ccfae3e91a7e524cc946ff885c88cd5b05a341991abf5f6",
+      "bytes": 295904
+    },
+    {
+      "id": "map-holy-pill",
+      "regionId": "holy-pill",
+      "target": "assets/images/regions/holy-pill-v2.webp",
+      "sha256": "429d66d0804d82f7072f1b6d5ca51b2abc3b22abdf8304010618c4cb3356395a",
+      "bytes": 641330
+    },
+    {
+      "id": "place-holy-pill-local-1",
+      "regionId": "holy-pill",
+      "target": "assets/images/places/holy-pill-local-1-v2.webp",
+      "sha256": "0d91a9cee1a9ce59c9d78147675fe9d98ab053416b8d6988360e71664854e370",
+      "bytes": 322738
+    },
+    {
+      "id": "place-holy-pill-local-2",
+      "regionId": "holy-pill",
+      "target": "assets/images/places/holy-pill-local-2-v2.webp",
+      "sha256": "27816e06e98f012e1754fd52211afe41932da62e7d74e05117ffc85cd2f2d15f",
+      "bytes": 319730
+    },
+    {
+      "id": "place-holy-pill-local-3",
+      "regionId": "holy-pill",
+      "target": "assets/images/places/holy-pill-local-3-v2.webp",
+      "sha256": "7ea2402f70addd4df27c806dac418de89226981d1ab1ba61b8d496fa64f288c6",
+      "bytes": 352550
+    },
+    {
+      "id": "place-holy-pill-local-4",
+      "regionId": "holy-pill",
+      "target": "assets/images/places/holy-pill-local-4-v2.webp",
+      "sha256": "50e58c156dc4ff4a830b4051394d2f828ad25e9ed08fa888209c4d73a009cfe7",
+      "bytes": 345382
+    },
+    {
+      "id": "place-holy-pill-local-5",
+      "regionId": "holy-pill",
+      "target": "assets/images/places/holy-pill-local-5-v2.webp",
+      "sha256": "c68bbbe5c5961ca397031bf7ab12795b20a7eff0fc4bc87962ed57161cb589dc",
+      "bytes": 322448
+    },
+    {
+      "id": "place-holy-pill-local-6",
+      "regionId": "holy-pill",
+      "target": "assets/images/places/holy-pill-local-6-v2.webp",
+      "sha256": "8eb977d3ac73b57493a94f64668690d8c0af481f0cf969d9a5477c375764d8ae",
+      "bytes": 333092
+    },
+    {
+      "id": "map-dead-soul",
+      "regionId": "dead-soul",
+      "target": "assets/images/regions/dead-soul-v2.webp",
+      "sha256": "a09d02810c985a393215db49365e0cfde8001e87944d541632126235d583936b",
+      "bytes": 454088
+    },
+    {
+      "id": "place-dead-soul-local-1",
+      "regionId": "dead-soul",
+      "target": "assets/images/places/dead-soul-local-1-v2.webp",
+      "sha256": "36521446b3a35243c259517355bc4dce8e59e7eb7f09fdb1698d146f2277181e",
+      "bytes": 335164
+    },
+    {
+      "id": "place-dead-soul-local-2",
+      "regionId": "dead-soul",
+      "target": "assets/images/places/dead-soul-local-2-v2.webp",
+      "sha256": "eb91b6eb7c33b0700548a68ebdd60ee2c0ed6ff33d605c9e0e54191b16c293c6",
+      "bytes": 321074
+    },
+    {
+      "id": "place-dead-soul-local-3",
+      "regionId": "dead-soul",
+      "target": "assets/images/places/dead-soul-local-3-v2.webp",
+      "sha256": "f221212cfe37b7d5ee7aeb3630143c8c99d8ff08504f39dcef579ed483027d63",
+      "bytes": 306558
+    },
+    {
+      "id": "place-dead-soul-local-4",
+      "regionId": "dead-soul",
+      "target": "assets/images/places/dead-soul-local-4-v2.webp",
+      "sha256": "1c3b5d5d9df650abbded01533f365d808e5063c314fc850992747116518e2a0b",
+      "bytes": 330440
+    },
+    {
+      "id": "place-dead-soul-local-5",
+      "regionId": "dead-soul",
+      "target": "assets/images/places/dead-soul-local-5-v2.webp",
+      "sha256": "b3828990b66294786048ced41d83f944f843b000c4a46d41d4bfb12f53251e66",
+      "bytes": 287512
+    },
+    {
+      "id": "place-dead-soul-local-6",
+      "regionId": "dead-soul",
+      "target": "assets/images/places/dead-soul-local-6-v2.webp",
+      "sha256": "e8502a76400d840bd488dde8251c2d10a4de45d0870a073ab4e05d38ab724d2c",
+      "bytes": 344982
+    },
+    {
+      "id": "map-tianxing",
+      "regionId": "tianxing",
+      "target": "assets/images/regions/tianxing-v2.webp",
+      "sha256": "1f65286b3c07889fe424d3977622ed37c1a54053c6491e85bb5bf40dc6309314",
+      "bytes": 637830
+    },
+    {
+      "id": "place-tianxing-local-1",
+      "regionId": "tianxing",
+      "target": "assets/images/places/tianxing-local-1-v2.webp",
+      "sha256": "94503f9d1bbd85ff8bc2a79e6bd8ce73c01e47123d6b656ac404878cc2e04dab",
+      "bytes": 349564
+    },
+    {
+      "id": "place-tianxing-local-2",
+      "regionId": "tianxing",
+      "target": "assets/images/places/tianxing-local-2-v2.webp",
+      "sha256": "6579b2701197d46f93647a68985b2e9f47c1df28b0363b6f8b1cee177e26756e",
+      "bytes": 327502
+    },
+    {
+      "id": "place-tianxing-local-3",
+      "regionId": "tianxing",
+      "target": "assets/images/places/tianxing-local-3-v2.webp",
+      "sha256": "ed1056fc4d6f19a602069ec3b663f14de830507cbc6ac6661eae1c0260d299e2",
+      "bytes": 345574
+    },
+    {
+      "id": "place-tianxing-local-4",
+      "regionId": "tianxing",
+      "target": "assets/images/places/tianxing-local-4-v2.webp",
+      "sha256": "0bcfce77ccf1ec8a24112b3c4d34408c789c950c44b6564f1c9e06c2c85e53e4",
+      "bytes": 372254
+    },
+    {
+      "id": "place-tianxing-local-5",
+      "regionId": "tianxing",
+      "target": "assets/images/places/tianxing-local-5-v2.webp",
+      "sha256": "9d097f502fd2c5103373addd5a50eeb9ebe819761bbec856281caa216dbf0dd3",
+      "bytes": 346666
+    },
+    {
+      "id": "place-tianxing-local-6",
+      "regionId": "tianxing",
+      "target": "assets/images/places/tianxing-local-6-v2.webp",
+      "sha256": "4b5e4850c4d91107cdd6a63771485b88b5d8c588f2794ae59139f3d3686cdbe1",
+      "bytes": 381038
+    },
+    {
+      "id": "map-beast-region",
+      "regionId": "beast-region",
+      "target": "assets/images/regions/beast-region-v2.webp",
+      "sha256": "a8c27c351b154ad271075bd8302c1d77e484350d11bfdd922d65a7c93fa56299",
+      "bytes": 706140
+    },
+    {
+      "id": "place-beast-region-local-1",
+      "regionId": "beast-region",
+      "target": "assets/images/places/beast-region-local-1-v2.webp",
+      "sha256": "0a84381dbb77c275ee335a219938af16f105e6b07eec15ceec05b76f3e34691c",
+      "bytes": 371586
+    },
+    {
+      "id": "place-beast-region-local-2",
+      "regionId": "beast-region",
+      "target": "assets/images/places/beast-region-local-2-v2.webp",
+      "sha256": "222ddaa6b311bad24894c4009d615917a6dc9646d62e89c6d9bcaf6396666743",
+      "bytes": 388944
+    },
+    {
+      "id": "place-beast-region-local-3",
+      "regionId": "beast-region",
+      "target": "assets/images/places/beast-region-local-3-v2.webp",
+      "sha256": "516848adee28509472d9a6f045bda26d301e8cb674029dd238408ae632404ed6",
+      "bytes": 394256
+    },
+    {
+      "id": "place-beast-region-local-4",
+      "regionId": "beast-region",
+      "target": "assets/images/places/beast-region-local-4-v2.webp",
+      "sha256": "34516e3889b213f160e2288049b819152d0468e3a1268a1fe3ded3eadfdf29a3",
+      "bytes": 397124
+    },
+    {
+      "id": "place-beast-region-local-5",
+      "regionId": "beast-region",
+      "target": "assets/images/places/beast-region-local-5-v2.webp",
+      "sha256": "874e72299549fbf40e6221c139c1e52232c83062c8a14d35f5653d01dc9ff76f",
+      "bytes": 406538
+    },
+    {
+      "id": "place-beast-region-local-6",
+      "regionId": "beast-region",
+      "target": "assets/images/places/beast-region-local-6-v2.webp",
+      "sha256": "61753adb9b16f70a0a821862919882408dfdfba00e297594dc71f1bb33e01085",
+      "bytes": 398210
+    },
+    {
+      "id": "map-bone-mountains",
+      "regionId": "bone-mountains",
+      "target": "assets/images/regions/bone-mountains-v2.webp",
+      "sha256": "0b705f78339e3839f165db9e20369c3bf3f1dd790a6ac673e06356164e963adf",
+      "bytes": 635000
+    },
+    {
+      "id": "place-bone-mountains-local-1",
+      "regionId": "bone-mountains",
+      "target": "assets/images/places/bone-mountains-local-1-v2.webp",
+      "sha256": "1a1ab2e362ead36fe77ce90ffffc45c25a398c6275cd6b0323561e5a21d03f11",
+      "bytes": 357206
+    },
+    {
+      "id": "place-bone-mountains-local-2",
+      "regionId": "bone-mountains",
+      "target": "assets/images/places/bone-mountains-local-2-v2.webp",
+      "sha256": "4a86b76b00d125b26163f62536685617842e07ed3a12f4479cd3d9bfcf60e92a",
+      "bytes": 324130
+    },
+    {
+      "id": "place-bone-mountains-local-3",
+      "regionId": "bone-mountains",
+      "target": "assets/images/places/bone-mountains-local-3-v2.webp",
+      "sha256": "70b4a336b1d97adf2f3ebffefcde1fdf7b4e8b8682d9f8954ee3224b53f74e42",
+      "bytes": 329654
+    },
+    {
+      "id": "place-bone-mountains-local-4",
+      "regionId": "bone-mountains",
+      "target": "assets/images/places/bone-mountains-local-4-v2.webp",
+      "sha256": "4c0ec6a8aaa15c663dc7c4d7a5c55771649ed9a9e07dd4e2a04a3915a6648506",
+      "bytes": 350494
+    },
+    {
+      "id": "place-bone-mountains-local-5",
+      "regionId": "bone-mountains",
+      "target": "assets/images/places/bone-mountains-local-5-v2.webp",
+      "sha256": "3426c1fde19a68ffaaee2d353908b483fc82c846f64b8c97d837f5c3f2f1d996",
+      "bytes": 357618
+    },
+    {
+      "id": "place-bone-mountains-local-6",
+      "regionId": "bone-mountains",
+      "target": "assets/images/places/bone-mountains-local-6-v2.webp",
+      "sha256": "7e13afcc4b64289fcd3b70971de22198c78f595ae66ebe800de96bca28a9a3f4",
+      "bytes": 374556
+    },
+    {
+      "id": "map-ancient-city",
+      "regionId": "ancient-city",
+      "target": "assets/images/regions/ancient-city-v2.webp",
+      "sha256": "57ec47d1cba82dbba09022637d5dacad8059294a39167d2c18a920b53d9f5e7f",
+      "bytes": 639382
+    },
+    {
+      "id": "place-ancient-city-local-1",
+      "regionId": "ancient-city",
+      "target": "assets/images/places/ancient-city-local-1-v2.webp",
+      "sha256": "df3739eee3496c351e8cd838369aab010aa6c5f1b88508c4759e83cc2a714e81",
+      "bytes": 328640
+    },
+    {
+      "id": "place-ancient-city-local-2",
+      "regionId": "ancient-city",
+      "target": "assets/images/places/ancient-city-local-2-v2.webp",
+      "sha256": "54ba604503275f01fc35040b987d14786f49ee4fc5bd05b76a6e398f4bc9bf19",
+      "bytes": 273692
+    },
+    {
+      "id": "place-ancient-city-local-3",
+      "regionId": "ancient-city",
+      "target": "assets/images/places/ancient-city-local-3-v2.webp",
+      "sha256": "4132c641cd2f3f04750a1c3f0a6d345bc22d0e235b195bc65e0b2aa46f8b6b99",
+      "bytes": 341646
+    },
+    {
+      "id": "place-ancient-city-local-4",
+      "regionId": "ancient-city",
+      "target": "assets/images/places/ancient-city-local-4-v2.webp",
+      "sha256": "14c6d6a0c225ae3474cb858dd77da88b969be29321927e923f47e72747ee4b44",
+      "bytes": 341990
+    },
+    {
+      "id": "place-ancient-city-local-5",
+      "regionId": "ancient-city",
+      "target": "assets/images/places/ancient-city-local-5-v2.webp",
+      "sha256": "7ddc7c80b97cc474af951955598f6eae1b8b841cb6206dcf8f0621635782e571",
+      "bytes": 287322
+    },
+    {
+      "id": "place-ancient-city-local-6",
+      "regionId": "ancient-city",
+      "target": "assets/images/places/ancient-city-local-6-v2.webp",
+      "sha256": "7b616c856edfe81848e4168e86d7374b8ab359f42310e3335b4554fa92c7e821",
+      "bytes": 354656
+    },
+    {
+      "id": "map-wild-town",
+      "regionId": "wild-town",
+      "target": "assets/images/regions/wild-town-v2.webp",
+      "sha256": "c98315b0af9594a8a7aabb1476eac90acb7b0eb490ed1b6a10ac98b49587a014",
+      "bytes": 703246
+    },
+    {
+      "id": "place-wild-town-local-1",
+      "regionId": "wild-town",
+      "target": "assets/images/places/wild-town-local-1-v2.webp",
+      "sha256": "363e1fbcff16a05fab95ca09d7587e8f530783ee268d556771d49722d7ef9b66",
+      "bytes": 368986
+    },
+    {
+      "id": "place-wild-town-local-2",
+      "regionId": "wild-town",
+      "target": "assets/images/places/wild-town-local-2-v2.webp",
+      "sha256": "0f5267dfe6c5b6e2ba22a1fb28e421384202df01b6a33f308a70b63a796de995",
+      "bytes": 352600
+    },
+    {
+      "id": "place-wild-town-local-3",
+      "regionId": "wild-town",
+      "target": "assets/images/places/wild-town-local-3-v2.webp",
+      "sha256": "73a5dfcd40d980b43c53e621778d5d86d889cf04e217be89b5344f16a7fe6b09",
+      "bytes": 335888
+    },
+    {
+      "id": "place-wild-town-local-4",
+      "regionId": "wild-town",
+      "target": "assets/images/places/wild-town-local-4-v2.webp",
+      "sha256": "d6e1ad4f5309a8007e40e7faee28de7e7bc0e8f9fcb061f6d7328640b82eb7a9",
+      "bytes": 369508
+    },
+    {
+      "id": "place-wild-town-local-5",
+      "regionId": "wild-town",
+      "target": "assets/images/places/wild-town-local-5-v2.webp",
+      "sha256": "adad205eccd890f741fa3a7e4bc538ebd646e663a22ce4719c2ac28e0d1b02d9",
+      "bytes": 373240
+    },
+    {
+      "id": "place-wild-town-local-6",
+      "regionId": "wild-town",
+      "target": "assets/images/places/wild-town-local-6-v2.webp",
+      "sha256": "4a06a2ded5df5afbb700c0a24cf0a42005b3b9b108bd523dfeb146d0b5518cb9",
+      "bytes": 342906
+    },
+    {
+      "id": "map-wild-region",
+      "regionId": "wild-region",
+      "target": "assets/images/regions/wild-region-v2.webp",
+      "sha256": "66a34e8511fd1d0b177502d8e136e3ece6a9008c047e4a69cebf34d5516d7589",
+      "bytes": 708326
+    },
+    {
+      "id": "place-wild-region-local-1",
+      "regionId": "wild-region",
+      "target": "assets/images/places/wild-region-local-1-v2.webp",
+      "sha256": "855cf79703920301f8d821d0bd20d6c8473e714e1070ee636488ae1ed6fb04ca",
+      "bytes": 358970
+    },
+    {
+      "id": "place-wild-region-local-2",
+      "regionId": "wild-region",
+      "target": "assets/images/places/wild-region-local-2-v2.webp",
+      "sha256": "d5bc3c854a37a5c83d4824aeeac90280d7e90b496b4538d9856393df59ae0d33",
+      "bytes": 377554
+    },
+    {
+      "id": "place-wild-region-local-3",
+      "regionId": "wild-region",
+      "target": "assets/images/places/wild-region-local-3-v2.webp",
+      "sha256": "4222cb115212d7c92ae8a4174870c3b1255e66153887b98c00c43e1aab9a77a8",
+      "bytes": 385608
+    },
+    {
+      "id": "place-wild-region-local-4",
+      "regionId": "wild-region",
+      "target": "assets/images/places/wild-region-local-4-v2.webp",
+      "sha256": "b5e5cc9895020bce6e1ada3b1f4333de2cab3ac291ba9825f83006eb0174c61c",
+      "bytes": 361934
+    },
+    {
+      "id": "place-wild-region-local-5",
+      "regionId": "wild-region",
+      "target": "assets/images/places/wild-region-local-5-v2.webp",
+      "sha256": "1f1a0b82b45ce3b8f3b50efb82b69e1503a5ebb742dbd974b98b4ee5ee89f5bd",
+      "bytes": 366788
+    },
+    {
+      "id": "place-wild-region-local-6",
+      "regionId": "wild-region",
+      "target": "assets/images/places/wild-region-local-6-v2.webp",
+      "sha256": "2056e4f976c83983e63e13ac95c6ee699659855ca06988d4137bcf5002a1dfe7",
+      "bytes": 384002
+    },
+    {
+      "id": "map-demon-plain",
+      "regionId": "demon-plain",
+      "target": "assets/images/regions/demon-plain-v2.webp",
+      "sha256": "2dc065e7b022a50e9ca2a01cda37f541f559e0f6c6e763290d6fd646c7dd1c0e",
+      "bytes": 589218
+    },
+    {
+      "id": "place-demon-plain-local-1",
+      "regionId": "demon-plain",
+      "target": "assets/images/places/demon-plain-local-1-v2.webp",
+      "sha256": "1ec24218b669f393827ce2b3cf43fb8623c75d8969451984cdcf07201f9b0d3e",
+      "bytes": 345398
+    },
+    {
+      "id": "place-demon-plain-local-2",
+      "regionId": "demon-plain",
+      "target": "assets/images/places/demon-plain-local-2-v2.webp",
+      "sha256": "94a4a98031ff891ce52558df05a2d7339e1652fa5c8fe9dc37912a34ff88193a",
+      "bytes": 317072
+    },
+    {
+      "id": "place-demon-plain-local-3",
+      "regionId": "demon-plain",
+      "target": "assets/images/places/demon-plain-local-3-v2.webp",
+      "sha256": "cc45e9c9da83aed8d04f2534fb45b4f6e593c31558c88ae67f64221ddbd77e8d",
+      "bytes": 336740
+    },
+    {
+      "id": "place-demon-plain-local-4",
+      "regionId": "demon-plain",
+      "target": "assets/images/places/demon-plain-local-4-v2.webp",
+      "sha256": "439934000487c4667ed956e94b56d1c0584af378e237c23df6741fbb5669620c",
+      "bytes": 339156
+    },
+    {
+      "id": "place-demon-plain-local-5",
+      "regionId": "demon-plain",
+      "target": "assets/images/places/demon-plain-local-5-v2.webp",
+      "sha256": "70e565154cfd900324ede7c773c3541192e2dfb51582b32be1e06d302d7c1b2d",
+      "bytes": 412704
+    },
+    {
+      "id": "place-demon-plain-local-6",
+      "regionId": "demon-plain",
+      "target": "assets/images/places/demon-plain-local-6-v2.webp",
+      "sha256": "88bc4324f7e02d6c4db693f835246f6ec5880da074e4abe5a355836b1b6e4696",
+      "bytes": 335968
+    },
+    {
+      "id": "map-fallen-mountains",
+      "regionId": "fallen-mountains",
+      "target": "assets/images/regions/fallen-mountains-v2.webp",
+      "sha256": "6c11e50506fe7e484a4d0cd036347e25df364ade6c2dd07ec6c9cf6d89d2ef41",
+      "bytes": 617672
+    },
+    {
+      "id": "place-fallen-mountains-local-1",
+      "regionId": "fallen-mountains",
+      "target": "assets/images/places/fallen-mountains-local-1-v2.webp",
+      "sha256": "395b3c2845ea7f4b75ddc105ecf69a4eb4292401ca1bacba98a330ab40ff16d8",
+      "bytes": 371910
+    },
+    {
+      "id": "place-fallen-mountains-local-2",
+      "regionId": "fallen-mountains",
+      "target": "assets/images/places/fallen-mountains-local-2-v2.webp",
+      "sha256": "b3f36bf4a1378fa2291a2d4607e7b633c050a090d99260b66e4c851e769cc17f",
+      "bytes": 389078
+    },
+    {
+      "id": "place-fallen-mountains-local-3",
+      "regionId": "fallen-mountains",
+      "target": "assets/images/places/fallen-mountains-local-3-v2.webp",
+      "sha256": "5049743e006b2c725dfafbbabbc6d35380e45ddc75796948bd3587e279299a78",
+      "bytes": 357664
+    },
+    {
+      "id": "place-fallen-mountains-local-4",
+      "regionId": "fallen-mountains",
+      "target": "assets/images/places/fallen-mountains-local-4-v2.webp",
+      "sha256": "94eb82492f7195471ffcb3fd64e9a84e169d3fd93ab3ad1e62e017b063c5c1f7",
+      "bytes": 343978
+    },
+    {
+      "id": "place-fallen-mountains-local-5",
+      "regionId": "fallen-mountains",
+      "target": "assets/images/places/fallen-mountains-local-5-v2.webp",
+      "sha256": "cf93a42f6ad36848a784659fbbb19fd56ea1eb2be6ff7aac0bf4c47dd81b8c26",
+      "bytes": 322912
+    },
+    {
+      "id": "place-fallen-mountains-local-6",
+      "regionId": "fallen-mountains",
+      "target": "assets/images/places/fallen-mountains-local-6-v2.webp",
+      "sha256": "fda95510384704de4ecc326de43ede666423ba640b5664f5e34095b83e081cf4",
+      "bytes": 389124
+    },
+    {
+      "id": "map-shennong",
+      "regionId": "shennong",
+      "target": "assets/images/regions/shennong-v2.webp",
+      "sha256": "45a8a7c06f4520d89add3436fe548d55ffe91425ed4b66827122f952c8213ffd",
+      "bytes": 720836
+    },
+    {
+      "id": "place-shennong-local-1",
+      "regionId": "shennong",
+      "target": "assets/images/places/shennong-local-1-v2.webp",
+      "sha256": "a2fe2d29451653f22cb86dffa650887eb43cee38b799f36d8196c62eb100db6e",
+      "bytes": 379020
+    },
+    {
+      "id": "place-shennong-local-2",
+      "regionId": "shennong",
+      "target": "assets/images/places/shennong-local-2-v2.webp",
+      "sha256": "ce75e43a7b3d581e5efc07d237b9598e8342198221b0cc71ccd93724159e6739",
+      "bytes": 396674
+    },
+    {
+      "id": "place-shennong-local-3",
+      "regionId": "shennong",
+      "target": "assets/images/places/shennong-local-3-v2.webp",
+      "sha256": "73c69f5e35a84051d992733991a3545c6bd375d37877808853a512e619dde4ab",
+      "bytes": 344966
+    },
+    {
+      "id": "place-shennong-local-4",
+      "regionId": "shennong",
+      "target": "assets/images/places/shennong-local-4-v2.webp",
+      "sha256": "688b8de9b813c193bcfc35084e0ab55d42f247a130a6c33d4ad8e5b95e730d78",
+      "bytes": 410512
+    },
+    {
+      "id": "place-shennong-local-5",
+      "regionId": "shennong",
+      "target": "assets/images/places/shennong-local-5-v2.webp",
+      "sha256": "dcbdc72d4be2e88f1b15ba135b5c55bdb5998ee65ba1aba32002387d1b8b1449",
+      "bytes": 369588
+    },
+    {
+      "id": "place-shennong-local-6",
+      "regionId": "shennong",
+      "target": "assets/images/places/shennong-local-6-v2.webp",
+      "sha256": "c87334656468c73f419cc377aca244f481c4d5e624f5a14faa447106c80b9cf6",
+      "bytes": 372826
+    },
+    {
+      "id": "map-buried-heaven",
+      "regionId": "buried-heaven",
+      "target": "assets/images/regions/buried-heaven-v2.webp",
+      "sha256": "f77fb23b7dc5a2d4474b3f030cac0a46d7fb39a1f25514c34d1ff4275f3f6ff1",
+      "bytes": 591480
+    },
+    {
+      "id": "place-buried-heaven-local-1",
+      "regionId": "buried-heaven",
+      "target": "assets/images/places/buried-heaven-local-1-v2.webp",
+      "sha256": "13891dfd0530c7984b5d6a3e6943a0d73f5e3ddddc5d9a616c44968fc51f4679",
+      "bytes": 311460
+    },
+    {
+      "id": "place-buried-heaven-local-2",
+      "regionId": "buried-heaven",
+      "target": "assets/images/places/buried-heaven-local-2-v2.webp",
+      "sha256": "03bc214cd1eec4a5fb31c6afe60116064e40d65f249923c8823fee39e1f2cb2e",
+      "bytes": 320870
+    },
+    {
+      "id": "place-buried-heaven-local-3",
+      "regionId": "buried-heaven",
+      "target": "assets/images/places/buried-heaven-local-3-v2.webp",
+      "sha256": "f93c4bd82519ce69885ac70a03fb3b5b9648465f4ceb811cb32197efcce9e7ff",
+      "bytes": 304582
+    },
+    {
+      "id": "place-buried-heaven-local-4",
+      "regionId": "buried-heaven",
+      "target": "assets/images/places/buried-heaven-local-4-v2.webp",
+      "sha256": "c353eb4411339fb6011fe1fdf65c4aaf3c8343398dcf7b7b14f3f3c05b6f6f92",
+      "bytes": 365974
+    },
+    {
+      "id": "place-buried-heaven-local-5",
+      "regionId": "buried-heaven",
+      "target": "assets/images/places/buried-heaven-local-5-v2.webp",
+      "sha256": "a3cd3a187718a582d433b3288f766d28405ff9248fa0cbf468dc8ff666bac168",
+      "bytes": 321052
+    },
+    {
+      "id": "place-buried-heaven-local-6",
+      "regionId": "buried-heaven",
+      "target": "assets/images/places/buried-heaven-local-6-v2.webp",
+      "sha256": "84542ec1e8a752e786820af62b83ead805cdd248eb996ebb93e920b2cf7f381d",
+      "bytes": 315784
+    }
+  ],
+  "additionalAssets": [
+    {
+      "id": "mainland-v4",
+      "target": "assets/images/world-atlas-expanded-v4.webp",
+      "bytes": 755628,
+      "sha256": "75068fbc64feb3540d9b6245e532c9f719fea68301ff56b1936f5fe27df4e540"
+    },
+    {
+      "id": "flight-xiaoyan",
+      "target": "assets/images/avatar-xiaoyan-flight-sheet-v3.webp",
+      "bytes": 526098,
+      "sha256": "d1bf627218e90e19ce4ae637009f10968bea461a8ef92c605d4b64286ade8701"
+    },
+    {
+      "id": "flight-xuner",
+      "target": "assets/images/avatar-xuner-flight-sheet-v3.webp",
+      "bytes": 683580,
+      "sha256": "5ee3380928cf247447a8d2f99f5bcf251bd0e11f6a2c24a666b6428227550946"
+    },
+    {
+      "id": "flight-xiaoyixian",
+      "target": "assets/images/avatar-xiaoyixian-flight-sheet-v3.webp",
+      "bytes": 594964,
+      "sha256": "613b6bb1543750ff0e20151fc04ad6d2b04da219f0f10a10b9d4b6be334eb6aa"
+    },
+    {
+      "id": "flight-medusa",
+      "target": "assets/images/avatar-medusa-flight-sheet-v3.webp",
+      "bytes": 565644,
+      "sha256": "bef1b164ebdf931cbf16bbf48cf843a61e7a8eac28b15bd4cb0eafe9e5c29ca8"
+    }
+  ]
+}

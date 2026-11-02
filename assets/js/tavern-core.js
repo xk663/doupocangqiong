@@ -1,9 +1,9 @@
 /* Shared, framework-free chat logic. Also importable by the Node regression suite. */
 (function(root, factory) {
-  var api = factory(typeof module === 'object' && module.exports ? require('./preset-core.js') : root.PresetCore);
+  var api = factory(typeof module === 'object' && module.exports ? require('./preset-core.js') : root.PresetCore,typeof module === 'object' && module.exports ? require('./model-route-core.js') : root.ModelRouteCore,typeof module === 'object' && module.exports ? require('./model-profile-core.js') : root.ModelResponseProfile);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.TavernCore = api;
-})(typeof globalThis !== 'undefined' ? globalThis : this, function(PresetCore) {
+})(typeof globalThis !== 'undefined' ? globalThis : this, function(PresetCore,ModelRouteCore,ModelResponseProfile) {
   'use strict';
   var blocked = new Set(['__proto__', 'prototype', 'constructor']);
   var secrets = /^(api_?key|key|authorization|access_?token|refresh_?token|token|password|secret|discordWebhook|discordAuthCode)$/i;
@@ -239,13 +239,17 @@
     if(options.jsonMode)config.responseMimeType='application/json';
     var body={contents:contents,generationConfig:config};if(system.length){if(options.use_sysprompt===false){if(body.contents[0]?.role==='user')body.contents[0].parts=system.concat(body.contents[0].parts);else body.contents.unshift({role:'user',parts:system});}else body.systemInstruction={parts:system};}return body;
   }
-  function geminiReply(data){
+  function geminiReply(data,onResponseText){
     if(data.error)throw new Error('Gemini 返回错误，请检查模型和接口配置');
     if(data.promptFeedback&&data.promptFeedback.blockReason)throw new Error('Gemini 拒绝处理本次输入');
     var c=data.candidates&&data.candidates[0];
     if(!c)return {text:'',finish:null};
+    var text=((c.content&&c.content.parts)||[]).filter(function(p){return !p.thought&&typeof p.text==='string';}).map(function(p){return p.text;}).join('');
+    // Retain received prose for diagnostics even when final validation rejects it.
+    // This callback never commits a turn or displays provider thought fields.
+    if(text&&onResponseText)onResponseText(text);
     if(c.finishReason&&c.finishReason!=='STOP')throw new Error(c.finishReason==='MAX_TOKENS'?'Gemini 输出达到 token 上限，本轮未提交；请增加预设输出额度或降低思考级别':'Gemini 回复未正常完成，本轮未提交');
-    return {text:((c.content&&c.content.parts)||[]).filter(function(p){return !p.thought&&typeof p.text==='string';}).map(function(p){return p.text;}).join(''),finish:c.finishReason};
+    return {text:text,finish:c.finishReason};
   }
   // Display-only filtering: keep raw replies intact for option parsing and persistence.
   function visibleBranches(value, streaming) {
@@ -270,36 +274,114 @@
     return text;
   }
 
+  // The preset may wrap prose in XML before the runtime's Markdown sections.
+  // Preserve those bodies instead of replacing them with a later short maintext.
+  function parseOutput(value, validTags) {
+    var text=String(value||''), result={maintext:'',option:[],sum:'',vars:'',thinking:'',think:''};
+    var allowed=new Set(Array.isArray(validTags)?validTags:['maintext','option','sum','vars','thinking','think']);
+    var markers=[],re=/(?:^|\n)##[ \t]*(\w+)[ \t]*\r?\n/g,m;
+    while((m=re.exec(text))){var tag=m[1].toLowerCase();if(allowed.has(tag)&&!['__proto__','prototype','constructor'].includes(tag))markers.push({tag:tag,start:m.index,end:re.lastIndex});}
+    var bodies=[];
+    if(!markers.length)bodies.push(text);
+    else{
+      var preamble=text.slice(0,markers[0].start).trim();if(preamble)bodies.push(preamble);
+      markers.forEach(function(marker,i){
+        var content=text.slice(marker.end,i+1<markers.length?markers[i+1].start:text.length).trim();
+        if(marker.tag==='maintext'){if(content)bodies.push(content);}
+        else if(marker.tag==='option')content.split('\n').forEach(function(line){var option=line.replace(/^[-*]\s*\[?\s*[x ]?\s*\]?\s*/,'').trim();if(option)result.option.push(option);});
+        else if(content)result[marker.tag]=(result[marker.tag]?result[marker.tag]+'\n\n':'')+content;
+      });
+    }
+    var prose=bodies.join('\n\n'),wrapped=[],stack=[],start=-1,tagRE=/<\/?(content|game|maintext)\b[^>]*>/gi;
+    while((m=tagRE.exec(prose))){
+      var name=m[1].toLowerCase();
+      if(/^<\//.test(m[0])){
+        var index=stack.lastIndexOf(name);if(index<0)continue;stack.length=index;
+        if(!stack.length){wrapped.push(prose.slice(start,m.index));start=-1;}
+      }else if(!/\/\s*>$/.test(m[0])){if(!stack.length)start=tagRE.lastIndex;stack.push(name);}
+    }
+    if(start>=0)wrapped.push(prose.slice(start));
+    result.maintext=(wrapped.length?wrapped.map(function(body){return body.replace(/<\/?(?:content|game|maintext)\b[^>]*>/gi,'');}).join('\n\n'):prose).trim();
+    return result;
+  }
+
+  // Some imported presets emit literal Unicode escapes inside ordinary prose.
+  // Decode one layer for display; keep code examples, escaped backslashes and
+  // malformed/unpaired surrogates intact. Never parse or execute generated code.
+  function decodeProseUnicode(value,streaming){
+    function decode(text){
+      var out='',i=0;
+      while(i<text.length){
+        if(text[i]!=='\\'){out+=text[i++];continue;}
+        var end=i+1;while(text[end]==='\\')end++;
+        if(end-i>1){out+=text.slice(i,end);i=end;continue;}
+        var hex=text.slice(i+2,i+6);
+        if(text[i+1]==='u'&&hex.length===4&&/^[\da-f]{4}$/i.test(hex)){
+          var code=parseInt(hex,16);
+          if(code>=0xd800&&code<=0xdbff){
+            var next=text.slice(i+6).match(/^\\u([\da-f]{4})/i),low=next?parseInt(next[1],16):0;
+            if(low>=0xdc00&&low<=0xdfff){out+=String.fromCharCode(code,low);i+=12;continue;}
+            if(streaming&&(i+6===text.length||/^\\u[\da-f]{0,3}$/i.test(text.slice(i+6))))break;
+          }
+          if(code>=0xd800&&code<=0xdfff||code<32&&![9,10,13].includes(code)||code>=0x7f&&code<=0x9f)out+=text.slice(i,i+6);
+          else out+=String.fromCharCode(code);
+          i+=6;continue;
+        }
+        if(streaming&&/^\\u[\da-f]{0,3}$/i.test(text.slice(i)))break;
+        out+=text[i++];
+      }
+      return out;
+    }
+    return String(value||'').split(/(```[\s\S]*?(?:```|$)|`[^`\n]*`)/g).map(function(part,index){return index%2?part:decode(part);}).join('');
+  }
+
+  // Render generated semantic HTML as readable paragraphs, always through textContent.
+  // The original reply remains unchanged in storage and in future prompt history.
+  function proseText(value, streaming) {
+    var text=String(value||'').replace(/<!--[\s\S]*?(?:-->|$)/g,'');
+    if(streaming)text=text.replace(/<\/?[A-Za-z_][\w~:-]*(?:\s[^>]*)?$/,'');
+    text=text.replace(/<br\b[^>]*\/?\s*>/gi,'\n').replace(/<\/(?:p|div|section|article|blockquote|aside|scene_checkpoint|h[1-6]|li)\s*>/gi,'\n\n').replace(/<\/?[A-Za-z_][\w~:-]*(?:\s[^>]*?)?\/?\s*>/g,'');
+    var entities={amp:'&',lt:'<',gt:'>',quot:'"',apos:"'",nbsp:' '};
+    text=text.replace(/&(#x[\da-f]+|#\d+|amp|lt|gt|quot|apos|nbsp);/gi,function(all,key){
+      if(key[0]!=='#')return entities[key.toLowerCase()];
+      var code=key[1].toLowerCase()==='x'?parseInt(key.slice(2),16):Number(key.slice(1));
+      return Number.isInteger(code)&&code>0&&code<=0x10ffff&&!(code>=0xd800&&code<=0xdfff)?String.fromCodePoint(code):all;
+    });
+    // Decoded angle brackets stay inert text; do not run another HTML parse pass.
+    text=decodeProseUnicode(text,streaming);
+    // Remove exact duplication and narrowly recognized explicit laugh annotations; retain other explanations and code.
+    text=text.split(/(```[\s\S]*?(?:```|$)|`[^`\n]*`)/g).map(function(part,i){if(i%2)return part;return part.replace(/([\u3400-\u9fff]{1,12})[（(]([\u3400-\u9fff]{1,12})[）)]/g,function(all,before,note){return before.endsWith(note)?before:all;}).replace(/([哈哈呵嘿嘻哐呱嘎咯]{2,6})[（(]笑[）)](?=了?(?:一声|起来|几声|两声))/g,'笑');}).join('');
+    return text.replace(/\r\n?/g,'\n').replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+  }
+
   function streamParser() {
     var text = '', listeners = [];
     function emit() {
-      var found = false, re = /(?:^|\n)##\s*(\w+)[ \t]*\r?\n/g, markers = [], m;
-      while ((m = re.exec(text))) markers.push({tag:m[1].toLowerCase(), start:m.index, end:re.lastIndex});
-      markers.forEach(function(marker, i) {
-        var content = text.slice(marker.end, i + 1 < markers.length ? markers[i + 1].start : text.length).trim();
-        listeners.forEach(function(fn) { fn(marker.tag, content); }); found = true;
-      });
-      if (!found) listeners.forEach(function(fn) { fn('maintext', text); });
+      var parsed=parseOutput(text);
+      Object.keys(parsed).forEach(function(tag){var content=Array.isArray(parsed[tag])?parsed[tag].join('\n'):parsed[tag];if(content||tag==='maintext')listeners.forEach(function(fn){fn(tag,content);});});
     }
     return {feed:function(chunk) { text += chunk; emit(); }, onTag:function(fn) { listeners.push(fn); }, reset:function() { text = ''; }, flushBuffer:function() { emit(); return text; }};
   }
 
-  async function readStream(response, backend, onChunk, signal) {
-    var reader = response.body.getReader(), decoder = new TextDecoder(), pending = '', eventData = [], full = '', done = false, geminiFinish=null;
+  async function readStream(response, backend, onChunk, signal, onMetadata, onResponseText) {
+    var reader = response.body.getReader(), decoder = new TextDecoder(), pending = '', eventData = [], eventType = '', full = '', done = false, geminiFinish=null;
     function accept(payload) {
       if (payload === '[DONE]') { done = true; return; }
       var data;
       try { data = JSON.parse(payload); } catch (_) { throw new Error('模型返回了无法解析的流式数据'); }
       if (data.error) throw new Error(backend==='gemini'?'Gemini 返回错误，请检查模型和接口配置':typeof data.error === 'string' ? data.error : data.error.message || '模型返回错误');
-      var gemini=backend==='gemini'?geminiReply(data):null;
+      if(onMetadata)onMetadata(data,eventType);
+      var gemini=backend==='gemini'?geminiReply(data,onResponseText):null;
       if(gemini&&gemini.finish)geminiFinish=gemini.finish;
       var content = gemini?gemini.text:backend === 'ollama' ? data.message && data.message.content : backend === 'kobold' ? data.token : data.choices && data.choices[0] && data.choices[0].delta && data.choices[0].delta.content;
+      if(!gemini&&typeof content==='string'&&content&&onResponseText)onResponseText(content);
       if (content) { full += content; if (onChunk) onChunk(content, full); }
     }
-    function flushEvent() { if (eventData.length) { accept(eventData.join('\n')); eventData = []; } }
+    function flushEvent() { if (eventData.length) { accept(eventData.join('\n')); eventData = []; } eventType = ''; }
     function line(value) {
       if (backend === 'ollama') { if (value.trim()) accept(value); return; }
       if (!value) { flushEvent(); return; }
+      if (value.startsWith('event:')) eventType = value.slice(6).trim();
       if (value.startsWith('data:')) eventData.push(value.slice(5).replace(/^ /,''));
     }
     function drain(final) {
@@ -322,7 +404,8 @@
         if (chunk.done) { pending += decoder.decode(); drain(true); break; }
         pending += decoder.decode(chunk.value, {stream:true}); drain(false);
       }
-      if(backend==='gemini'&&(geminiFinish!=='STOP'||!full.trim()))throw new Error('Gemini 流式回复不完整或缺少正文，本轮未提交');
+      if(backend==='gemini'&&geminiFinish!=='STOP')throw new Error('Gemini 流式回复不完整：未收到 STOP 结束标记（已接收 '+full.length+' 字符），本轮未提交');
+      if(backend==='gemini'&&!full.trim())throw new Error('Gemini 已结束但没有返回正文，可能仅返回了思考内容，本轮未提交');
       return full;
     } finally { if(signal)signal.removeEventListener('abort',onAbort);try { await reader.cancel(); } catch (_) {} reader.releaseLock(); }
   }
@@ -339,7 +422,12 @@
   }
   async function request(api, messages, options, onChunk, fetcher) {
     options = options || {}; checkAbort(options.signal);
+    var audit=ModelRouteCore.create(options.model||api.model,api.backend);
+    var profile=null;
+    function observe(data,eventType){audit.observe(data,eventType);if(profile)profile.observe(data);}
+    function finish(text){checkAbort(options.signal);if(profile&&typeof options.onResponseProfile==='function')options.onResponseProfile(profile.result());if(typeof options.onModelAudit==='function')options.onModelAudit(audit.result());return text;}
     var backend = api.backend || 'openai', stream = !!onChunk, body=requestBody(api,messages,options,stream), headers = {'Content-Type':'application/json'};
+    if(typeof options.onResponseProfile==='function'&&ModelResponseProfile)profile=ModelResponseProfile.create(backend,options.profileContext,body);
     if(backend==='gemini'){
       if(!options.model&&!api.model)throw new Error('请填写 Gemini 模型标识');
       if(api.apiKey||api.key)headers['x-goog-api-key']=api.apiKey||api.key;
@@ -347,20 +435,23 @@
     var response = await (fetcher || fetch)(transportURL(api,endpoint(api.url, backend,options.model||api.model,stream)), {method:'POST', headers:headers, body:JSON.stringify(body), signal:options.signal});
     checkAbort(options.signal);
     if (!response.ok) { var error = new Error('模型请求失败（HTTP ' + response.status + '）'); error.status = response.status; throw error; }
+    audit.headers(response.headers);
     var contentType = (response.headers.get('content-type') || '').toLowerCase();
     if (backend === 'kobold' || !stream || contentType.includes('application/json')) {
       var data = await response.json(); checkAbort(options.signal);
       if (data.error) throw new Error('模型返回错误，请检查模型和接口配置');
+      observe(data);
       if(backend==='gemini'){
-        var reply=geminiReply(data);if(reply.finish!=='STOP'||!reply.text.trim())throw new Error('Gemini 回复不完整或缺少正文，本轮未提交');
-        if(onChunk)onChunk(reply.text,reply.text);return reply.text;
+        var reply=geminiReply(data,options.onResponseText);if(reply.finish!=='STOP'||!reply.text.trim())throw new Error('Gemini 回复不完整或缺少正文，本轮未提交');
+        if(onChunk)onChunk(reply.text,reply.text);return finish(reply.text);
       }
       var content = backend === 'kobold' ? data.results && data.results[0] && data.results[0].text : backend === 'ollama' ? data.message && data.message.content : data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
       if (typeof content !== 'string') throw new Error('模型回复缺少正文，请检查接口协议');
+      if(content&&options.onResponseText)options.onResponseText(content);
       if (onChunk) onChunk(content, content);
-      return content;
+      return finish(content);
     }
-    return readStream(response, backend, onChunk, options.signal);
+    return finish(await readStream(response, backend, onChunk, options.signal,observe,options.onResponseText));
   }
 
   function applyOperations(current, operations) {
@@ -416,5 +507,5 @@
     ['personality','scenario','firstMessage'].forEach(function(k) { if (card[k] != null && typeof card[k] !== 'string') throw new Error('角色卡字段类型错误：' + k); });
     return card;
   }
-  return {presetOptions:function(p){return PresetCore.options(p);}, presetReport:function(p,b){return PresetCore.report(p,b);}, requestBody:requestBody, clone:clone, redact:function(v) { return clone(v,true); }, escapeHtml:escapeHtml, handlerArg:handlerArg, estimateTokens:estimateTokens, endpoint:endpoint, transportURL:transportURL, abortError:abortError, checkAbort:checkAbort, matchLorebooks:matchLorebooks, promptPlan:promptPlan, composePrompt:composePrompt, streamParser:streamParser, visibleBranches:visibleBranches, visibleUpstore:visibleUpstore, request:request, readStream:readStream, applyOperations:applyOperations, regeneration:regeneration, parseJSON:parseJSON, importCard:importCard};
+  return {presetOptions:function(p){return PresetCore.options(p);}, presetReport:function(p,b){return PresetCore.report(p,b);}, requestBody:requestBody, clone:clone, redact:function(v) { return clone(v,true); }, escapeHtml:escapeHtml, handlerArg:handlerArg, estimateTokens:estimateTokens, endpoint:endpoint, transportURL:transportURL, abortError:abortError, checkAbort:checkAbort, matchLorebooks:matchLorebooks, promptPlan:promptPlan, composePrompt:composePrompt, parseOutput:parseOutput, proseText:proseText, streamParser:streamParser, visibleBranches:visibleBranches, visibleUpstore:visibleUpstore, request:request, readStream:readStream, applyOperations:applyOperations, regeneration:regeneration, parseJSON:parseJSON, importCard:importCard};
 });

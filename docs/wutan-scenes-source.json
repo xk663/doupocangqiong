@@ -1,0 +1,95 @@
+{
+  "tool": "built-in image_gen",
+  "images": [
+    {
+      "id": "wutan",
+      "original": "output/wutan-scenes-originals/wutan-v1.png",
+      "asset": "assets/images/places/wutan-v1.webp",
+      "bytes": 270842
+    },
+    {
+      "id": "xiao-home",
+      "original": "output/wutan-scenes-originals/xiao-home-v1.png",
+      "asset": "assets/images/places/xiao-home-v1.webp",
+      "bytes": 255698
+    },
+    {
+      "id": "wutan-market",
+      "original": "output/wutan-scenes-originals/wutan-market-v1.png",
+      "asset": "assets/images/places/wutan-market-v1.webp",
+      "bytes": 276748
+    },
+    {
+      "id": "wutan-inn",
+      "original": "output/wutan-scenes-originals/wutan-inn-v1.png",
+      "asset": "assets/images/places/wutan-inn-v1.webp",
+      "bytes": 236028
+    },
+    {
+      "id": "wutan-auction",
+      "original": "output/wutan-scenes-originals/wutan-auction-v1.png",
+      "asset": "assets/images/places/wutan-auction-v1.webp",
+      "bytes": 222256
+    },
+    {
+      "id": "wutan-herbs",
+      "original": "output/wutan-scenes-originals/wutan-herbs-v1.png",
+      "asset": "assets/images/places/wutan-herbs-v1.webp",
+      "bytes": 247080
+    },
+    {
+      "id": "wutan-guild",
+      "original": "output/wutan-scenes-originals/wutan-guild-v1.png",
+      "asset": "assets/images/places/wutan-guild-v1.webp",
+      "bytes": 222238
+    },
+    {
+      "id": "wutan-gate",
+      "original": "output/wutan-scenes-originals/wutan-gate-v1.png",
+      "asset": "assets/images/places/wutan-gate-v1.webp",
+      "bytes": 271984
+    },
+    {
+      "id": "wutan-home",
+      "original": "assets/images/residence-wutan-courtyard-v1.webp",
+      "asset": "assets/images/places/wutan-home-v1.webp",
+      "bytes": 258212,
+      "source": "复用既有乌坦清居庭院画景，缩放并压缩为1200×800，不改变画面内容；本次未重新生图。"
+    }
+  ],
+  "prompts": [
+    [
+      "wutan",
+      "Use case: stylized-concept. Create one landscape illustration for a browser RPG set in Battle Through the Heavens (斗破苍穹), Wutan City (乌坦城) in Jia Ma Empire. Scene: CITY GATE AND PANORAMA, impressive gray stone fortified southern gate, dark tiled Chinese roofs, bustling caravan arriving along a bridge over a turquoise moat, wooded mountains and tiled city skyline beyond. Wide landscape 3:2 composition, immersive hand-painted Chinese fantasy environment concept art, intricate architecture, warm morning light, jade greens, muted gold, ink-like atmospheric depth. No text, lettering, UI, watermark, modern objects or character portraits. Distinct standalone location artwork, not a map, not a collage. Save generated image to a local file and return the file path."
+    ],
+    [
+      "xiao-home",
+      "萧家宅邸。一个修炼家族的宅邸，庄重灰瓦院门，宽阔演武石坪，木制廊庑，数位远处练武的弟子，苍松与山景，上午清光。"
+    ],
+    [
+      "wutan-market",
+      "坊市长街。乌坦城热闹的露天市集，从行人视角看长街，药草摊、陶罐、布匹、小贩与商客，深灰瓦檐与暖色遮棚，青石路通向石拱桥，日光穿过树影。"
+    ],
+    [
+      "wutan-inn",
+      "临街客栈。街角温暖的两层木瓦客栈，朝街门窗透出灯火，门前饮茶的小桌与拴马木桩，门外青石路和老树，傍晚安静的旅人歇脚气氛。"
+    ],
+    [
+      "wutan-auction",
+      "拍卖场外。米特尔拍卖场的奢华高挑楼阁，朱红柱子、金铜装饰与沉稳的灰瓦屋顶，宽阔石阶和守卫，衣着讲究的商贾在门外等候，灯笼和宝石色旗帜，夕照。"
+    ],
+    [
+      "wutan-herbs",
+      "药材铺。开放式中式药铺，前景竹匾中晒着不同药草，成排木药柜、瓷罐与黄铜秤，桌面有淡淡灵气的低阶灵草，店后小院和侧窗竹影，柔和午后光。"
+    ],
+    [
+      "wutan-guild",
+      "佣兵告示处。乌坦城东南角靠近城墙的佣兵集合院，木制告示板上无可读文字的纸笺，长凳、行囊和武器架，数位远处带斗篷的佣兵准备出发，通往山林的小路，粗粝但有生活气息。"
+    ],
+    [
+      "wutan-gate",
+      "城门驿道。城外的驿站与商队停靠地，前景石路与木制车棚，载满货物的马车、饮马水槽、商队行旅与一株古树，远处侧见乌坦城城门而非正面特写，清晨薄雾。"
+    ]
+  ],
+  "commonPrompt": "Use case: stylized-concept. 为斗破苍穹世界观、加玛帝国乌坦城的浏览器RPG制作一张独立地点画景。地点与画面：{subject} 整体采用精致手绘中国玄幻环境概念美术，写实建筑比例、丰富生活细节，青绿与暖金色，山水般空气透视。横向3:2构图，有空间纵深，和同套乌坦城画景保持美术一致。禁止文字、可读招牌、界面、水印、现代建筑、现代服装，不画角色大头像，不画地图或拼图。输出一张完整场景。"
+}

@@ -1,0 +1,238 @@
+{
+  "type": "map",
+  "version": "1.10",
+  "tiledversion": "1.12.2",
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tilewidth": 32,
+  "tileheight": 32,
+  "infinite": false,
+  "layers": [
+    {
+      "id": 1,
+      "name": "无字地形底图",
+      "type": "imagelayer",
+      "opacity": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "image": "../../assets/images/regions/xuanhuang-fort-v2.webp",
+      "imagewidth": 1536,
+      "imageheight": 1024
+    },
+    {
+      "id": 2,
+      "name": "地点锚点",
+      "type": "objectgroup",
+      "objects": [
+        {
+          "id": 1,
+          "name": "玄黄要塞",
+          "point": true,
+          "x": 768,
+          "y": 962.56,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "xuanhuang-fort"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "xuanhuang-fort"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "novel-evidence"
+            }
+          ],
+          "type": "fortress"
+        },
+        {
+          "id": 2,
+          "name": "玄黄外关",
+          "point": true,
+          "x": 245.76,
+          "y": 747.52,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "xuanhuang-fort-local-1"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "xuanhuang-fort"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "gate"
+        },
+        {
+          "id": 3,
+          "name": "行军备物场",
+          "point": true,
+          "x": 399.36,
+          "y": 491.52,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "xuanhuang-fort-local-2"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "xuanhuang-fort"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "market"
+        },
+        {
+          "id": 4,
+          "name": "古垒观望台",
+          "point": true,
+          "x": 629.76,
+          "y": 163.84,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "xuanhuang-fort-local-3"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "xuanhuang-fort"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        },
+        {
+          "id": 5,
+          "name": "战讯告示亭",
+          "point": true,
+          "x": 983.04,
+          "y": 266.24,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "xuanhuang-fort-local-4"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "xuanhuang-fort"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "guild"
+        },
+        {
+          "id": 6,
+          "name": "石墙避风院",
+          "point": true,
+          "x": 1182.72,
+          "y": 614.4,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "xuanhuang-fort-local-5"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "xuanhuang-fort"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "inn"
+        },
+        {
+          "id": 7,
+          "name": "平原接引桥",
+          "point": true,
+          "x": 844.8,
+          "y": 706.56,
+          "width": 0,
+          "height": 0,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "worldId",
+              "type": "string",
+              "value": "xuanhuang-fort-local-6"
+            },
+            {
+              "name": "sceneId",
+              "type": "string",
+              "value": "xuanhuang-fort"
+            },
+            {
+              "name": "sourceType",
+              "type": "string",
+              "value": "game-design"
+            }
+          ],
+          "type": "wild"
+        }
+      ]
+    }
+  ],
+  "width": 48,
+  "height": 32,
+  "nextlayerid": 3,
+  "nextobjectid": 8
+}
