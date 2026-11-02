@@ -51,7 +51,7 @@
     },
     {
       "id": "wutan-home",
-      "original": "assets/images/residence-wutan-courtyard-v1.webp",
+      "original": "assets/images/residence/residence-wutan-courtyard-v1.webp",
       "asset": "assets/images/places/wutan-home-v1.webp",
       "bytes": 258212,
       "source": "复用既有乌坦清居庭院画景，缩放并压缩为1200×800，不改变画面内容；本次未重新生图。"

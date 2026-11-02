@@ -51,7 +51,7 @@ test('anonymous users receive a readable login page; direct assets, alternate en
  // must also be permitted by the login document's form-action policy.
  assert.equal(page.headers.get('referrer-policy'),'same-origin');
  assert.match(page.headers.get('content-security-policy'),/form-action 'self' https:\/\/discord\.com;/);
- for(const path of ['/index.html','/game.html','/map.html','/sillytavern.html','/assets/js/tavern-core.js','/assets/images/title-gu-reunion.webp','/__gemini_proxy/v1beta/models']){
+ for(const path of ['/index.html','/game.html','/map.html','/sillytavern.html','/assets/js/tavern-core.js','/assets/images/title/title-gu-reunion.webp','/__gemini_proxy/v1beta/models']){
   const response=await get(path);assert.equal(response.status,401);assert.equal(response.headers.get('cache-control'),'no-store');assert.doesNotMatch(await response.text(),/SYNTHETIC|function build/);
  }
  assert.equal(calls.length,0);
@@ -72,7 +72,7 @@ test('official OAuth flow binds state to this browser, sends minimal scopes and 
  assert.equal((await get('/assets/js/preset-ui.js',{headers})).status,200);
  const status=await get('/auth/discord/status',{headers});assert.deepEqual(await status.json(),{authenticated:true,community:'类脑'});
  const exposed=JSON.stringify([...result.response.headers])+await result.response.text();assert.doesNotMatch(exposed,/SYNTHETIC/);
- for(const path of ['/tools/discord-gate.cjs','/tests/fixtures/presets.html','/docs/discord-community-auth.md','/index.html.bak','/.env'])assert.equal((await get(path,{headers})).status,403);
+ for(const path of ['/tools/discord-gate.cjs','/tests/fixtures/presets.html','/docs/hosting/discord-community-auth.md','/index.html.bak','/.env'])assert.equal((await get(path,{headers})).status,403);
  assert.equal((await get('/__gemini_proxy/v1beta/models',{headers})).status,404);
 });
 test('foreign origins, forged cookies, missing state, wrong browser and consumed callbacks cannot authorize',async t=>{

@@ -41,4 +41,4 @@
 
 每场战斗保存种子和随机序号，行动可以从同一存档继续复现。战斗结算会写入玩家 `stateChanges`，并将确认结果接入当前会话的 `memoryTable` 与 `openWorldState`。会话的 `playerState` 作为历史副本保留，切换聊天不会覆盖当前人生的角色状态；不同人生需通过完整存档恢复。列表标记战斗中和待发送战报。
 
-状态归属、历史技能补录、装备字段与随机数修订详见 [结构完整性修订](structure-integrity.md)。
+状态归属、历史技能补录、装备字段与随机数修订详见 [结构完整性修订](../verification/structure-integrity.md)。

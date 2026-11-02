@@ -19,4 +19,4 @@ if(command==='export'){
   const pos=[Math.round(obj.x/data.worldWidth*10000)/100,Math.round(obj.y/data.worldHeight*10000)/100];if(n.id===scene.id)n.localPosition=pos;else [n.x,n.y]=pos;count++;
  }
  if(!count)throw Error('No map anchors found');if(command==='import')writeRuntime();console.log(command+': '+count+' validated anchors');
-}else if(command==='sync'){writeRuntime();console.log('Runtime catalogue synchronized.');}else throw Error('Usage: node scripts/world-maps.cjs export | check <map> | import <map> | sync');
+}else if(command==='sync'){writeRuntime();console.log('Runtime catalogue synchronized.');}else throw Error('Usage: node tools/world-maps.cjs export | check <map> | import <map> | sync');

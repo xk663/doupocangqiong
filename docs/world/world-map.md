@@ -48,13 +48,13 @@
 
 ```sh
 # 从当前目录导出四份Tiled作者文件；编辑前先保留已有修改
-node scripts/world-maps.cjs export
+node tools/world-maps.cjs export
 # 校验Tiled文件或Tiled导出的JSON，不修改运行目录
-node scripts/world-maps.cjs check maps/authoring/wutan.tmj
+node tools/world-maps.cjs check maps/authoring/wutan.tmj
 # 将已编辑的锚点导入JSON目录并同步浏览器数据
-node scripts/world-maps.cjs import maps/authoring/wutan.tmj
+node tools/world-maps.cjs import maps/authoring/wutan.tmj
 # 若手工编辑了JSON的道路、人物或描述，同步浏览器文件
-node scripts/world-maps.cjs sync
+node tools/world-maps.cjs sync
 node --test tests/*.test.cjs
 ```
 

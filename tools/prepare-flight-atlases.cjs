@@ -11,7 +11,7 @@ const root=path.resolve(__dirname,'..');
  }
  if(slots.some(s=>!s)||slots.length!==12)throw Error(id+': incomplete atlas');
  const frames=slots.map(s=>{const x=Math.max(0,s.left-4),y=Math.max(0,s.top-4),right=Math.min(W,s.right+5),bottom=Math.min(H,s.bottom+5);let sum=0,count=0;for(let py=s.bottom-11;py<=s.bottom;py++)for(let px=s.left;px<=s.right;px++)if(data[(py*W+px)*4+3]>=100){sum+=px;count++;}const footX=count?sum/count:(s.left+s.right)/2;return {x,y,width:right-x,height:bottom-y,trimX:x-footX+W/8,trimY:y-s.bottom+H/3*.94};});
- const target='assets/images/avatar-'+id+'-flight-sheet-v3.webp';await sharp(job.source).webp({quality:94,alphaQuality:100,effort:5}).toFile(path.join(root,target));
+ const target='assets/images/avatars/avatar-'+id+'-flight-sheet-v3.webp';await sharp(job.source).webp({quality:94,alphaQuality:100,effort:5}).toFile(path.join(root,target));
  metadata[id]={image:target,width:W,height:H,frames,visibleHeight:Math.max(...slots.map(s=>s.bottom-s.top+1))/(H/3),source:job.source,prompt:job.prompt};
  }fs.writeFileSync(path.join(root,'assets/data/flight-atlas-frames.json'),JSON.stringify(metadata,null,2)+'\n');
  const runtime=Object.fromEntries(Object.entries(metadata).map(([id,m])=>[id,{image:m.image,width:m.width,height:m.height,frames:m.frames,visibleHeight:m.visibleHeight}]));

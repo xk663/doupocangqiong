@@ -36,7 +36,7 @@
 
 ## 美术
 
-背景：`assets/images/creation-landscape.png`，使用内置 image_gen 工具新生成。图片用于侧栏山水，不包含文字；表单文字保持可选择、可访问的HTML。
+背景：`assets/images/creation/creation-landscape.png`，使用内置 image_gen 工具新生成。图片用于侧栏山水，不包含文字；表单文字保持可选择、可访问的HTML。
 
 最终生成提示词：
 

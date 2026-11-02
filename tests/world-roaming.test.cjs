@@ -74,7 +74,7 @@ test('clicking the Wutan city marker walks to the real place and displays its ma
  assert.ok(nodes.some(n=>n.id==='wutan'&&n.name==='乌坦城门'));assert.ok(nodes.some(n=>n.id==='wutan-gate'&&n.name==='城门驿道'));
  await s.view.selectPoint(city.id);await s.view.renderPromise;
  assert.equal(s.commits,1);assert.equal(s.c.state.locationId,city.id);assert.deepEqual([s.c.state.pose.x,s.c.state.pose.y],[44,79]);assert.ok(s.c.state.visited.includes(city.id));
- const html=s.host.querySelector('.world-detail').innerHTML;assert.match(html,/assets\/images\/world-wutan\.webp/);assert.match(html,/离开乌坦城/);assert.doesNotMatch(html,/places\/wutan-v1\.webp/);
+ const html=s.host.querySelector('.world-detail').innerHTML;assert.match(html,/assets\/images\/world\/world-wutan\.webp/);assert.match(html,/离开乌坦城/);assert.doesNotMatch(html,/places\/wutan-v1\.webp/);
  assert.equal(Places.resolve(s.c.worldState,s.c.state).id,city.id);
 });
 test('all regional name locations offer an exit which returns both the actor and the view to the mainland',async()=>{

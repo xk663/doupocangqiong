@@ -3,7 +3,7 @@ const fs=require('node:fs'),path=require('node:path');
 const root=path.resolve(__dirname,'..'),catalogue=require('./data/world-regions.json');
 const data=JSON.parse(fs.readFileSync(path.join(root,'assets/data/world.json'),'utf8'));
 const regionIds=new Set(catalogue.regions.map(r=>r.id));
-Object.assign(data.scenes.find(s=>s.id==='world'),{art:'assets/images/world-atlas-expanded-v4.webp',width:1536,height:1024});
+Object.assign(data.scenes.find(s=>s.id==='world'),{art:'assets/images/world/world-atlas-expanded-v4.webp',width:1536,height:1024});
 for(const r of catalogue.regions){
  const parent=data.nodes.find(n=>n.id===r.id);parent.localPosition=r.entry;if(r.localName)parent.localName=r.localName;if(r.localArt)parent.localArt=r.localArt;
  const scene={id:r.id,name:r.name,subtitle:'地区探索 · 六处分支与专属画景',root:r.id,art:r.mapArt,width:r.width,height:r.height,roads:r.roads},existingScene=data.scenes.find(s=>s.id===r.id);if(!existingScene)data.scenes.push(scene);else if(!r.legacy)Object.assign(existingScene,scene);

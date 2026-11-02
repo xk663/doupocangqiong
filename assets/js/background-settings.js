@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   const TEMPLATES = [
-    { id: 'original-title', name: '初见 · 原始主界面', src: 'assets/images/title-gu-reunion.webp', original: true },
+    { id: 'original-title', name: '初见 · 原始主界面', src: 'assets/images/title/title-gu-reunion.webp', original: true },
     { id: 'flame-duet', name: '异火相映 · 萧炎与薰儿', src: 'assets/images/backgrounds/flame-duet.webp' },
     { id: 'cloud-dawn', name: '云海晨曦 · 萧炎与薰儿', src: 'assets/images/backgrounds/cloud-dawn.png' },
     { id: 'herb-valley', name: '药谷清溪 · 萧炎与小医仙', src: 'assets/images/backgrounds/herb-valley.png' },

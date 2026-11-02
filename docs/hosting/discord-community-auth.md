@@ -29,7 +29,7 @@
 
 1. 在 https://discord.com/developers/applications 创建自己的应用，记录 General Information → Application ID。
 2. 在 OAuth2 页面登记准确的回调地址。本机沿用现有存档域名时为 `http://127.0.0.1:8090/auth/discord/callback`；使用 localhost 时配置和访问都应统一为 localhost。
-3. 参考 `docs/discord-server.env.example` 在仓库根目录创建 `.env.discord`，填写应用 ID 和 Client Secret。这个文件已被 `.gitignore` 忽略，Secret 只保存在服务器，不写入 HTML、浏览器存储或聊天。
+3. 参考 `docs/hosting/discord-server.env.example` 在仓库根目录创建 `.env.discord`，填写应用 ID 和 Client Secret。这个文件已被 `.gitignore` 忽略，Secret 只保存在服务器，不写入 HTML、浏览器存储或聊天。
 4. 完成真实联调时先停止占用相同端口的开发预览，再用授权入口启动。保持原来的协议、主机和端口，浏览器现有存档与预设仍保存在原位置；切换域名或端口前应先导出本地存档。
 
 环境变量：

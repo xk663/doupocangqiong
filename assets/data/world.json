@@ -8,7 +8,7 @@
       "id": "world",
       "name": "斗气大陆",
       "subtitle": "山河总览 · 美术布局非测绘坐标",
-      "art": "assets/images/world-atlas-expanded-v4.webp",
+      "art": "assets/images/world/world-atlas-expanded-v4.webp",
       "root": null,
       "width": 1536,
       "height": 1024
@@ -17,21 +17,21 @@
       "id": "wutan",
       "name": "乌坦城",
       "subtitle": "坊市烟火 · 家族与商路",
-      "art": "assets/images/world-wutan.webp",
+      "art": "assets/images/world/world-wutan.webp",
       "root": "wutan"
     },
     {
       "id": "qingshan",
       "name": "青山镇",
       "subtitle": "山林初探 · 采药与委托",
-      "art": "assets/images/world-qingshan.webp",
+      "art": "assets/images/world/world-qingshan.webp",
       "root": "qingshan"
     },
     {
       "id": "shimo",
       "name": "石漠城",
       "subtitle": "沙海行旅 · 补给与线索",
-      "art": "assets/images/world-shimo.webp",
+      "art": "assets/images/world/world-shimo.webp",
       "root": "shimo"
     },
     {

@@ -2,7 +2,7 @@
 (function(root,factory){const api=factory(typeof module==='object'&&module.exports&&typeof require==='function'?require('./world-regions.js'):root.WorldRegions);if(typeof module==='object'&&module.exports)module.exports=api;else root.PlaceScenes=api;})(typeof globalThis!=='undefined'?globalThis:this,function(Regions){
  'use strict';
  const entries=[['wutan','乌坦城',['城门','乌坦城入口']],['xiao-home','萧家宅邸',['萧家']],['wutan-market','坊市长街',['乌坦城坊市','坊市']],['wutan-inn','临街客栈',['客栈']],['wutan-auction','拍卖场外',['米特尔拍卖场','拍卖场']],['wutan-herbs','药材铺',['药铺']],['wutan-guild','佣兵告示处',['佣兵告示']],['wutan-gate','城门驿道',['驿道']],['wutan-home','乌坦清居',['西北亭院']]].map(([id,name,aliases])=>Object.freeze({id,name,aliases,art:'assets/images/places/'+id+'-v1.webp'}));
- const wutan=entries[0];entries[0]=Object.freeze({...wutan,art:'assets/images/world-wutan.webp',localName:'乌坦城门',localArt:wutan.art});
+ const wutan=entries[0];entries[0]=Object.freeze({...wutan,art:'assets/images/world/world-wutan.webp',localName:'乌坦城门',localArt:wutan.art});
  if(Regions)for(const p of Regions.entries){const index=entries.findIndex(e=>e.id===p.id);if(index<0)entries.push(Object.freeze(p));else if(p.overview)entries[index]=Object.freeze({...entries[index],...p,aliases:entries[index].aliases});}
  const get=(id,sceneId)=>{const p=entries.find(p=>p.id===id);return !p?null:sceneId===p.id&&p.localName?{...p,name:p.localName,art:p.localArt||p.art}:p;};
  function resolve(world,state){

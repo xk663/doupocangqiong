@@ -1166,11 +1166,11 @@ input:checked + .toggle-slider::before { background:var(--text-primary);transfor
 
 <!-- VIEW: Title Screen -->
 <div id="view-title" class="view active">
-  <header class="landing-masthead"><div class="landing-brand"><img class="landing-logo" src="assets/images/title-calligraphy-logo.webp" alt="斗气大陆 · 修行录" width="2172" height="724" onerror="this.parentNode.classList.add('logo-unavailable')"><span class="landing-brand-fallback" aria-hidden="true">斗气大陆 · 修行录</span></div><span class="landing-edition">THE CULTIVATION CHRONICLES</span></header>
+  <header class="landing-masthead"><div class="landing-brand"><img class="landing-logo" src="assets/images/title/title-calligraphy-logo.webp" alt="斗气大陆 · 修行录" width="2172" height="724" onerror="this.parentNode.classList.add('logo-unavailable')"><span class="landing-brand-fallback" aria-hidden="true">斗气大陆 · 修行录</span></div><span class="landing-edition">THE CULTIVATION CHRONICLES</span></header>
   <main class="landing-body">
     <section class="landing-copy">
       <p class="landing-kicker">山河初启 · 众生录</p>
-      <h1 class="landing-title-art"><img src="assets/images/title-winged-wordmark.webp" alt="斗破苍穹" width="2172" height="724" onerror="this.parentNode.classList.add('logo-unavailable')"><span aria-hidden="true">斗破苍穹</span></h1>
+      <h1 class="landing-title-art"><img src="assets/images/title/title-winged-wordmark.webp" alt="斗破苍穹" width="2172" height="724" onerror="this.parentNode.classList.add('logo-unavailable')"><span aria-hidden="true">斗破苍穹</span></h1>
       <p class="landing-description"><span class="landing-verse-line">一纸命书，万里山河。</span><span class="landing-description-line">从乌坦城出发，写下属于你的修行故事。</span></p>
       <div id="title-menu">
         <button id="btn-new-game" class="title-btn primary" onclick="startNewGame()"><span class="title-button-label">开启新人生</span><small>落笔 · 新卷</small><span class="title-button-arrow" aria-hidden="true">↗</span></button>
@@ -3512,7 +3512,7 @@ function initTitleParticles() {
 function initTitleCover() {
   var video = document.getElementById('title-cover-video');
   if (!video) return;
-  video.src = 'assets/dou1.mp4';
+  video.src = 'assets/videos/dou1.mp4';
   video.play().catch(function(e) { console.log('Video autoplay:', e); });
 
   // Mouse parallax

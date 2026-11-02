@@ -22,7 +22,7 @@
 
 43 个地区不会同时加载图像。地图只载入当前底图与当前人物图集，保留原有有界纹理缓存；侧栏和驻地页按当前地点载入画景。新地区不新增模型探测或聊天请求。
 
-新增画景合计约 107.4 MiB，为完整资源目录的磁盘体积；不会一次下载到浏览器。实际图像哈希、字节数见 `docs/world-regions-art-manifest.json`，最终使用的生成提示词见 `docs/world-regions-art-prompts.json`。飞行图集的原图与提示词另见 `assets/data/flight-atlas-frames.json`。
+新增画景合计约 107.4 MiB，为完整资源目录的磁盘体积；不会一次下载到浏览器。实际图像哈希、字节数见 `docs/art/world-regions-art-manifest.json`，最终使用的生成提示词见 `docs/world-regions-art-prompts.json`。飞行图集的原图与提示词另见 `assets/data/flight-atlas-frames.json`。
 
 隔离浏览器实测覆盖四人物 × 三形态连续切换、飞行左右移动和松键停步、轻量模式 43 个完整地名、地点画景与行动草稿对应，以及 390 像素窄屏的左右画卷控制。窄屏控制只移动视口，不移动角色。
 

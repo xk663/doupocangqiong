@@ -1,5 +1,5 @@
 {
-  "asset": "assets/images/world-atlas-expanded-v2.webp",
+  "asset": "assets/images/world/world-atlas-expanded-v2.webp",
   "source": "output/imagegen/world-atlas-expanded-v2.png",
   "mode": "built-in image_gen edit with local world-atlas.webp as reference",
   "width": 1920,

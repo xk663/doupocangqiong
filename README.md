@@ -45,7 +45,7 @@ node tools/serve.cjs
 
 ### Discord 社区授权入口
 
-如需要求用户加入类脑社区后才能访问整个站点，使用独立服务端入口 `node --env-file=.env.discord tools/serve-discord.cjs`。默认仅检查服务器 `1134557553011998840` 的成员资格，不检查身份组；需创建自己的 Discord 应用并在服务端配置 ID、Secret 与回调地址。原有 `serve.cjs` 仍为无门禁的本地开发预览。GitHub Pages 纯静态发布不会自动受此入口保护；详细配置及发布边界见 [Discord 社区授权](docs/discord-community-auth.md)。
+如需要求用户加入类脑社区后才能访问整个站点，使用独立服务端入口 `node --env-file=.env.discord tools/serve-discord.cjs`。默认仅检查服务器 `1134557553011998840` 的成员资格，不检查身份组；需创建自己的 Discord 应用并在服务端配置 ID、Secret 与回调地址。原有 `serve.cjs` 仍为无门禁的本地开发预览。GitHub Pages 纯静态发布不会自动受此入口保护；详细配置及发布边界见 [Discord 社区授权](docs/hosting/discord-community-auth.md)。
 
 当前本机已配置自有应用并通过真实 Discord 授权及类脑成员核验，8090 使用授权入口。运行此服务的 Node 进程需要能访问 Discord 官方 API；受限沙箱可能阻止联网。
 
@@ -53,15 +53,15 @@ node tools/serve.cjs
 
 ### Gemini / AI Studio 本机反代
 
-接口类型选择 **Gemini 原生 / AI Studio 反代**，地址填写自己的本机服务（例如 http://localhost:8080），密钥仅在本机设置中输入。需要解决浏览器跨域时，使用本项目服务器并勾选“本机反代同源通道”。该通道固定转发至 localhost:8080 的 Gemini 原生路径，不是任意目标代理。GitHub Pages 等纯静态托管没有此通道。详见 [Gemini 原生接入](docs/gemini-native.md)。
+接口类型选择 **Gemini 原生 / AI Studio 反代**，地址填写自己的本机服务（例如 http://localhost:8080），密钥仅在本机设置中输入。需要解决浏览器跨域时，使用本项目服务器并勾选“本机反代同源通道”。该通道固定转发至 localhost:8080 的 Gemini 原生路径，不是任意目标代理。GitHub Pages 等纯静态托管没有此通道。详见 [Gemini 原生接入](docs/chat/gemini-native.md)。
 
-回复下的“路由检测”显示请求模型、接口报告模型及同一响应内的标识冲突。API 设置中的“路由测试”可单独发送一道算术题，查看渠道是否可用及耗时。打开面板不会发起模型调用。详见 [模型路由检测](docs/model-route-check.md)。
+回复下的“路由检测”显示请求模型、接口报告模型及同一响应内的标识冲突。API 设置中的“路由测试”可单独发送一道算术题，查看渠道是否可用及耗时。打开面板不会发起模型调用。详见 [模型路由检测](docs/chat/model-route-check.md)。
 
-推演失败时，聊天中会保留失败阶段、原因和可展开的已接收响应；这些未完成内容单独保存在当前标签页，不计入剧情或角色状态，也不会自动重试。详见 [流式失败记录](docs/tavern-stream-failures.md)。
+推演失败时，聊天中会保留失败阶段、原因和可展开的已接收响应；这些未完成内容单独保存在当前标签页，不计入剧情或角色状态，也不会自动重试。详见 [流式失败记录](docs/chat/tavern-stream-failures.md)。
 
 ## 预设兼容范围
 
-正文显示兼容 `<game>`、`<content>`、`<maintext>` 与 Markdown `## maintext`；混合格式中的长正文不会再被后面的短概述覆盖。现有保存回复刷新后即可按完整正文显示，无需重新调用模型。语义 HTML 以安全文本段落呈现。详见 [预设正文格式与显示兼容](docs/preset-output-compatibility.md)。
+正文显示兼容 `<game>`、`<content>`、`<maintext>` 与 Markdown `## maintext`；混合格式中的长正文不会再被后面的短概述覆盖。现有保存回复刷新后即可按完整正文显示，无需重新调用模型。语义 HTML 以安全文本段落呈现。详见 [预设正文格式与显示兼容](docs/chat/preset-output-compatibility.md)。
 
 - 对齐酒馆 Chat Completion 的主要采样字段、prompts、prompt_order、System／User／Assistant 角色、相对位置、绝对深度、注入顺序和 normal／regenerate／continue 触发类型。
 - 温度、Top P、Top K、Min P、惩罚、上下文与输出容量、Seed、停止词、推理强度及高级采样均有设置入口；每种接口按其能力映射。扩展采样需要服务端明确支持，不能认为所有兼容接口都接受所有字段。
@@ -69,7 +69,7 @@ node tools/serve.cjs
 - 未接入的联网、工具调用、媒体输入和图片输出开关会说明原因并保留导入值；未知扩展字段保留供再次导出，不执行第三方脚本。不能把支持 JSON 预设等同于完整运行酒馆及其所有插件。
 - 游戏续写仍为独立、可回溯的叙事回合；多候选回复、真正的 Assistant 预填充和原回复拼接功能尚未接入。
 
-操作、参数映射和边界见 [预设工作台说明](docs/preset-workbench.md)。
+操作、参数映射和边界见 [预设工作台说明](docs/chat/preset-workbench.md)。
 
 ## 存储与隐私
 
@@ -85,7 +85,15 @@ doupocangqiong/
 ├── map.html                   # 地图独立演示入口
 ├── assets/
 │   ├── css/                   # 标题、地图、驻地、排行榜、概要、预设等样式
-│   ├── images/                # 书法字标、场景、角色图集、异火和人物美术
+│   ├── images/                # 按用途分目录存放美术
+│   │   ├── avatars/           # 地图人物动作图集
+│   │   ├── world/             # 大陆与城镇底图
+│   │   ├── title/             # 标题背景与书法字标
+│   │   ├── residence/         # 驻地画景
+│   │   ├── creation/          # 创角画景
+│   │   ├── covers/            # 封面与装饰
+│   │   └── …                 # 地点、地区、异火、人物立绘与可选背景
+│   ├── videos/                # 封面与背景视频
 │   ├── data/                  # 地图与图集配置
 │   └── js/
 │       ├── tavern-core.js     # 提示词、上下文预算、请求与流式解析
@@ -98,9 +106,16 @@ doupocangqiong/
 │       ├── flame-*.js         # 异火事实档案、界面与意象图
 │       ├── summary-*.js       # 玩家概要与纠错
 │       └── save-manager.js    # 存档管理
-├── tools/serve.cjs             # 静态服务器与固定本机 Gemini 通道
+├── tools/                     # 本地服务、资源制作、地图编辑与发布工具
 ├── tests/                     # Node 回归测试与隔离浏览器页面
-└── docs/                      # 架构、操作、美术来源和兼容范围
+└── docs/                      # 文档导航见 docs/README.md
+    ├── chat/                  # 聊天、预设、世界书与模型接口
+    ├── world/                 # 地图、移动与地点互动
+    ├── gameplay/              # 创角、驻地、战斗与存档
+    ├── art/                   # 美术来源与素材清单
+    ├── hosting/               # 托管与授权配置
+    ├── verification/          # 验证记录与结构说明
+    └── superpowers/           # 历史设计与实施方案
 ```
 
 地图优先使用本地 PixiJS 渲染，兼顾轻量模式。原生前端、IndexedDB（Dexie）与 localStorage 构成当前技术栈。game.html、sillytavern.html 等为历史入口，当前功能以 index.html 为准。
@@ -119,17 +134,17 @@ node --test tests/*.test.cjs
 
 | 内容 | 说明 |
 | --- | --- |
-| 预设与请求 | [预设工作台](docs/preset-workbench.md) · [世界书与请求组装](docs/tavern-request-wiring.md) |
-| 模型接口 | [Gemini 原生](docs/gemini-native.md) · [聊天内核](docs/chat-core-optimization.md) |
-| 世界与角色 | [创角](docs/character-creation-redesign.md) · [地图架构](docs/world-map.md) · [动态移动](docs/world-movement.md) |
-| 驻地 | [驻地规则](docs/residence.md) · [实景素材](docs/residence-art.md) |
-| 排行榜 | [异火榜](docs/flame-atlas.md) · [人物动态](docs/beauty-chronicle.md) · [人物立绘](docs/beauty-art.md) |
-| 玩家与保存 | [概要](docs/summary-dashboard.md) · [存档管理](docs/save-library.md) |
-| 主界面 | [动态与字标素材](docs/title-motion-art.md) |
+| 预设与请求 | [预设工作台](docs/chat/preset-workbench.md) · [世界书与请求组装](docs/chat/tavern-request-wiring.md) |
+| 模型接口 | [Gemini 原生](docs/chat/gemini-native.md) · [聊天内核](docs/chat/chat-core-optimization.md) |
+| 世界与角色 | [创角](docs/gameplay/character-creation-redesign.md) · [地图架构](docs/world/world-map.md) · [动态移动](docs/world/world-movement.md) |
+| 驻地 | [驻地规则](docs/gameplay/residence.md) · [实景素材](docs/art/residence-art.md) |
+| 排行榜 | [异火榜](docs/gameplay/flame-atlas.md) · [人物动态](docs/gameplay/beauty-chronicle.md) · [人物立绘](docs/art/beauty-art.md) |
+| 玩家与保存 | [概要](docs/gameplay/summary-dashboard.md) · [存档管理](docs/gameplay/save-library.md) |
+| 主界面 | [动态与字标素材](docs/art/title-motion-art.md) |
 
 ## 状态与发布准备
 
-同一人生内的聊天共用当前角色与世界进度，聊天切换不加载旧角色副本。回溯和重演包含记忆、待核对技能和开放世界事实。详情及旧存档边界见 [结构完整性修订](docs/structure-integrity.md)。
+同一人生内的聊天共用当前角色与世界进度，聊天切换不加载旧角色副本。回溯和重演包含记忆、待核对技能和开放世界事实。详情及旧存档边界见 [结构完整性修订](docs/verification/structure-integrity.md)。
 
 运行 `node tools/release.cjs` 检查发布引用和未跟踪文件；`node tools/release.cjs --build` 生成独立本地发布目录。发布包排除测试、旧入口和暂留本地的素材，不自动上线。Git 部署前使用 `--require-tracked` 检查是否遗漏运行文件。
 
@@ -149,13 +164,13 @@ node --test tests/*.test.cjs
 - 设置 → 核心中填写自己的 Discord Webhook，点击时才上传聊天进度；不需要 Discord OAuth。历史版本公开的共享 Webhook 应由其持有人在 Discord 撤销，删除源码不会撤销凭据。
 - 支持 JSON 角色卡和 PNG `chara`/`ccv3` tEXt 元数据；管理界面对角色、存档及相关预设字段做转义。
 
-详情、兼容范围与验证记录见 [本轮优化说明](docs/chat-core-optimization.md)。`game.html` 和 `sillytavern.html` 为历史入口，本轮功能改动集中于 `index.html`；旧 `game.html` 仅移除了公开 Webhook。
+详情、兼容范围与验证记录见 [本轮优化说明](docs/chat/chat-core-optimization.md)。`game.html` 和 `sillytavern.html` 为历史入口，本轮功能改动集中于 `index.html`；旧 `game.html` 仅移除了公开 Webhook。
 
 ### 界面与异火设定更新
 
 - 首页、角色档案、聊天阅读区与推演工具栏采用新的山水、纸色与青玉视觉样式，兼顾窄屏布局。
 - 按作者补充文档接入第18名风怒龙炎、第20名幽冥毒火、第21名阴阳双炎，同步异火榜和默认世界书，并修正第16–23名的错位。
-- 旧默认世界书只迁移与旧版内容完全匹配的条目，保留启用状态；已编辑或导入的世界书不覆盖。详情见[异火修改说明](docs/user-flame-supplement.md)。
+- 旧默认世界书只迁移与旧版内容完全匹配的条目，保留启用状态；已编辑或导入的世界书不覆盖。详情见[异火修改说明](docs/gameplay/user-flame-supplement.md)。
 
 ### 回归验证方法
 
@@ -171,18 +186,18 @@ node --test tests/creation.test.cjs tests/tavern-core.test.cjs
 
 根据小说分析校正族群、炼药条件、斗气与灵魂体系及16条世界书内容。原著框架与自由演绎分开；独立角色不默认绑定药老、薰儿或萧家后院。地点、物品、属性与身份会传入实际聊天开局，创角草稿可刷新恢复。
 
-制作方法、美术提示词、兼容范围与验证说明见[创角修订说明](docs/character-creation-redesign.md)。
+制作方法、美术提示词、兼容范围与验证说明见[创角修订说明](docs/gameplay/character-creation-redesign.md)。
 
 ### 山河行旅 · 交互大地图
 
 主游戏侧栏「大世界」已接入新的探索地图。也可打开 `map.html` 使用独立演示存档。固定斜俯视插画支持平移、缩放、地点目录与路线预览，大陆总览和乌坦城、青山镇、石漠城四张底图按需加载。
 
-地图角色可在萧炎、薰儿、小医仙之间三选一并保存，不改变玩家身份。徒步、随商队骑乘、化翼飞行各有完整四向三帧动作图集；骑乘包含完整坐姿、腿部、靴子与马镫，飞行包含完整人物与翅膀，统一播放整帧以避免分层错位。区域道路支持点击改道、WASD、镜头跟随和途中停步；斗王解锁直线飞行，费用与位置由规则结算。详见 docs/world-movement.md。
+地图角色可在萧炎、薰儿、小医仙之间三选一并保存，不改变玩家身份。徒步、随商队骑乘、化翼飞行各有完整四向三帧动作图集；骑乘包含完整坐姿、腿部、靴子与马镫，飞行包含完整人物与翅膀，统一播放整帧以避免分层错位。区域道路支持点击改道、WASD、镜头跟随和途中停步；斗王解锁直线飞行，费用与位置由规则结算。详见 docs/world/world-movement.md。
 
 地图规则独立处理旅行、时间、精力、补给、日夜人物位置、交易、委托、探索线索和行旅记录，并与主游戏角色、聊天、存档及回溯衔接。LLM只接收已知地图事实，行动建议须玩家确认。当前包含79个地点节点、79条连接、6名原创地方人物；深度街区互动先覆盖三个出发地，其余区域为可扩展的地点与入口网络。
 
-运行全部回归检查：`node --test tests/*.test.cjs`。地图架构、美术来源、Tiled编辑流程及现有限制见[大地图制作说明](docs/world-map.md)。
+运行全部回归检查：`node --test tests/*.test.cjs`。地图架构、美术来源、Tiled编辑流程及现有限制见[大地图制作说明](docs/world/world-map.md)。
 
 ### 世界书校订 V3
 
-默认世界书由261条整理为202条，覆盖人物、地点、势力、修行、功法、资源、异火等10类。后期秘闻默认关闭，支持别名搜索和分类筛选；升级自动备份旧书，并保护自定义正文。迁移规则、资料边界及验证结果见[世界书校订说明](docs/lore-catalog-v3.md)。
+默认世界书由261条整理为202条，覆盖人物、地点、势力、修行、功法、资源、异火等10类。后期秘闻默认关闭，支持别名搜索和分类筛选；升级自动备份旧书，并保护自定义正文。迁移规则、资料边界及验证结果见[世界书校订说明](docs/chat/lore-catalog-v3.md)。

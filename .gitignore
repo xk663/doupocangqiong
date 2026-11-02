@@ -80,7 +80,7 @@ Untitled*.ipynb
 !assets/data/world.json
 !assets/vendor/PIXI-LICENSE.txt
 !assets/vendor/DEXIE-LICENSE.txt
-!docs/world-map-art.json
-!docs/world-map-verification.json
-!docs/creation-verification.json
-!docs/flame-art-prompts.json
+!docs/art/world-map-art.json
+!docs/verification/world-map-verification.json
+!docs/verification/creation-verification.json
+!docs/art/flame-art-prompts.json

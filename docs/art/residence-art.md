@@ -4,8 +4,8 @@
 
 均使用内置 image_gen 生成，1536 × 1024；为符合原著环境气质的原创居所，不是原著建筑的精确复刻。交互点按画面内设施配置，背景不授予任何物品与居住权限。
 
-- 乌坦城：`assets/images/residence-wutan-courtyard-v1.png`。灰瓦木廊、坊市屋顶、石板庭院与竹影。
-- 青山镇：`assets/images/residence-qingshan-lodge-v1.png`。山麓木舍、药草、溪流与魔兽山脉方向的山雾。客舍及普通庭院采用此图，明确的山洞仍保持洞府场景。
+- 乌坦城：`assets/images/residence/residence-wutan-courtyard-v1.png`。灰瓦木廊、坊市屋顶、石板庭院与竹影。
+- 青山镇：`assets/images/residence/residence-qingshan-lodge-v1.png`。山麓木舍、药草、溪流与魔兽山脉方向的山雾。客舍及普通庭院采用此图，明确的山洞仍保持洞府场景。
 
 乌坦城生成提示词：
 
@@ -18,7 +18,7 @@ Create a premium realistic 3D Chinese fantasy RPG residence environment backgrou
 ## 石漠城
 
 - 工具：内置 image_gen。
-- 文件：`assets/images/residence-desert-camp-v1.png`。
+- 文件：`assets/images/residence/residence-desert-camp-v1.png`。
 - 实际尺寸：1536 × 1024，非原生 4K。不通过插值冒充原生细节。
 - 根据石漠城、加玛帝国、塔戈尔沙漠环境设计的原创营地，并非原著明确命名的建筑复刻。
 - 设施使用权仍以游戏档案为准，背景物件不能直接产生库存。

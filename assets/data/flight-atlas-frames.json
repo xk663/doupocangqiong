@@ -1,6 +1,6 @@
 {
   "xiaoyan": {
-    "image": "assets/images/avatar-xiaoyan-flight-sheet-v3.webp",
+    "image": "assets/images/avatars/avatar-xiaoyan-flight-sheet-v3.webp",
     "width": 1536,
     "height": 1024,
     "frames": [
@@ -106,7 +106,7 @@
     "prompt": "EDIT TARGET: faithful technical re-layout of this exact 4 columns x 3 rows flying chibi animation atlas. Preserve the hero design, clothes, attached magical wings, colors, 12 poses, front/right/back/left column order and 3 flap rows. CRITICAL NEW LAYOUT: canvas exactly 1536x1024, 4x3 equal invisible cells, each cell 384x341.333. REDUCE EVERY COMPLETE FIGURE INCLUDING WINGSPAN to occupy at most 250 pixels wide and 245 pixels high within its own cell, perfectly centered horizontally with foot at 83% cell height. Leave at least 60 px completely EMPTY TRANSPARENT gutter at left and right of EVERY cell and at least 35 px empty gutter top and bottom. No part of any neighboring figure may extend across the cell boundary. Erase ALL detached fragments, side wing specks, colored haze, backlight bloom, matte gradients or other artifacts. Background must be literally empty alpha=0 everywhere outside each clean complete figure; no backdrop, no colored lighting, no aura, no floor/shadow, no cell grid. Keep FULL attached wings and complete body; never crop wings. The increased empty padding is more important than large figure size. The final result is a production sprite atlas, small centered figures with generous transparent gutters, not a contact illustration."
   },
   "xuner": {
-    "image": "assets/images/avatar-xuner-flight-sheet-v3.webp",
+    "image": "assets/images/avatars/avatar-xuner-flight-sheet-v3.webp",
     "width": 1536,
     "height": 1024,
     "frames": [
@@ -212,7 +212,7 @@
     "prompt": "EDIT TARGET: faithful technical re-layout of this exact 4 columns x 3 rows flying chibi animation atlas. Preserve the hero design, clothes, attached magical wings, colors, 12 poses, front/right/back/left column order and 3 flap rows. CRITICAL NEW LAYOUT: canvas exactly 1536x1024, 4x3 equal invisible cells, each cell 384x341.333. REDUCE EVERY COMPLETE FIGURE INCLUDING WINGSPAN to occupy at most 250 pixels wide and 245 pixels high within its own cell, perfectly centered horizontally with foot at 83% cell height. Leave at least 60 px completely EMPTY TRANSPARENT gutter at left and right of EVERY cell and at least 35 px empty gutter top and bottom. No part of any neighboring figure may extend across the cell boundary. Erase ALL detached fragments, side wing specks, colored haze, backlight bloom, matte gradients or other artifacts. Background must be literally empty alpha=0 everywhere outside each clean complete figure; no backdrop, no colored lighting, no aura, no floor/shadow, no cell grid. Keep FULL attached wings and complete body; never crop wings. The increased empty padding is more important than large figure size. The final result is a production sprite atlas, small centered figures with generous transparent gutters, not a contact illustration."
   },
   "xiaoyixian": {
-    "image": "assets/images/avatar-xiaoyixian-flight-sheet-v3.webp",
+    "image": "assets/images/avatars/avatar-xiaoyixian-flight-sheet-v3.webp",
     "width": 1536,
     "height": 1024,
     "frames": [
@@ -318,7 +318,7 @@
     "prompt": "EDIT TARGET: faithful technical re-layout of this exact 4 columns x 3 rows flying chibi animation atlas. Preserve the hero design, clothes, attached magical wings, colors, 12 poses, front/right/back/left column order and 3 flap rows. CRITICAL NEW LAYOUT: canvas exactly 1536x1024, 4x3 equal invisible cells, each cell 384x341.333. REDUCE EVERY COMPLETE FIGURE INCLUDING WINGSPAN to occupy at most 250 pixels wide and 245 pixels high within its own cell, perfectly centered horizontally with foot at 83% cell height. Leave at least 60 px completely EMPTY TRANSPARENT gutter at left and right of EVERY cell and at least 35 px empty gutter top and bottom. No part of any neighboring figure may extend across the cell boundary. Erase ALL detached fragments, side wing specks, colored haze, backlight bloom, matte gradients or other artifacts. Background must be literally empty alpha=0 everywhere outside each clean complete figure; no backdrop, no colored lighting, no aura, no floor/shadow, no cell grid. Keep FULL attached wings and complete body; never crop wings. The increased empty padding is more important than large figure size. The final result is a production sprite atlas, small centered figures with generous transparent gutters, not a contact illustration."
   },
   "medusa": {
-    "image": "assets/images/avatar-medusa-flight-sheet-v3.webp",
+    "image": "assets/images/avatars/avatar-medusa-flight-sheet-v3.webp",
     "width": 1536,
     "height": 1024,
     "frames": [

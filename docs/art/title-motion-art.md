@@ -1,8 +1,8 @@
 # 主界面书法字标与动态背景
 
-字标由内置 image_gen 工具生成，素材为 `assets/images/title-calligraphy-logo.png`，2172 × 724，RGBA PNG。已检查角点 alpha 为 0。它作为独立图片叠加在页眉上；古族背景原图未修改。
+字标由内置 image_gen 工具生成，素材为 `assets/images/title/title-calligraphy-logo.png`，2172 × 724，RGBA PNG。已检查角点 alpha 为 0。它作为独立图片叠加在页眉上；古族背景原图未修改。
 
-主标题素材为 `assets/images/title-winged-wordmark.png`，2172 × 724，透明底。Q 版萧炎坐在“斗”字上、熏儿坐在“破”字上；左侧是萧炎的单扇青蓝斗气翼，右侧是熏儿的单扇柔金斗气翼。经用户确认后替换主标题，原背景保持独立。
+主标题素材为 `assets/images/title/title-winged-wordmark.png`，2172 × 724，透明底。Q 版萧炎坐在“斗”字上、熏儿坐在“破”字上；左侧是萧炎的单扇青蓝斗气翼，右侧是熏儿的单扇柔金斗气翼。经用户确认后替换主标题，原背景保持独立。
 
 鼠标拖尾已按用户要求移除。首页不再加载拖尾脚本和额外的 PixiJS 实例；地图仍使用自身的本地 PixiJS 依赖。背景动态保留衣发微动、花瓣、光照和薄雾，暂停、后台及离开标题页时停止更新。
 

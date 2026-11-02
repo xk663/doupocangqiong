@@ -38,13 +38,13 @@ test('direct-file mode loads the map and all avatar forms without fetching Pixi 
  assert.equal(pixiInitializations(),0);assert.equal(host.dataset.renderer,'lightweight');
  const point={id:'market',name:'坊市长街',x:50,y:50,known:true};
  for(const avatar of nav.avatars)for(const form of Object.keys(nav.forms)){
-  const model={scene:{id:'wutan',name:'乌坦城',art:'assets/images/world-wutan.webp'},nodes:[point],npcs:[],routes:[],routeIds:[],pose:{x:50,y:50,direction:0},avatar,form};
+  const model={scene:{id:'wutan',name:'乌坦城',art:'assets/images/world/world-wutan.webp'},nodes:[point],npcs:[],routes:[],routeIds:[],pose:{x:50,y:50,direction:0},avatar,form};
   assert.equal(await r.render(model),true);assert.equal(host.dataset.actorAvatar,avatar.id);assert.equal(host.dataset.actorForm,form);
   assert.equal(host.dataset.actorError,'false');assert.ok(sources.includes(avatar.sheets[form]));
   assert.equal(r.fallbackEl.children.filter(el=>el.className==='world-player-rig').length,1);
   r.setActorPose({x:56,y:42},1,1,250);assert.equal(r.actor.dom.style.left,'56%');assert.equal(r.actor.dom.style.top,'42%');
  }
- assert.ok(sources.includes('assets/images/world-wutan.webp'));
+ assert.ok(sources.includes('assets/images/world/world-wutan.webp'));
  r.fallbackEl.children.find(el=>el.className?.startsWith('world-fallback-pin')).onclick();assert.equal(selected[0][0],'market');
  assert.equal(pixiInitializations(),0);r.destroy();
 });

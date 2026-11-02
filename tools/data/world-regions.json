@@ -8,7 +8,7 @@
       "shortName": "乌坦城",
       "environment": "jade-green river city with gray-tile clan courtyards",
       "layout": "existing authored regional layout",
-      "mapArt": "assets/images/world-wutan.webp",
+      "mapArt": "assets/images/world/world-wutan.webp",
       "width": 1536,
       "height": 1024,
       "entry": [
@@ -550,7 +550,7 @@
           "minRank": 0,
           "desc": "乌坦城内的城区地点，可沿城门一带的道路走近，查看整座乌坦城的专属地图。",
           "sourceType": "game-design",
-          "art": "assets/images/world-wutan.webp",
+          "art": "assets/images/world/world-wutan.webp",
           "artOf": "wutan",
           "legacy": true,
           "interactions": [
@@ -615,7 +615,7 @@
       "shortName": "青山镇",
       "environment": "verdant foothill herbalist town and deep forest waterfalls",
       "layout": "existing authored regional layout",
-      "mapArt": "assets/images/world-qingshan.webp",
+      "mapArt": "assets/images/world/world-qingshan.webp",
       "width": 1536,
       "height": 1024,
       "entry": [
@@ -2889,7 +2889,7 @@
       "shortName": "石漠城",
       "environment": "golden desert frontier city, ochre adobe and emerald water",
       "layout": "existing authored regional layout",
-      "mapArt": "assets/images/world-shimo.webp",
+      "mapArt": "assets/images/world/world-shimo.webp",
       "width": 1536,
       "height": 1024,
       "entry": [

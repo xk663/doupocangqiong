@@ -2065,31 +2065,31 @@
   "additionalAssets": [
     {
       "id": "mainland-v4",
-      "target": "assets/images/world-atlas-expanded-v4.webp",
+      "target": "assets/images/world/world-atlas-expanded-v4.webp",
       "bytes": 755628,
       "sha256": "75068fbc64feb3540d9b6245e532c9f719fea68301ff56b1936f5fe27df4e540"
     },
     {
       "id": "flight-xiaoyan",
-      "target": "assets/images/avatar-xiaoyan-flight-sheet-v3.webp",
+      "target": "assets/images/avatars/avatar-xiaoyan-flight-sheet-v3.webp",
       "bytes": 526098,
       "sha256": "d1bf627218e90e19ce4ae637009f10968bea461a8ef92c605d4b64286ade8701"
     },
     {
       "id": "flight-xuner",
-      "target": "assets/images/avatar-xuner-flight-sheet-v3.webp",
+      "target": "assets/images/avatars/avatar-xuner-flight-sheet-v3.webp",
       "bytes": 683580,
       "sha256": "5ee3380928cf247447a8d2f99f5bcf251bd0e11f6a2c24a666b6428227550946"
     },
     {
       "id": "flight-xiaoyixian",
-      "target": "assets/images/avatar-xiaoyixian-flight-sheet-v3.webp",
+      "target": "assets/images/avatars/avatar-xiaoyixian-flight-sheet-v3.webp",
       "bytes": 594964,
       "sha256": "613b6bb1543750ff0e20151fc04ad6d2b04da219f0f10a10b9d4b6be334eb6aa"
     },
     {
       "id": "flight-medusa",
-      "target": "assets/images/avatar-medusa-flight-sheet-v3.webp",
+      "target": "assets/images/avatars/avatar-medusa-flight-sheet-v3.webp",
       "bytes": 565644,
       "sha256": "bef1b164ebdf931cbf16bbf48cf843a61e7a8eac28b15bd4cb0eafe9e5c29ca8"
     }

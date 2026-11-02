@@ -16,7 +16,7 @@
       "id": 1,
       "name": "无字地形底图",
       "type": "imagelayer",
-      "image": "../../assets/images/world-shimo.webp",
+      "image": "../../assets/images/world/world-shimo.webp",
       "opacity": 1,
       "visible": true,
       "x": 0,
